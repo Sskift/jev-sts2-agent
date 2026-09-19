@@ -32,6 +32,19 @@ test('Orichalcum and delayed Rage block are not mistaken for immediate block gai
   assert.equal(combatForecast(combat, { id: 'RAGE', cost: 0, block: 3 }).block_after_card, 6);
 });
 
+test('Rage exposes an affordable attack sequence as conditional Block without granting it immediately', () => {
+  const rage = { index: 0, id: 'RAGE', type: 'Skill', cost: 0, block: 3, can_play: true };
+  const attack = (index, cost, extra = {}) => ({ index, type: 'Attack', cost, can_play: true, ...extra });
+  const combat = { player: { hp: 10, block: 0, energy: 3 }, enemies: [{ is_alive: true, hp: 100, intents: [{ damage: 13 }] }], hand: [rage, attack(1, 1), attack(2, 2), attack(3, 3), attack(4, 0), attack(5, 0, { hp_loss: 2 }), attack(6, -1), attack(7, 0, { can_play: false })] };
+  const estimate = combatForecast(combat, rage);
+  assert.equal(estimate.block_after_card, 0);
+  assert.equal(estimate.fatal_if_end_turn, true);
+  assert.deepEqual(estimate.attack_trigger_potential.hand_indices, [1, 2, 4]);
+  assert.equal(estimate.attack_trigger_potential.additional_block_if_all_played, 9);
+  combat.player.energy = 0;
+  assert.deepEqual(combatForecast(combat, rage).attack_trigger_potential.hand_indices, [4]);
+});
+
 test('visible Sandpit instant death overrides safe-looking HP and Block arithmetic', () => {
   const boss = { combat_id: 1, hp: 143, block: 0, is_alive: true, intents: [{ damage: 10, hits: 2 }], powers: [{ id: 'SANDPIT_POWER', amount: 1 }] };
   const combat = { player: { hp: 45, block: 10, energy: 1 }, hand: [], enemies: [boss] };
