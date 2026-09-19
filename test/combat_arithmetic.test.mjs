@@ -15,3 +15,19 @@ test('visible damage caps prevent a false lethal and defensive arithmetic expose
   enemy.powers = [];
   assert.equal(combatForecast(combat, bash, enemy).hp_remaining_if_end_turn, 2);
 });
+
+test('an inexpensive first hit leaves enough energy to finish a target after consuming Slippery', () => {
+  const enemy = { combat_id: 1, hp: 16, block: 0, is_alive: true, powers: [{ id: 'SLIPPERY_POWER', amount: 1 }], intents: [{ damage: 8 }] };
+  const strike = { index: 0, cost: 1, can_play: true, target_previews: [{ target_id: 1, damage: 9 }] };
+  const bigAttack = { index: 1, cost: 2, can_play: true, target_previews: [{ target_id: 1, damage: 30 }] };
+  const combat = { player: { hp: 10, block: 0, energy: 3 }, hand: [strike, bigAttack], enemies: [enemy] };
+  assert.equal(combatForecast(combat, strike, enemy).followup_attacks.enough_to_deplete_target, true);
+  assert.equal(combatForecast(combat, bigAttack, enemy).followup_attacks.enough_to_deplete_target, false);
+});
+
+test('Orichalcum and delayed Rage block are not mistaken for immediate block gains', () => {
+  const combat = { player: { hp: 10, energy: 3, block: 0, relics: [{ id: 'ORICHALCUM' }] }, hand: [], enemies: [{ is_alive: true, hp: 20, intents: [{ damage: 6 }] }] };
+  assert.equal(combatForecast(combat).hp_loss_if_end_turn, 0);
+  assert.equal(combatForecast(combat, { cost: 1, block: 5 }).hp_loss_if_end_turn, 1);
+  assert.equal(combatForecast(combat, { id: 'RAGE', cost: 0, block: 3 }).block_after_card, 6);
+});

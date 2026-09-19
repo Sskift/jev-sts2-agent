@@ -817,21 +817,23 @@ index 20475ea..3bc9877 100644
 \ No newline at end of file
 +}
 diff --git a/STS2.Cli.Mod/Utils/TextUtils.cs b/STS2.Cli.Mod/Utils/TextUtils.cs
-index d510bdd..8a8a99a 100644
+index d510bdd..3ab6190 100644
 --- a/STS2.Cli.Mod/Utils/TextUtils.cs
 +++ b/STS2.Cli.Mod/Utils/TextUtils.cs
-@@ -51,7 +51,9 @@ public static partial class TextUtils
+@@ -51,7 +51,11 @@ public static partial class TextUtils
              return string.Empty;
  
          var cleaned = StripBbCode(text);
 -        cleaned = StripRichText(cleaned);
 +        cleaned = StripRichText(cleaned);
-+        cleaned = Regex.Replace(cleaned, @"res://[^\s]*?energy_icon\.png", " Energy ");
-+        cleaned = Regex.Replace(cleaned, @"res://[^\s]*?star_icon\.png", " Star ");
++        cleaned = Regex.Replace(cleaned, @"(?:\s*res://[^\s]*?energy_icon\.png\s*)+",
++            match => $" {Regex.Matches(match.Value, @"energy_icon\.png").Count} Energy ");
++        cleaned = Regex.Replace(cleaned, @"(?:\s*res://[^\s]*?star_icon\.png\s*)+",
++            match => $" {Regex.Matches(match.Value, @"star_icon\.png").Count} Star ");
  
          // Normalize whitespace
          cleaned = WhitespaceRegex().Replace(cleaned, " ");
-@@ -81,4 +83,4 @@ public static partial class TextUtils
+@@ -81,4 +85,4 @@ public static partial class TextUtils
              return null;
          }
      }

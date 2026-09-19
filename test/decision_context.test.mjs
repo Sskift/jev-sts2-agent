@@ -51,6 +51,22 @@ test('map decisions have current player, permanent deck, rules, downstream graph
   assert.equal(value.in_combat, false);
 });
 
+test('map context keeps every future branch and the visited route while omitting expired forks', () => {
+  const graph = { act_index: 0, current_coord: { col: 0, row: 2 }, visited: [{ col: 0, row: 1 }], nodes: [
+    { col: 0, row: 1, type: 'MONSTER', children: [{ col: 0, row: 2 }] },
+    { col: 1, row: 1, type: 'SHOP', children: [{ col: 0, row: 2 }] },
+    { col: 0, row: 2, type: 'REST_SITE', children: [{ col: 0, row: 3 }] },
+    { col: 0, row: 3, type: 'MONSTER', children: [{ col: 0, row: 4 }] },
+    { col: 1, row: 3, type: 'SHOP', children: [{ col: 0, row: 4 }] },
+    { col: 0, row: 4, type: 'BOSS', children: [] }
+  ] };
+  const state = withContext({ screen: 'MAP', map: { ...graph, travelable_coords: [{ col: 0, row: 3 }] } }, { map: graph });
+  const value = packet(state);
+  assert.deepEqual(value.map.visited, [{ col: 0, row: 1, type: 'MONSTER' }]);
+  assert.equal(value.map.nodes.length, 4);
+  assert.ok(value.map.nodes.some(n => n.col === 1 && n.row === 3));
+});
+
 test('combat includes full pile contents, previous plays, exhausted cards, stable targets and no hidden move label', () => {
   const state = completeCombat();
   state.decision_context.combat_history = [{ sequence: 0, type: 'CardPlayFinishedEntry', card_id: 'BASH', result_pile: 'Discard', description: 'Bash was played.' }];
@@ -147,6 +163,25 @@ test('unresolved actions survive process restart and cannot be replayed automati
   assert.equal(sends, 0); assert.equal(decisions, 0);
 });
 
+test('memory removes only travel already in this act map and redundant successful command echoes', () => {
+  const state = completeCombat(), memory = new DecisionMemory();
+  state.decision_context.total_floor = 23;
+  state.decision_context.act_floor = 5;
+  state.decision_context.map.visited = [{ col: 1, row: 2 }];
+  memory.observe(state);
+  const travel = { floor: 20, combat_id: null, ok: true, request: { cmd: 'choose_map_node', args: [1, 2] } };
+  memory.data.actions = [travel, { ...travel, floor: 3 }, { ...travel, ok: false },
+    { ...travel, request: { cmd: 'choose_map_node', args: [2, 2] } },
+    { floor: 22, combat_id: null, ok: true, request: { cmd: 'reward_choose_card', card_id: 'ANGER', nth: 0 }, after_screen: 'REWARD', result: { card_id: 'ANGER', nth: 0, card_name: 'Anger+', upgraded: true, screen: 'REWARD' } }];
+  const projected = memory.context(state).actions;
+  assert.equal(projected.length, 4);
+  assert.equal(projected[0].floor, 3, 'Earlier act travel is retained even at matching coordinates');
+  assert.equal(projected[1].ok, false);
+  assert.deepEqual(projected[2].request.args, [2, 2]);
+  assert.deepEqual(projected[3].result, { card_name: 'Anger+', upgraded: true });
+  assert.equal(memory.data.actions.length, 5, 'Full local records remain untouched');
+});
+
 test('route calculations preserve branch uncertainty and reject broken topology', () => {
   const map = { nodes: [
     { col: 0, row: 0, type: 'UNKNOWN', children: [{ col: 0, row: 1 }, { col: 1, row: 1 }] },
@@ -221,6 +256,7 @@ test('history table and text dictionary restore every original event and orderin
   const expand = item => {
     if (item?.text_ref) return compact.text_dictionary[item.text_ref];
     if (item?.encoding === 'record_table_v1') return item.rows.map(([layout, ...values]) => Object.fromEntries(item.layouts[layout].map((key, i) => [key, expand(values[i])])));
+    if (item?.encoding === 'record_table_v2') return item.rows.map(([index, ...values]) => ({ ...expand(item.layouts[index].constants), ...Object.fromEntries(item.layouts[index].fields.map((key, i) => [key, expand(values[i])])) }));
     if (Array.isArray(item)) return item.map(expand);
     if (item && typeof item === 'object') return Object.fromEntries(Object.entries(item).filter(([key]) => key !== 'text_dictionary').map(([key, value]) => [key, expand(value)]));
     return item;

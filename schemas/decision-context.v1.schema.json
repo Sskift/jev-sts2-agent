@@ -542,15 +542,18 @@
           ],
           "properties": {
             "encoding": {
-              "const": "record_table_v1"
+              "enum": ["record_table_v1", "record_table_v2"]
             },
             "layouts": {
               "type": "array",
               "items": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
+                "oneOf": [
+                  { "type": "array", "items": { "type": "string" } },
+                  { "type": "object", "required": ["constants", "fields"], "properties": {
+                    "constants": { "type": "object" },
+                    "fields": { "type": "array", "items": { "type": "string" } }
+                  } }
+                ]
               }
             },
             "rows": {

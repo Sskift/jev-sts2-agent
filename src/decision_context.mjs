@@ -18,8 +18,9 @@ export function validateDecisionPacket(packet) {
   const visit = item => {
     if (!item || typeof item !== 'object') return;
     if (item.text_ref && typeof packet.text_dictionary?.[item.text_ref] !== 'string') throw new ContextError('Dangling rule reference in decision JSON');
-    if (item.encoding === 'record_table_v1') for (const row of item.rows) {
-      if (!Number.isInteger(row[0]) || !item.layouts[row[0]] || row.length !== item.layouts[row[0]].length + 1) throw new ContextError('Malformed decision history table');
+    if (['record_table_v1', 'record_table_v2'].includes(item.encoding)) for (const row of item.rows) {
+      const layout = item.layouts[row[0]], fields = item.encoding === 'record_table_v2' ? layout?.fields : layout;
+      if (!Number.isInteger(row[0]) || !Array.isArray(fields) || row.length !== fields.length + 1) throw new ContextError('Malformed decision history table');
     }
     Object.values(item).forEach(visit);
   };
@@ -232,12 +233,34 @@ export class DecisionMemory {
   context(state) {
     if (state.decision_context?.run_id !== this.data.run_id) return { coverage: 'No matching run memory', actions: [], observations: [] };
     const combatId = state.decision_context?.combat_id;
-    const actions = clone(this.data.actions.filter(a => !a.combat_id || a.combat_id === combatId));
+    const pureFlow = new Set(['proceed', 'continue_run', 'advance_dialogue']);
+    const currentActStart = state.decision_context.total_floor - state.decision_context.act_floor;
+    const visited = new Set((state.decision_context.map?.visited || []).map(keyOf));
+    const actions = clone(this.data.actions.filter(a => (!a.combat_id || a.combat_id === combatId)
+      && !(a.floor < state.decision_context.total_floor && (pureFlow.has(a.request.cmd) || a.result?.is_proceed))
+      // The map's ordered visited list already records these exact choices.
+      // Keep older-act travel and failed/unmatched requests in memory.
+      && !(a.ok && a.request.cmd === 'choose_map_node' && a.floor >= currentActStart
+        && visited.has(`${a.request.args?.[0]},${a.request.args?.[1]}`))));
     for (const action of actions) {
+      if (action.floor < state.decision_context.total_floor && action.result?.event_state) {
+        const event = action.result.event_state;
+        action.result = { event_id: event.event_id, title: event.title, description: event.description, chosen_options: event.options?.filter(option => option.was_chosen) || [] };
+      }
       // Successful card/turn effects are already in the same combat's complete
       // engine history. Keep the command, outcome and the card's then-current
       // rules, instead of duplicating each engine event in two histories.
       if (action.ok && action.combat_id === combatId && ['play_card', 'end_turn'].includes(action.request.cmd)) delete action.result;
+      if (action.ok && action.result && typeof action.result === 'object' && !Array.isArray(action.result)) {
+        // Command echoes and success flags do not add information to a
+        // successful action. Preserve every non-echo outcome/effect field.
+        for (const [key, value] of Object.entries(action.result)) {
+          if (JSON.stringify(value) === JSON.stringify(action.request[key])
+            || (key === 'screen' && value === action.after_screen)
+            || (key === 'claimed' && value === true)) delete action.result[key];
+        }
+        if (!Object.keys(action.result).length) delete action.result;
+      }
       if (action.played_card_at_request) {
         const card = action.played_card_at_request;
         for (const key of ['index', 'can_play', 'valid_target_ids', 'target_previews', 'tags', 'rarity']) delete card[key];
@@ -255,10 +278,16 @@ export class DecisionMemory {
     }
     const relevant = clone([...completedRooms.values(), ...observations]);
     for (const observation of relevant) {
+      // Current values and the engine's EnergySpent/BlockGained history already
+      // describe combat resources. Do not send a second per-action snapshot log.
+      if (combatId && observation.combat_id === combatId && state.decision_context.combat_history?.length) {
+        delete observation.changes.energy;
+        delete observation.changes.block;
+      }
       if (observation.changes.master_deck?.before) observation.changes.master_deck = deckDifference(observation.changes.master_deck);
       for (const field of ['relics', 'potions']) if (observation.changes[field]?.before) observation.changes[field] = effectDifference(observation.changes[field]);
     }
-    return { coverage: `${this.data.coverage} Completed combats retain room resource changes; their expired tactical actions are in local logs. Deck changes list added and removed copies; an upgrade replaces its former state. Relic/potion changes list added, removed and updated fields; unchanged fields remain as previously observed.`, actions: clone(actions), observations: relevant, pending: clone(this.data.pending) };
+    return { coverage: `${this.data.coverage} Completed rooms retain strategic choices, event outcomes and resource changes; expired combat actions and pure UI navigation remain in local logs. Successful travel already in map.visited and successful command echoes are not duplicated. Combat energy/Block use current player values and engine history instead of duplicate observation logs. Deck changes list added and removed copies; an upgrade replaces its former state. Relic/potion changes list added, removed and updated fields; unchanged fields remain as previously observed.`, actions: clone(actions), observations: relevant.filter(o => Object.keys(o.changes).length), pending: clone(this.data.pending) };
   }
 }
 
@@ -317,6 +346,18 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     map.legal_next_nodes = source.map.travelable_coords;
     map.routes = routeFacts(map, map.legal_next_nodes);
     map.route_semantics = 'Counts include the chosen node and end at the first boss or known terminal. Min/max for different node types may describe different paths. UNKNOWN nodes are not assumed safe or a specific encounter.';
+  }
+  if (map && Number.isInteger(map.current_coord?.row) && map.nodes.every(node => node.children.every(child => child.row > node.row))) {
+    const firstRelevantRow = Math.min(map.current_coord.row, ...(map.legal_next_nodes || []).map(n => n.row));
+    const byCoord = new Map(map.nodes.map(node => [keyOf(node), node]));
+    map.visited = (map.visited || []).map(coord => ({ ...coord, type: byCoord.get(keyOf(coord))?.type ?? 'UNKNOWN' }));
+    map.nodes = map.nodes.filter(node => node.row >= firstRelevantRow);
+    map.scope = 'All nodes and edges at or ahead of the current row, including disconnected future branches. Earlier visited node types remain in visited; expired branches behind the player cannot affect forward routing.';
+  }
+  if (state.screen === 'SHOP' && screenState.shop && map?.current_coord && map.nodes.some(n => keyOf(n) === keyOf(map.current_coord))) {
+    const route = routeFacts(map, [map.current_coord])[0];
+    const ownShop = Number(map.nodes.find(n => keyOf(n) === keyOf(map.current_coord)).type === 'SHOP');
+    screenState.shop.route_context = { steps_to_boss: route.nearest_steps_after_chosen_node.BOSS ?? null, future_shops_before_boss: { min: route.counts.SHOP.min - ownShop, max: route.counts.SHOP.max - ownShop }, note: 'Counts follow known map edges; movement relics may add future legal choices.' };
   }
   const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}), ...(candidate.combat_estimate ? { combat_estimate: candidate.combat_estimate } : {}) }));
   return validateDecisionPacket(aliasInstanceIds({
@@ -388,6 +429,20 @@ export function recordTable(records) {
   return { encoding: 'record_table_v1', layouts, rows };
 }
 
+function compactRecords(records) {
+  const layouts = [], lookup = new Map();
+  const constantKeys = new Set(['type', 'side', 'actor_id', 'floor', 'combat_id', 'screen', 'ok', 'source']);
+  const rows = records.map(record => {
+    const constants = Object.fromEntries(Object.entries(record).filter(([key]) => constantKeys.has(key)));
+    const fields = Object.keys(record).filter(key => !constantKeys.has(key));
+    const layout = { constants, fields }, signature = JSON.stringify(layout);
+    if (!lookup.has(signature)) { lookup.set(signature, layouts.length); layouts.push(layout); }
+    return [lookup.get(signature), ...fields.map(key => record[key])];
+  });
+  return [records, recordTable(records), { encoding: 'record_table_v2', layouts, rows }]
+    .sort((a, b) => Buffer.byteLength(JSON.stringify(a)) - Buffer.byteLength(JSON.stringify(b)))[0];
+}
+
 export function compactContext(context) {
   const interned = deduplicateText(context);
   const copy = Buffer.byteLength(JSON.stringify(interned)) < Buffer.byteLength(JSON.stringify(context)) ? interned : clone(context);
@@ -403,7 +458,7 @@ export function compactContext(context) {
     action.played_card_at_request = { card_state_ref: known.get(signature), instance_id: instance };
   }
   if (known.size) copy.memory.card_states = cardStates;
-  if (copy.combat?.history?.length) copy.combat.history = recordTable(copy.combat.history);
-  for (const key of ['actions', 'observations']) if (copy.memory[key]?.length) copy.memory[key] = recordTable(copy.memory[key]);
+  if (copy.combat?.history?.length) copy.combat.history = compactRecords(copy.combat.history);
+  for (const key of ['actions', 'observations']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
   return copy;
 }
