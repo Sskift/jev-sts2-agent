@@ -1,0 +1,22 @@
+{
+  "name": "sts2-agent-loop",
+  "version": "0.1.0",
+  "description": "Autonomous Agent Loop for Slay the Spire 2 using Claude Opus 5 (Vision/Parsing), TypeSafe Jev (System One Decisions), and Native Computer Use",
+  "main": "src/agent_loop.mjs",
+  "type": "module",
+  "scripts": {
+    "test:jev": "node test_jev.mjs",
+    "test:opus": "node src/vision_opus.mjs",
+    "start": "node src/agent_loop.mjs"
+  },
+  "keywords": [
+    "slay-the-spire-2",
+    "typesafe",
+    "jev",
+    "claude-opus-5",
+    "computer-use",
+    "agent-loop"
+  ],
+  "author": "skift",
+  "license": "MIT"
+}
