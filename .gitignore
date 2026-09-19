@@ -1,28 +1,5 @@
-# Environment variables
 .env
-.env.*
-!.env.example
-
-# Node
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-
-# Game agent artifacts & temporary files
-screenshots/
-temp/
 *.log
-
-# OS & IDE
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+screenshots/
+run-artifacts/
