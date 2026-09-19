@@ -15,6 +15,20 @@ function temporary(t) {
   return directory;
 }
 
+test('temporary Windows sharing violations do not lose the atomic memory write', t => {
+  const file = path.join(temporary(t), 'memory.json');
+  const memory = new DecisionMemory({ file });
+  const rename = fs.renameSync;
+  let calls = 0;
+  t.mock.method(fs, 'renameSync', (...args) => {
+    if (++calls < 3) throw Object.assign(new Error('Sharing violation'), { code: 'EPERM' });
+    return rename(...args);
+  });
+  memory.persist();
+  assert.equal(calls, 3);
+  assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')), memory.data);
+});
+
 test('map decisions have current player, permanent deck, rules, downstream graph and executable options together', () => {
   const graph = { act_index: 0, nodes: [
     { col: 0, row: 1, type: 'MONSTER', children: [{ col: 0, row: 2 }] },

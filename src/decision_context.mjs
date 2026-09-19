@@ -193,7 +193,15 @@ export class DecisionMemory {
     fs.mkdirSync(path.dirname(this.file), { recursive: true });
     const temporary = `${this.file}.${randomUUID()}.tmp`;
     fs.writeFileSync(temporary, JSON.stringify(this.data) + '\n');
-    fs.renameSync(temporary, this.file);
+    // Windows may briefly deny replacement while an indexer or reader holds
+    // the destination. Preserve atomic replacement and retry only that case.
+    for (let attempt = 0; ; attempt++) {
+      try { fs.renameSync(temporary, this.file); break; }
+      catch (error) {
+        if (!['EPERM', 'EACCES', 'EBUSY'].includes(error.code) || attempt >= 5) throw error;
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20 * 2 ** attempt);
+      }
+    }
   }
   observe(state) {
     const runId = state.decision_context?.run_id || null;
