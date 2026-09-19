@@ -8,11 +8,11 @@ Read [UPSTREAM-NOTICE.md](UPSTREAM-NOTICE.md) for attribution and the unresolved
 
 ## Decision context extension (2026-09-20)
 
-The build now applies `decision-context.patch` after the original compatibility patch, and copies our `context/DecisionContextBuilder.cs` into the temporary source. It produces **0.111.0-context.1**, assembly version **0.111.0.2**. The original draft PR above only contains the v0.111 API compatibility changes; it does not contain or claim runtime verification of this new extension.
+The build applies `decision-context.patch` after the original compatibility patch, and copies our `context/DecisionContextBuilder.cs` into the temporary source. It produces **0.111.0-context.3**, assembly version **0.111.0.4**. The original draft PR above only contains the v0.111 API compatibility changes; the decision-context extension is maintained in this repository.
 
-The extension collects player, permanent deck, current-act map, card enhancements, rules and combat history in the same main-thread snapshot as the screen. It preserves combat beneath every overlay, reports extraction gaps, exports card/potion usability and targets, and fixes the observed missing `Amount` power description path. No hidden draw order, RNG, future encounter table or seed is exported. Run/card identities are random and scoped to the game objects, not a persistent save identifier.
+The extension collects player, permanent deck, current-act map, card enhancements, rules and combat history in the same main-thread snapshot as the screen. It preserves combat beneath overlays, reports extraction gaps, exports card/potion usability and targets, and formats power/card rules with current values. Target damage previews use the game's normal preview hooks and support both fixed `Damage` and `CalculatedDamage` variables, including Perfected Strike and Body Slam. No hidden draw order, RNG, future encounter table or seed is exported. Run identity uses the saved start time; combat/card identities are opaque random identifiers.
 
-See the [decision protocol and coverage](../../docs/decision-context.md). New code requires this context contract; an older mod is rejected before a Jev/game-action request. The new binary has compiled against the installed game with 103 source files and 186 managed references, with no warnings/errors. It is **not deployed or live-tested in this phase**. The prior `0.111.0-local-compat` battle evidence below remains evidence only for that prior build.
+See the [decision context and coverage](../../docs/decision-context.md) and [live run progress](../../docs/full-run-progress.md). An older mod without this contract is rejected before a Jev/game-action request. Context builds have been deployed and tested through Act 2's boss, including shops, rewards, enchantment confirmation and act transitions; a complete three-act victory is still pending. The latest calculated-damage patch has compiled without warnings/errors and awaits deployment outside combat. Earlier single-battle evidence below describes the initial compatibility build only.
 
 ## Changes
 
@@ -54,7 +54,7 @@ git -C path/to/disposable-clone apply --check path/to/jev-sts2-agent/mods/sts2-c
 
 Successful outputs:
 
-- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.1`, assembly version `0.111.0.2`.
+- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.3`, assembly version `0.111.0.4`.
 - `compile.log` and `compile.rsp`, containing the build output and exact compiler inputs.
 - `build-evidence.json`, recording the upstream commit, both patch hashes, context builder and game assembly hashes, compiler location, source/reference counts, exit code, binary hash, and `deploymentPerformed: false`.
 

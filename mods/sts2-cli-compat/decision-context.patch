@@ -383,7 +383,7 @@ index c38d702..735d23f 100644
                      }
                  }
 diff --git a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-index de41515..b59556d 100644
+index de41515..81d8f6b 100644
 --- a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 @@ -25,6 +25,9 @@ public static class CardStateBuilder
@@ -396,7 +396,17 @@ index de41515..b59556d 100644
                  Index = index,
                  Id = card.Id.Entry,
                  Name = StripGameTags(card.Title),
-@@ -68,6 +71,7 @@ public static class CardStateBuilder
+@@ -52,7 +55,8 @@ public static class CardStateBuilder
+                 if (tag != CardTag.None)
+                     state.Tags.Add(tag.ToString());
+ 
+-            if (card.DynamicVars.TryGetValue("Damage", out var damageVar))
++            if (card.DynamicVars.TryGetValue("Damage", out var damageVar) ||
++                card.DynamicVars.TryGetValue("CalculatedDamage", out damageVar))
+                 state.Damage = (int)damageVar.PreviewValue;
+ 
+             if (card.DynamicVars.TryGetValue("Block", out var blockVar))
+@@ -68,6 +72,7 @@ public static class CardStateBuilder
          }
          catch (Exception ex)
          {
@@ -404,7 +414,7 @@ index de41515..b59556d 100644
              Logger.Error($"Failed to build card state: {ex.Message}");
              return null;
          }
-@@ -91,9 +95,10 @@ public static class CardStateBuilder
+@@ -91,9 +96,10 @@ public static class CardStateBuilder
              }
              catch (Exception ex2)
              {

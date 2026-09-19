@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Entities.Potions;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Map;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
@@ -102,7 +103,8 @@ public static class DecisionContextBuilder
                 description = Read($"card.{card.Id.Entry}.target_description", () => StripGameTags(card.GetDescriptionForPile(PileType.Hand, target))),
                 damage = Read($"card.{card.Id.Entry}.damage_preview", () =>
                 {
-                    if (!card.DynamicVars.TryGetValue("Damage", out var value)) return (int?)null;
+                    if (!card.DynamicVars.TryGetValue(DamageVar.defaultName, out var value) &&
+                        !card.DynamicVars.TryGetValue(CalculatedDamageVar.defaultName, out value)) return (int?)null;
                     var preview = value.Clone();
                     preview.UpdateCardPreview(card, CardPreviewMode.Normal, target, true);
                     return (int?)preview.PreviewValue;
