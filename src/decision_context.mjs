@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import Ajv2020 from 'ajv/dist/2020.js';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
@@ -32,6 +32,12 @@ export function validateDecisionPacket(rawPacket) {
 }
 
 const clone = value => structuredClone(value);
+export function cardRewardKey(reward) {
+  if (!Array.isArray(reward?.card_choices)) return null;
+  // Reward indices shift as gold and potions are claimed; the offered cards do not.
+  const cards = reward.card_choices.map(({ index, ...card }) => card);
+  return createHash('sha256').update(JSON.stringify(cards)).digest('hex');
+}
 const keyOf = node => `${node.col},${node.row}`;
 const preRun = new Set(['MENU', 'SINGLEPLAYER_SUBMENU', 'CHARACTER_SELECT', 'GAME_OVER']);
 const array = (value, name) => { if (!Array.isArray(value)) throw new ContextError(`Missing context array: ${name}`); return value; };
@@ -226,11 +232,12 @@ export class DecisionMemory {
     this.data.pending = { request: clone(request), floor: state.decision_context?.total_floor, combat_id: state.decision_context?.combat_id || null, round: state.combat?.turn_number, screen: state.screen,
       ...(request.cmd === 'play_card' ? { played_card_at_request: clone(matching?.[request.nth ?? 0]) } : {}) };
     if (request.cmd === 'use_potion') this.data.pending.potion_at_request = clone(state.decision_context?.player?.potions.filter(p => p.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.slot - b.slot)[request.nth ?? 0]);
+    if (request.cmd === 'reward_skip_card') this.data.pending.card_reward_key = cardRewardKey(state.rewards?.rewards?.filter(reward => reward.type.toLowerCase() === 'card')[request.nth ?? 0]);
     this.persist();
   }
   finish(response, after) {
     this.data.actions.push({ ...this.data.pending, ok: response.ok, result: clone(response.data ?? response.error ?? null), after_screen: after.screen });
-    this.data.pending = !response.ok && ['TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? { ...this.data.pending, outcome_unknown: true, error: response.error } : null;
+    this.data.pending = !response.ok && ['TIMEOUT', 'EVENT_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? { ...this.data.pending, outcome_unknown: true, error: response.error } : null;
     this.persist();
   }
   context(state) {
@@ -246,6 +253,7 @@ export class DecisionMemory {
       && !(a.ok && a.request.cmd === 'choose_map_node' && a.floor >= currentActStart
         && visited.has(`${a.request.args?.[0]},${a.request.args?.[1]}`))));
     for (const action of actions) {
+      delete action.card_reward_key; // Local identity bookkeeping; the skip action itself is retained.
       if (action.floor < state.decision_context.total_floor && action.result?.event_state) {
         const event = action.result.event_state;
         action.result = { event_id: event.event_id, title: event.title, description: event.description, chosen_options: event.options?.filter(option => option.was_chosen) || [] };

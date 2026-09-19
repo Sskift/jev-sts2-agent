@@ -1,3 +1,164 @@
+diff --git a/STS2.Cli.Mod/Actions/ChooseEventHandler.cs b/STS2.Cli.Mod/Actions/ChooseEventHandler.cs
+index aced82c..2b43415 100644
+--- a/STS2.Cli.Mod/Actions/ChooseEventHandler.cs
++++ b/STS2.Cli.Mod/Actions/ChooseEventHandler.cs
+@@ -1,11 +1,14 @@
+-using Godot;
++using System.Text.Json;
++using Godot;
++using MegaCrit.Sts2.Core.Models;
+ using MegaCrit.Sts2.Core.Nodes.Rooms;
+ using MegaCrit.Sts2.Core.Nodes.Screens.Map;
+ using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
+ using STS2.Cli.Mod.Actions.Utils;
+ using STS2.Cli.Mod.Models.Messages;
+ using STS2.Cli.Mod.State.Builders;
+-using STS2.Cli.Mod.Utils;
++using STS2.Cli.Mod.Utils;
++using static STS2.Cli.Mod.Utils.TextUtils;
+ 
+ namespace STS2.Cli.Mod.Actions;
+ 
+@@ -114,22 +117,10 @@ public static class ChooseEventHandler
+                     message = $"Option button at index {optionIndex} not found in UI"
+                 };
+ 
+-            var targetButton = optionButtons[optionIndex];
+-
+-            // --- Capture state before click for comparison ---
+-            var snapshotOptionCount = eventModel.CurrentOptions.Count;
+-            string? snapshotFirstTitle = null;
+-            try
+-            {
+-                if (snapshotOptionCount > 0)
+-                    snapshotFirstTitle = eventModel.CurrentOptions[0].Title.GetFormattedText();
+-            }
+-            catch
+-            {
+-                // ignore
+-            }
+-
+-            var snapshotIsFinished = eventModel.IsFinished;
++            var targetButton = optionButtons[optionIndex];
++
++            // --- Capture state before click for comparison ---
++            var snapshot = CaptureEventState(eventModel);
+ 
+             // --- ForceClick the button ---
+             Logger.Info($"ForceClick option at index {optionIndex}: '{selectedOption.Title}'");
+@@ -158,9 +149,8 @@ public static class ChooseEventHandler
+                 };
+             }
+ 
+-            // Wait for the event state to change (new page)
+-            var stateChanged = await WaitForEventStateChange(
+-                eventRoom, snapshotOptionCount, snapshotFirstTitle, snapshotIsFinished);
++            // Wait for a changed page to settle or for the event to open another screen.
++            var stateChanged = await WaitForEventStateChange(eventRoom, snapshot);
+             if (!stateChanged)
+             {
+                 Logger.Warning("Timed out waiting for event state change");
+@@ -205,29 +195,73 @@ public static class ChooseEventHandler
+             ActionUtils.UiTimeoutMs);
+     }
+ 
+-    /// <summary>
+-    ///     Waits for the event state to change (new options or finished).
+-    /// </summary>
+-    private static async Task<bool> WaitForEventStateChange(
+-        NEventRoom eventRoom, int prevOptionCount, string? prevFirstTitle, bool prevIsFinished)
+-    {
+-        return await ActionUtils.PollUntilAsync(() =>
+-        {
+-            if (!eventRoom.IsInsideTree()) return true;
+-            if (NOverlayStack.Instance?.Peek() is not null) return true;
+-            if (NMapScreen.Instance is { IsOpen: true }) return true;
+-
+-            var eventModel = EventUtils.GetEventModel(eventRoom);
+-            if (eventModel == null) return true;
+-
+-            if (eventModel.CurrentOptions.Count != prevOptionCount) return true;
+-            if (eventModel.CurrentOptions.Count > 0 && prevFirstTitle != null)
+-            {
+-                var currentFirstTitle = eventModel.CurrentOptions[0].Title.GetFormattedText();
+-                if (currentFirstTitle != prevFirstTitle) return true;
+-            }
+-
+-            return eventModel.IsFinished != prevIsFinished;
+-        }, ActionUtils.UiTimeoutMs);
+-    }
+-}
+\ No newline at end of file
++    /// <summary>
++    ///     Waits for a stable, interactive changed page or a transition away from the event.
++    /// </summary>
++    private static async Task<bool> WaitForEventStateChange(
++        NEventRoom eventRoom, string previousState)
++    {
++        string? candidateState = null;
++
++        // PollUntilAsync preserves the Godot synchronization context captured by ExecuteAsync.
++        // All model and scene access therefore stays on the main thread across each delay.
++        return await ActionUtils.PollUntilAsync(() =>
++        {
++            if (!GodotObject.IsInstanceValid(eventRoom) || !eventRoom.IsInsideTree()) return true;
++            if (NOverlayStack.Instance?.Peek() is not null) return true;
++            if (NMapScreen.Instance is { IsOpen: true }) return true;
++
++            var eventModel = EventUtils.GetEventModel(eventRoom);
++            if (eventModel == null) return true;
++
++            var currentState = CaptureEventState(eventModel);
++            if (currentState == previousState || !AreOptionsReady(eventRoom, eventModel))
++            {
++                candidateState = null;
++                return false;
++            }
++
++            // WasChosen and dynamic descriptions can change before the chosen action finishes.
++            // Require the ready page to match on two consecutive polls, not just a changed flag.
++            if (currentState == candidateState) return true;
++            candidateState = currentState;
++            return false;
++        }, ActionUtils.UiTimeoutMs);
++    }
++
++    private static bool AreOptionsReady(NEventRoom eventRoom, EventModel eventModel)
++    {
++        var buttons = eventRoom.Layout?.OptionButtons.ToList();
++        if (buttons == null || buttons.Count == 0 ||
++            buttons.Count != (eventModel.IsFinished ? 1 : eventModel.CurrentOptions.Count)) return false;
++
++        // Native clicks clear/disable the old buttons; the replacement buttons animate in.
++        // Locked options remain visible but are not expected to accept another click.
++        return buttons.All(button => button.IsInsideTree() && button.IsVisibleInTree() &&
++            (button.Option.IsLocked || (button.IsEnabled && button.MouseFilter == Control.MouseFilterEnum.Stop)));
++    }
++
++    private static string CaptureEventState(EventModel eventModel)
++    {
++        // Snapshot only the currently presented page and option content. Titles/count alone
++        // miss repeatable choices whose displayed cost or affected card changes in place.
++        return JsonSerializer.Serialize(new
++        {
++            event_id = eventModel.Id.Entry,
++            title = GetLocText(eventModel.Title),
++            description = GetLocText(eventModel.Description),
++            is_finished = eventModel.IsFinished,
++            options = eventModel.CurrentOptions.Select(option => new
++            {
++                title = GetLocText(option.Title),
++                description = GetLocText(option.Description),
++                text_key = option.TextKey,
++                is_locked = option.IsLocked,
++                is_proceed = option.IsProceed,
++                was_chosen = option.WasChosen,
++                relic_id = option.Relic?.Id.Entry,
++                relic_name = GetLocText(option.Relic?.Title)
++            }).ToArray()
++        });
++    }
++}
 diff --git a/STS2.Cli.Mod/Actions/EndTurnHandler.cs b/STS2.Cli.Mod/Actions/EndTurnHandler.cs
 index deb4503..a240f8f 100644
 --- a/STS2.Cli.Mod/Actions/EndTurnHandler.cs

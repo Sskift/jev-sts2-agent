@@ -1,10 +1,41 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildModCandidates, makeModDecisionWithJev } from '../src/mod_decision.mjs';
+import { buildModCandidates, makeModDecisionWithJev, prepareModDecision } from '../src/mod_decision.mjs';
+import { DecisionMemory } from '../src/decision_context.mjs';
 import { withContext } from './fixtures/context.mjs';
 
 const card = { index: 0, id: 'STRIKE_IRONCLAD', name: 'Strike', description: 'Deal 6 damage.', target_type: 'AnyEnemy', cost: 1, can_play: true, damage: 6 };
 const enemy = { combat_id: 42, name: 'Enemy', hp: 10, block: 0, is_alive: true };
+
+test('card skip intent survives other claims without hiding gold or reconsidering the card', async () => {
+  const state = withContext({ screen: 'REWARD', rewards: { can_skip: true, rewards: [
+    { index: 0, type: 'Gold', description: '20 Gold', gold_amount: 20 },
+    { index: 1, type: 'Card', card_choices: [{ index: 0, id: 'A', name: 'A', description: 'Gain 5 Block.', type: 'Skill', cost: 1 }] }
+  ] } });
+  const memory = new DecisionMemory(); memory.observe(state);
+  memory.begin({ cmd: 'reward_skip_card', reward_type: 'card', nth: 0 }, state);
+  memory.finish({ ok: true }, state);
+  let prepared = prepareModDecision(state, { memory });
+  assert.equal(prepared.candidates.has('skip_card_0'), false);
+  assert.ok(prepared.candidates.has('claim_0'));
+  assert.ok(prepared.candidates.has('reward_1_card_0'));
+  assert.deepEqual(prepared.payload.state.screen_state.skipped_card_rewards.reward_nths, [0]);
+  const after = structuredClone(state);
+  after.rewards.rewards.shift(); after.rewards.rewards[0].index = 0;
+  memory.begin({ cmd: 'reward_claim', reward_type: 'gold', nth: 0 }, state);
+  memory.finish({ ok: true }, after); memory.observe(after);
+  prepared = prepareModDecision(after, { memory });
+  assert.equal(prepared.candidates.has('skip_card_0'), false);
+  const decision = await makeModDecisionWithJev(after, { memory, fetchImpl: () => { throw new Error('Already selected skip needs no new judgment'); } });
+  assert.equal(decision.request.cmd, 'proceed');
+  assert.equal(decision.model, 'complete-selected-skip');
+  const changed = structuredClone(after); changed.rewards.rewards[0].card_choices[0].description = 'Gain 8 Block.';
+  assert.equal(prepareModDecision(changed, { memory }).candidates.has('skip_card_0'), true);
+  const nextFloor = structuredClone(after); nextFloor.decision_context.total_floor++;
+  assert.equal(prepareModDecision(nextFloor, { memory }).candidates.has('skip_card_0'), true);
+  const otherRun = structuredClone(after); otherRun.decision_context.run_id = 'another-run';
+  assert.equal(prepareModDecision(otherRun, { memory }).candidates.has('skip_card_0'), true);
+});
 function combat(hand = [card], overrides = {}) {
   return { screen: 'COMBAT', combat: { player: { hp: 80, energy: 3 }, is_player_turn: true, is_player_actions_disabled: false, is_combat_ending: false, hand, enemies: [enemy], ...overrides } };
 }

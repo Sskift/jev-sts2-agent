@@ -14,6 +14,8 @@ const priorities = {
 export function needsStrategyAssessment(state, options, prepared) {
   if (options.strategyAssessment || state.combat || prepared.candidates.size <= 1 || !['SHOP', 'REWARD'].includes(state.screen)) return false;
   const last = options.memory?.data.actions.at(-1);
+  const rewardCards = state.rewards?.rewards.filter(reward => reward.type.toLowerCase() === 'card') || [];
+  if (state.screen === 'REWARD' && rewardCards.length && prepared.skippedCardRewards?.length === rewardCards.length) return false;
   if (state.screen === 'REWARD' && last?.ok && last.request.cmd === 'reward_skip_card' && last.floor === state.decision_context?.total_floor) return false;
   return [...prepared.candidates.values()].some(action => ['reward_choose_card', 'shop_buy_card', 'shop_buy_relic', 'shop_buy_potion', 'shop_remove_card'].includes(action.request?.cmd));
 }

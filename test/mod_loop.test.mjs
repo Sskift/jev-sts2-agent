@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { actionFingerprint, observeModBattle, runModLoop, observedEndTurnSelection } from '../src/mod_loop.mjs';
+import { actionFingerprint, observeModBattle, runModLoop, observedEndTurnSelection, observedEventProgress } from '../src/mod_loop.mjs';
 import { DecisionMemory } from '../src/decision_context.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
 import { ModTransportError } from '../src/mod_client.mjs';
@@ -98,6 +98,40 @@ test('a pending end-turn resumes at the observed selection, but different combat
   assert.deepEqual(client.requests, [{ cmd: 'tri_select_card', card_ids: ['STATUS_A'], nth_values: [0] }]);
   const saved = JSON.parse(fs.readFileSync(memoryFile));
   assert.equal(saved.actions.filter(action => action.request.cmd === 'end_turn').length, 1);
+});
+
+test('changed effects on same-title event options reconcile a timeout without replay', async t => {
+  const initial = withContext({ screen: 'EVENT', event: { event_id: 'BRIDGE', is_finished: false, options: [{ index: 0, title: 'Hold On', description: 'Lose 3 HP.', text_key: 'HOLD_0', is_locked: false }] } });
+  const after = structuredClone(initial);
+  after.event.options[0].description = 'Lose 4 HP.';
+  after.event.options[0].text_key = 'HOLD_1';
+  after.decision_context.player.hp -= 3;
+  const request = { cmd: 'choose_event', args: [0] }, artifactDir = temporaryFolder(t);
+  const client = scriptedClient([initial, initial, after], async () => ({ ok: false, error: 'EVENT_TIMEOUT' }));
+  const result = await runModLoop({ client, artifactDir, maxSteps: 1, intervalMs: 0, logger() {}, decide: () => ({ action: 'mod_command', request }) });
+  assert.equal(result.stoppedReason, 'max_steps');
+  assert.deepEqual(client.requests, [request]);
+  const memory = JSON.parse(fs.readFileSync(path.join(artifactDir, 'memory.json')));
+  assert.equal(memory.pending, null);
+  assert.equal(memory.actions[0].result.reason, 'observed_event_progress');
+  assert.equal(memory.actions[0].result.command_replayed, false);
+  const wrong = structuredClone(after); wrong.decision_context.run_id = 'another-run';
+  assert.equal(observedEventProgress(initial, request, wrong), null);
+  wrong.decision_context.run_id = initial.decision_context.run_id; wrong.event.event_id = 'OTHER';
+  assert.equal(observedEventProgress(initial, request, wrong), null);
+});
+
+test('an event timeout without changed choices remains unresolved even if HP changes', async t => {
+  const initial = withContext({ screen: 'EVENT', event: { event_id: 'BRIDGE', is_finished: false, options: [{ index: 0, title: 'Hold On', description: 'Lose 3 HP.', is_locked: false }] } });
+  const after = structuredClone(initial); after.decision_context.player.hp -= 3;
+  const request = { cmd: 'choose_event', args: [0] }, artifactDir = temporaryFolder(t);
+  assert.equal(observedEventProgress(initial, request, after), null);
+  const client = scriptedClient([initial, initial, after], async () => ({ ok: false, error: 'EVENT_TIMEOUT' }));
+  const result = await runModLoop({ client, artifactDir, maxSteps: 2, intervalMs: 0, logger() {}, decide: () => ({ action: 'mod_command', request }) });
+  assert.equal(result.outcomeUnknown, true);
+  assert.deepEqual(client.requests, [request]);
+  const memory = JSON.parse(fs.readFileSync(path.join(artifactDir, 'memory.json')));
+  assert.equal(memory.pending.error, 'EVENT_TIMEOUT');
 });
 
 test('reward without observed combat never meets battle acceptance', () => {

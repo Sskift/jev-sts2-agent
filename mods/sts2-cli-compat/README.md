@@ -8,13 +8,15 @@ Read [UPSTREAM-NOTICE.md](UPSTREAM-NOTICE.md) for attribution and the unresolved
 
 ## Decision context extension (2026-09-20)
 
-The build applies `decision-context.patch` after the original compatibility patch, and copies our `context/DecisionContextBuilder.cs` into the temporary source. It produces **0.111.0-context.8**, assembly version **0.111.0.9**. The original draft PR above only contains the v0.111 API compatibility changes; the decision-context extension is maintained in this repository.
+The build applies `decision-context.patch` after the original compatibility patch, and copies our `context/DecisionContextBuilder.cs` into the temporary source. It produces **0.111.0-context.9**, assembly version **0.111.0.10**. The original draft PR above only contains the v0.111 API compatibility changes; the decision-context extension is maintained in this repository.
 
 The extension collects player, permanent deck, current-act map, card enhancements, rules and combat history in the same main-thread snapshot as the screen. It preserves combat beneath overlays, reports extraction gaps, exports card/potion usability and targets, and formats power/card rules with current values. Target damage previews use the game's normal preview hooks and support both fixed `Damage` and `CalculatedDamage` variables, including Perfected Strike and Body Slam. All-enemy attacks also expose previews for the native HittableEnemies recipient set; random targets remain unknown. No hidden draw order, RNG, future encounter table or seed is exported. Run identity uses the saved start time; combat/card identities are opaque random identifiers.
 
 See the [decision context and coverage](../../docs/decision-context.md) and [live run progress](../../docs/full-run-progress.md). An older mod without this contract is rejected before a Jev/game-action request. Context builds have been deployed and tested through Act 2's boss, including shops, rewards, enchantment confirmation and act transitions; a complete three-act victory is still pending. The calculated-damage path was verified live in the ninth run: Perfected Strike previewed 22 damage and reduced the boss from 163 to 141 HP. Explicit HpLossVar values are also exported as hp_loss before prevention hooks. Earlier single-battle evidence below describes the initial compatibility build only.
 
 FakeMerchant custom events expose the already initialized, currently accessible merchant inventory as `SHOP`, with their event ID/title, stock, native rules and prices. A shared resolver is used by state extraction and all four purchase/removal handlers. It rejects inaccessible overlays and started fights; purchases still use the game's native merchant entry checks and actions. Finished events use the existing `proceed` command instead of assuming a standard option-button layout.
+
+Event completion compares the visible page and full option content, including descriptions and text keys. It waits for interactive buttons and two matching observations, so repeated pages with the same button titles but different costs are recognized without accepting a transient click flag. The native card-reward Skip behavior is preserved: it closes the picker while retaining the reward; Node remembers the prior choice.
 
 ## Changes
 
@@ -56,7 +58,7 @@ git -C path/to/disposable-clone apply --check path/to/jev-sts2-agent/mods/sts2-c
 
 Successful outputs:
 
-- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.8`, assembly version `0.111.0.9`.
+- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.9`, assembly version `0.111.0.10`.
 - `compile.log` and `compile.rsp`, containing the build output and exact compiler inputs.
 - `build-evidence.json`, recording the upstream commit, both patch hashes, context builder and game assembly hashes, compiler location, source/reference counts, exit code, binary hash, and `deploymentPerformed: false`.
 

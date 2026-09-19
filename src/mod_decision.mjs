@@ -1,7 +1,7 @@
 import { decisionInstructions } from "./decision_instructions.mjs";
 import { getJevApiKey } from './decision_jev.mjs';
 import { validateModRequest } from './mod_client.mjs';
-import { buildDecisionContext, ContextError, compactContext, validateDecisionPacket } from './decision_context.mjs';
+import { buildDecisionContext, ContextError, compactContext, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
 import { combatForecast, firstHitHpLoss } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
 import { needsStrategyAssessment, prepareStrategyAssessment } from './strategy_assessment.mjs';
@@ -255,11 +255,24 @@ export function buildModCandidates(state) {
 
 export function prepareModDecision(gameState, options = {}) {
   let candidates = buildModCandidates(gameState);
+  const skippedCardRewards = [];
+  if (gameState.screen === 'REWARD' && options.memory) {
+    const cardRewards = (gameState.rewards?.rewards || []).filter(reward => reward.type.toLowerCase() === 'card');
+    for (const [nth, reward] of cardRewards.entries()) {
+      const key = cardRewardKey(reward);
+      if (key && options.memory.data.run_id === gameState.decision_context?.run_id && options.memory.data.actions.some(action => action.ok && action.request.cmd === 'reward_skip_card' && action.floor === gameState.decision_context.total_floor && action.card_reward_key === key && (action.request.nth ?? 0) === nth)) {
+        skippedCardRewards.push(nth);
+        candidates.delete(`skip_card_${nth}`);
+        for (const candidate of candidates.values()) if (candidate.request.cmd === 'reward_choose_card' && candidate.request.nth === nth) candidate.description += ' This reward was already skipped; selecting it now reconsiders that choice.';
+      }
+    }
+  }
   const selectionPlan = candidates.selectionPlan;
   const stage = selectionPlan ? selectionStage(selectionPlan, options.selectionProgress) : null;
   if (stage) candidates = stage.candidates;
   if (!candidates.size) return { action: 'wait', reason: `No complete supported action in ${gameState?.screen || 'unknown'}` };
   const context = buildDecisionContext(gameState, { candidates, memory: options.memory, selectionPlanning: stage?.state });
+  if (skippedCardRewards.length) context.screen_state.skipped_card_rewards = { reward_nths: skippedCardRewards, note: 'Skip closes the card picker but the game keeps this reward available. The earlier skip choice is remembered: duplicate skip commands are omitted, while taking a card to reconsider and claiming other rewards remain available.' };
   if (options.strategyAssessment) context.strategy_assessment = { source: 'Jev judgment of this observation, advisory rather than a verified fact', priority: options.strategyAssessment.priority, meaning: options.strategyAssessment.description };
   if (gameState.screen === 'MAP') for (const route of context.map?.routes || []) {
     const id = `map_${route.next_node.col}_${route.next_node.row}`, candidate = candidates.get(id);
@@ -289,7 +302,7 @@ export function prepareModDecision(gameState, options = {}) {
   // A live 66,970-byte request used 32,114 input tokens. The provider still
   // enforces its context limit, and any HTTP rejection stops before game input.
   if (requestBytes > maxBytes) throw new ContextError('Complete context exceeds the configured request budget; no facts were truncated and no model/action request was sent.', metrics);
-  return { candidates, payload, body, metrics, ...(selectionPlan ? { selectionPlan, selectionProgress: stage.progress } : {}) };
+  return { candidates, payload, body, metrics, skippedCardRewards, ...(selectionPlan ? { selectionPlan, selectionProgress: stage.progress } : {}) };
 }
 
 export async function makeModDecisionWithJev(gameState, options = {}) {
@@ -309,7 +322,7 @@ export async function makeModDecisionWithJev(gameState, options = {}) {
 async function choosePrepared(gameState, options, prepared) {
   const { candidates, payload, body, metrics } = prepared;
   const last = options.memory?.data.actions.at(-1);
-  if (gameState.screen === 'REWARD' && gameState.rewards?.rewards.length === 1 && gameState.rewards.rewards[0].type === 'Card' && last?.ok && last.request.cmd === 'reward_skip_card' && last.floor === gameState.decision_context?.total_floor && candidates.has('proceed')) {
+  if (gameState.screen === 'REWARD' && gameState.rewards?.rewards.length === 1 && gameState.rewards.rewards[0].type === 'Card' && (prepared.skippedCardRewards?.includes(0) || (last?.ok && !last.card_reward_key && last.request.cmd === 'reward_skip_card' && last.floor === gameState.decision_context?.total_floor)) && candidates.has('proceed') && [...candidates.values()].every(candidate => ['proceed', 'reward_choose_card', 'reward_skip_card'].includes(candidate.request?.cmd))) {
     return { ...candidates.get('proceed'), candidate_id: 'proceed', model: 'complete-selected-skip', context_metrics: metrics };
   }
   if (candidates.size === 1) {

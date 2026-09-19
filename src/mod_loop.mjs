@@ -71,6 +71,21 @@ export function observedEndTurnSelection(pending, state) {
   return { ok: true, data: { action: 'END_TURN', reason: 'observed_enemy_turn_selection', turn_completed: false, observed_screen: state.screen, command_replayed: false } };
 }
 
+// Some mod versions compare only event button titles. Repeated event pages can
+// keep those titles while changing their actual effects and costs.
+export function observedEventProgress(before, request, after) {
+  if (request?.cmd !== 'choose_event' || before.screen !== 'EVENT' || after.screen !== 'EVENT'
+    || before.combat || after.combat || before.event?.is_finished !== false
+    || !before.decision_context?.run_id || before.decision_context.run_id !== after.decision_context?.run_id
+    || before.decision_context.total_floor !== after.decision_context?.total_floor
+    || !before.event?.event_id || before.event.event_id !== after.event?.event_id
+    || !before.event.options?.some(option => option.index === request.args?.[0] && option.is_locked === false)) return null;
+  const choices = event => (event.options || []).map(({ index, title, description, text_key, is_locked, is_proceed }) => ({ index, title, description, text_key, is_locked, is_proceed }));
+  const advanced = after.event.is_finished === true || (after.event.options?.length > 0 && JSON.stringify(choices(before.event)) !== JSON.stringify(choices(after.event)));
+  if (!advanced) return null;
+  return { ok: true, data: { action: 'CHOOSE_EVENT', reason: 'observed_event_progress', observed_event_id: after.event.event_id, command_replayed: false } };
+}
+
 export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 3000, intervalMs = 600, artifactDir = createSession(), memoryFile = path.join(artifactDir, 'memory.json'), signal, logger = console.log, stopAfterBattle = false } = {}) {
   if (!client) throw new Error('Mod client is required');
   const battle = { sawCombat: false, complete: false, failed: false, playedCards: 0, endedTurns: 0 };
@@ -169,6 +184,10 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       await snapshot(directory, 'after');
       if (!response.ok && response.error === 'TIMEOUT' && decision.request.cmd === 'end_turn') {
         const observed = observedEndTurnSelection(memory.data.pending, after);
+        if (observed) { save(path.join(directory, 'timeout-response.json'), response); response = observed; }
+      }
+      if (!response.ok && response.error === 'EVENT_TIMEOUT') {
+        const observed = observedEventProgress(current, decision.request, after);
         if (observed) { save(path.join(directory, 'timeout-response.json'), response); response = observed; }
       }
       memory.finish(response, after);
