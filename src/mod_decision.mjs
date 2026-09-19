@@ -149,7 +149,13 @@ export function buildModCandidates(state) {
       if (state.relic_select?.can_skip === true) add('relic_skip', { cmd: 'relic_skip' }, 'Skip this relic selection.');
       break;
     case 'REST_SITE':
-      for (const option of state.rest_site?.options || []) if (option.is_enabled === true && hasId(option.option_id)) add(`rest_${option.option_id}`, { cmd: 'choose_rest_option', id: option.option_id }, `${option.name}: ${option.description || ''}`);
+      for (const option of state.rest_site?.options || []) if (option.is_enabled === true && hasId(option.option_id)) {
+        const player = state.decision_context?.player;
+        const missingHp = player ? Math.max(0, player.max_hp - player.hp) : null;
+        const health = option.option_id === 'HEAL' && missingHp !== null ? ` Current HP ${player.hp}/${player.max_hp}: healing can restore at most ${missingHp} HP before reaching the maximum. Check any additional rest-triggered effects.` : '';
+        const upgrade = option.option_id === 'SMITH' ? ' Permanently improve a card for every remaining fight; choose the card next.' : '';
+        add(`rest_${option.option_id}`, { cmd: 'choose_rest_option', id: option.option_id }, `${option.name}: ${option.description || ''}${health}${upgrade}`);
+      }
       if (state.rest_site?.can_proceed === true) add('proceed', { cmd: 'proceed' }, 'Leave the rest site and open the map.');
       break;
     case 'TREASURE':
