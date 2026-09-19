@@ -23,14 +23,21 @@ export function combatForecast(combat, card = null, target = null) {
   if (block === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) block = 6;
   const loss = Math.max(0, incoming - block);
   const followup = card && target && hit ? followupAttackBudget(combat, card, target, hit) : null;
+  // Sandpit is a visible, deterministic instant-death countdown. Ordinary
+  // Block/HP cannot prevent it; Frantic Escape visibly adds one turn.
+  const deathTimers = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !(targetDepleted && e.combat_id === target.combat_id))
+    .flatMap(enemy => (enemy.powers || []).filter(p => p.id === 'SANDPIT_POWER' && p.amount > 0)
+      .map(power => ({ target_id: enemy.combat_id, power_id: power.id, enemy_turns_remaining_after_card: power.amount + Number(card?.id === 'FRANTIC_ESCAPE') })));
+  const instantDeath = deathTimers.some(timer => timer.enemy_turns_remaining_after_card <= 1);
   return {
     energy_after_card: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
     first_hit_hp_loss: hit?.hp_loss ?? null,
     block_after_card: block,
     displayed_attacks_after_target_depletion: incoming,
-    hp_loss_if_end_turn: loss,
-    hp_remaining_if_end_turn: combat.player.hp - loss,
-    fatal_if_end_turn: loss >= combat.player.hp,
+    hp_loss_if_end_turn: instantDeath ? combat.player.hp : loss,
+    hp_remaining_if_end_turn: instantDeath ? 0 : combat.player.hp - loss,
+    fatal_if_end_turn: instantDeath || loss >= combat.player.hp,
+    ...(deathTimers.length ? { death_timers: deathTimers, instant_death_if_end_turn: instantDeath } : {}),
     ...(followup?.hand_indices.length ? { followup_attacks: followup } : {})
   };
 }

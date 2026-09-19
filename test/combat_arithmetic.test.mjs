@@ -31,3 +31,18 @@ test('Orichalcum and delayed Rage block are not mistaken for immediate block gai
   assert.equal(combatForecast(combat, { cost: 1, block: 5 }).hp_loss_if_end_turn, 1);
   assert.equal(combatForecast(combat, { id: 'RAGE', cost: 0, block: 3 }).block_after_card, 6);
 });
+
+test('visible Sandpit instant death overrides safe-looking HP and Block arithmetic', () => {
+  const boss = { combat_id: 1, hp: 143, block: 0, is_alive: true, intents: [{ damage: 10, hits: 2 }], powers: [{ id: 'SANDPIT_POWER', amount: 1 }] };
+  const combat = { player: { hp: 45, block: 10, energy: 1 }, hand: [], enemies: [boss] };
+  assert.equal(combatForecast(combat).instant_death_if_end_turn, true);
+  assert.equal(combatForecast(combat).hp_loss_if_end_turn, 45);
+  assert.equal(combatForecast(combat, { cost: 1, block: 99 }).hp_remaining_if_end_turn, 0);
+  const escaped = combatForecast(combat, { id: 'FRANTIC_ESCAPE', cost: 1 });
+  assert.equal(escaped.fatal_if_end_turn, false);
+  assert.equal(escaped.death_timers[0].enemy_turns_remaining_after_card, 2);
+  const kill = combatForecast(combat, { cost: 1, target_previews: [{ target_id: 1, damage: 143 }] }, boss);
+  assert.equal(kill.fatal_if_end_turn, false, 'Killing the countdown owner ends this threat');
+  boss.powers[0].amount = 2;
+  assert.equal(combatForecast(combat).instant_death_if_end_turn, false);
+});
