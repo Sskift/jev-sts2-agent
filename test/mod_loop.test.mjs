@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { actionFingerprint, observeModBattle, runModLoop } from '../src/mod_loop.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
+import { ModTransportError } from '../src/mod_client.mjs';
 import { withContext } from './fixtures/context.mjs';
 
 function combat(enemyHp = 20) {
@@ -152,6 +153,22 @@ test('unknown command outcome stops without automatically replaying the request'
   assert.equal(summary.error, timeout.message);
   assert.equal(summary.battle.complete, false);
   assert.match(summary.stoppedReason, /no automatic action replay/);
+});
+
+test('a failed connection clears only the unsent action and reobserves before deciding', async t => {
+  const artifactDir = temporaryFolder(t), memoryFile = path.join(artifactDir, 'memory.json');
+  let calls = 0, decisions = 0;
+  const client = scriptedClient([combat(20), combat(20), combat(12), combat(12), reward()], async request => {
+    if (++calls === 1) throw new ModTransportError('Pipe temporarily absent', { code: 'ENOENT', request, dispatched: false });
+    return { ok: true };
+  });
+  const summary = await runModLoop({ client, memoryFile, decide: state => { decisions++; return chooseAttack(state); }, artifactDir, intervalMs: 0, maxSteps: 2, stopAfterBattle: true, logger() {} });
+  const saved = JSON.parse(fs.readFileSync(memoryFile, 'utf8'));
+  assert.equal(decisions, 2);
+  assert.equal(summary.battle.playedCards, 1);
+  assert.equal(saved.pending, null);
+  assert.equal(saved.actions[0].result, 'NOT_DISPATCHED');
+  assert.equal(saved.actions[0].ok, false);
 });
 
 test('combat progress in one screen resets the unchanged-action limit', async t => {

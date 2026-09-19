@@ -46,6 +46,7 @@ public static class DecisionContextBuilder
             var original = power.SmartDescription;
             var description = new LocString(original.LocTable, original.LocEntryKey);
             description.AddVariablesFrom(original);
+            power.DynamicVars.AddTo(description);
             description.Add("Amount", power.Amount);
             return StripGameTags(description.GetFormattedText());
         }
@@ -191,6 +192,7 @@ public static class DecisionContextBuilder
                 _ => null
             };
             var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var typed = entry is CardPlayStartedEntry or CardPlayFinishedEntry or CardDrawnEntry or CardDiscardedEntry or CardExhaustedEntry or EnergySpentEntry or BlockGainedEntry or DamageReceivedEntry or PowerReceivedEntry or PotionUsedEntry;
             return (object)new
             {
                 sequence = index,
@@ -202,9 +204,12 @@ public static class DecisionContextBuilder
                 card_instance_id = card != null ? IdentityOf(card) : null,
                 result_pile = entry is CardPlayFinishedEntry play ? play.CardPlay.ResultPile.ToString() : null,
                 potion_id = entry is PotionUsedEntry potion ? potion.Potion.Id.Entry : null,
-                description = entry is PotionUsedEntry used ? $"Actor {entry.Actor?.CombatId} used {used.Potion.Id.Entry}."
-                    : entry is CardDrawnEntry ? $"Actor {entry.Actor?.CombatId} drew {card?.Id.Entry}."
-                    : Read($"history.{index}.description", () => StripGameTags(entry.Description))
+                target_id = entry switch { CardPlayStartedEntry e => (int?)e.CardPlay.Target?.CombatId, CardPlayFinishedEntry e => (int?)e.CardPlay.Target?.CombatId, PotionUsedEntry e => (int?)e.Target?.CombatId, _ => null },
+                source_id = entry switch { DamageReceivedEntry e => (int?)e.Dealer?.CombatId, PowerReceivedEntry e => (int?)e.Applier?.CombatId, _ => null },
+                power_id = entry is PowerReceivedEntry powered ? powered.Power.Id.Entry : null,
+                amount = entry switch { EnergySpentEntry e => (decimal?)e.Amount, BlockGainedEntry e => (decimal?)e.Amount, PowerReceivedEntry e => (decimal?)e.Amount, _ => null },
+                damage = entry is DamageReceivedEntry damaged ? new { total = damaged.Result.TotalDamage, blocked = damaged.Result.BlockedDamage, unblocked = damaged.Result.UnblockedDamage, overkill = damaged.Result.OverkillDamage } : null,
+                description = typed ? null : entry is MonsterPerformedMoveEntry ? "Enemy performed its observed move; damage and effects are recorded in the surrounding events." : Read($"history.{index}.description", () => StripGameTags(entry.Description))
             };
         }).ToArray();
     }

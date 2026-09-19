@@ -99,15 +99,15 @@ export class ModClient {
 
   async state({ includePileDetails = false, timeoutMs = this.timeoutMs } = {}) {
     let response;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 5; attempt++) {
       try {
         response = await this.request({ cmd: 'state', include_pile_details: includePileDetails }, { timeoutMs });
         break;
       } catch (error) {
         // The server creates a new short-lived pipe after each response. A read
         // can briefly race its recreation. Only read-only state is retried.
-        if (!(error instanceof ModTransportError) || error.code !== 'MOD_PIPE_ERROR' || attempt === 2) throw error;
-        await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+        if (!(error instanceof ModTransportError) || !['MOD_PIPE_ERROR', 'ENOENT', 'EBUSY'].includes(error.code) || attempt === 4) throw error;
+        await new Promise(resolve => setTimeout(resolve, 100 * 2 ** attempt));
       }
     }
     if (!response.ok) {

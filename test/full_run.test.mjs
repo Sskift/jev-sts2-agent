@@ -22,7 +22,8 @@ test('shop candidates exclude unaffordable and sold items but count sold copies 
     cards: [
       { index: 0, card_id: 'A', is_stocked: false, cost: 20 },
       { index: 1, card_id: 'A', is_stocked: true, cost: 40 },
-      { index: 2, card_id: 'B', is_stocked: true, cost: 100 }
+      { index: 2, card_id: 'B', is_stocked: true, cost: 100 },
+      { index: 3, is_stocked: false }
     ], relics: [], potions: [], card_removal: { cost: 75, is_used: false }
   } });
   const candidates = buildModCandidates(state);
@@ -39,7 +40,7 @@ test('formal victory requires one observed run beginning in act one and reaching
   }
   observeRun(run, { screen: 'REWARD' }, 'reward.json');
   assert.equal(run.complete, undefined);
-  observeRun(run, { screen: 'GAME_OVER', game_over: { is_victory: true } }, 'final.json');
+  observeRun(run, { screen: 'GAME_OVER', game_over: { is_victory: true, can_return_to_menu: true } }, 'final.json');
   assert.equal(run.complete, true);
   assert.throws(() => observeRun(run, { decision_context: { run_id: 'another-run' } }), /identity changed/);
   const attachedLate = { startedAtFloor: 40, acts: [2] };

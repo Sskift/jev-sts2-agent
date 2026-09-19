@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ModClient } from './mod_client.mjs';
+import { ModClient, ModTransportError } from './mod_client.mjs';
 import { makeModDecisionWithJev, prepareModDecision, buildModCandidates } from './mod_decision.mjs';
 import { DecisionMemory, ContextError, canonicalObservation } from './decision_context.mjs';
 import { createSession } from './artifacts.mjs';
@@ -53,7 +53,7 @@ export function observeRun(progress, state, evidence) {
     progress.finalEvidence = evidence;
     progress.failed = state.game_over?.is_victory === false;
     progress.victory = state.game_over?.is_victory === true;
-    progress.complete = progress.victory && progress.startedAtFloor <= 1 && [0, 1, 2].every(act => progress.acts?.includes(act));
+    progress.complete = progress.victory && state.game_over.can_return_to_menu === true && progress.startedAtFloor <= 1 && [0, 1, 2].every(act => progress.acts?.includes(act));
   }
 }
 
@@ -62,7 +62,8 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
   const battle = { sawCombat: false, complete: false, failed: false, playedCards: 0, endedTurns: 0 };
   const summary = { startedAt: new Date().toISOString(), mode: 'mod', decisionModel: 'jev-latest', artifactDir, steps: 0, battle };
   const memory = new DecisionMemory({ file: memoryFile });
-  const progress = summary.run = memory.data.run_progress || {};
+  const previous = memory.data.run_progress;
+  const progress = summary.run = previous?.failed || previous?.complete ? {} : previous || {};
   let unchangedActions = 0, emptyCycles = 0;
   const snapshot = async (directory, name) => {
     if (!driver) return;
@@ -88,7 +89,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       if (memory.data.pending && state.decision_context?.run_id === memory.data.run_id) throw Object.assign(new ContextError('An earlier action has an unresolved outcome; inspect saved memory before continuing.'), { outcomeUnknown: true });
       await snapshot(directory, 'before');
       observeModBattle(battle, state, path.join(directory, 'before-state.json'));
-      if (progress.victory || progress.failed || (stopAfterBattle && (battle.complete || battle.failed))) break;
+      if ((progress.victory && state.game_over?.can_return_to_menu) || progress.failed || (stopAfterBattle && (battle.complete || battle.failed))) break;
       const prepared = prepareModDecision(state, { memory });
       if (prepared.payload) {
         save(path.join(directory, 'jev-request.json'), prepared.payload);
@@ -99,7 +100,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       if (signal?.aborted) break;
       if (decision.action === 'wait') {
         logger(JSON.stringify({ step, screen: state.screen, wait: decision.reason }));
-        if (++emptyCycles >= 12) { summary.stoppedReason = 'No supported action after 12 observations'; break; }
+        if (++emptyCycles >= (state.screen === 'GAME_OVER' ? 60 : 20)) { summary.stoppedReason = `No supported action after ${emptyCycles} observations`; break; }
         await sleep(intervalMs);
         continue;
       }
@@ -112,19 +113,30 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
         continue;
       }
       memory.begin(decision.request, current);
-      const response = await client.request(decision.request);
+      let response;
+      try { response = await client.request(decision.request); }
+      catch (error) {
+        if (!(error instanceof ModTransportError) || error.dispatched) throw error;
+        // A failed connection sent no command. Record that fact and make a new
+        // decision from a fresh observation; never replay a stale selection.
+        memory.finish({ ok: false, error: 'NOT_DISPATCHED' }, current);
+        save(path.join(directory, 'result.json'), { executed: false, reason: error.message });
+        logger(JSON.stringify({ step, screen: state.screen, wait: 'Mod connection unavailable; no action was sent' }));
+        await sleep(intervalMs);
+        continue;
+      }
       save(path.join(directory, 'response.json'), response);
       await sleep(intervalMs);
       const after = await client.state({ includePileDetails: true });
       save(path.join(directory, 'after-state.json'), after);
       await snapshot(directory, 'after');
-      const changed = actionFingerprint(after) !== actionFingerprint(state);
       memory.finish(response, after);
       if (memory.data.pending) summary.outcomeUnknown = true;
       memory.observe(after);
       observeRun(progress, after, path.join(directory, 'after-state.json'));
       memory.data.run_progress = progress;
       memory.persist();
+      const changed = actionFingerprint(after) !== actionFingerprint(state);
       if (response.ok && decision.request.cmd === 'play_card') battle.playedCards++;
       if (response.ok && decision.request.cmd === 'end_turn') battle.endedTurns++;
       observeModBattle(battle, after, path.join(directory, 'after-state.json'));
@@ -134,7 +146,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       if (!response.ok) { summary.stoppedReason = `Mod rejected action: ${response.error}: ${response.message || ''}`; break; }
       unchangedActions = changed ? 0 : unchangedActions + 1;
       if (unchangedActions >= 3) { summary.stoppedReason = 'Three actions caused no observed state change; inspect unsupported overlay'; break; }
-      if (progress.victory || progress.failed || (stopAfterBattle && (battle.complete || battle.failed))) break;
+      if ((progress.victory && after.game_over?.can_return_to_menu) || progress.failed || (stopAfterBattle && (battle.complete || battle.failed))) break;
     }
   } catch (error) {
     summary.error = error.message;

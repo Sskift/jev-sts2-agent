@@ -29,7 +29,7 @@ export function validateDecisionPacket(packet) {
 
 const clone = value => structuredClone(value);
 const keyOf = node => `${node.col},${node.row}`;
-const preRun = new Set(['MENU', 'SINGLEPLAYER_SUBMENU', 'CHARACTER_SELECT']);
+const preRun = new Set(['MENU', 'SINGLEPLAYER_SUBMENU', 'CHARACTER_SELECT', 'GAME_OVER']);
 const array = (value, name) => { if (!Array.isArray(value)) throw new ContextError(`Missing context array: ${name}`); return value; };
 
 // Canonicalize only unordered piles, never hand positions, discard order,
@@ -255,12 +255,22 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
       energy_remaining: context.player.energy,
       note: 'Arithmetic from current visible intents only; excludes future intent changes and non-attack effects. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
     };
+    combat.visible_arithmetic.attack_budgets = combat.enemies.filter(enemy => enemy.is_alive).map(enemy => {
+      const energy = Math.max(0, Math.min(30, context.player.energy || 0));
+      const dp = Array.from({ length: energy + 1 }, () => ({ damage: 0, hand_indices: [] }));
+      for (const card of combat.hand) {
+        const damage = card.target_previews?.find(p => p.target_id === enemy.combat_id)?.damage;
+        if (!card.can_play || !Number.isFinite(damage) || damage <= 0 || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy) continue;
+        for (let budget = energy; budget >= card.cost; budget--) if (dp[budget - card.cost].damage + damage > dp[budget].damage) dp[budget] = { damage: dp[budget - card.cost].damage + damage, hand_indices: [...dp[budget - card.cost].hand_indices, card.index] };
+      }
+      return { target_id: enemy.combat_id, hp_plus_block: enemy.hp + enemy.block, energy_budget: energy, first_hit_damage_sum: dp[energy].damage, hand_indices: dp[energy].hand_indices, note: 'Sum of current per-target first-hit previews under current costs, one use per listed card. Does not simulate changing costs, new buffs, multi-hits, draws, extra resources or death-prevention powers.' };
+    });
     combat.play_pile = context.play_pile;
     combat.history = clone(context.combat_history);
     for (const entry of combat.history) {
       const verb = { CardDrawnEntry: 'drew', CardDiscardedEntry: 'discarded', CardExhaustedEntry: 'exhausted' }[entry.type];
       if (verb) delete entry.description; // Typed event/card/actor already fully describe this; the game's Drawn text incorrectly says discarded.
-      else if (!entry.description) entry.description = `${entry.type}; formatting unavailable. See matching recorded action and resource changes; unrecorded details are unknown.`;
+      else if (!entry.description && context.extraction_errors.some(e => e.startsWith(`history.${entry.sequence}.description:`))) entry.description = `${entry.type}; formatting unavailable. See matching recorded action and resource changes; unrecorded details are unknown.`;
     }
     combat.history_coverage = context.history_coverage;
   }

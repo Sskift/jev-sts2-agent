@@ -1,7 +1,16 @@
 diff --git a/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs b/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs
-index bd7887e..62faa3e 100644
+index bd7887e..f47b35d 100644
 --- a/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs
 +++ b/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs
+@@ -208,7 +208,7 @@ public static class GridSelectCardHandler
+             // Wait for the screen to be removed from the overlay stack
+             var completed = await WaitForScreenRemoval(screen);
+             if (!completed)
+-                Logger.Warning("Grid card selection completed but screen was not removed in time");
++                return new { ok = false, error = "SELECTION_NOT_COMPLETED", message = "Selected cards, but the selection screen is still open; inspect the current state before continuing." };
+ 
+             Logger.Info($"Successfully selected {selectedCardIds.Count} card(s)");
+ 
 @@ -305,7 +305,12 @@ public static class GridSelectCardHandler
      /// </summary>
      private static IReadOnlyList<CardModel>? GetCards(NCardGridSelectionScreen screen)
@@ -25,9 +34,68 @@ index bd7887e..62faa3e 100644
      }
  
      /// <summary>
-@@ -444,4 +449,4 @@ public static class GridSelectCardHandler
+@@ -334,27 +339,10 @@ public static class GridSelectCardHandler
+     {
+         try
+         {
+-            // NDeckCardSelectScreen: _previewConfirmButton is inside %PreviewContainer
+-            if (screen is NDeckCardSelectScreen)
+-                return UiUtils.GetPrivateField<NConfirmButton>(typeof(NDeckCardSelectScreen), screen,
+-                    "_previewConfirmButton");
+-
+-            // NDeckUpgradeSelectScreen: has single and multi preview
+-            if (screen is NDeckUpgradeSelectScreen)
+-            {
+-                // Try a single preview confirm first
+-                var singleBtn = UiUtils.GetPrivateField<NConfirmButton>(typeof(NDeckUpgradeSelectScreen), screen,
+-                    "_singlePreviewConfirmButton");
+-                if (singleBtn != null && GodotObject.IsInstanceValid(singleBtn))
+-                    return singleBtn;
+-
+-                // Fall back to multi preview confirm
+-                return UiUtils.GetPrivateField<NConfirmButton>(typeof(NDeckUpgradeSelectScreen), screen,
+-                    "_multiPreviewConfirmButton");
+-            }
+-
+-            // Generic fallback: search for confirmation buttons in the tree
+-            return UiUtils.FindFirst<NConfirmButton>(screen);
++            // Upgrade and enchant screens contain hidden confirmation buttons
++            // for both single and multi previews. Only the visible one is usable.
++            return UiUtils.FindAll<NConfirmButton>(screen).FirstOrDefault(button =>
++                GodotObject.IsInstanceValid(button) && button.IsEnabled && button.IsVisibleInTree());
+         }
+         catch (Exception ex)
+         {
+@@ -444,4 +432,4 @@ public static class GridSelectCardHandler
              () => !GodotObject.IsInstanceValid(screen) || !screen.IsInsideTree(),
              ActionUtils.UiTimeoutMs);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Actions/ReturnToMenuHandler.cs b/STS2.Cli.Mod/Actions/ReturnToMenuHandler.cs
+index 7a1726b..6eb3a1c 100644
+--- a/STS2.Cli.Mod/Actions/ReturnToMenuHandler.cs
++++ b/STS2.Cli.Mod/Actions/ReturnToMenuHandler.cs
+@@ -13,6 +13,15 @@ namespace STS2.Cli.Mod.Actions;
+ /// </summary>
+ internal static class ReturnToMenuHandler
+ {
++    public static async Task<object> ExecuteContinueAsync()
++    {
++        var screen = UiUtils.FindScreenInOverlay<NGameOverScreen>();
++        var button = screen?.GetNodeOrNull<NGameOverContinueButton>("%ContinueButton");
++        if (button == null || !button.IsEnabled || !button.IsVisibleInTree()) return new { ok = false, error = "CONTINUE_NOT_AVAILABLE" };
++        button.ForceClick();
++        await Task.Delay(ActionUtils.PostClickDelayMs);
++        return new { ok = true, data = new { action = "GAME_OVER_CONTINUE" } };
++    }
+     private static readonly ModLogger Logger = new("ReturnToMenuHandler");
+ 
+     /// <summary>
+@@ -99,4 +108,4 @@ internal static class ReturnToMenuHandler
+             return new { ok = false, error = "ACTION_FAILED", message = $"Failed to return to menu: {ex.Message}" };
+         }
      }
 -}
 \ No newline at end of file
@@ -164,6 +232,27 @@ index 6492648..008e8d1 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/Models/State/GridCardSelectStateDto.cs b/STS2.Cli.Mod/Models/State/GridCardSelectStateDto.cs
+index 06ca918..0ace6a5 100644
+--- a/STS2.Cli.Mod/Models/State/GridCardSelectStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/GridCardSelectStateDto.cs
+@@ -22,6 +22,9 @@ public class GridCardSelectStateDto
+     /// </summary>
+     public string? Prompt { get; set; }
+ 
++    /// <summary>The enchantment rules displayed beside an enchant selection.</summary>
++    public object? Enchantment { get; set; }
++
+     /// <summary>
+     ///     Minimum number of cards that must be selected.
+     /// </summary>
+@@ -41,4 +44,4 @@ public class GridCardSelectStateDto
+     ///     List of cards available for selection.
+     /// </summary>
+     public List<SelectableCardDto> Cards { get; set; } = [];
+-}
+\ No newline at end of file
++}
 diff --git a/STS2.Cli.Mod/Models/State/PileCardDto.cs b/STS2.Cli.Mod/Models/State/PileCardDto.cs
 index ee4139f..fc3c518 100644
 --- a/STS2.Cli.Mod/Models/State/PileCardDto.cs
@@ -247,6 +336,30 @@ index 6f45c8c..dd3c66d 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/Server/PipeServer.cs b/STS2.Cli.Mod/Server/PipeServer.cs
+index 8e0675c..0f773dc 100644
+--- a/STS2.Cli.Mod/Server/PipeServer.cs
++++ b/STS2.Cli.Mod/Server/PipeServer.cs
+@@ -282,8 +282,10 @@ public static class PipeServer
+                 "proceed" => await MainThreadExecutor.RunOnMainThreadAsync(() =>
+                     ProceedHandler.ExecuteAsync()),
+ 
+-                // --- Game over ---
+-                "return_to_menu" => await MainThreadExecutor.RunOnMainThreadAsync(() =>
++                // --- Game over ---
++                "game_over_continue" => await MainThreadExecutor.RunOnMainThreadAsync(() =>
++                    ReturnToMenuHandler.ExecuteContinueAsync()),
++                "return_to_menu" => await MainThreadExecutor.RunOnMainThreadAsync(() =>
+                     ReturnToMenuHandler.ExecuteAsync()),
+ 
+                 _ => new { ok = false, error = "UNKNOWN_COMMAND", message = $"Unknown command: {request.Cmd}" }
+@@ -332,4 +334,4 @@ public static class PipeServer
+             PipeTransmissionMode.Byte,
+             PipeOptions.Asynchronous);
+     }
+-}
+\ No newline at end of file
++}
 diff --git a/STS2.Cli.Mod/State/Builders/BundleSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/BundleSelectStateBuilder.cs
 index c38d702..735d23f 100644
 --- a/STS2.Cli.Mod/State/Builders/BundleSelectStateBuilder.cs
@@ -317,7 +430,7 @@ index 9547402..01e4c8a 100644
              Name = StripGameTags(card.Title),
              Type = card.Type.ToString(),
 diff --git a/STS2.Cli.Mod/State/Builders/GameOverStateBuilder.cs b/STS2.Cli.Mod/State/Builders/GameOverStateBuilder.cs
-index efe90a3..43125e9 100644
+index efe90a3..fcc3fd6 100644
 --- a/STS2.Cli.Mod/State/Builders/GameOverStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/GameOverStateBuilder.cs
 @@ -2,6 +2,7 @@ using System.Collections;
@@ -347,6 +460,17 @@ index efe90a3..43125e9 100644
                  characterId = GetCharacterId(runState);
              }
  
+@@ -56,8 +58,8 @@ public static class GameOverStateBuilder
+                 CharacterId = characterId,
+                 Score = score,
+                 EpochsDiscovered = 0,
+-                CanReturnToMenu = screen.GetNodeOrNull<Node>("%MainMenuButton") != null,
+-                CanContinue = screen.GetNodeOrNull<Node>("%ContinueButton") != null
++                CanReturnToMenu = screen.GetNodeOrNull<NReturnToMainMenuButton>("%MainMenuButton") is { IsEnabled: true } menu && menu.IsVisibleInTree(),
++                CanContinue = screen.GetNodeOrNull<NGameOverContinueButton>("%ContinueButton") is { IsEnabled: true } next && next.IsVisibleInTree()
+             };
+         }
+         catch (Exception ex)
 @@ -87,4 +89,4 @@ public static class GameOverStateBuilder
          var id = characters[0]?.GetType().GetProperty("Id")?.GetValue(characters[0]);
          return id?.GetType().GetProperty("Entry")?.GetValue(id) as string;
@@ -355,7 +479,7 @@ index efe90a3..43125e9 100644
 \ No newline at end of file
 +}
 diff --git a/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
-index aa3cb26..f309345 100644
+index aa3cb26..50229a2 100644
 --- a/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
 @@ -1,5 +1,6 @@
@@ -375,7 +499,35 @@ index aa3cb26..f309345 100644
                      });
                  }
                  catch (Exception ex)
-@@ -115,7 +117,12 @@ public static class GridCardSelectStateBuilder
+@@ -97,6 +99,7 @@ public static class GridCardSelectStateBuilder
+             {
+                 SelectionType = selectionType,
+                 Prompt = prompt,
++                Enchantment = screen is NDeckEnchantSelectScreen ? BuildEnchantment(screen) : null,
+                 MinSelect = prefs?.MinSelect ?? 1,
+                 MaxSelect = prefs?.MaxSelect ?? 1,
+                 Cancelable = prefs?.Cancelable ?? false,
+@@ -110,12 +113,32 @@ public static class GridCardSelectStateBuilder
+         }
+     }
+ 
++    private static object? BuildEnchantment(NCardGridSelectionScreen screen)
++    {
++        var enchantment = UiUtils.GetPrivateField<EnchantmentModel>(screen, "_enchantment");
++        if (enchantment == null) return null;
++        var amount = UiUtils.GetPrivateFieldValue<int>(screen, "_enchantmentAmount") ?? enchantment.Amount;
++        var label = UiUtils.GetPrivateField<Godot.RichTextLabel>(screen, "_enchantmentDescription");
++        return new
++        {
++            id = enchantment.Id.Entry,
++            name = StripGameTags(enchantment.Title.GetFormattedText()),
++            amount,
++            description = StripGameTags(label?.Text ?? enchantment.DynamicDescription.GetFormattedText())
++        };
++    }
++
+     /// <summary>
+     ///     Gets the card list from the protected <c>_cards</c> field on the base class.
      /// </summary>
      private static IReadOnlyList<CardModel>? GetCards(NCardGridSelectionScreen screen)
      {
@@ -389,7 +541,7 @@ index aa3cb26..f309345 100644
      }
  
      /// <summary>
-@@ -154,6 +161,7 @@ public static class GridCardSelectStateBuilder
+@@ -154,6 +177,7 @@ public static class GridCardSelectStateBuilder
          {
              var overlayStack = NOverlayStack.Instance;
              if (overlayStack == null) return null;
@@ -397,7 +549,7 @@ index aa3cb26..f309345 100644
  
              var children = overlayStack.GetChildren();
              for (var i = children.Count - 1; i >= 0; i--)
-@@ -168,4 +176,4 @@ public static class GridCardSelectStateBuilder
+@@ -168,4 +192,4 @@ public static class GridCardSelectStateBuilder
              return null;
          }
      }
