@@ -72,6 +72,7 @@ test('Jev must select an enumerated complete action, never arbitrary JSON or an 
     assert.equal(offered.target_combat_id, 42);
     assert.match(payload.state.combat.hand.find(c => c.index === offered.card_hand_index).description, /Deal 6 damage/);
     assert.equal(payload.questions.next_action.criteria.card_0_target_42.action_id, 'card_0_target_42');
+    assert.equal(payload.questions.next_action.criteria.card_0_target_42.effect, 'Strike, cost 1: Deal 6 damage. Target Enemy (10 HP, 0 Block).');
     return { ok: true, json: async () => ({ model: 'jev-test', answers: { next_action: { type: 'choice', choice: 'card_0_target_42', probabilities: { card_0_target_42: 1 } } } }) };
   } };
   const decision = await makeModDecisionWithJev(state, options);

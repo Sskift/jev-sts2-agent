@@ -628,7 +628,7 @@ index 5235f87..f35f2a2 100644
              var entry = inventory.CardRemovalEntry;
              if (entry == null)
 diff --git a/STS2.Cli.Mod/Models/State/CardStateDto.cs b/STS2.Cli.Mod/Models/State/CardStateDto.cs
-index 3a446ca..61da68d 100644
+index 3a446ca..25a1ed9 100644
 --- a/STS2.Cli.Mod/Models/State/CardStateDto.cs
 +++ b/STS2.Cli.Mod/Models/State/CardStateDto.cs
 @@ -12,8 +12,12 @@ namespace STS2.Cli.Mod.Models.State;
@@ -646,7 +646,7 @@ index 3a446ca..61da68d 100644
      // -- DTO context --
  
      /// <summary>
-@@ -93,9 +97,15 @@ public class CardStateDto
+@@ -93,9 +97,23 @@ public class CardStateDto
      ///     Preview block value after all modifiers (dexterity, powers, relics, enchantments).
      ///     Null if the card does not grant any block.
      /// </summary>
@@ -654,6 +654,14 @@ index 3a446ca..61da68d 100644
 -
 -    // -- Enchantment & Affliction (CardModel lines 512-514) --
 +    public int? Block { get; set; }
++
++    /// <summary>
++    ///     Rage's base Block per later Attack this turn, including this card's upgrade.
++    ///     This is a triggered amount, not immediate Block. Native Rage uses unpowered Block,
++    ///     so Dexterity and Frail do not apply; later Block-gain hooks are not predicted here.
++    ///     Null for other cards.
++    /// </summary>
++    public int? RageBlockPerAttack { get; set; }
 +
 +    /// <summary>
 +    ///     Explicit HP loss shown by the card's HpLoss dynamic variable, before damage-prevention hooks.
@@ -665,7 +673,7 @@ index 3a446ca..61da68d 100644
  
      /// <summary>
      ///     Enchantment model ID (e.g., "SHARP", "NIMBLE", "GLAM").
-@@ -128,4 +138,4 @@ public class CardStateDto
+@@ -128,4 +146,4 @@ public class CardStateDto
      ///     Null when the card is playable.
      /// </summary>
      public string? UnplayableReason { get; set; }
@@ -894,16 +902,18 @@ index c38d702..735d23f 100644
                      }
                  }
 diff --git a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-index de41515..d1e44ce 100644
+index de41515..67c3887 100644
 --- a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-@@ -1,4 +1,5 @@
+@@ -1,5 +1,7 @@
  using MegaCrit.Sts2.Core.Entities.Cards;
 +using MegaCrit.Sts2.Core.Localization.DynamicVars;
  using MegaCrit.Sts2.Core.Models;
++using MegaCrit.Sts2.Core.Models.Cards;
  using STS2.Cli.Mod.Models.State;
  using STS2.Cli.Mod.Utils;
-@@ -25,6 +26,9 @@ public static class CardStateBuilder
+ using static STS2.Cli.Mod.Utils.TextUtils;
+@@ -25,6 +27,9 @@ public static class CardStateBuilder
  
              var state = new CardStateDto
              {
@@ -913,7 +923,7 @@ index de41515..d1e44ce 100644
                  Index = index,
                  Id = card.Id.Entry,
                  Name = StripGameTags(card.Title),
-@@ -52,12 +56,16 @@ public static class CardStateBuilder
+@@ -52,12 +57,21 @@ public static class CardStateBuilder
                  if (tag != CardTag.None)
                      state.Tags.Add(tag.ToString());
  
@@ -925,13 +935,18 @@ index de41515..d1e44ce 100644
              if (card.DynamicVars.TryGetValue("Block", out var blockVar))
                  state.Block = (int)blockVar.PreviewValue;
  
++            // Rage applies its Power amount; it gains no immediate Block when played.
++            // The native power grants this unpowered amount after each later Attack.
++            if (card is Rage && card.DynamicVars.TryGetValue("Power", out var rageVar))
++                state.RageBlockPerAttack = (int)rageVar.BaseValue;
++
 +            if (card.DynamicVars.TryGetValue(HpLossVar.defaultName, out var hpLossVar))
 +                state.HpLoss = (int)hpLossVar.PreviewValue;
 +
              if (card.Enchantment is { } enchantment)
                  state.Enchantment = enchantment.Id.Entry;
  
-@@ -68,6 +76,7 @@ public static class CardStateBuilder
+@@ -68,6 +82,7 @@ public static class CardStateBuilder
          }
          catch (Exception ex)
          {
@@ -939,7 +954,7 @@ index de41515..d1e44ce 100644
              Logger.Error($"Failed to build card state: {ex.Message}");
              return null;
          }
-@@ -91,9 +100,10 @@ public static class CardStateBuilder
+@@ -91,9 +106,10 @@ public static class CardStateBuilder
              }
              catch (Exception ex2)
              {
@@ -1544,23 +1559,28 @@ index 0000000..cb0f109
 +    }
 +}
 diff --git a/STS2.Cli.Mod/Utils/TextUtils.cs b/STS2.Cli.Mod/Utils/TextUtils.cs
-index d510bdd..3ab6190 100644
+index d510bdd..3e4f595 100644
 --- a/STS2.Cli.Mod/Utils/TextUtils.cs
 +++ b/STS2.Cli.Mod/Utils/TextUtils.cs
-@@ -51,7 +51,11 @@ public static partial class TextUtils
+@@ -51,7 +51,16 @@ public static partial class TextUtils
              return string.Empty;
  
          var cleaned = StripBbCode(text);
 -        cleaned = StripRichText(cleaned);
 +        cleaned = StripRichText(cleaned);
-+        cleaned = Regex.Replace(cleaned, @"(?:\s*res://[^\s]*?energy_icon\.png\s*)+",
-+            match => $" {Regex.Matches(match.Value, @"energy_icon\.png").Count} Energy ");
++        // Native energy text uses repeated icons for 1-3, but an explicit number plus
++        // one unit icon for 0 or >=4. Preserve that number instead of adding an extra 1.
++        cleaned = Regex.Replace(cleaned,
++            @"(?:(?<amount>[+-]?\d+)\s*)?(?<icons>res://[^\s]*?energy_icon\.png(?:\s*res://[^\s]*?energy_icon\.png)*)",
++            match => (match.Groups["amount"].Success
++                ? match.Groups["amount"].Value
++                : Regex.Matches(match.Groups["icons"].Value, @"energy_icon\.png").Count.ToString()) + " Energy");
 +        cleaned = Regex.Replace(cleaned, @"(?:\s*res://[^\s]*?star_icon\.png\s*)+",
 +            match => $" {Regex.Matches(match.Value, @"star_icon\.png").Count} Star ");
  
          // Normalize whitespace
          cleaned = WhitespaceRegex().Replace(cleaned, " ");
-@@ -81,4 +85,4 @@ public static partial class TextUtils
+@@ -81,4 +90,4 @@ public static partial class TextUtils
              return null;
          }
      }

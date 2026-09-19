@@ -287,7 +287,16 @@ export function prepareModDecision(gameState, options = {}) {
     questions: { next_action: {
       type: 'choice',
       instructions: `${decisionInstructions(gameState)}${options.strategyAssessment ? ' Use strategy_assessment as an advisory view of the deck\'s largest current need. Compare the actual offered choices against that need and their costs; it does not require buying or taking a card. If nothing helps enough, skip or preserve resources. Reconsider the advice when a concrete option provides a better overall result.' : ''}${stage ? ' This is a multi-card planning stage: follow screen_state.selection_planning, choose the next component of the final set, and consider its synergy with already selected cards. A planning choice with request=null sends no game action. Every remaining card is available as a choice; the final complete set is submitted only after all choices.' : ''}`,
-      criteria: Object.fromEntries([...candidates].map(([id, candidate]) => [id, { action_id: id, command: candidate.request?.cmd || 'plan_selection', ...(!gameState.combat || stage ? { effect: candidate.description } : {}) }]))
+      criteria: Object.fromEntries([...candidates].map(([id, candidate]) => {
+        // Keep the immediate choice readable even when full histories and card
+        // collections use tables. Rules remain in state; this is a direct label,
+        // not a second strategy or a replacement for target previews.
+        const card = gameState.screen === 'COMBAT' && candidate.request?.cmd === 'play_card'
+          ? gameState.combat.hand.find(card => card.index === candidate.card_hand_index) : null;
+        const target = card && gameState.combat.enemies.find(enemy => enemy.combat_id === candidate.target_combat_id);
+        const effect = card ? `${card.name}, cost ${card.cost}: ${card.description}${target ? ` Target ${target.name} (${target.hp} HP, ${target.block} Block).` : ''}` : candidate.description;
+        return [id, { action_id: id, command: candidate.request?.cmd || 'plan_selection', effect }];
+      }))
     } }
   };
   const originalBytes = Buffer.byteLength(JSON.stringify(payload));

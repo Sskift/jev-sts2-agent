@@ -33,7 +33,7 @@ test('Orichalcum and delayed Rage block are not mistaken for immediate block gai
 });
 
 test('Rage exposes an affordable attack sequence as conditional Block without granting it immediately', () => {
-  const rage = { index: 0, id: 'RAGE', type: 'Skill', cost: 0, block: 3, can_play: true };
+  const rage = { index: 0, id: 'RAGE', type: 'Skill', cost: 0, rage_block_per_attack: 3, can_play: true };
   const attack = (index, cost, extra = {}) => ({ index, type: 'Attack', cost, can_play: true, ...extra });
   const combat = { player: { hp: 10, block: 0, energy: 3 }, enemies: [{ is_alive: true, hp: 100, intents: [{ damage: 13 }] }], hand: [rage, attack(1, 1), attack(2, 2), attack(3, 3), attack(4, 0), attack(5, 0, { hp_loss: 2 }), attack(6, -1), attack(7, 0, { can_play: false })] };
   const estimate = combatForecast(combat, rage);
@@ -43,6 +43,10 @@ test('Rage exposes an affordable attack sequence as conditional Block without gr
   assert.equal(estimate.attack_trigger_potential.additional_block_if_all_played, 9);
   combat.player.energy = 0;
   assert.deepEqual(combatForecast(combat, rage).attack_trigger_potential.hand_indices, [4]);
+  rage.rage_block_per_attack = 5;
+  assert.equal(combatForecast(combat, rage).attack_trigger_potential.additional_block_if_all_played, 5, 'Upgraded Rage uses its actual trigger amount, without adding Dexterity');
+  delete rage.rage_block_per_attack;
+  assert.equal(combatForecast(combat, rage).attack_trigger_potential, null, 'A legacy mod missing the amount cannot claim that Rage grants zero Block');
 });
 
 test('visible Sandpit instant death overrides safe-looking HP and Block arithmetic', () => {

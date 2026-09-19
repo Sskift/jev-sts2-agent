@@ -60,6 +60,9 @@ export function combatForecast(combat, card = null, target = null) {
 }
 
 function rageFollowups(combat, rage) {
+  // Rage uses a power amount, not the ordinary Block dynamic variable. Older
+  // mod builds omit it: unknown must not be presented as a zero-value effect.
+  if (!Number.isFinite(rage.rage_block_per_attack)) return null;
   const energy = Math.max(0, Math.min(30, combat.player.energy - Math.max(0, rage.cost)));
   const dp = Array.from({ length: energy + 1 }, () => []);
   for (const card of combat.hand || []) {
@@ -69,7 +72,7 @@ function rageFollowups(combat, rage) {
       if (candidate.length > dp[budget].length) dp[budget] = candidate;
     }
   }
-  const blockPerAttack = Math.max(0, rage.block || 0);
+  const blockPerAttack = Math.max(0, rage.rage_block_per_attack);
   return { additional_block_per_attack: blockPerAttack, hand_indices: dp[energy], additional_block_if_all_played: blockPerAttack * dp[energy].length,
     note: 'Conditional future Block, not immediate Block. Play Rage before these currently playable attacks, using current fixed costs and remaining energy. Excludes X-cost and declared self-HP-loss attacks, draws, energy gains, cost changes and other triggers. Not a forced plan.' };
 }
