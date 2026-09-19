@@ -1,5 +1,5 @@
 // Arithmetic over player-visible facts only. These are single-action estimates,
-// not a combat simulator: draws, triggered effects and future choices stay unknown.
+// not a combat simulator: draws, general triggered effects and future choices stay unknown.
 export const intentDamage = enemy => (enemy.intents || []).reduce((sum, intent) => sum + (Number.isFinite(intent.damage) ? intent.damage * (intent.hits || 1) : 0), 0);
 
 export function firstHitHpLoss(card, enemy) {
@@ -25,10 +25,15 @@ export function combatForecast(combat, card = null, target = null) {
   if (targetDepleted) depleted.add(target.combat_id);
   const incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
   const exhausted = card?.id === 'SECOND_WIND' ? (combat.hand || []).filter(other => other.index !== card.index && other.type !== 'Attack') : null;
+  const remainingHand = (combat.hand || []).filter(other => other.index !== card?.index && !exhausted?.some(removed => removed.index === other.index));
+  const living = combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0);
+  const allTargetsDepleted = living.length > 0 && living.every(enemy => depleted.has(enemy.combat_id));
+  const endTurnHandDamage = allTargetsDepleted ? 0 : remainingHand.filter(other => other.id === 'TOXIC').reduce((sum, other) => sum + Math.max(0, other.damage || 0), 0);
+  const selfHpLoss = Math.max(0, card?.hp_loss || 0);
   const immediateBlock = card?.id === 'RAGE' || card?.type === 'Power' ? 0 : Math.max(0, card?.block || 0) * (exhausted ? exhausted.length : 1);
   let block = combat.player.block + immediateBlock;
   if (block === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) block = 6;
-  const loss = Math.max(0, incoming - block);
+  const loss = selfHpLoss + Math.max(0, incoming + endTurnHandDamage - block);
   const followup = card && target && hit ? followupAttackBudget(combat, card, target, hit) : null;
   // Sandpit is a visible, deterministic instant-death countdown. Ordinary
   // Block/HP cannot prevent it; Frantic Escape visibly adds one turn.
@@ -40,6 +45,8 @@ export function combatForecast(combat, card = null, target = null) {
     energy_after_card: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
     first_hit_hp_loss: hit?.hp_loss ?? null,
     ...(areaHits ? { first_hit_hp_loss_by_target: areaHits } : {}),
+    ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss, hp_remaining_after_declared_loss: combat.player.hp - selfHpLoss, fatal_from_declared_hp_loss: selfHpLoss >= combat.player.hp } : {}),
+    ...(endTurnHandDamage ? { end_turn_hand_damage: endTurnHandDamage } : {}),
     block_after_card: block,
     displayed_attacks_after_target_depletion: incoming,
     hp_loss_if_end_turn: instantDeath ? combat.player.hp : loss,
@@ -63,7 +70,7 @@ function followupAttackBudget(combat, played, target, hit) {
   const energy = played.cost < 0 ? 0 : Math.max(0, Math.min(30, combat.player.energy - played.cost));
   const dp = Array.from({ length: energy + 1 }, () => ({ damage: 0, hand_indices: [] }));
   for (const card of combat.hand || []) {
-    if (card.index === played.index || !card.can_play || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy) continue;
+    if (card.index === played.index || !card.can_play || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy || (card.hp_loss || 0) >= combat.player.hp - (played.hp_loss || 0)) continue;
     const damage = card.target_previews?.find(p => p.target_id === target.combat_id)?.damage;
     if (!Number.isFinite(damage) || damage <= 0) continue;
     for (let budget = energy; budget >= card.cost; budget--) {

@@ -330,14 +330,14 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
       energy_remaining: context.player.energy,
       fatal_if_end_turn_from_visible_attacks: Math.max(0, incoming - context.player.block) >= context.player.hp,
       extra_block_needed_to_survive_visible_attacks: Math.max(0, incoming - context.player.block - context.player.hp + 1),
-      note: 'Arithmetic from current visible intents only. Action estimates use one hit and printed Block, excluding multi-hits, self-damage, draws, buffs, triggers, death prevention/revival and later actions. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
+      note: 'Arithmetic from current visible intents only. Action estimates use one hit and printed Block, including explicit hp_loss and Toxic hand damage, but excluding other self-damage, multi-hits, draws, buffs, general triggers, death prevention/revival and later actions. Printed hp_loss is before prevention hooks. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
     };
     combat.visible_arithmetic.attack_budgets = combat.enemies.filter(enemy => enemy.is_alive).map(enemy => {
       const energy = Math.max(0, Math.min(30, context.player.energy || 0));
       const dp = Array.from({ length: energy + 1 }, () => ({ damage: 0, hand_indices: [] }));
       for (const card of combat.hand) {
         const damage = card.target_previews?.find(p => p.target_id === enemy.combat_id)?.damage;
-        if (!card.can_play || !Number.isFinite(damage) || damage <= 0 || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy) continue;
+        if (!card.can_play || !Number.isFinite(damage) || damage <= 0 || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy || (card.hp_loss || 0) >= context.player.hp) continue;
         for (let budget = energy; budget >= card.cost; budget--) if (dp[budget - card.cost].damage + damage > dp[budget].damage) dp[budget] = { damage: dp[budget - card.cost].damage + damage, hand_indices: [...dp[budget - card.cost].hand_indices, card.index] };
       }
       return { target_id: enemy.combat_id, hp_plus_block: enemy.hp + enemy.block, energy_budget: energy, first_hit_damage_sum: dp[energy].damage, hand_indices: dp[energy].hand_indices, note: 'Sum of current per-target first-hit previews under current costs, one use per listed card. Does not simulate changing costs, new buffs, multi-hits, draws, extra resources or death-prevention powers.' };

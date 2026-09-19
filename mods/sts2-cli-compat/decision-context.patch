@@ -318,7 +318,7 @@ index 5235f87..f35f2a2 100644
              var entry = inventory.CardRemovalEntry;
              if (entry == null)
 diff --git a/STS2.Cli.Mod/Models/State/CardStateDto.cs b/STS2.Cli.Mod/Models/State/CardStateDto.cs
-index 3a446ca..d4299bd 100644
+index 3a446ca..61da68d 100644
 --- a/STS2.Cli.Mod/Models/State/CardStateDto.cs
 +++ b/STS2.Cli.Mod/Models/State/CardStateDto.cs
 @@ -12,8 +12,12 @@ namespace STS2.Cli.Mod.Models.State;
@@ -336,7 +336,26 @@ index 3a446ca..d4299bd 100644
      // -- DTO context --
  
      /// <summary>
-@@ -128,4 +132,4 @@ public class CardStateDto
+@@ -93,9 +97,15 @@ public class CardStateDto
+     ///     Preview block value after all modifiers (dexterity, powers, relics, enchantments).
+     ///     Null if the card does not grant any block.
+     /// </summary>
+-    public int? Block { get; set; }
+-
+-    // -- Enchantment & Affliction (CardModel lines 512-514) --
++    public int? Block { get; set; }
++
++    /// <summary>
++    ///     Explicit HP loss shown by the card's HpLoss dynamic variable, before damage-prevention hooks.
++    ///     Null if no HpLoss variable is declared. Excludes indirect or triggered HP loss.
++    /// </summary>
++    public int? HpLoss { get; set; }
++
++    // -- Enchantment & Affliction (CardModel lines 512-514) --
+ 
+     /// <summary>
+     ///     Enchantment model ID (e.g., "SHARP", "NIMBLE", "GLAM").
+@@ -128,4 +138,4 @@ public class CardStateDto
      ///     Null when the card is playable.
      /// </summary>
      public string? UnplayableReason { get; set; }
@@ -542,10 +561,16 @@ index c38d702..735d23f 100644
                      }
                  }
 diff --git a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-index de41515..81d8f6b 100644
+index de41515..d1e44ce 100644
 --- a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-@@ -25,6 +25,9 @@ public static class CardStateBuilder
+@@ -1,4 +1,5 @@
+ using MegaCrit.Sts2.Core.Entities.Cards;
++using MegaCrit.Sts2.Core.Localization.DynamicVars;
+ using MegaCrit.Sts2.Core.Models;
+ using STS2.Cli.Mod.Models.State;
+ using STS2.Cli.Mod.Utils;
+@@ -25,6 +26,9 @@ public static class CardStateBuilder
  
              var state = new CardStateDto
              {
@@ -555,7 +580,7 @@ index de41515..81d8f6b 100644
                  Index = index,
                  Id = card.Id.Entry,
                  Name = StripGameTags(card.Title),
-@@ -52,7 +55,8 @@ public static class CardStateBuilder
+@@ -52,12 +56,16 @@ public static class CardStateBuilder
                  if (tag != CardTag.None)
                      state.Tags.Add(tag.ToString());
  
@@ -565,7 +590,15 @@ index de41515..81d8f6b 100644
                  state.Damage = (int)damageVar.PreviewValue;
  
              if (card.DynamicVars.TryGetValue("Block", out var blockVar))
-@@ -68,6 +72,7 @@ public static class CardStateBuilder
+                 state.Block = (int)blockVar.PreviewValue;
+ 
++            if (card.DynamicVars.TryGetValue(HpLossVar.defaultName, out var hpLossVar))
++                state.HpLoss = (int)hpLossVar.PreviewValue;
++
+             if (card.Enchantment is { } enchantment)
+                 state.Enchantment = enchantment.Id.Entry;
+ 
+@@ -68,6 +76,7 @@ public static class CardStateBuilder
          }
          catch (Exception ex)
          {
@@ -573,7 +606,7 @@ index de41515..81d8f6b 100644
              Logger.Error($"Failed to build card state: {ex.Message}");
              return null;
          }
-@@ -91,9 +96,10 @@ public static class CardStateBuilder
+@@ -91,9 +100,10 @@ public static class CardStateBuilder
              }
              catch (Exception ex2)
              {

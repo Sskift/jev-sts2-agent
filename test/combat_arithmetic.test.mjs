@@ -77,3 +77,27 @@ test('an all-enemy attack uses each target preview and preserves surviving or un
   assert.deepEqual(estimate.first_hit_hp_loss_by_target.map(p => p.hp_depleted), [true, false, false, false]);
   assert.equal(combatForecast(combat, { ...area, target_type: 'RandomEnemy' }).hp_remaining_if_end_turn, -3, 'A random-target attack cannot claim to hit every enemy');
 });
+
+test('declared self HP loss can kill before an otherwise fully blocked enemy turn', () => {
+  const target = { combat_id: 2, hp: 61, block: 0, is_alive: true, intents: [{ damage: 6 }] };
+  const combat = { player: { hp: 1, energy: 1, block: 20 }, hand: [], enemies: [target] };
+  const selfHarm = combatForecast(combat, { cost: 1, hp_loss: 2, target_previews: [{ target_id: 2, damage: 15 }] }, target);
+  assert.equal(selfHarm.fatal_from_declared_hp_loss, true);
+  assert.equal(selfHarm.fatal_if_end_turn, true);
+  assert.equal(selfHarm.hp_remaining_after_declared_loss, -1);
+  assert.equal(combatForecast(combat, { cost: 1, target_previews: [{ target_id: 2, damage: 6 }] }, target).hp_remaining_if_end_turn, 1, 'The recorded Strike alternative preserves life');
+});
+
+test('Toxic hand damage uses block, and playing or exhausting the affected cards removes it', () => {
+  const toxicA = { id: 'TOXIC', type: 'Status', index: 0, cost: 1, damage: 5 };
+  const toxicB = { ...toxicA, index: 1 };
+  const combat = { player: { hp: 19, energy: 3, block: 10 }, hand: [toxicA, toxicB], enemies: [{ is_alive: true, hp: 50, block: 0, intents: [{ damage: 18 }] }] };
+  assert.equal(combatForecast(combat).hp_remaining_if_end_turn, 1, 'Two Toxic cards explain the observed extra ten damage');
+  assert.equal(combatForecast(combat, toxicA).hp_remaining_if_end_turn, 6);
+  const exhausted = combatForecast(combat, { id: 'SECOND_WIND', type: 'Skill', index: 2, cost: 1, block: 5 });
+  assert.equal(exhausted.end_turn_hand_damage, undefined);
+  assert.equal(exhausted.hp_remaining_if_end_turn, 19);
+  const finishingAttack = { cost: 1, index: 2, target_previews: [{ target_id: 1, damage: 50 }] };
+  combat.enemies[0].combat_id = 1;
+  assert.equal(combatForecast(combat, finishingAttack, combat.enemies[0]).end_turn_hand_damage, undefined, 'Ending combat avoids retained-hand turn-end effects, subject to the existing revival caveat');
+});

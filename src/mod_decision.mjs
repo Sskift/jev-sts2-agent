@@ -220,6 +220,8 @@ export function buildModCandidates(state) {
       const estimate = combatForecast(state.combat, card, target);
       action.combat_estimate = estimate;
       action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn}${estimate.fatal_if_end_turn ? ' (FATAL)' : ''}; energy left ${estimate.energy_after_card}.`;
+      if (estimate.declared_self_hp_loss) action.description += ` Printed self HP loss ${estimate.declared_self_hp_loss}; HP after that loss ${estimate.hp_remaining_after_declared_loss}${estimate.fatal_from_declared_hp_loss ? ' (LETHAL SELF-LOSS before waiting for enemies)' : ''}. Check any loss-prevention effects.`;
+      if (estimate.end_turn_hand_damage) action.description += ` Remaining Toxic cards deal ${estimate.end_turn_hand_damage} extra blockable damage at end of turn.`;
       if (estimate.exhausted_hand_cards) action.description += ` Exhausts ${estimate.exhausted_hand_cards.map(c => `${c.id} (hand ${c.index})`).join(', ') || 'no other cards'} for ${estimate.immediate_block_gain} immediate Block.`;
       if (estimate.instant_death_if_end_turn) action.description += ' Sandpit causes instant death on the next enemy turn, regardless of HP/Block.';
       else if (card?.id === 'FRANTIC_ESCAPE' && estimate.death_timers?.length) action.description += ` Sandpit deadline extended to ${estimate.death_timers[0].enemy_turns_remaining_after_card} enemy turns.`;
