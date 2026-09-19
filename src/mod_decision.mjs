@@ -292,7 +292,13 @@ export async function makeModDecisionWithJev(gameState, options = {}) {
     method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body, signal: AbortSignal.timeout(options.timeoutMs ?? 30000)
   });
-  if (!response.ok) throw new Error(`Jev API error ${response.status}`);
+  if (!response.ok) {
+    let kind;
+    try { kind = (await response.json())?.detail?.error_type; } catch {}
+    // Retain the provider's bounded error category, never arbitrary response
+    // bodies or credentials, so capacity failures are distinguishable.
+    throw new Error(`Jev API error ${response.status}${typeof kind === 'string' && /^[a-z_]{1,80}$/.test(kind) ? ` (${kind})` : ''}`);
+  }
   const result = await response.json();
   const answer = result.answers?.next_action;
   if (answer?.type !== 'choice' || typeof answer.choice !== 'string' || !candidates.has(answer.choice)) throw new Error('Jev returned an invalid mod action choice');

@@ -464,7 +464,24 @@ function compactRecords(records) {
     if (!lookup.has(signature)) { lookup.set(signature, layouts.length); layouts.push(layout); }
     return [lookup.get(signature), ...fields.map(key => record[key])];
   });
-  return [records, recordTable(records), { encoding: 'record_table_v2', layouts, rows }]
+  // Mixed histories can have many floor/actor combinations. Instead of making
+  // a separate layout for each combination, share only values actually common
+  // to records with the same shape and event type. No event or field is lost.
+  const groups = new Map();
+  for (const record of records) {
+    const key = JSON.stringify([Object.keys(record), record.type]);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(record);
+  }
+  const sharedLayouts = [], groupOf = new Map();
+  for (const group of groups.values()) {
+    const common = Object.keys(group[0]).filter(key => group.every(record => JSON.stringify(record[key]) === JSON.stringify(group[0][key])));
+    const layout = { constants: Object.fromEntries(common.map(key => [key, group[0][key]])), fields: Object.keys(group[0]).filter(key => !common.includes(key)) };
+    sharedLayouts.push(layout);
+    for (const record of group) groupOf.set(record, sharedLayouts.length - 1);
+  }
+  const sharedRows = records.map(record => [groupOf.get(record), ...sharedLayouts[groupOf.get(record)].fields.map(key => record[key])]);
+  return [records, recordTable(records), { encoding: 'record_table_v2', layouts, rows }, { encoding: 'record_table_v2', layouts: sharedLayouts, rows: sharedRows }]
     .sort((a, b) => Buffer.byteLength(JSON.stringify(a)) - Buffer.byteLength(JSON.stringify(b)))[0];
 }
 

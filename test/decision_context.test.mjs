@@ -273,7 +273,7 @@ test('the loop requests full pile details for every observation and saves the ex
 
 test('history table and text dictionary restore every original event and ordering, including omitted fields', () => {
   const state = completeCombat();
-  state.decision_context.combat_history = Array.from({ length: 100 }, (_, sequence) => ({ sequence, type: sequence % 2 ? 'CardPlayFinishedEntry' : 'DamageReceivedEntry', description: 'Observed Strike dealing exactly 6 damage to a visible enemy.', ...(sequence % 2 ? { result_pile: 'Discard' } : { hp_loss: 6 }) }));
+  state.decision_context.combat_history = Array.from({ length: 100 }, (_, sequence) => ({ sequence, round: Math.floor(sequence / 6) + 1, actor_id: sequence % 2 ? 0 : 1, side: 'Player', type: sequence % 2 ? 'CardPlayFinishedEntry' : 'DamageReceivedEntry', description: 'Observed Strike dealing exactly 6 damage to a visible enemy.', ...(sequence % 2 ? { result_pile: 'Discard' } : { damage: { total: 6, blocked: sequence % 3, unblocked: 6 - sequence % 3, overkill: 0 } }) }));
   const original = packet(state), compact = compactContext(original);
   validateDecisionPacket(compact);
   const expand = item => {
