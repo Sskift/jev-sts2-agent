@@ -1,0 +1,223 @@
+diff --git a/STS2.Cli.Mod/Actions/EndTurnHandler.cs b/STS2.Cli.Mod/Actions/EndTurnHandler.cs
+index 262fdf6..deb4503 100644
+--- a/STS2.Cli.Mod/Actions/EndTurnHandler.cs
++++ b/STS2.Cli.Mod/Actions/EndTurnHandler.cs
+@@ -46,6 +46,9 @@ public static class EndTurnHandler
+             var player = ActionUtils.GetLocalPlayer();
+             if (player == null)
+                 return new { ok = false, error = "NO_PLAYER", message = "Player not found" };
++            var playerCombatState = player.PlayerCombatState;
++            if (playerCombatState == null)
++                return new { ok = false, error = "NOT_IN_COMBAT", message = "Player combat state not found" };
+ 
+             // --- Snapshot history and end turn ---
+ 
+@@ -57,7 +60,14 @@ public static class EndTurnHandler
+             void OnTurnStarted(CombatState _)
+             {
+                 // Only resolve when it's the player's play phase again
+-                if (CombatManager.Instance.IsPlayPhase)
++                if (playerCombatState.Phase == PlayerTurnPhase.Play)
++                    tcs.TrySetResult("turn_started");
++            }
++
++            // Since v0.111, play readiness is per player and can follow TurnStarted.
++            void OnPlayerTurnPhaseChanged()
++            {
++                if (playerCombatState.Phase == PlayerTurnPhase.Play)
+                     tcs.TrySetResult("turn_started");
+             }
+ 
+@@ -68,6 +78,7 @@ public static class EndTurnHandler
+ 
+             CombatManager.Instance.TurnStarted += OnTurnStarted;
+             CombatManager.Instance.CombatEnded += OnCombatEnded;
++            playerCombatState.PlayerTurnPhaseChanged += OnPlayerTurnPhaseChanged;
+ 
+             try
+             {
+@@ -108,6 +119,7 @@ public static class EndTurnHandler
+                 // Always unsubscribe to avoid leaking event handlers
+                 CombatManager.Instance.TurnStarted -= OnTurnStarted;
+                 CombatManager.Instance.CombatEnded -= OnCombatEnded;
++                playerCombatState.PlayerTurnPhaseChanged -= OnPlayerTurnPhaseChanged;
+             }
+         }
+         catch (Exception ex)
+@@ -116,4 +128,4 @@ public static class EndTurnHandler
+             return new { ok = false, error = "INTERNAL_ERROR", message = ex.Message };
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Actions/ShopBuyCardHandler.cs b/STS2.Cli.Mod/Actions/ShopBuyCardHandler.cs
+index 8f44800..483ae2a 100644
+--- a/STS2.Cli.Mod/Actions/ShopBuyCardHandler.cs
++++ b/STS2.Cli.Mod/Actions/ShopBuyCardHandler.cs
+@@ -43,7 +43,7 @@ public static class ShopBuyCardHandler
+             if (merchantRoom == null || !merchantRoom.IsInsideTree())
+                 return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
+ 
+-            var inventory = merchantRoom.Room.Inventory;
++            var inventory = merchantRoom.Room.GetLocalInventory();
+ 
+             // --- Find the card entry by ID + nth ---
+             var entry = FindCardEntry(inventory, cardId, nth);
+@@ -113,4 +113,4 @@ public static class ShopBuyCardHandler
+ 
+         return null;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Actions/ShopBuyPotionHandler.cs b/STS2.Cli.Mod/Actions/ShopBuyPotionHandler.cs
+index 35df1db..1197ced 100644
+--- a/STS2.Cli.Mod/Actions/ShopBuyPotionHandler.cs
++++ b/STS2.Cli.Mod/Actions/ShopBuyPotionHandler.cs
+@@ -45,7 +45,7 @@ public static class ShopBuyPotionHandler
+             if (merchantRoom == null || !merchantRoom.IsInsideTree())
+                 return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
+ 
+-            var inventory = merchantRoom.Room.Inventory;
++            var inventory = merchantRoom.Room.GetLocalInventory();
+ 
+             // --- Find the potion entry by ID + nth ---
+             var entry = FindPotionEntry(inventory, potionId, nth);
+@@ -121,4 +121,4 @@ public static class ShopBuyPotionHandler
+ 
+         return null;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs b/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
+index b36a45a..8b37a1f 100644
+--- a/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
++++ b/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
+@@ -43,7 +43,7 @@ public static class ShopBuyRelicHandler
+             if (merchantRoom == null || !merchantRoom.IsInsideTree())
+                 return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
+ 
+-            var inventory = merchantRoom.Room.Inventory;
++            var inventory = merchantRoom.Room.GetLocalInventory();
+ 
+             // --- Find the relic entry by ID + nth ---
+             var entry = FindRelicEntry(inventory, relicId, nth);
+@@ -113,4 +113,4 @@ public static class ShopBuyRelicHandler
+ 
+         return null;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs b/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs
+index f74fd27..5235f87 100644
+--- a/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs
++++ b/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs
+@@ -44,7 +44,7 @@ public static class ShopRemoveCardHandler
+             if (merchantRoom == null || !merchantRoom.IsInsideTree())
+                 return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
+ 
+-            var inventory = merchantRoom.Room.Inventory;
++            var inventory = merchantRoom.Room.GetLocalInventory();
+ 
+             // --- Guard: Check card removal entry exists ---
+             var entry = inventory.CardRemovalEntry;
+@@ -127,4 +127,4 @@ public static class ShopRemoveCardHandler
+             Logger.Error($"Fire-and-forget card removal task failed: {ex.Message}");
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Actions/Utils/ActionUtils.cs b/STS2.Cli.Mod/Actions/Utils/ActionUtils.cs
+index ec9b793..480b78d 100644
+--- a/STS2.Cli.Mod/Actions/Utils/ActionUtils.cs
++++ b/STS2.Cli.Mod/Actions/Utils/ActionUtils.cs
+@@ -96,7 +96,7 @@ public static class ActionUtils
+         if (CombatManager.Instance.IsOverOrEnding)
+             return new { ok = false, error = "COMBAT_ENDING", message = "Combat is over or ending" };
+ 
+-        if (!CombatManager.Instance.IsPlayPhase)
++        if (GetLocalPlayer()?.PlayerCombatState?.Phase != PlayerTurnPhase.Play)
+             return new { ok = false, error = "NOT_PLAYER_TURN", message = "Not in play phase" };
+ 
+         if (CombatManager.Instance.PlayerActionsDisabled)
+@@ -357,4 +357,4 @@ public static class ActionUtils
+ 
+         return null;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Models/State/CombatStateDto.cs b/STS2.Cli.Mod/Models/State/CombatStateDto.cs
+index dc02e82..cf94e54 100644
+--- a/STS2.Cli.Mod/Models/State/CombatStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/CombatStateDto.cs
+@@ -34,7 +34,7 @@ public class CombatStateDto
+     ///     True if it's the player's turn and they can play cards.
+     /// </summary>
+     /// <remarks>
+-    ///     Source: <c>CombatManager.IsPlayPhase</c>.
++    ///     Source: <c>PlayerCombatState.Phase == PlayerTurnPhase.Play</c>.
+     /// </remarks>
+     public bool IsPlayerTurn { get; set; }
+ 
+@@ -94,4 +94,4 @@ public class CombatStateDto
+     ///     Active enemies in combat (includes dead enemies with IsAlive=false).
+     /// </summary>
+     public List<EnemyStateDto> Enemies { get; set; } = [];
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
+index ee4807e..9547402 100644
+--- a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
+@@ -36,16 +36,16 @@ public static class CombatStateBuilder
+             return null;
+         }
+ 
++        var player = combatState.Players.Count > 0 ? combatState.Players[0] : null;
+         var result = new CombatStateDto
+         {
+             Encounter = combatState.Encounter?.Id.Entry,
+             TurnNumber = combatState.RoundNumber,
+-            IsPlayerTurn = combatManager.IsPlayPhase,
++            IsPlayerTurn = player?.PlayerCombatState?.Phase == PlayerTurnPhase.Play,
+             IsPlayerActionsDisabled = combatManager.PlayerActionsDisabled,
+             IsCombatEnding = combatManager.IsOverOrEnding
+         };
+ 
+-        var player = combatState.Players.Count > 0 ? combatState.Players[0] : null;
+         if (player != null)
+         {
+             var pcs = player.PlayerCombatState;
+@@ -161,4 +161,4 @@ public static class CombatStateBuilder
+                 : null
+         };
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs b/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
+index 288c30a..eac8d59 100644
+--- a/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
+@@ -31,7 +31,7 @@ public static class ShopStateBuilder
+                 return null;
+             }
+ 
+-            var inventory = merchantRoom.Room.Inventory;
++            var inventory = merchantRoom.Room.GetLocalInventory();
+ 
+             var cards = BuildCards(inventory);
+             var relics = BuildRelics(inventory);
+@@ -191,4 +191,4 @@ public static class ShopStateBuilder
+             IsUsed = entry.Used
+         };
+     }
+-}
+\ No newline at end of file
++}

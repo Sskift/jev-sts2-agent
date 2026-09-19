@@ -69,3 +69,13 @@ test('untargeted cards use an observed play area and end turn uses observed coor
   assert.equal(decision.action, 'end_turn');
   assert.deepEqual(decision.target, position);
 });
+
+test('disabled menu options and defeated games are not actionable candidates', async () => {
+  const state = { scene: 'main_menu', selectable_options: [
+    { name: 'Continue', enabled: false, screen_pos: position },
+    { name: 'Single player', enabled: true, screen_pos: { x: 200, y: 100 } }
+  ] };
+  const decision = await makeDecisionWithJev(state, choose('option_1', payload => assert.deepEqual(Object.keys(payload.questions.next_action.criteria), ['option_1'])));
+  assert.equal(decision.name, 'Single player');
+  assert.equal((await makeDecisionWithJev({ ...state, scene: 'game_over' }, noFetch)).action, 'wait');
+});

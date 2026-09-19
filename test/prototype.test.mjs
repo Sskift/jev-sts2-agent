@@ -36,18 +36,16 @@ test('uncertain player turn and invalid coordinates never produce a native actio
   assert.equal(planAction(decision, { ...state, screen_size: null }).type, 'wait');
 });
 
-test('native adapter uses explicit argument array and dry run never invokes it', () => {
+test('native adapter uses client-coordinate commands and dry run never invokes it', async () => {
   const { state, decision } = simulationFixture();
   decision.card.screen_pos.x = 500.4;
   const plan = planAction(decision, state);
   let observed;
-  const result = executeActionPlan(plan, { executeFile: (...args) => { observed = args; return 'stub executed'; } });
+  const result = await executeActionPlan(plan, { driver: { execute: async action => { observed = action; return { foregroundUnchanged: true, cursorUnchanged: true }; } } });
   assert.equal(result.executed, true);
-  assert.equal(observed[0], 'python');
-  assert.deepEqual(observed[1].slice(1), ['drag', '500', '620', '950', '300']);
-  assert.equal(observed[2].shell, undefined);
-  assert.equal(executeActionPlan(plan, { dryRun: true, executeFile: forbidden }).executed, false);
-  assert.throws(() => executeActionPlan({ type: 'click', args: ['1 & bad', 2] }, { executeFile: forbidden }), /Invalid native/);
+  assert.deepEqual(observed, { type: 'drag', x: 500, y: 620, endX: 950, endY: 300 });
+  assert.equal((await executeActionPlan(plan, { dryRun: true, driver: { execute: forbidden } })).executed, false);
+  await assert.rejects(executeActionPlan({ type: 'click', args: ['1 & bad', 2] }, { driver: { execute: forbidden } }), /Invalid native/);
 });
 
 test('perception rejects incomplete state and duplicate card slots', () => {

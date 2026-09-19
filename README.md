@@ -1,59 +1,104 @@
 # jev-sts2-agent
 
-在 Windows 上探索《Slay the Spire 2》的可见自动游玩：**Opus 5 看图 → Jev 从完整动作候选中选一步 → Computer Use 点击/拖拽 → 重新截图**。
+Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结构化状态 → Jev 选择完整动作 → Named Pipe 调用游戏动作 → 重读状态确认**。用户已授权采用 STS2-Cli-Mod，截图、Opus 5 和 Computer Use 用于未覆盖弹窗与验收留证。**已在本机完成一场真实战斗。**
 
-[飞书方案](https://icnainlav1b8.feishu.cn/docx/Ijr1dLJpio6JvNxfcAfcnvXKnUR) · [本地方案](feishu_plan.md) · [闭环图](docs/agent-loop.mmd)
+[仓库执行计划](feishu_plan.md) · [技术选型与资源预算](docs/technology-selection.md) · [飞书方案](https://icnainlav1b8.feishu.cn/docx/Ijr1dLJpio6JvNxfcAfcnvXKnUR)
 
 ## 当前状态
 
-- 私有 GitHub 仓库、TypeSafe skill 和 Node.js/Python 原型已就绪。
-- Jev 真实 API 已验证：2026-09-19 返回 `jev-1.13.0`，单次三 primitive 测试约 675ms；此结果不代表游戏策略质量或平均延迟。
-- 指定 `claude-opus-5` 的合成图请求已成功：HTTP 200，约 3.7 秒，矩形中心误差 2 像素。此前 `ENOTFOUND` 来自旧配置，现已解决。
-- 本机装有二代 `v0.111.0` 和影响玩法的 mod，尚未验证真实出牌、完整战斗或通关。
+- 运行栈为 Node.js + 游戏内 C# mod；可选常驻 C# / .NET 8 窗口驱动负责截图和 CU 后备。不需要 Python 或 Pillow。
+- 已安装 [STS2-Cli-Mod](https://github.com/longkerdandy/STS2-Cli-Mod) 的 `0.102.1` release，并实际验证 `ping`、`state`、`new_run` 在游戏最小化时成功。该结果只覆盖已测命令，不能推及完整战斗。
+- 原 release 对本机 `v0.111.0` 存在旧 API 不兼容。已编译并部署 `0.111.0-local-compat`，替换 `IsPlayPhase` / `Inventory` 等调用；出牌和结束回合已通过首场战斗，商店和其他未走到的路径仍未实测。
+- 首场 `NIBBITS_WEAK` 从菜单到奖励约 40.4 秒，17 轮观察、11 条成功命令，其中 6 次出牌、2 次结束回合。战后画面为 68/80 HP、20 金币与卡牌奖励；该段战斗没有用 CU 或 Opus 操作。
+- 已发现模组未识别的新手教程弹窗：当时结构化 `screen` 仍为 `CHARACTER_SELECT`。借助截图和一次后台 `PostMessage` 点击后进入地图。这显示该弹窗当时需要另一种处理途径；可选择 CU 或补模组覆盖，不代表 CU 是固定依赖。
+- 配置现为 `mods_enabled:true`，仅 `STS2.Cli.Mod` 启用；已安装的 RebalancedRegentForging 保持禁用。
+- 旧视觉通道已验证 1280×720 非前台真截图、Opus 5 主菜单识别和 Jev 选择“单人模式”。这些是可复用能力，未作为“完成战斗”的证据。
 
-本轮修复模拟误触鼠标、硬编码坐标、零费牌被跳过、重复卡牌覆盖、选牌与选敌不关联及错误响应默选第一项等问题。现阶段仍是需要实景联调的原型。
+战斗记录为 `run-artifacts/2026-09-19T16-39-33-428Z-dcc28eb7/`；`session.json` 标记 `battle_complete`，`step-0017/before-state.json` 与 `before.png` 共同确认战后奖励。28 份窗口/捕获样本均为游戏非前台、foreground/cursor 不变；终局另外检查到 `topmost:false` 且有多个更高层窗口与游戏重叠，后台奖励截图仍正常。详见[本轮验证记录](docs/validation-2026-09-20.md)。这证明本次单场后台运行成功，不代表所有场景、最小化战斗或长时间策略都完成验证。
 
-## 环境与配置
+## 环境、安装位置与备份
 
-需要支持 `--use-system-ca` 的 Node.js（本机已验证 v25.8.1）、Windows Python 3 和 Pillow：
+默认运行只需 Windows、Node、Steam、游戏及已安装的兼容 mod；不需要截图、Opus 或额外 C# helper。游戏内动作照常渲染动画，不必用 CU 播放动画。本机已确认 Node `v25.8.1`、.NET SDK `8.0.408`、STS2 `v0.111.0`；游戏自带 .NET 9 runtime。本地兼容构建使用 SDK 8 Roslyn 与游戏程序集，未安装全局 .NET 9 SDK。只有重建 mod 或使用可选窗口驱动时才需相应开发工具，详见[技术选型](docs/technology-selection.md)。
+
+| 内容 | 本机位置 |
+|---|---|
+| 游戏安装目录 | `D:/SteamLibrary/steamapps/common/Slay the Spire 2` |
+| 当前 mod | 游戏目录下 `mods/STS2.Cli.Mod.dll`、`mods/STS2.Cli.Mod.json` |
+| 原 release 包与已安装 CLI | 包位于 `temp/sts2-release/`；CLI 为 `%LOCALAPPDATA%/sts2-cli/sts2.exe`，Agent 直接连 pipe |
+| 启用 mod 前的配置备份 | `temp/mod-install-backup/settings.before-cli.save` |
+| 原 release DLL 备份 | `temp/mod-install-backup/STS2.Cli.Mod.release.dll` |
+| 兼容补丁与可复现构建 | 仓库 [mods/sts2-cli-compat](mods/sts2-cli-compat/README.md)；本地原始编译记录位于 `temp/compat-build/` |
+
+上述 `temp/` 是本机工作材料，默认不随 Git 提交。恢复前退出游戏；只恢复本次改变的 mod DLL/manifest 或配置，避免覆盖后续游戏进度。配置源位于 `%APPDATA%/SlayTheSpire2/steam/<account>/settings.save`，仓库无需记录账号标识。
+
+在 `.env` 设置 `TYPESAFE_API_KEY`，或通过同名环境变量提供。仅在使用视觉后备时需要 Claude 配置：从 `%USERPROFILE%/.claude/settings.json` 的 env 读取地址和凭据，支持 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN` 或 `ANTHROPIC_API_KEY` 覆盖，模型固定 `claude-opus-5`。带模型请求的项目启动命令使用 `--use-system-ca` 保持 TLS 校验；凭据不写入日志或提交仓库。
+
+## 启动与检查
+
+通过 Steam 启动二代，应用 ID 为 `2868840`：
 
 ```powershell
-python -m pip install -r requirements.txt
+& 'C:\Program Files (x86)\Steam\steam.exe' -applaunch 2868840 --windowed --resolution 1280x720
+
+# 只读检查：Node 直接连接游戏的 Named Pipe
+node src/mod_client.mjs ping
+npm run mod:state
+
+# 主通道：最多 80 步，仅用 Node + 游戏 mod
+npm start -- --max-steps 80
 ```
 
-在 `.env` 设置 `TYPESAFE_API_KEY`，或通过同名环境变量提供。Claude 地址和凭据从 `%USERPROFILE%/.claude/settings.json` 的 env 读取，可用同名环境变量覆盖：`ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN`（Bearer）或 `ANTHROPIC_API_KEY`（x-api-key）。视觉模型固定为用户指定的 `claude-opus-5`，不沿用默认 Opus alias。凭据、截图和临时日志不提交。
+Agent 不必为每条命令启动 `sts2.exe`。pipe 为 `\\.\pipe\sts2-cli-mod`；上游协议每条连接处理一行 UTF-8 JSON 后关闭，因此 Node 串行调用并为每次请求创建连接，不假设多路复用或额外 request ID。`id` 是游戏实体 ID，不能用作传输序号。已发送动作超时后先读状态，不盲目重发。
 
-## 验证和运行
+`npm start` 是结构化主循环，`npm run start:mod` 为同一路线的显式别名，默认最多 80 步；省略 `--screenshots` 可只记录结构化数据，不启动窗口驱动。动作前重读状态，防止用户操作或动画让 Jev 的选择过时；动作后再读状态，连续三次动作无变化即停下排查。请求超时或错误时停止，不自动重放。截图失败或最小化会留记录/跳过截图，不等于模组失败。Ctrl+C 发出停止请求，可能需等当前请求返回。
+
+完成标记要求在本次运行中观察到活敌战斗、至少一次成功的出牌响应，以及后续非空 `REWARD`；最终还需核对前后状态的实际变化，可附截图，不能把代码的标记单独当成验收。下节的 `start:vision` 是保留的视觉循环。
+
+## 视觉 / Computer Use 后备
+
+需要看图、处理模组未覆盖弹窗或截图留证时，先编译窗口驱动：
+
+```powershell
+npm run build:driver
+npm run window:status
+
+# 为结构化主循环附加截图记录
+npm start -- --screenshots --max-steps 80
+
+# 真窗口截图与真模型，只生成一步计划
+npm run start:vision -- --once --dry-run
+
+# 视觉通道执行一步并重新观察
+npm run start:vision -- --once
+```
+
+截图默认 `PrintWindow`，输入默认 `PostMessage`，坐标是游戏 client 原始像素。建议窗口为 1280×720；游戏配置可能覆盖启动参数，应以 `window:status` 为准。客户区变化后重新截图，不复用旧坐标。非前台截图已实测；**窗口驱动拒绝最小化窗口**，需要视觉后备时恢复窗口。模组通道已测部分命令能在最小化状态运行，两者不能混为一谈。
+
+默认允许用户并发移动鼠标和切换窗口，只记录前后桌面差异。`--strict-desktop` 是可选无人干预检测，遇到变化会停止，但快照差异不能证明由 Agent 造成。用户已允许必要时短暂聚焦；实际使用后备时必须留证，不设置永久置顶。WGC 是特定 GPU/遮挡截图失败时的待选方案，不是已完成能力。
+
+视觉循环另支持 `--max-steps`（默认 120）、`--until-battle-complete`、`--interval-ms`、`--settle-ms`、`--artifact-dir`、`--hwnd`；Ctrl+C 停止。该通道保留供调试和回退，主路线已改为结构化 mod。
+
+## 测试、模块与验收
 
 ```powershell
 npm test
 npm run sim
 npm run check:opus-config
-```
-
-`npm test` 是离线回归；`sim` 用合成局面和预设决策，仅打印动作计划，不调用 API、不截图、不移动鼠标。`check:opus-config` 只检查配置是否存在。
-
-```powershell
 npm run test:jev
 npm run test:opus
 ```
 
-这两个命令分别实际调用 Jev 和 Opus 5 API，会消耗少量额度。`test:opus` 在内存中生成红矩形 PNG，只测试图片理解，不截取桌面；结果保存在 `temp/opus-smoke-result.json`。项目的 Opus 测试和启动命令使用 `--use-system-ca`，加载 Windows 系统证书库并保持 TLS 校验，不使用关闭证书校验的方式。
+离线测试使用替身，不证明实机完成；`sim` 不调用 API、不截图、不输入。`test:jev` / `test:opus` 实际调用服务并消耗额度，后者仅测试合成图。测试数量以本轮实际输出为准。
 
-网关已可达；待游戏处于主屏且坐标完成标定后：
+| 文件 | 职责 |
+|---|---|
+| `src/mod_client.mjs` | pipe 协议、串行请求、超时与状态读取 |
+| `src/mod_decision.mjs` | 用结构化 `can_play`、卡牌 ID / `nth`、目标 `combat_id` 等产生完整候选并调用 Jev |
+| `src/mod_loop.mjs` | 主闭环、动作前状态一致性检查、动作后重读、无进展停止、战斗与证据跟踪 |
+| `src/vision_opus.mjs`、`src/decision_jev.mjs` | 视觉后备：识别可见界面，生成像素动作 |
+| `src/agent_loop.mjs` | 现有视觉循环、动作后观察、战斗跟踪和证据记录 |
+| `src/window_driver.mjs`、`native/WindowDriver/` | 可选常驻 C# 窗口驱动、client 截图与后台消息 |
 
-```powershell
-npm start -- --once --dry-run
-npm start -- --once
-npm start
-```
+本机历史证据包括 `run-artifacts/2026-09-19T16-21-36-656Z-6415a6a2/` 的真 Opus/Jev dry-run（`battle.complete:false`）、`temp/resized.png` 的非前台截图，以及 `temp/mod-tutorial.png` / `temp/mod-after-tutorial.png` / `temp/mod-tutorial-dismiss.json` 的弹窗后备记录。原始运行材料默认不提交 Git；[历史验证记录](docs/validation-2026-09-19.md)只覆盖其注明时间与范围。
 
-`--once --dry-run` 会截取主屏并发送给 Opus、调用 Jev，仅打印鼠标动作。`--once` 会执行一次真实动作；不带参数则持续运行，Ctrl+C 停止。当前程序不自动启动或聚焦游戏，截图是整张主屏，应先让游戏占据该屏幕。
-
-## 模块和边界
-
-`vision_opus.mjs` 提取场景、玩家回合、牌面效果、实体坐标、End Turn 和释放区。`decision_jev.mjs` 用手牌/敌人的数组槽位枚举完整动作，Jev 一次 Choice 选中具体的“牌 + 目标”或界面选项。`agent_loop.mjs` 把当前帧坐标映射为动作计划，`computer_use.py` 执行 Windows 点击和拖拽。
-
-每次只做一个动作，然后重新截图。没有识别到目标或按钮时不使用固定坐标；零能量仍保留可用零费牌。后续还需窗口裁剪/缩放逆变换、悬停读牌、动作后状态变化确认，以及特殊资源和多阶段选择处理。连续循环当前只在每次失败后等待再尝试，尚不具备完整故障恢复能力。
-
-[STS2-Cli-Mod](https://github.com/longkerdandy/STS2-Cli-Mod) 是可选结构化状态通道。它没有手牌/敌人的屏幕像素坐标，其公开 release 与本机游戏版本也不同，尚未安装验证；默认主路线继续使用视觉和可见 Computer Use。
+最终验收需串联一场真实战斗的结构化状态、Jev 答案、具体动作请求/响应、资源和敌人变化、胜利或战后奖励。本次另附截图佐证，但截图和 CU 不是默认运行或完成战斗的前置条件。仅遇模组未覆盖界面时才选择 CU，未来也可直接补模组覆盖。多房间推进和通关是后续工作，见[执行检查表](feishu_plan.md#7-执行检查表与完成标准)。

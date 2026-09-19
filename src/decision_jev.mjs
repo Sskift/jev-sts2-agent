@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const API_URL = 'https://api.typesafe.ai/v1/systemone';
-const NON_COMBAT_SCENES = new Set(['reward', 'map', 'rest', 'event', 'main_menu', 'shop', 'treasure', 'card_select', 'game_over', 'character_select']);
+const NON_COMBAT_SCENES = new Set(['reward', 'map', 'rest', 'event', 'main_menu', 'shop', 'treasure', 'card_select', 'character_select', 'dialog', 'settings']);
 
 export function getJevApiKey() {
   if (process.env.TYPESAFE_API_KEY) return process.env.TYPESAFE_API_KEY;
@@ -53,7 +53,7 @@ function combatCandidates(state) {
 
 function candidateDescription(candidate) {
   if (candidate.action === 'end_turn') return 'End the current player turn.';
-  if (candidate.action === 'click') return `Select the visible option: ${candidate.name}`;
+  if (candidate.action === 'click') return `Select the visible option: ${candidate.name}${candidate.description ? `; ${candidate.description}` : ''}${candidate.selected === true ? '; this option is visibly ALREADY SELECTED' : candidate.selected === false ? '; this option is visibly not selected' : ''}`;
   const card = candidate.card;
   const effect = card.description || card.effects || 'Effect not visible';
   const target = candidate.target_enemy;
@@ -73,7 +73,7 @@ export async function makeDecisionWithJev(gameState, options = {}) {
     candidates = new Map();
     for (const [index, option] of (gameState.selectable_options || []).entries()) {
       if (option.enabled === false || option.visible === false || !hasPosition(option.screen_pos)) continue;
-      candidates.set(`option_${index}`, { action: 'click', target: option.screen_pos, name: option.name });
+      candidates.set(`option_${index}`, { action: 'click', target: option.screen_pos, name: option.name, description: option.description, selected: option.selected });
     }
   } else {
     return wait('Scene is not supported');
@@ -90,11 +90,12 @@ export async function makeDecisionWithJev(gameState, options = {}) {
     questions: {
       next_action: {
         type: 'choice',
-        instructions: 'Choose one next action to make progress in the current Slay the Spire 2 screen. Each option is a complete action; choose the card and its target together. Use the observed card descriptions and screen state. Do not assume unseen effects. Candidate card_N and enemy_N indices refer to the state cards and enemies arrays.',
+        instructions: 'Choose one next action toward winning the first combat in Slay the Spire 2. Each option is a complete action; choose a specific card and its specific target together. In combat, use visible effects, enemy HP and incoming damage to finish enemies while preserving HP. Spend energy on useful attacks or block; end turn when no useful affordable card remains. Outside combat, continue an existing run if available; otherwise start a single-player standard run as Ironclad, confirm the character and choose a reachable normal combat map node. If Ironclad is already selected (selected=true or his details are displayed), choose the enabled confirm/start check mark rather than selecting his portrait again. At a required card selection choose a suitable card then confirm if required. Read recent_actions: if the same choice was already attempted and no structured change was observed, prefer a different forward-progress control instead of repeating it. Do not choose quit, abandon, settings or back when a forward-progress choice is available. Use the observed card descriptions and screen state; do not assume unseen effects. Candidate card_N and enemy_N indices refer to the state cards and enemies arrays.',
         criteria: Object.fromEntries([...candidates].map(([id, candidate]) => [id, candidateDescription(candidate)]))
       }
     }
   };
+  const started = performance.now();
   const response = await (options.fetchImpl || globalThis.fetch)(API_URL, {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -102,8 +103,7 @@ export async function makeDecisionWithJev(gameState, options = {}) {
     signal: AbortSignal.timeout(options.timeoutMs ?? 30000)
   });
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Jev API error ${response.status}: ${error}`);
+    throw new Error(`Jev API error ${response.status}`);
   }
   const result = await response.json();
   const answer = result.answers?.next_action;
@@ -116,7 +116,8 @@ export async function makeDecisionWithJev(gameState, options = {}) {
     probabilities: answer.probabilities,
     confidence: answer.confidence,
     model: result.model,
-    usage: result.usage
+    usage: result.usage,
+    durationMs: Math.round(performance.now() - started)
   };
 }
 
