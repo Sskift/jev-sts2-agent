@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { buildDecisionContext, DecisionMemory, groupCards, routeFacts, deduplicateText, compactContext, validateDecisionPacket } from '../src/decision_context.mjs';
+import { buildDecisionContext, DecisionMemory, groupCards, routeFacts, deduplicateText, compactContext, validateDecisionPacket, expandRecordTables } from '../src/decision_context.mjs';
 import { buildModCandidates, prepareModDecision, makeModDecisionWithJev } from '../src/mod_decision.mjs';
 import { actionFingerprint, runModLoop } from '../src/mod_loop.mjs';
 import { completeCombat, withContext, fixtureCard } from './fixtures/context.mjs';
@@ -284,7 +284,7 @@ test('history table and text dictionary restore every original event and orderin
     if (item && typeof item === 'object') return Object.fromEntries(Object.entries(item).filter(([key]) => key !== 'text_dictionary').map(([key, value]) => [key, expand(value)]));
     return item;
   };
-  assert.deepEqual(expand(compact), original);
+  assert.deepEqual(expand(expandRecordTables(compact)), original);
   assert.ok(Buffer.byteLength(JSON.stringify(compact)) < Buffer.byteLength(JSON.stringify(original)));
 });
 
@@ -296,6 +296,34 @@ test('JSON Schema rejects unknown protocol versions, missing choices and invalid
   const value = packet(completeCombat());
   value.rules = [{ title: 'Broken reference', description: { text_ref: 'rule_99' } }];
   assert.throws(() => validateDecisionPacket(value), /Dangling/);
+});
+
+test('nested record tables preserve all candidates, card copies, costs and nested field names', () => {
+  const base = completeCombat();
+  const state = withContext({ ...base, combat: { ...base.combat,
+    hand: Array.from({ length: 12 }, (_, index) => fixtureCard('STRIKE_IRONCLAD', { index, cost: index % 3, damage: 6 + index, can_play: true, target_type: 'AnyEnemy', details: { instance_id: `copy_${index}`, nested: { 'display.damage': index, optional: index % 2 ? null : false } } })),
+    enemies: Array.from({ length: 4 }, (_, i) => ({ ...base.combat.enemies[0], combat_id: 42 + i, hp: 12 + i }))
+  } });
+  const original = packet(state), compact = compactContext(original);
+  assert.match(JSON.stringify(compact), /record_table_v3/);
+  validateDecisionPacket(compact);
+  const text = item => {
+    if (item?.text_ref) return compact.text_dictionary[item.text_ref];
+    if (Array.isArray(item)) return item.map(text);
+    if (item && typeof item === 'object') return Object.fromEntries(Object.entries(item).filter(([key]) => key !== 'text_dictionary').map(([key, value]) => [key, text(value)]));
+    return item;
+  };
+  assert.deepEqual(text(expandRecordTables(compact)), original);
+  assert.ok(JSON.stringify(compact).length < JSON.stringify(original).length);
+  const corrupted = structuredClone(compact);
+  const table = corrupted.combat.hand;
+  if (table.encoding === 'record_table_v3') {
+    const layout = table.layouts[table.rows[0][0]], column = layout.fields.findIndex(path => path.length === 1 && path[0] === 'cost');
+    assert.ok(column >= 0);
+    table.rows[0][column + 1] = 'invalid energy';
+    assert.throws(() => validateDecisionPacket(corrupted), /versioned protocol/);
+  }
+  assert.throws(() => expandRecordTables({ encoding: 'record_table_v3', layouts: [{ constants: [], fields: [['__proto__', 'x']] }], rows: [[0, 1]] }), /Malformed nested record path/);
 });
 
 test('historical deck references share only exactly identical current card states', () => {

@@ -10,7 +10,8 @@ export class ContextError extends Error {
 
 const protocolSchema = JSON.parse(fs.readFileSync(new URL('../schemas/decision-context.v1.schema.json', import.meta.url), 'utf8'));
 const protocolCheck = new Ajv2020({ allErrors: true, strict: true }).compile(protocolSchema);
-export function validateDecisionPacket(packet) {
+export function validateDecisionPacket(rawPacket) {
+  const packet = expandRecordTables(rawPacket);
   if (!protocolCheck(packet)) throw new ContextError('Decision JSON does not match the versioned protocol', { errors: clone(protocolCheck.errors) });
   if (packet.in_combat !== Boolean(packet.combat)) throw new ContextError('in_combat contradicts combat data');
   const actionIds = packet.legal_actions.map(a => a.action_id);
@@ -27,7 +28,7 @@ export function validateDecisionPacket(packet) {
     Object.values(item).forEach(visit);
   };
   visit(packet);
-  return packet;
+  return rawPacket;
 }
 
 const clone = value => structuredClone(value);
@@ -456,7 +457,7 @@ export function recordTable(records) {
   return { encoding: 'record_table_v1', layouts, rows };
 }
 
-function compactRecords(records) {
+function compactRecords(records, nested = true) {
   const layouts = [], lookup = new Map();
   const constantKeys = new Set(['type', 'side', 'actor_id', 'floor', 'combat_id', 'screen', 'ok', 'source']);
   const rows = records.map(record => {
@@ -483,8 +484,49 @@ function compactRecords(records) {
     for (const record of group) groupOf.set(record, sharedLayouts.length - 1);
   }
   const sharedRows = records.map(record => [groupOf.get(record), ...sharedLayouts[groupOf.get(record)].fields.map(key => record[key])]);
-  return [records, recordTable(records), { encoding: 'record_table_v2', layouts, rows }, { encoding: 'record_table_v2', layouts: sharedLayouts, rows: sharedRows }]
+  const variants = [records, recordTable(records), { encoding: 'record_table_v2', layouts, rows }, { encoding: 'record_table_v2', layouts: sharedLayouts, rows: sharedRows }];
+  if (nested) {
+    const flatten = (item, path = [], output = {}) => {
+      if (item && typeof item === 'object' && !Array.isArray(item) && Object.keys(item).length) {
+        for (const [key, value] of Object.entries(item)) flatten(value, [...path, key], output);
+      } else output[JSON.stringify(path)] = item;
+      return output;
+    };
+    const flat = compactRecords(records.map(record => flatten(record)), false);
+    if (flat.encoding) variants.push({ encoding: 'record_table_v3', layouts: flat.layouts.map(layout => ({
+      constants: Object.entries(Array.isArray(layout) ? {} : layout.constants).map(([key, value]) => [JSON.parse(key), value]),
+      fields: (Array.isArray(layout) ? layout : layout.fields).map(key => JSON.parse(key))
+    })), rows: flat.rows });
+  }
+  return variants
     .sort((a, b) => Buffer.byteLength(JSON.stringify(a)) - Buffer.byteLength(JSON.stringify(b)))[0];
+}
+
+// Decode for schema validation and round-trip checks. v3 stores explicit key
+// paths rather than dotted keys, so original field names remain unambiguous.
+export function expandRecordTables(item) {
+  if (!item || typeof item !== 'object') return item;
+  if (Array.isArray(item)) return item.map(expandRecordTables);
+  if (['record_table_v1', 'record_table_v2', 'record_table_v3'].includes(item.encoding)) {
+    if (!Array.isArray(item.layouts) || !Array.isArray(item.rows)) throw new ContextError('Malformed decision history table');
+    return item.rows.map(row => {
+      const layout = item.layouts[row?.[0]], fields = item.encoding === 'record_table_v1' ? layout : layout?.fields;
+      if (!Array.isArray(row) || !Number.isInteger(row[0]) || !Array.isArray(fields) || row.length !== fields.length + 1) throw new ContextError('Malformed decision history table');
+      if (item.encoding !== 'record_table_v3') return { ...expandRecordTables(item.encoding === 'record_table_v2' ? layout.constants : {}), ...Object.fromEntries(fields.map((key, i) => [key, expandRecordTables(row[i + 1])])) };
+      const record = {};
+      const set = (keys, value) => {
+        if (!Array.isArray(keys) || !keys.length || keys.some(key => typeof key !== 'string' || ['__proto__', 'constructor', 'prototype'].includes(key))) throw new ContextError('Malformed nested record path');
+        let target = record;
+        for (const key of keys.slice(0, -1)) target = target[key] ??= {};
+        target[keys.at(-1)] = expandRecordTables(value);
+      };
+      if (!Array.isArray(layout.constants)) throw new ContextError('Malformed nested record constants');
+      for (const [keys, value] of layout.constants) set(keys, value);
+      fields.forEach((keys, i) => set(keys, row[i + 1]));
+      return record;
+    });
+  }
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => [key, expandRecordTables(value)]));
 }
 
 export function compactContext(context) {
@@ -512,5 +554,8 @@ export function compactContext(context) {
   if (known.size) copy.memory.card_states = cardStates;
   if (copy.combat?.history?.length) copy.combat.history = compactRecords(copy.combat.history);
   for (const key of ['actions', 'observations']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
+  for (const container of [copy.deck, copy.combat?.draw_pile]) if (container?.cards?.length) container.cards = compactRecords(container.cards);
+  for (const key of ['hand', 'discard_pile', 'exhaust_pile', 'play_pile', 'enemies']) if (copy.combat?.[key]?.length) copy.combat[key] = compactRecords(copy.combat[key]);
+  if (copy.legal_actions?.length) copy.legal_actions = compactRecords(copy.legal_actions);
   return copy;
 }
