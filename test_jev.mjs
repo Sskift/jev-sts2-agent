@@ -12,8 +12,7 @@ if (!match) {
 }
 
 const apiKey = match[1].trim();
-const maskedKey = apiKey.slice(0, 10) + '...' + apiKey.slice(-6);
-console.log(`Using API key: ${maskedKey}`);
+console.log('TypeSafe API key loaded.');
 
 const url = 'https://api.typesafe.ai/v1/systemone';
 
@@ -53,7 +52,8 @@ async function testApi() {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(30000)
     });
 
     const elapsed = Date.now() - startTime;
@@ -66,14 +66,15 @@ async function testApi() {
     }
 
     const text = await res.text();
-    try {
-      const data = JSON.parse(text);
-      console.log('\nResponse Data:\n', JSON.stringify(data, null, 2));
-    } catch {
-      console.log('\nResponse Text:\n', text);
+    if (!res.ok) throw new Error(`Jev HTTP ${res.status}`);
+    const data = JSON.parse(text);
+    if (!Number.isFinite(data.answers?.is_test?.noul) || !Object.hasOwn(payload.questions.sentiment.criteria, data.answers?.sentiment?.choice)) {
+      throw new Error('Unexpected Jev answer contract');
     }
+    console.log('\nResponse Data:\n', JSON.stringify(data, null, 2));
   } catch (err) {
-    console.error('Fetch error:', err);
+    console.error('Jev smoke failed:', err.message);
+    process.exitCode = 1;
   }
 }
 

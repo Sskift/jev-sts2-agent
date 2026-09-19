@@ -41,13 +41,18 @@ async function testApi() {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(30000)
   });
 
   const elapsed = Date.now() - startTime;
+  if (!res.ok) throw new Error(`Jev HTTP ${res.status}`);
   const data = await res.json();
+  if (!Number.isFinite(data.answers?.urgency_level?.score) || !Object.hasOwn(payload.questions.issue_category.criteria, data.answers?.issue_category?.choice)) {
+    throw new Error('Unexpected Jev answer contract');
+  }
   console.log(`Status: ${res.status} OK (${elapsed}ms)`);
   console.log('Result:\n', JSON.stringify(data, null, 2));
 }
 
-testApi();
+testApi().catch(error => { console.error('Jev smoke failed:', error.message); process.exitCode = 1; });

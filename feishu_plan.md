@@ -1,139 +1,117 @@
-# Slay the Spire 2 自动游玩 Agent Loop 架构与实施计划
+# Slay the Spire 2 Agent Loop：Opus 5 识别、Jev 决策、Computer Use 执行
 
-## 一、项目目标与设计原则
+更新：2026-09-19。先完成一场可见的自动战斗，再接上奖励、地图和事件。首版采用单人模式，不把最优策略、流派构筑或通关作为前置条件。
 
-本项目旨在为《杀戮尖塔 2》（Slay the Spire 2）构建一套从零运行的自动化 Agent 闭环（Agent Loop）。系统结合多模态大模型的视觉感知、TypeSafe Jev 的快速强类型决策，以及原生的 Computer Use 模拟操作能力，让 AI 能够像真实玩家一样在桌面上实时识别局面、决策战术、拖拽出牌，将游戏完整驱动起来。
+## 1. 结论与当前进度
 
-在架构设计上，本项目严格贯彻**“功能优先、极简闭环、拒绝冗余”**的原则：
-- **零过度设计**：不引入繁琐的控制流门禁协议、复杂的版本对齐矩阵或沉重的多层代理协商机制。
-- **直击核心闭环**：专注于核心三部曲——“视觉看懂局面（Opus 5）” -> “快速算出动作（Jev）” -> “鼠标真实拖拽（Computer Use）”。
-- **先跑通再调优**：初始版本首要目标是搭建稳定、可操作的 Agent Loop，确保手牌能打出、回合能流转、战斗能推进；卡牌高阶策略与协同流派留待闭环确立后再行迭代。
+主循环确定为“截图 → Opus 5 提取局面和坐标 → 代码列出可执行动作 → Jev 选一个动作 → 鼠标点击或拖拽 → 等待动画 → 重新截图”。Opus 5 使用本机 Claude Code 的地址和凭据，模型明确指定 `claude-opus-5`；Jev 使用项目 `.env` 的 TypeSafe key。
 
----
+独立私有仓库 [Sskift/jev-sts2-agent](https://github.com/Sskift/jev-sts2-agent) 已存在，TypeSafe skill 已安装。2026-09-19 重测 Jev：三种 primitive 同一次请求返回 HTTP 200，实际模型 `jev-1.13.0`，单次约 675 ms，输入 487 tokens、输出 71 tokens。这只是一次小样本接口测试，不代表游戏局面的平均速度或决策质量。
 
-## 二、游戏交互现状与方案选型
+Opus 5 的合成图片探测遇到 `ENOTFOUND`：当前 Claude Code 所配置网关的主机名无法解析，尚未收到 HTTP 响应。因此不能标记“Opus 视觉已调通”。本机已安装游戏于 `D:/SteamLibrary/steamapps/common/Slay the Spire 2`，本次检查版本为 `v0.111.0`；游戏未运行，本轮没有完成真实出牌验证。
 
-### 1. 命令行与底层接口现状
-- **引擎架构**：《杀戮尖塔 2》由一代的 Java (LibGDX) 迁移至 **Godot 引擎（基于 C# / .NET 9）**。
-- **原生终端控制**：原版游戏未开放任何命令行参数、控制台输出或终端交互接口，界面完全通过图形渲染与输入事件驱动。
-- **Mod 接口可能性**：社区已有实验性 Mod（如 STS2MCP）通过进程注入暴露 HTTP REST 接口。虽然 Mod 可提供纯数据，但无法提供直观的游玩展示过程。
+首版完成与否以“真实游戏里打出牌，并从下一帧确认生效”为准。模拟运行、离线测试和 API 连通性分别记录，不能合并成“自动游玩已完成”。
 
-### 2. 方案确立：纯视觉感知 + 原生 Computer Use 动作驱动
-为满足“直观展示打牌效果”的核心要求，系统采用**纯视觉 + 原生桌面输入**作为基准方案：
-- **画面感知**：通过桌面/窗口截屏获取实时游戏画面，无需侵入游戏文件或破坏原版游戏完整性。
-- **操作展示**：利用原生操作系统输入通道执行平滑鼠标轨迹绘制与拖拽，在屏幕上直观呈现手牌划向敌人的动画轨迹。
+## 2. 游戏能否读取状态和使用 CLI
 
----
+游戏通过战斗、奖励、地图和房间交互推进。战斗中需要读手牌效果、费用、目标及敌人意图；房间之间需要选奖励、选路、处理营地、商店和事件。每张牌后局面可能改变，第一版每次只执行一个动作，再读新画面。具体规则以实机为准：本机已有影响玩法的 `RebalancedRegentForging v2.3.0` mod，不能把网上默认数值写死。[Mega Crit 官方 FAQ](https://www.megacrit.com/faq/)。
 
-## 三、模型职责划分：Opus 5 识别 vs Jev 决策
+本次未找到官方公开、稳定、面向外部 agent 的完整状态与动作 API。社区已有真正针对二代的 [STS2-Cli-Mod](https://github.com/longkerdandy/STS2-Cli-Mod)：C#/.NET 9 mod 和 CLI 通过 `sts2-cli-mod` Named Pipe 交换 JSON，提供 `sts2 state`、出牌、结束回合、地图和奖励等动作。其出牌处理器把动作加入游戏 ActionQueue，不是模拟鼠标。mod 可驱动可见的游戏变化；若要展示鼠标轨迹，仍用 Computer Use。[PipeServer](https://github.com/longkerdandy/STS2-Cli-Mod/blob/main/STS2.Cli.Mod/Server/PipeServer.cs)、[PlayCardHandler](https://github.com/longkerdandy/STS2-Cli-Mod/blob/main/STS2.Cli.Mod/Actions/PlayCardHandler.cs)。
 
-系统的核心是将视觉感知与战术决策解耦，发挥两款模型的最佳特性：
+该 mod 的手牌、敌人 DTO 没有像素坐标，地图 `col/row` 是拓扑位置，不能直接拿来点击。最新公开 release 为 `v0.102.1`，与本机 `v0.111.0` 的兼容性尚未实测。它适合作为可选状态对照通道，暂不成为首版依赖；默认仍用 Opus 5 看图、Computer Use 操作。[CardStateDto](https://github.com/longkerdandy/STS2-Cli-Mod/blob/main/STS2.Cli.Mod/Models/State/CardStateDto.cs)、[EnemyStateDto](https://github.com/longkerdandy/STS2-Cli-Mod/blob/main/STS2.Cli.Mod/Models/State/EnemyStateDto.cs)、[Releases](https://github.com/longkerdandy/STS2-Cli-Mod/releases)。这些源码证明能力存在，不代表已在本机跑通。
 
-| 职责维度 | Claude Opus 5 (主识别 Loop) | TypeSafe Jev (决策引擎) |
-| :--- | :--- | :--- |
-| **技术定位** | 多模态大语言模型 (Vision LLM) | 快速强类型 System One 判断模型 |
-| **调用配置** | 继承 Claude Code 配置（endpoint: `aster.empeirion.cn:44444`） | TypeSafe 官方 System One 接口（`api.typesafe.ai/v1/systemone`） |
-| **响应耗时** | 约 2~4 秒（负责复杂图像特征抽取） | 约 700 毫秒（极速结构化决策） |
-| **具体职责** | 1. 识别当前场景（战斗、选卡奖励、地图选路、营地休息、随机事件）<br>2. 提取玩家数值：当前生命值、生命上限、护盾量、可用费用<br>3. 定位手牌：卡牌名称、费用、类型、是否需要指定目标、物理屏幕像素坐标<br>4. 定位敌人：怪物名称、血量、意图类型（攻击/防御/增益）、意图伤害数值、怪物屏幕坐标<br>5. 定位关键 UI：结束回合按钮坐标、确认按钮坐标 | 1. 接收 Opus 5 提取的标准化结构文本<br>2. 提问 `choice`：当前费用下最优打出哪张手牌<br>3. 提问 `choice`：定向攻击牌应当优先攻击哪个敌人<br>4. 提问 `noul`：是否立即结束当前回合<br>5. 提问 `score`：评估敌方下回合造成的生存威胁等级 (1~5) |
-| **输出格式** | 纯结构化 `GameState` JSON 对象 | 强类型结构化结果：`{ choice, noul, score, probabilities }` |
+## 3. Opus、Jev 和普通代码的职责
 
-### 为什么选择 Jev 承担决策？
-1. **零解析风险**：传统 LLM 在决策时往往夹带冗余解释或 Markdown 格式，偶发格式损坏导致打断。Jev 原生输出强类型字段。
-2. **延迟极低**：实测单次往返仅 700ms，在回合内连续出牌（如出第一张牌后费用变化，继续决定第二张）时能够快速连续驱动。
-3. **内置校准概率**：Jev 输出伴随精准的概率分布（如 `defend: 0.80, strike: 0.03`），代码可直接依据置信度做出防御优先或斩杀优先的分流。
+| 环节 | 负责者 | 输入与输出 |
+|---|---|---|
+| 看懂画面 | Opus 5 | 截图 → 场景、是否玩家回合、数值、牌面效果、目标、按钮和坐标 |
+| 产生候选 | 普通代码 | 识别结果 → 完整动作，例如“第 2 张牌对第 1 个敌人” |
+| 选择一步 | Jev | 局面与候选 → 一个 choice 候选 ID 及概率分布 |
+| 执行动作 | 普通代码 + Windows 输入 | 候选 ID → 本帧坐标 → 一次点击或拖拽 |
+| 观察结果 | 下一轮 Opus 5 | 新截图 → 新局面，确认牌、能量或界面是否变化 |
 
----
+Jev 接收文字或 JSON，不接收图片，不生成任意文本或鼠标脚本。HTTP 接口为 `POST https://api.typesafe.ai/v1/systemone`，请求包含 `state`、`model`、`questions`。`choice` 选择有限候选；`noul` 返回命题为真的概率；`score` 返回有序等级的概率加权值，等级从 0 开始，并非固定 1–5 分。[TypeSafe State](https://docs.typesafe.ai/concepts/state)、[API](https://docs.typesafe.ai/api)、[Score](https://docs.typesafe.ai/primitives/score)。
 
-## 四、模型输出到 Computer Use 的具象化转化
+第一版每步只用一次 `choice`。同批问题看不到彼此答案，不宜独立问“选哪张牌”和“打哪个敌人”再拼接。代码枚举“卡牌槽位 + 目标槽位”的完整候选；无目标牌只含卡牌槽位，并把可用的结束回合加入候选。一次选择就有完整执行参数。以后候选规模较大时，再拆成选牌后第二次选目标。[Function calling](https://docs.typesafe.ai/cookbooks/function_calling)、[Fan-out](https://docs.typesafe.ai/patterns/fan-out)。
 
-当 Jev 做出动作选择后，动作执行器将抽象决策转化为可变化的物理输入：
+`noul` 可留给后续窄判断，`score` 可用于风险比较，不必为了用齐模型能力进入首版。confidence 表示分布集中程度，不是全流程正确率；这轮不引入未经样本验证的 `0.85` 结束回合阈值。[Confidence](https://docs.typesafe.ai/confidence)。
 
-### 1. 坐标体系与高 DPI 适配
-Windows 系统在 4K/2K 显示器下通常开启 150%~200% DPI 缩放。执行层通过 `SetProcessDpiAwareness` 确保像素坐标与物理屏幕 1:1 精确映射，避免因缩放导致的点击偏移。
+## 4. 识别结果与动作候选
 
-### 2. 模拟操作动作映射表
+Opus 的 GameState 至少包含以下字段。读不到的值用 null，不猜数值；文字被遮挡时，后续补悬停读取。以下是接口设计，不是真实战斗样本。
 
-| Jev 决策指令 | 目标实体类型 | 物理动作行为 (Computer Use) |
-| :--- | :--- | :--- |
-| `play_card` | 指定目标的攻击牌 | 从手牌坐标 `(startX, startY)` 按余弦缓动曲线平滑拖拽至目标怪物中心 `(endX, endY)`，释放鼠标左键 |
-| `play_card` | 非定向牌（技能/群体攻击/能力） | 从手牌坐标按曲线向上拖拽至战场中心空地（`y - 500`）释放，触发全场生效 |
-| `end_turn` | 回合结束 | 移动鼠标至右下角 End Turn 按钮坐标，执行短促左键点击 |
-| `select_reward` | 战斗后选牌 / 遗物拾取 | 移动鼠标至对应卡牌奖励卡片中心，执行左键点击；随后点击右下方 Proceed 按钮 |
-| `choose_path` | 地图节点推进 | 移动鼠标至当前可到达的下一层地图图标（怪物/精英/问号/商店/营火），点击前进 |
+| 字段 | 含义 |
+|---|---|
+| `scene`、`player_turn` | 场景；玩家回合 true、敌方回合 false、不确定 null |
+| `screen_size` | 本次图片的像素宽高，供坐标检查及后续变换 |
+| `player` | HP、上限、格挡、能量；其他角色资源后续按需补充 |
+| `cards[]` | 槽位、名称、费用、description 牌面效果、可出标记、目标要求、坐标 |
+| `enemies[]` | 槽位、名称、HP、格挡、意图文本和伤害、坐标 |
+| `end_turn_btn`、`play_area` | 结束回合按钮、无目标牌释放位置 |
+| `selectable_options[]` | 可点击选项、描述、可用性及坐标；地图只列可达节点 |
 
-### 3. 为什么必须采用“平滑轨迹拖拽”
-《杀戮尖塔 2》作为图形化卡牌游戏，如果使用瞬移式的鼠标左键按下和释放，底层的 Godot 引擎输入事件可能无法在单帧内识别出“拖动卡牌进入释放区”的动作判定。通过带有 20~25 步缓动插值的平滑拖拽（耗时约 0.35 秒），不仅能 100% 触发游戏的打牌判定，更能呈现出如同真人游玩的直观视觉效果。
+同名牌可能同时存在，所以代码以本帧数组槽位生成唯一候选标识，不依赖卡名或跨帧固定 ID。精确费用比较、候选与坐标映射由代码完成，Jev 看到的是牌面效果、当前局面和动作定义。
 
----
+例如一张攻击牌、一张防御牌和两个敌人可以产生“攻击牌→敌人 A”“攻击牌→敌人 B”“防御牌”“结束回合”四个候选。选中第二项后，代码取本帧攻击牌与敌人 B 的坐标构造拖拽；Jev 不负责生成坐标。
 
-## 五、极简 Agent Loop 运行工作流
+能量为 0 仍可能有零费牌可出，不能直接结束回合。未知费用、X 费及特殊资源需要另做规则支持，首版不假定已经覆盖。接口错误或未知候选不默选第一张牌，以免把服务故障伪装成有效决定。
 
-整个系统的核心调度是一个高度精炼的单线程轮询循环（Tick Cycle）：
+## 5. 从语义动作到 Computer Use
 
-```mermaid
-flowchart TD
-    A[开始单轮 Tick] --> B[截取屏幕图像 temp/screen.png]
-    B --> C[调用 Claude Opus 5 进行多模态解析]
-    C --> D{判定当前游戏场景}
-    
-    D -->|非战斗: 选牌/地图/事件| E[调用 Jev 选择选项/路径]
-    E --> F[Computer Use 点击指定坐标]
-    
-    D -->|战斗场景| G[提取可用卡牌 & 敌人威胁]
-    G --> H{费用>0 且 存在可用手牌?}
-    H -->|否| I[Computer Use 点击 End Turn 按钮]
-    H -->|是| J[调用 TypeSafe Jev 判定动作]
-    
-    J --> K{Jev should_end_turn > 0.85?}
-    K -->|是| I
-    K -->|否| L[提取卡牌坐标与目标怪物坐标]
-    L --> M[Computer Use 执行平滑拖拽打牌]
-    
-    I --> N[休眠 1.5~2.5 秒等待游戏动画与局面重绘]
-    M --> N
-    F --> N
-    N --> A
-```
+| 选择结果 | 执行动作 | 下一帧验证依据 |
+|---|---|---|
+| 定向出牌 | 从牌中心拖到选中敌人命中区，松开 | 手中牌、资源或目标状态变化 |
+| 无目标出牌 | 从牌中心拖到本帧 play_area，松开 | 手牌、资源或状态变化 |
+| 结束回合 | 点击本帧 End Turn 坐标 | 回合阶段变化 |
+| 奖励、地图、休息、事件 | 点击本帧所选选项 | 场景或选项变化 |
+| 敌方回合、动画、信息不足 | 等待并重新截图 | 新的可操作画面 |
 
----
+选奖励后出现 Proceed、升级后出现选牌层、出牌后出现弃牌层，都作为下一轮新场景处理；不要预先写死一串点击。输入函数未报错不等于动作成功，必须通过新画面确认。
 
-## 六、本地代码工程结构
+当前 Python 执行器使用 Pillow 截取主屏，用 DPI awareness、SetCursorPos 和 mouse_event 点击及平滑拖拽。约 0.35 秒的拖拽仅为初始参数，尚无“100% 成功”证据。无目标牌不能固定上移 500 像素，结束回合也不能固定为某台 4K 屏幕的坐标。
 
-项目已在本地独立 Git 仓库完成初始化并经过实调验证，核心代码结构如下：
+下一步先把游戏放在主屏，固定窗口大小校准；再补客户区截图和坐标变换。若窗口原点 `(L,T)`、客户区大小 `(W,H)`、发送图大小 `(w,h)`，识别点 `(x,y)` 对应桌面 `(L+x*W/w, T+y*H/h)`。模型侧图像缩放也需实际标定，不能仅凭提示词保证坐标。现有原型尚未实现完整窗口裁剪与逆变换。
 
-```text
-jevmake/
-├── .env.example            # 环境变量配置模板
-├── .gitignore              # 忽略环境配置与运行时截图
-├── package.json            # Node.js 模块配置与启动脚本
-├── README.md               # 项目架构与快速上手指南
-├── test_jev.mjs            # TypeSafe Jev 官方接口连通性验证
-├── src/
-│   ├── computer_use.py     # Windows 原生高 DPI 鼠标拖拽/点击/截屏执行器
-│   ├── vision_opus.mjs     # Claude Opus 5 游戏画面多模态结构化提取模块
-│   ├── decision_jev.mjs    # TypeSafe Jev System One 战术决策原语封装模块
-│   └── agent_loop.mjs      # 核心运行主循环（串联感知、决策与执行）
-└── temp/                   # 运行期临时截屏缓存
-```
+每次动作后重新截图，不复用旧坐标连续出牌。手牌太小或遮挡时再补“悬停 → 局部截图 → Opus 补齐牌面”，目前该能力在计划中。
 
----
+<!-- LOOP_DIAGRAM -->
 
-## 七、实施计划与阶段路线
+[查看闭环流程图](docs/agent-loop.png) · [Mermaid 源码](docs/agent-loop.mmd)
 
-### 阶段一：原型连通与执行校验（当前已达成）
-- [x] 初始化独立 Git 仓库，完善 ignore 与依赖规范。
-- [x] 调通 TypeSafe Jev 官方接口（实测 700ms 强类型决策响应）。
-- [x] 调通本地 Claude Code 配置的 Opus 5 接口。
-- [x] 编写原生 Windows 鼠标缓动拖拽与截屏工具（支持 4K/2K 高 DPI 自动适配）。
-- [x] 完成模拟数据下的 Agent Loop 单步串联测试。
+## 6. 工程现状与本轮修复
 
-### 阶段二：游戏实景联调与坐标标定（下一步核心）
-1. **实机画面感知标定**：启动《杀戮尖塔 2》窗口，使用 Opus 5 截取实战画面，标定手牌栏、敌方站位、能量指示器与回合结束按钮的像素边界。
-2. **打牌手感参数微调**：实测拖拽手牌触发打出的最短有效像素距离与松手等待时间，确保 100% 成功率。
-3. **战斗内多动连续处理**：在一回合内有 3 点能量时，依次完成 3 次出牌直到 Jev 判定费用耗尽或无牌可打，随后自动点击 End Turn。
+| 文件 | 用途与边界 |
+|---|---|
+| `src/vision_opus.mjs` | 本机配置读地址和凭据，指定 Opus 5，解析局面 |
+| `src/decision_jev.mjs` | 组装完整动作候选，调用 Jev 并解析 choice |
+| `src/computer_use.py` | 主屏截屏、点击、平滑拖拽；真实坐标待标定 |
+| `src/agent_loop.mjs` | 单轮编排、动作计划、离线模拟与 dry-run |
+| `test/` | 离线回归；不代表真实游戏验证 |
+| `feishu_plan.md` | 本方案本地副本 |
 
-### 阶段三：非战斗场景串联（完整通关闭环）
-1. **战利品界面自动交互**：识别金币、卡牌奖励、药水，点击选择并点击 Proceed。
-2. **地图选路导航**：在地图界面识别可点击的下一层节点，调用 Jev 选择风险平衡路线并点击前进。
-3. **营地休息与简单事件**：优先选择休息回复生命值，简单事件默认选择确定推进。
+本轮修复影响后续联调的具体问题：模拟运行仍调用真实鼠标、全局关闭 TLS 校验、打印凭据、硬编码动作坐标、跳过零费牌、同名牌覆盖、选牌与目标独立、错误时默选第一项。保留 Node.js + Python 结构，不增加大型调度框架。
 
+验证结果：12 项离线回归通过，模拟 CLI 通过且没有调用模型、截图或鼠标；Jev 的三个 primitive 及新决策模块的单候选请求均通过真实 API 验证。Opus 图片请求仍因 ENOTFOUND 失败，真实游戏尚未验证。
+
+## 7. 实现顺序和完成标准
+
+| 顺序 | 实现内容 | 完成时可看到的结果 |
+|---|---|---|
+| A | 修通当前 Claude Code 网关解析，再用合成图验证指定 Opus 5 | 收到识别 JSON，而非仅打印配置 |
+| B | 实景截图与坐标标定，补齐牌面、释放区 | 真实战斗图转换成正确动作计划 |
+| C | 单步执行，重拍确认出牌及结束回合 | 可见拖拽、扣费和回合流转，完成一场战斗 |
+| D | 奖励、地图、休息、事件及选择牌/确认层 | 战后进入下一房间 |
+| E | 按需补商店、药水、特殊费用、悬停 | 覆盖更多界面，再逐步改进策略 |
+
+每步保存截图、识别结果、候选、Jev 答案和执行动作，便于判断是看错、选错还是点错。先以一场战斗和两个房间之间的推进作为里程碑，完整通关留待后续。CLI mod 只在确实需要状态对照时接入。
+
+本轮交付调研、可执行方案及原型修复；真实游玩的前置问题仍是 Opus 网关解析和实景联调。已安装游戏、已写代码或一次 Jev 成功请求，都不能标记为全链路完成。
+
+## 8. 一手资料
+
+- [TypeSafe skill](https://github.com/typesafe-ai/skills/blob/main/skills/typesafe-ai/SKILL.md)
+- [TypeSafe 文档索引](https://docs.typesafe.ai/llms.txt)、[Choice](https://docs.typesafe.ai/primitives/choice)、[Noul](https://docs.typesafe.ai/primitives/noul)
+- [Slay the Spire 2 官方页面](https://store.steampowered.com/app/2868840/Slay_the_Spire_2/)
+- [STS2-Cli-Mod 场景与动作参考](https://github.com/longkerdandy/STS2-Cli-Mod/blob/main/docs/cli-reference.md)
+
+外部接口和版本信息以本次读取、探测为准；社区能力来自作者源码，本机兼容性另行验证。

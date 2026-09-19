@@ -5,8 +5,11 @@
   "main": "src/agent_loop.mjs",
   "type": "module",
   "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "sim": "node src/agent_loop.mjs --sim",
     "test:jev": "node test_jev.mjs",
     "test:opus": "node src/vision_opus.mjs",
+    "check:opus-config": "node src/vision_opus.mjs",
     "start": "node src/agent_loop.mjs"
   },
   "keywords": [

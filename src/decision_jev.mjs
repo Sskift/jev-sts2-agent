@@ -1,203 +1,125 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const API_URL = 'https://api.typesafe.ai/v1/systemone';
+const NON_COMBAT_SCENES = new Set(['reward', 'map', 'rest', 'event', 'main_menu', 'shop', 'treasure', 'card_select', 'game_over', 'character_select']);
 
 export function getJevApiKey() {
+  if (process.env.TYPESAFE_API_KEY) return process.env.TYPESAFE_API_KEY;
   const envPath = path.join(process.cwd(), '.env');
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, 'utf8');
-    const match = content.match(/TYPESAFE_API_KEY\s*=\s*([^\r\n]+)/);
-    if (match) return match[1].trim();
-  }
-  return process.env.TYPESAFE_API_KEY || '';
+  if (!fs.existsSync(envPath)) return '';
+  const match = fs.readFileSync(envPath, 'utf8').match(/^\s*TYPESAFE_API_KEY\s*=\s*(.*?)\s*$/m);
+  return match ? match[1].replace(/^(['"])(.*)\1$/, '$2') : '';
 }
 
-/**
- * Make structured tactical decisions using TypeSafe Jev System One model.
- */
-export async function makeDecisionWithJev(gameState) {
-  const apiKey = getJevApiKey();
-  if (!apiKey) {
-    throw new Error('TYPESAFE_API_KEY not found in .env');
+function hasPosition(position) {
+  return Number.isFinite(position?.x) && Number.isFinite(position?.y);
+}
+
+function wait(reason) {
+  return { action: 'wait', reason };
+}
+
+function combatCandidates(state) {
+  const candidates = new Map();
+  const energy = state.player?.energy;
+  if (!Number.isFinite(energy) || energy < 0) return candidates;
+
+  const enemies = (state.enemies || []).map((enemy, index) => ({ enemy, index }))
+    .filter(({ enemy }) => hasPosition(enemy.screen_pos) && enemy.targetable !== false && enemy.hp !== 0);
+  for (const [cardIndex, card] of (state.cards || []).entries()) {
+    const affordable = (Number.isFinite(card.cost) && card.cost >= 0 && card.cost <= energy) || card.cost === 'X';
+    if (card.playable !== true || !affordable || !hasPosition(card.screen_pos)) continue;
+    if (card.target_required === true) {
+      for (const { enemy, index: enemyIndex } of enemies) {
+        candidates.set(`card_${cardIndex}_enemy_${enemyIndex}`, {
+          action: 'play_card', card, target_enemy: enemy
+        });
+      }
+    } else if (card.target_required === false && state.play_area?.visible === true && hasPosition(state.play_area.screen_pos)) {
+      candidates.set(`card_${cardIndex}`, { action: 'play_card', card, target_enemy: null });
+    }
   }
 
-  const url = 'https://api.typesafe.ai/v1/systemone';
-
-  // 1. If not combat, handle menu/reward/map selections
-  if (gameState.scene !== 'combat') {
-    return handleNonCombatDecision(gameState, apiKey, url);
+  // Observe again when a targeted playable card has no visible target.
+  if (candidates.size === 0 && enemies.length === 0 && (state.cards || []).some(card => card.playable === true && card.target_required === true)) {
+    return candidates;
   }
-
-  // 2. Combat phase decision
-  const playableCards = (gameState.cards || []).filter(c => c.playable && c.cost <= gameState.player.energy);
-  
-  if (playableCards.length === 0 || gameState.player.energy <= 0) {
-    return {
-      action: 'end_turn',
-      target: gameState.end_turn_btn?.screen_pos,
-      reason: 'No playable cards or 0 energy remaining'
-    };
+  if (state.end_turn_btn?.visible === true && state.end_turn_btn.enabled !== false && hasPosition(state.end_turn_btn.screen_pos)) {
+    candidates.set('end_turn', { action: 'end_turn', target: state.end_turn_btn.screen_pos });
   }
+  return candidates;
+}
 
-  // Format concise system state text for Jev
-  const cardDescriptions = playableCards.map((c, i) => 
-    `[${c.id || i}] ${c.name} (Cost: ${c.cost}, Type: ${c.type}, NeedsTarget: ${c.target_required})`
-  ).join('\n');
+function candidateDescription(candidate) {
+  if (candidate.action === 'end_turn') return 'End the current player turn.';
+  if (candidate.action === 'click') return `Select the visible option: ${candidate.name}`;
+  const card = candidate.card;
+  const effect = card.description || card.effects || 'Effect not visible';
+  const target = candidate.target_enemy;
+  return `Play this specific hand card: ${card.name}; cost ${card.cost}; effect ${typeof effect === 'string' ? effect : JSON.stringify(effect)}.`
+    + (target ? ` Target this specific enemy: ${target.name}; HP ${target.hp}; block ${target.block}.` : ' This card has no enemy target.');
+}
 
-  const enemyDescriptions = (gameState.enemies || []).map((e, i) =>
-    `[${e.id || i}] ${e.name} (HP: ${e.hp}/${e.max_hp}, Block: ${e.block}, Intent: ${e.intent_type} ${e.intent_damage || 0})`
-  ).join('\n');
+/** Select one complete, executable action. Probability is logged, not used as a gate. */
+export async function makeDecisionWithJev(gameState, options = {}) {
+  if (!gameState || gameState.scene === 'unknown') return wait('Scene is unknown');
 
-  const stateContext = `Game: Slay the Spire 2 Combat
-Player: HP ${gameState.player.hp}/${gameState.player.max_hp}, Block ${gameState.player.block}, Energy ${gameState.player.energy}/${gameState.player.max_energy}
+  let candidates;
+  if (gameState.scene === 'combat') {
+    if (gameState.player_turn !== true) return wait('Player turn is not confirmed');
+    candidates = combatCandidates(gameState);
+  } else if (NON_COMBAT_SCENES.has(gameState.scene)) {
+    candidates = new Map();
+    for (const [index, option] of (gameState.selectable_options || []).entries()) {
+      if (option.enabled === false || option.visible === false || !hasPosition(option.screen_pos)) continue;
+      candidates.set(`option_${index}`, { action: 'click', target: option.screen_pos, name: option.name });
+    }
+  } else {
+    return wait('Scene is not supported');
+  }
+  if (candidates.size === 0) return wait('No complete visible action is available');
+  if (candidates.size > 255) throw new Error('Jev Choice supports at most 255 action candidates');
 
-Playable Cards in Hand:
-${cardDescriptions}
-
-Enemies:
-${enemyDescriptions}`;
-
-  // Build card choice criteria
-  const cardCriteria = {};
-  playableCards.forEach(c => {
-    cardCriteria[c.id || c.name] = `Play ${c.name} (${c.type}, cost ${c.cost})`;
-  });
-
-  // Build enemy target criteria
-  const targetCriteria = {};
-  (gameState.enemies || []).forEach(e => {
-    targetCriteria[e.id || e.name] = `Target ${e.name} (${e.hp} HP, intent: ${e.intent_type} ${e.intent_damage || ''})`;
-  });
-
+  const apiKey = options.apiKey ?? getJevApiKey();
+  if (!apiKey) throw new Error('TYPESAFE_API_KEY not found');
   const payload = {
-    state: stateContext,
-    model: 'jev-latest',
+    model: options.model || 'jev-latest',
+    // Preserve visible descriptions/effects, resources and scene-specific context.
+    state: gameState,
     questions: {
-      should_end_turn: {
-        type: 'noul',
-        instructions: 'Should the player end their turn now without playing more cards?',
-        criteria: {
-          true: 'Player has no useful plays or wants to retain cards',
-          false: 'Player should play a card'
-        }
-      },
-      card_choice: {
+      next_action: {
         type: 'choice',
-        instructions: 'Which card is best to play right now?',
-        criteria: cardCriteria
-      },
-      threat_level: {
-        type: 'score',
-        instructions: 'How dangerous is the incoming enemy attack this turn?',
-        criteria: [
-          "Zero incoming damage",
-          "Minor incoming damage (1-10) easily absorbed",
-          "Moderate incoming damage (11-20)",
-          "Heavy incoming damage (21-35) threatening survival",
-          "Lethal or near lethal incoming attack"
-        ]
+        instructions: 'Choose one next action to make progress in the current Slay the Spire 2 screen. Each option is a complete action; choose the card and its target together. Use the observed card descriptions and screen state. Do not assume unseen effects. Candidate card_N and enemy_N indices refer to the state cards and enemies arrays.',
+        criteria: Object.fromEntries([...candidates].map(([id, candidate]) => [id, candidateDescription(candidate)]))
       }
     }
   };
-
-  // If there are targeted cards, add target choice question
-  if (Object.keys(targetCriteria).length > 0) {
-    payload.questions.target_choice = {
-      type: 'choice',
-      instructions: 'If a targeted card is played, which enemy is the priority target?',
-      criteria: targetCriteria
-    };
-  }
-
-  const res = await fetch(url, {
+  const response = await (options.fetchImpl || globalThis.fetch)(API_URL, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(options.timeoutMs ?? 30000)
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Jev API error ${res.status}: ${err}`);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Jev API error ${response.status}: ${error}`);
   }
-
-  const result = await res.json();
-  const answers = result.answers;
-
-  // Decide action based on Jev's output
-  if (answers.should_end_turn?.noul > 0.85) {
-    return {
-      action: 'end_turn',
-      target: gameState.end_turn_btn?.screen_pos,
-      reason: 'Jev decided to end turn'
-    };
+  const result = await response.json();
+  const answer = result.answers?.next_action;
+  if (answer?.type !== 'choice' || typeof answer.choice !== 'string' || !candidates.has(answer.choice)) {
+    throw new Error('Jev returned an invalid next_action choice');
   }
-
-  const chosenCardKey = answers.card_choice?.choice;
-  const chosenCard = playableCards.find(c => (c.id || c.name) === chosenCardKey) || playableCards[0];
-
-  let targetEnemy = null;
-  if (chosenCard.target_required) {
-    const chosenTargetKey = answers.target_choice?.choice;
-    targetEnemy = (gameState.enemies || []).find(e => (e.id || e.name) === chosenTargetKey) || gameState.enemies[0];
-  }
-
   return {
-    action: 'play_card',
-    card: chosenCard,
-    target_enemy: targetEnemy,
-    threat_level: answers.threat_level?.score,
-    probabilities: answers.card_choice?.probabilities
-  };
-}
-
-async function handleNonCombatDecision(gameState, apiKey, url) {
-  const options = gameState.selectable_options || [];
-  if (options.length === 0) {
-    return { action: 'wait', reason: 'No selectable options visible' };
-  }
-
-  const criteria = {};
-  options.forEach((opt, idx) => {
-    criteria[`option_${idx}`] = `Choose ${opt.name}`;
-  });
-
-  const payload = {
-    state: `Scene: ${gameState.scene}. Options available: ${options.map(o => o.name).join(', ')}`,
-    model: 'jev-latest',
-    questions: {
-      choice: {
-        type: 'choice',
-        instructions: `Select the best option for the current ${gameState.scene} screen`,
-        criteria: criteria
-      }
-    }
-  };
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
-
-  const data = await res.json();
-  const selectedKey = data.answers?.choice?.choice;
-  const matchIndex = selectedKey ? parseInt(selectedKey.replace('option_', ''), 10) : 0;
-  const chosen = options[matchIndex] || options[0];
-
-  return {
-    action: 'click',
-    target: chosen.screen_pos,
-    name: chosen.name
+    ...candidates.get(answer.choice),
+    candidate_id: answer.choice,
+    probabilities: answer.probabilities,
+    confidence: answer.confidence,
+    model: result.model,
+    usage: result.usage
   };
 }
 
 if (process.argv[1]?.endsWith('decision_jev.mjs')) {
-  console.log('Jev Decision Module ready. Using API Key:', getJevApiKey().slice(0, 10) + '...');
+  console.log('Jev Decision Module ready. API key configured:', Boolean(getJevApiKey()));
 }
-
-

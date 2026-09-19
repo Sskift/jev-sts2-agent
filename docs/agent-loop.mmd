@@ -1,0 +1,19 @@
+flowchart TD
+    A([截取当前画面]) --> B[Opus5 视觉识别]
+    B -->|场景、牌面、坐标| C{当前可决策？}
+    C -->|信息不足或非玩家回合| W[短暂等待]
+    W --> A
+    C -->|玩家回合或可操作界面| D[枚举完整候选]
+    D -->|含零费牌、卡牌+目标、结束回合、界面选项| E[Jev 一次 choice]
+    E -->|返回候选 ID| F[映射本帧坐标]
+    F --> G[CU 单次操作]
+    G -->|点击或拖拽| H[等待动画结束]
+    H --> A
+    classDef observe fill:#EAF2FF,stroke:#3E6DC8,color:#183458;
+    classDef decide fill:#E7F6EE,stroke:#33875F,color:#185036;
+    classDef execute fill:#FFF1E6,stroke:#C47932,color:#724619;
+    classDef wait fill:#F3F4F6,stroke:#89919F,color:#46515F;
+    class A,B observe;
+    class C,D,E decide;
+    class F,G execute;
+    class W,H wait;

@@ -3,3 +3,7 @@ node_modules/
 *.log
 screenshots/
 run-artifacts/
+temp/
+__pycache__/
+*.pyc
+diagrams/
