@@ -1,6 +1,6 @@
 # jev-sts2-agent
 
-Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结构化状态 → Jev 选择完整动作 → Named Pipe 调用游戏动作 → 重读状态确认**。用户已授权采用 STS2-Cli-Mod，截图、Opus 5 和 Computer Use 用于未覆盖弹窗与验收留证。**已在本机完成一场真实战斗。**
+Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结构化状态 → Jev 选择完整动作 → Named Pipe 调用游戏动作 → 重读状态确认**。用户已授权采用 STS2-Cli-Mod，截图、Opus 5 和 Computer Use 用于未覆盖弹窗与验收留证。**已实测推进至第二幕 Boss，正在以同一局三幕通关为验收继续开发。**
 
 [仓库执行计划](feishu_plan.md) · [技术选型与资源预算](docs/technology-selection.md) · [飞书方案](https://icnainlav1b8.feishu.cn/docx/Ijr1dLJpio6JvNxfcAfcnvXKnUR)
 
@@ -8,7 +8,7 @@ Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结�
 
 当前部署构建为 `0.111.0-context.2`。`npm run context:preview` 可以只读检查完整请求，不调用 Jev、不执行游戏动作。本项目在 `master` 直接提交，不为自身改动提 PR。
 
-## 当前状态
+## 早期单场验证记录
 
 - 运行栈为 Node.js + 游戏内 C# mod；可选常驻 C# / .NET 8 窗口驱动负责截图和 CU 后备。不需要 Python 或 Pillow。
 - 已安装 [STS2-Cli-Mod](https://github.com/longkerdandy/STS2-Cli-Mod) 的 `0.102.1` release，并实际验证 `ping`、`state`、`new_run` 在游戏最小化时成功。该结果只覆盖已测命令，不能推及完整战斗。
@@ -108,4 +108,4 @@ npm run test:opus
 
 本机历史证据包括 `run-artifacts/2026-09-19T16-21-36-656Z-6415a6a2/` 的真 Opus/Jev dry-run（`battle.complete:false`）、`temp/resized.png` 的非前台截图，以及 `temp/mod-tutorial.png` / `temp/mod-after-tutorial.png` / `temp/mod-tutorial-dismiss.json` 的弹窗后备记录。原始运行材料默认不提交 Git；[历史验证记录](docs/validation-2026-09-19.md)只覆盖其注明时间与范围。
 
-最终验收需串联一场真实战斗的结构化状态、Jev 答案、具体动作请求/响应、资源和敌人变化、胜利或战后奖励。本次另附截图佐证，但截图和 CU 不是默认运行或完成战斗的前置条件。仅遇模组未覆盖界面时才选择 CU，未来也可直接补模组覆盖。多房间推进和通关是后续工作，见[执行检查表](feishu_plan.md#7-执行检查表与完成标准)。
+早期单场验收串联了真实战斗的结构化状态、Jev 答案、具体动作请求/响应、资源和敌人变化与战后奖励。截图和 CU 不是默认循环的前置条件，仅在模组未覆盖界面或查看结果时使用。当前整局验收要求同一局从第一幕开始，经过第二、第三幕并进入正式胜利结算，见[执行计划](feishu_plan.md)和[整局进展](docs/full-run-progress.md)。

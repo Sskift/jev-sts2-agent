@@ -49,6 +49,9 @@ test('map decisions have current player, permanent deck, rules, downstream graph
   assert.equal(value.map.nodes.length, 5);
   assert.deepEqual(value.legal_actions[1].request, { cmd: 'choose_map_node', args: [1, 1] });
   assert.equal(value.in_combat, false);
+  const prepared = prepareModDecision(state);
+  assert.equal(prepared.payload.state.deck.statistics.non_basic_attacks, 0);
+  assert.match(prepared.payload.questions.next_action.criteria.map_1_1.effect, /nearest known elite 0 steps, rest none reachable/);
 });
 
 test('map context keeps every future branch and the visited route while omitting expired forks', () => {

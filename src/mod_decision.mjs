@@ -234,6 +234,13 @@ export function prepareModDecision(gameState, options = {}) {
   const candidates = buildModCandidates(gameState);
   if (!candidates.size) return { action: 'wait', reason: `No complete supported action in ${gameState?.screen || 'unknown'}` };
   const context = buildDecisionContext(gameState, { candidates, memory: options.memory });
+  if (gameState.screen === 'MAP') for (const route of context.map?.routes || []) {
+    const id = `map_${route.next_node.col}_${route.next_node.row}`, candidate = candidates.get(id);
+    if (!candidate) continue;
+    const nearest = route.nearest_steps_after_chosen_node;
+    candidate.description += ` After this node: nearest known elite ${nearest.ELITE ?? 'none reachable'} steps, rest ${nearest.REST_SITE ?? 'none reachable'} steps, shop ${nearest.SHOP ?? 'none reachable'} steps. Paths to boss contain ${route.counts.ELITE.min}-${route.counts.ELITE.max} elites and ${route.counts.REST_SITE.min}-${route.counts.REST_SITE.max} rests (bounds may be on different paths). Deck has ${context.deck.statistics.non_basic_attacks} non-basic attacks and ${context.deck.statistics.upgraded_attacks} upgraded attacks; consider their rules, relics and potions before taking early elites.`;
+    context.legal_actions.find(action => action.action_id === id).description = candidate.description;
+  }
   let payload = {
     model: options.model || 'jev-latest',
     state: context,

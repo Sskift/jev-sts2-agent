@@ -384,7 +384,15 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     run: context ? { run_id: context.run_id, combat_id: context.combat_id || null, act_index: context.act_index, act_floor: context.act_floor, total_floor: context.total_floor, ascension: context.ascension, game_mode: context.game_mode, modifiers: context.modifiers } : null,
     player: context?.player ?? null,
     resources: context ? { potion_capacity: context.potion_capacity } : null,
-    deck: context ? { count: context.master_deck.length, cards: groupCards(context.master_deck), kind: 'permanent master deck, distinct from combat piles' } : null,
+    deck: context ? {
+      count: context.master_deck.length, cards: groupCards(context.master_deck), kind: 'permanent master deck, distinct from combat piles',
+      statistics: {
+        by_type: Object.fromEntries([...new Set(context.master_deck.map(c => c.type))].map(type => [type, context.master_deck.filter(c => c.type === type).length])),
+        basic_cards: context.master_deck.filter(c => c.rarity === 'Basic').length,
+        non_basic_attacks: context.master_deck.filter(c => c.type === 'Attack' && c.rarity !== 'Basic').length,
+        upgraded_attacks: context.master_deck.filter(c => c.type === 'Attack' && c.is_upgraded).length
+      }
+    } : null,
     map, combat, screen_state: screenState,
     memory: memory.context(state),
     rules: context?.glossary || [],
