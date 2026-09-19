@@ -453,18 +453,41 @@ index df03d5e..3f15171 100644
 \ No newline at end of file
 +}
 diff --git a/STS2.Cli.Mod/Models/State/SelectableCardDto.cs b/STS2.Cli.Mod/Models/State/SelectableCardDto.cs
-index 1330f72..5a344eb 100644
+index 1330f72..d26bbd0 100644
 --- a/STS2.Cli.Mod/Models/State/SelectableCardDto.cs
 +++ b/STS2.Cli.Mod/Models/State/SelectableCardDto.cs
-@@ -10,6 +10,7 @@ namespace STS2.Cli.Mod.Models.State;
+@@ -10,6 +10,21 @@ namespace STS2.Cli.Mod.Models.State;
  [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
  public class SelectableCardDto
  {
++    /// <summary>
++    ///     Description of an independently upgraded preview, or null outside upgrade selections.
++    /// </summary>
 +    public string? UpgradePreview { get; set; }
++
++    /// <summary>
++    ///     Localized name of the upgraded preview, including its upgrade suffix.
++    /// </summary>
++    public string? UpgradePreviewName { get; set; }
++
++    /// <summary>
++    ///     Displayed energy cost of the upgraded preview (-1 for X-cost cards).
++    /// </summary>
++    public int? UpgradePreviewCost { get; set; }
++
      /// <summary>
      ///     Index of the card in the selection screen (0-based).
      /// </summary>
-@@ -39,4 +40,4 @@ public class SelectableCardDto
+@@ -31,7 +46,7 @@ public class SelectableCardDto
+     public string? CardType { get; set; }
+ 
+     /// <summary>
+-    ///     Energy cost to play the card.
++    ///     Displayed energy cost of the card (-1 for X-cost cards).
+     /// </summary>
+     public int? Cost { get; set; }
+ 
+@@ -39,4 +54,4 @@ public class SelectableCardDto
      ///     Card description text.
      /// </summary>
      public string? Description { get; set; }
@@ -681,27 +704,40 @@ index efe90a3..fcc3fd6 100644
 \ No newline at end of file
 +}
 diff --git a/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
-index aa3cb26..50229a2 100644
+index aa3cb26..636ad36 100644
 --- a/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,7 @@
  using MegaCrit.Sts2.Core.CardSelection;
++using MegaCrit.Sts2.Core.Entities.Cards;
  using MegaCrit.Sts2.Core.Models;
 +using MegaCrit.Sts2.Core.Nodes.Cards;
  using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
  using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
  using STS2.Cli.Mod.Models.State;
-@@ -77,7 +78,8 @@ public static class GridCardSelectStateBuilder
+@@ -70,15 +72,17 @@ public static class GridCardSelectStateBuilder
+                 var card = cards[i];
+                 try
+                 {
+-                    cardDtos.Add(new SelectableCardDto
++                    var dto = new SelectableCardDto
+                     {
+                         Index = i,
+                         CardId = card.Id.Entry,
                          CardName = StripGameTags(card.Title),
                          CardType = card.Type.ToString(),
-                         Cost = card.EnergyCost.Canonical,
+-                        Cost = card.EnergyCost.Canonical,
 -                        Description = StripGameTags(card.Description.GetFormattedText())
-+                        UpgradePreview = selectionType == "upgrade" ? StripGameTags(card.GetDescriptionForUpgradePreview()) : null,
-+                        Description = StripGameTags(card.GetDescriptionForPile(MegaCrit.Sts2.Core.Entities.Cards.PileType.Deck))
-                     });
+-                    });
++                        Cost = DisplayedEnergyCost(card),
++                        Description = StripGameTags(card.GetDescriptionForPile(PileType.Deck))
++                    };
++                    if (selectionType == "upgrade") AddUpgradePreview(card, dto);
++                    cardDtos.Add(dto);
                  }
                  catch (Exception ex)
-@@ -97,6 +99,7 @@ public static class GridCardSelectStateBuilder
+                 {
+@@ -97,6 +101,7 @@ public static class GridCardSelectStateBuilder
              {
                  SelectionType = selectionType,
                  Prompt = prompt,
@@ -709,10 +745,48 @@ index aa3cb26..50229a2 100644
                  MinSelect = prefs?.MinSelect ?? 1,
                  MaxSelect = prefs?.MaxSelect ?? 1,
                  Cancelable = prefs?.Cancelable ?? false,
-@@ -110,12 +113,32 @@ public static class GridCardSelectStateBuilder
+@@ -110,12 +115,70 @@ public static class GridCardSelectStateBuilder
          }
      }
  
++    private static int DisplayedEnergyCost(CardModel card) =>
++        card.EnergyCost.CostsX ? -1 : card.EnergyCost.GetWithModifiers(CostModifiers.All);
++
++    private static void AddUpgradePreview(CardModel card, SelectableCardDto dto)
++    {
++        if (!card.IsUpgradable) return;
++
++        try
++        {
++            // Match NUpgradePreview/NCard on a detached model. CardScope.CloneCard
++            // registers a new card in live state, so it is unsuitable for a state read.
++            var preview = (CardModel)card.MutableClone();
++            preview.UpgradeInternal();
++            preview.UpgradePreviewType = card.Pile?.IsCombatPile == true
++                ? CardUpgradePreviewType.Combat
++                : CardUpgradePreviewType.Deck;
++            preview.DynamicVars.ClearPreview();
++            preview.UpdateDynamicVarPreview(CardPreviewMode.Upgrade, null, preview.DynamicVars);
++            if (preview.Enchantment is { } enchantment)
++            {
++                enchantment.DynamicVars.ClearPreview();
++                preview.UpdateDynamicVarPreview(CardPreviewMode.Upgrade, null, enchantment.DynamicVars);
++            }
++
++            var description = StripGameTags(preview.GetDescriptionForUpgradePreview());
++            var name = StripGameTags(preview.Title);
++            var cost = DisplayedEnergyCost(preview);
++            dto.UpgradePreview = description;
++            dto.UpgradePreviewName = name;
++            dto.UpgradePreviewCost = cost;
++        }
++        catch (Exception ex)
++        {
++            DecisionContextBuilder.Report($"card {card.Id.Entry} upgrade preview: {ex.GetType().Name}");
++            Logger.Warning($"Failed to build upgrade preview for '{card.Id.Entry}': {ex.Message}");
++        }
++    }
++
 +    private static object? BuildEnchantment(NCardGridSelectionScreen screen)
 +    {
 +        var enchantment = UiUtils.GetPrivateField<EnchantmentModel>(screen, "_enchantment");
@@ -743,7 +817,7 @@ index aa3cb26..50229a2 100644
      }
  
      /// <summary>
-@@ -154,6 +177,7 @@ public static class GridCardSelectStateBuilder
+@@ -154,6 +217,7 @@ public static class GridCardSelectStateBuilder
          {
              var overlayStack = NOverlayStack.Instance;
              if (overlayStack == null) return null;
@@ -751,7 +825,7 @@ index aa3cb26..50229a2 100644
  
              var children = overlayStack.GetChildren();
              for (var i = children.Count - 1; i >= 0; i--)
-@@ -168,4 +192,4 @@ public static class GridCardSelectStateBuilder
+@@ -168,4 +232,4 @@ public static class GridCardSelectStateBuilder
              return null;
          }
      }

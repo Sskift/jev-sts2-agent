@@ -66,6 +66,10 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 
 战斗动作通过 `card_hand_index` 和 `target_combat_id` 关联同一 JSON 中的手牌与敌人，携带完整命令和简短数值提示，不逐项复制完整卡牌规则。策略指令按战斗/非战斗场景提供，减少无关的提示文字。
 
+多张选牌若完整组合超过单题容量，先让 Jev 选择数量（仅数量可变时），再逐张组成选择集。每次仍携带完整 JSON；`screen_state.selection_planning` 明确当前阶段、目标数量、已选牌和剩余数量，所有未选牌都在候选中。`legal_actions[].planning_choice` 表示本地规划步骤，对应 `request: null`，绝不发送游戏命令。选满后才生成一次完整的 `card_ids` / `nth_values` 请求，并重新核对游戏状态。中途失败或状态改变不会提交部分选择。每一步的请求和结果分别留档；组合决策不冒称具有单次选择的置信度。
+
+升级选择的 `upgrade_preview`、`upgrade_preview_name`、`upgrade_preview_cost` 来自独立卡牌副本的原生升级预览计算；副本不注册到实时卡牌集合，也不升级玩家的原牌。基础费用和升级费用分别保留，X 费为 -1。
+
 仍超限就明确停止并保留诊断，不悄悄截断卡牌、规则和当前战斗事件。长 Boss 战已实际触发过门槛，后续通过消除重复字段和无关的过去地图分支继续。模型返回后记录实际 `usage.input_tokens`/`output_tokens`、模型版本和时延；请求前保存精确 `jev-request.json` 与字节/候选指标。离线测试不能产生真实 token 用量或测量服务吞吐。
 
 ## 验证与下一阶段
@@ -76,6 +80,6 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 
 `npm run context:benchmark` 是纯离线合成基准。已保存[本机记录](evidence/2026-09-20/context-benchmark.json)：30 张永久牌、55 地图节点、100 条游戏事件、12 条 Agent 动作的案例经无损整理从 40,638 降至 27,531 字节；准备阶段中位约 1.91 ms、P95 约 3.17 ms。另一个 55 节点双分支地图案例约 9.2 KB。RSS 记录包含整个 Node/Ajv 进程，不含游戏；这些数字不是实机采集耗时、Jev 网络延迟或策略胜率。
 
-当前模组 `0.111.0-context.6` 已部署并用于整局测试。构建产物在 `mods/sts2-cli-compat/out-context/`。`npm run context:preview` 可只读检查当前完整 JSON，不调用 Jev、不发送游戏动作，也不修改记忆。`npm start` 默认连续运行至正式结算、明确错误或步数上限。
+当前模组 `0.111.0-context.7` 已部署并用于整局测试。构建产物在 `mods/sts2-cli-compat/out-context/`。`npm run context:preview` 可只读检查当前完整 JSON，不调用 Jev、不发送游戏动作，也不修改记忆。`npm start` 默认连续运行至正式结算、明确错误或步数上限。
 
 真实长战斗也出现过 65,104 字节即被服务端拒绝的情况，说明字节门槛不能当作 token 保证。历史表布局现在还会按相同字段集合和事件类型共享实际恒定值，保持原有 record_table_v2 格式并通过逐项还原测试；该局面整理到 60,336 字节、31,165 输入 tokens 后成功续玩。

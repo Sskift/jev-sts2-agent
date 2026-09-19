@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ModClient, ModTransportError } from './mod_client.mjs';
+import { ModClient, ModTransportError, validateModRequest } from './mod_client.mjs';
 import { makeModDecisionWithJev, prepareModDecision, buildModCandidates } from './mod_decision.mjs';
 import { DecisionMemory, ContextError, canonicalObservation } from './decision_context.mjs';
 import { createSession } from './artifacts.mjs';
@@ -95,7 +95,13 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
         save(path.join(directory, 'jev-request.json'), prepared.payload);
         save(path.join(directory, 'context-metrics.json'), prepared.metrics);
       }
-      const decision = await decide(state, { memory, prepared });
+      let planningCalls = 0, planningDecisions = 0;
+      const decision = await decide(state, { memory, prepared,
+        onRequest: payload => {
+          if (prepared.selectionPlan) save(path.join(directory, `jev-planning-request-${String(++planningCalls).padStart(4, '0')}.json`), payload);
+        },
+        onPlanningDecision: result => save(path.join(directory, `jev-planning-decision-${String(++planningDecisions).padStart(4, '0')}.json`), result)
+      });
       save(path.join(directory, 'decision.json'), decision);
       if (signal?.aborted) break;
       if (decision.action === 'wait') {
@@ -105,6 +111,8 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
         continue;
       }
       emptyCycles = 0;
+      if (decision.action !== 'mod_command' || !decision.request) throw new ContextError('Decision is not a complete dispatchable game command');
+      validateModRequest(decision.request);
       // A user or animation may change state while Jev is answering.
       const current = await client.state({ includePileDetails: true });
       save(path.join(directory, 'pre-action-state.json'), current);

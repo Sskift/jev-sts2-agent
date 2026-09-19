@@ -3,6 +3,7 @@ import { getJevApiKey } from './decision_jev.mjs';
 import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactContext, validateDecisionPacket } from './decision_context.mjs';
 import { combatForecast, firstHitHpLoss } from './combat_arithmetic.mjs';
+import { selectionStage, assembleSelection } from './mod_selection.mjs';
 
 const API_URL = 'https://api.typesafe.ai/v1/systemone';
 const integer = value => Number.isInteger(value) && value >= 0;
@@ -26,12 +27,12 @@ function indexedCopies(cards, idField) {
   });
 }
 
-function combinations(items, size) {
+function combinations(items, size, limit = 255) {
   const result = [];
   const visit = (start, chosen) => {
-    if (result.length > 255) throw new Error('Selection has more than 255 complete choices');
+    if (result.length > limit) return;
     if (chosen.length === size) { result.push(chosen); return; }
-    for (let index = start; index < items.length; index++) visit(index + 1, [...chosen, items[index]]);
+    for (let index = start; index <= items.length - (size - chosen.length) && result.length <= limit; index++) visit(index + 1, [...chosen, items[index]]);
   };
   visit(0, []);
   return result;
@@ -139,9 +140,15 @@ export function buildModCandidates(state) {
       if (!selection) break;
       const command = grid ? 'grid_select_card' : 'tri_select_card';
       const copies = indexedCopies(selection.cards || [], 'card_id');
-      const count = Math.max(1, selection.min_select);
-      if (integer(count) && count <= selection.max_select) for (const [index, group] of combinations(copies, count).entries()) {
-        add(`selection_${index}`, { cmd: command, card_ids: group.map(item => item.card.card_id), nth_values: group.map(item => item.nth) }, `${selection.prompt || selection.selection_type || 'Select cards'}: ${group.map(item => `${item.card.card_name}: ${item.card.description || ''}`).join('; ')}`);
+      const min = Math.max(1, selection.min_select), max = Math.min(copies.length, selection.max_select);
+      const groups = [];
+      if (integer(min) && integer(max)) for (let count = min; count <= max && groups.length <= 254; count++) groups.push(...combinations(copies, count, 254 - groups.length));
+      if (groups.length > 254) {
+        candidates.selectionPlan = { command, copies, min, max, canSkip: grid ? selection.cancelable === true : selection.can_skip === true, skipCommand: grid ? 'grid_select_skip' : 'tri_select_skip' };
+        break;
+      }
+      for (const [index, group] of groups.entries()) {
+        add(`selection_${index}`, { cmd: command, card_ids: group.map(item => item.card.card_id), nth_values: group.map(item => item.nth) }, `${selection.prompt || selection.selection_type || 'Select cards'}: ${group.map(item => `${item.card.card_name}: ${item.card.description || ''}${item.card.upgrade_preview ? ` Upgrade: ${item.card.upgrade_preview}; upgraded energy cost ${item.card.upgrade_preview_cost ?? 'unknown'}.` : ''}`).join('; ')}`);
       }
       if (grid ? selection.cancelable === true : selection.can_skip === true) add('skip_selection', { cmd: grid ? 'grid_select_skip' : 'tri_select_skip' }, 'Skip this optional card selection.');
       break;
@@ -242,9 +249,12 @@ export function buildModCandidates(state) {
 }
 
 export function prepareModDecision(gameState, options = {}) {
-  const candidates = buildModCandidates(gameState);
+  let candidates = buildModCandidates(gameState);
+  const selectionPlan = candidates.selectionPlan;
+  const stage = selectionPlan ? selectionStage(selectionPlan, options.selectionProgress) : null;
+  if (stage) candidates = stage.candidates;
   if (!candidates.size) return { action: 'wait', reason: `No complete supported action in ${gameState?.screen || 'unknown'}` };
-  const context = buildDecisionContext(gameState, { candidates, memory: options.memory });
+  const context = buildDecisionContext(gameState, { candidates, memory: options.memory, selectionPlanning: stage?.state });
   if (gameState.screen === 'MAP') for (const route of context.map?.routes || []) {
     const id = `map_${route.next_node.col}_${route.next_node.row}`, candidate = candidates.get(id);
     if (!candidate) continue;
@@ -257,8 +267,8 @@ export function prepareModDecision(gameState, options = {}) {
     state: context,
     questions: { next_action: {
       type: 'choice',
-      instructions: decisionInstructions(gameState),
-      criteria: Object.fromEntries([...candidates].map(([id, candidate]) => [id, { action_id: id, command: candidate.request.cmd, ...(!gameState.combat ? { effect: candidate.description } : {}) }]))
+      instructions: `${decisionInstructions(gameState)}${stage ? ' This is a multi-card planning stage: follow screen_state.selection_planning, choose the next component of the final set, and consider its synergy with already selected cards. A planning choice with request=null sends no game action. Every remaining card is available as a choice; the final complete set is submitted only after all choices.' : ''}`,
+      criteria: Object.fromEntries([...candidates].map(([id, candidate]) => [id, { action_id: id, command: candidate.request?.cmd || 'plan_selection', ...(!gameState.combat || stage ? { effect: candidate.description } : {}) }]))
     } }
   };
   const originalBytes = Buffer.byteLength(JSON.stringify(payload));
@@ -273,12 +283,17 @@ export function prepareModDecision(gameState, options = {}) {
   // A live 66,970-byte request used 32,114 input tokens. The provider still
   // enforces its context limit, and any HTTP rejection stops before game input.
   if (requestBytes > maxBytes) throw new ContextError('Complete context exceeds the configured request budget; no facts were truncated and no model/action request was sent.', metrics);
-  return { candidates, payload, body, metrics };
+  return { candidates, payload, body, metrics, ...(selectionPlan ? { selectionPlan, selectionProgress: stage.progress } : {}) };
 }
 
 export async function makeModDecisionWithJev(gameState, options = {}) {
   const prepared = options.prepared ?? prepareModDecision(gameState, options);
   if (prepared.action === 'wait') return prepared;
+  if (prepared.selectionPlan) return assembleSelection(gameState, options, prepared, choosePrepared, prepareModDecision);
+  return choosePrepared(gameState, options, prepared);
+}
+
+async function choosePrepared(gameState, options, prepared) {
   const { candidates, payload, body, metrics } = prepared;
   const last = options.memory?.data.actions.at(-1);
   if (gameState.screen === 'REWARD' && gameState.rewards?.rewards.length === 1 && gameState.rewards.rewards[0].type === 'Card' && last?.ok && last.request.cmd === 'reward_skip_card' && last.floor === gameState.decision_context?.total_floor && candidates.has('proceed')) {

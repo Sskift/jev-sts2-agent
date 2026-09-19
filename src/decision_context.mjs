@@ -15,6 +15,7 @@ export function validateDecisionPacket(packet) {
   if (packet.in_combat !== Boolean(packet.combat)) throw new ContextError('in_combat contradicts combat data');
   const actionIds = packet.legal_actions.map(a => a.action_id);
   if (new Set(actionIds).size !== actionIds.length) throw new ContextError('Duplicate legal action IDs');
+  for (const action of packet.legal_actions) if (action.request === null && (!action.planning_choice || !packet.screen_state.selection_planning)) throw new ContextError('A non-dispatchable choice requires an explicit selection planning stage');
   const visit = item => {
     if (!item || typeof item !== 'object') return;
     if (item.text_ref && typeof packet.text_dictionary?.[item.text_ref] !== 'string') throw new ContextError('Dangling rule reference in decision JSON');
@@ -308,11 +309,12 @@ export class DecisionMemory {
   }
 }
 
-export function buildDecisionContext(state, { candidates, memory = new DecisionMemory() } = {}) {
+export function buildDecisionContext(state, { candidates, memory = new DecisionMemory(), selectionPlanning } = {}) {
   validateContext(state);
   const source = canonicalObservation(state), context = source.decision_context;
   const screenState = { ...source };
   for (const key of ['screen', 'combat', 'map', 'decision_context']) delete screenState[key];
+  if (selectionPlanning) screenState.selection_planning = clone(selectionPlanning);
   const combat = source.combat ? { ...source.combat } : null;
   if (combat) {
     delete combat.player; // Exactly equal to the authoritative player above.
@@ -376,7 +378,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     const ownShop = Number(map.nodes.find(n => keyOf(n) === keyOf(map.current_coord)).type === 'SHOP');
     screenState.shop.route_context = { steps_to_boss: route.nearest_steps_after_chosen_node.BOSS ?? null, future_shops_before_boss: { min: route.counts.SHOP.min - ownShop, max: route.counts.SHOP.max - ownShop }, note: 'Counts follow known map edges; movement relics may add future legal choices.' };
   }
-  const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}), ...(candidate.combat_estimate ? { combat_estimate: candidate.combat_estimate } : {}) }));
+  const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.planning_choice ? { planning_choice: candidate.planning_choice } : {}), ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}), ...(candidate.combat_estimate ? { combat_estimate: candidate.combat_estimate } : {}) }));
   return validateDecisionPacket(aliasInstanceIds({
     schema_version: CONTEXT_VERSION,
     objective: { strategy: 'Win this entire run through all three acts and the final boss. Balance immediate survival, efficient combat, coherent deck/relic synergies, resources, and visible future routes.', execution_checkpoint: 'Continue through ordinary rewards and act transitions until the formal final victory screen.' },

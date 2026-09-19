@@ -11,11 +11,11 @@ try {
   const state = await client.state({ includePileDetails: true });
   const memory = new DecisionMemory({ file: path.resolve('run-artifacts/mod-memory.json') });
   const candidates = buildModCandidates(state);
-  const prepared = candidates.size ? prepareModDecision(state, { memory }) : null;
+  const prepared = candidates.size || candidates.selectionPlan ? prepareModDecision(state, { memory }) : null;
   const directory = createSession();
   fs.writeFileSync(path.join(directory, 'state.json'), JSON.stringify(state, null, 2) + '\n');
   fs.writeFileSync(path.join(directory, 'decision-context.json'), JSON.stringify(prepared?.payload.state || buildDecisionContext(state, { candidates, memory }), null, 2) + '\n');
-  console.log(JSON.stringify({ directory, screen: state.screen, legal_actions: candidates.size, metrics: prepared?.metrics, model_called: false, game_actions_sent: 0 }));
+  console.log(JSON.stringify({ directory, screen: state.screen, legal_actions: prepared?.candidates.size ?? candidates.size, selection_planning: Boolean(prepared?.selectionPlan), metrics: prepared?.metrics, model_called: false, game_actions_sent: 0 }));
 } catch (error) {
   console.error(JSON.stringify({ error: error.message, details: error.details })); process.exitCode = 1;
 } finally { client.close(); }

@@ -6,7 +6,7 @@ Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结�
 
 当前阶段是整局通关开发与实测。每个 Jev 请求自带本局、玩家、永久卡组、地图、战斗各牌堆、相关历史和 `legal_actions`，已接入真实游戏。循环能继续普通奖励，并处理事件、选牌、商店、药水与休息；最终成功要求同一局经过三幕并显示正式胜利结算。[当前进展和待验证项](docs/full-run-progress.md)与下面旧版单场战斗记录分开维护。
 
-当前部署构建为 `0.111.0-context.6`。`npm run context:preview` 可以只读检查完整请求，不调用 Jev、不执行游戏动作。本项目在 `master` 直接提交，不为自身改动提 PR。
+当前部署构建为 `0.111.0-context.7`。`npm run context:preview` 可以只读检查完整请求，不调用 Jev、不执行游戏动作。本项目在 `master` 直接提交，不为自身改动提 PR。
 
 ## 早期单场验证记录
 

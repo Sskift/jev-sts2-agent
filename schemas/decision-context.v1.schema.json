@@ -424,8 +424,16 @@
             "type": "integer",
             "minimum": 0
           },
+          "planning_choice": {
+            "oneOf": [
+              { "type": "object", "required": ["kind", "count"], "additionalProperties": false,
+                "properties": { "kind": { "const": "count" }, "count": { "type": "integer", "minimum": 1 } } },
+              { "type": "object", "required": ["kind", "card_index"], "additionalProperties": false,
+                "properties": { "kind": { "const": "card" }, "card_index": { "type": "integer", "minimum": 0 } } }
+            ]
+          },
           "request": {
-            "type": "object",
+            "type": ["object", "null"],
             "required": [
               "cmd"
             ],
