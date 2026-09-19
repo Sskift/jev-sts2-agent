@@ -8,14 +8,14 @@
 
 - 私有 GitHub 仓库、TypeSafe skill 和 Node.js/Python 原型已就绪。
 - Jev 真实 API 已验证：2026-09-19 返回 `jev-1.13.0`，单次三 primitive 测试约 675ms；此结果不代表游戏策略质量或平均延迟。
-- 指定 `claude-opus-5` 的合成图请求遇到配置网关的 `ENOTFOUND`。尚未验证 Opus 视觉成功。
+- 指定 `claude-opus-5` 的合成图请求已成功：HTTP 200，约 3.7 秒，矩形中心误差 2 像素。此前 `ENOTFOUND` 来自旧配置，现已解决。
 - 本机装有二代 `v0.111.0` 和影响玩法的 mod，尚未验证真实出牌、完整战斗或通关。
 
 本轮修复模拟误触鼠标、硬编码坐标、零费牌被跳过、重复卡牌覆盖、选牌与选敌不关联及错误响应默选第一项等问题。现阶段仍是需要实景联调的原型。
 
 ## 环境与配置
 
-需要现代 Node.js（内置 fetch，建议 22+）、Windows Python 3 和 Pillow：
+需要支持 `--use-system-ca` 的 Node.js（本机已验证 v25.8.1）、Windows Python 3 和 Pillow：
 
 ```powershell
 python -m pip install -r requirements.txt
@@ -31,15 +31,16 @@ npm run sim
 npm run check:opus-config
 ```
 
-`npm test` 是离线回归；`sim` 用合成局面和预设决策，仅打印动作计划，不调用 API、不截图、不移动鼠标。`check:opus-config` 只检查配置是否存在；旧命令 `test:opus` 是同一个配置检查，不是连通性测试。
+`npm test` 是离线回归；`sim` 用合成局面和预设决策，仅打印动作计划，不调用 API、不截图、不移动鼠标。`check:opus-config` 只检查配置是否存在。
 
 ```powershell
 npm run test:jev
+npm run test:opus
 ```
 
-此命令实际调用 TypeSafe API，会消耗少量额度。
+这两个命令分别实际调用 Jev 和 Opus 5 API，会消耗少量额度。`test:opus` 在内存中生成红矩形 PNG，只测试图片理解，不截取桌面；结果保存在 `temp/opus-smoke-result.json`。项目的 Opus 测试和启动命令使用 `--use-system-ca`，加载 Windows 系统证书库并保持 TLS 校验，不使用关闭证书校验的方式。
 
-待网关可达、游戏处于主屏且坐标完成标定后：
+网关已可达；待游戏处于主屏且坐标完成标定后：
 
 ```powershell
 npm start -- --once --dry-run

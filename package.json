@@ -8,9 +8,9 @@
     "test": "node --test test/*.test.mjs",
     "sim": "node src/agent_loop.mjs --sim",
     "test:jev": "node test_jev.mjs",
-    "test:opus": "node src/vision_opus.mjs",
-    "check:opus-config": "node src/vision_opus.mjs",
-    "start": "node src/agent_loop.mjs"
+    "test:opus": "node --use-system-ca scripts/opus_smoke.mjs",
+    "check:opus-config": "node --use-system-ca src/vision_opus.mjs",
+    "start": "node --use-system-ca src/agent_loop.mjs"
   },
   "keywords": [
     "slay-the-spire-2",
