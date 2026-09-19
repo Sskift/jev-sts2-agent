@@ -46,3 +46,18 @@ test('visible Sandpit instant death overrides safe-looking HP and Block arithmet
   boss.powers[0].amount = 2;
   assert.equal(combatForecast(combat).instant_death_if_end_turn, false);
 });
+
+test('Second Wind counts other non-attacks and exposes exhausted setup cards', () => {
+  const wind = { id: 'SECOND_WIND', index: 1, type: 'Skill', cost: 1, block: 5 };
+  const combat = { player: { hp: 9, block: 6, energy: 2 }, enemies: [{ is_alive: true, hp: 124, intents: [{ damage: 24 }] }], hand: [
+    { id: 'PERFECTED_STRIKE', index: 0, type: 'Attack' }, wind,
+    { id: 'DEFEND_IRONCLAD', index: 2, type: 'Skill' }, { id: 'DEFEND_IRONCLAD', index: 3, type: 'Skill' }
+  ] };
+  const forecast = combatForecast(combat, wind);
+  assert.equal(forecast.hp_remaining_if_end_turn, 1, 'The recorded boss position is survivable with two exhausted Defends');
+  assert.equal(forecast.immediate_block_gain, 10);
+  combat.hand = [wind, { id: 'INFLAME', index: 0, type: 'Power' }];
+  assert.deepEqual(combatForecast(combat, wind).exhausted_hand_cards, [{ index: 0, id: 'INFLAME', type: 'Power' }]);
+  combat.hand = [wind, { index: 0, type: 'Attack' }];
+  assert.equal(combatForecast(combat, wind).immediate_block_gain, 0, 'The played card is not itself exhausted');
+});

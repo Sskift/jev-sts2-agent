@@ -18,7 +18,8 @@ export function combatForecast(combat, card = null, target = null) {
   const hit = target && card ? firstHitHpLoss(card, target) : null;
   const targetDepleted = hit && hit.hp_loss >= target.hp;
   const incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !(targetDepleted && e.combat_id === target.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
-  const immediateBlock = card?.id === 'RAGE' || card?.type === 'Power' ? 0 : Math.max(0, card?.block || 0);
+  const exhausted = card?.id === 'SECOND_WIND' ? (combat.hand || []).filter(other => other.index !== card.index && other.type !== 'Attack') : null;
+  const immediateBlock = card?.id === 'RAGE' || card?.type === 'Power' ? 0 : Math.max(0, card?.block || 0) * (exhausted ? exhausted.length : 1);
   let block = combat.player.block + immediateBlock;
   if (block === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) block = 6;
   const loss = Math.max(0, incoming - block);
@@ -37,6 +38,7 @@ export function combatForecast(combat, card = null, target = null) {
     hp_loss_if_end_turn: instantDeath ? combat.player.hp : loss,
     hp_remaining_if_end_turn: instantDeath ? 0 : combat.player.hp - loss,
     fatal_if_end_turn: instantDeath || loss >= combat.player.hp,
+    ...(exhausted ? { exhausted_hand_cards: exhausted.map(c => ({ index: c.index, id: c.id, type: c.type })), immediate_block_gain: immediateBlock } : {}),
     ...(deathTimers.length ? { death_timers: deathTimers, instant_death_if_end_turn: instantDeath } : {}),
     ...(followup?.hand_indices.length ? { followup_attacks: followup } : {})
   };
