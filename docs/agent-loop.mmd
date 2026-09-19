@@ -1,19 +1,21 @@
-flowchart TD
-    A([截取当前画面]) --> B[Opus5 视觉识别]
-    B -->|场景、牌面、坐标| C{当前可决策？}
-    C -->|信息不足或非玩家回合| W[短暂等待]
-    W --> A
-    C -->|玩家回合或可操作界面| D[枚举完整候选]
-    D -->|含零费牌、卡牌+目标、结束回合、界面选项| E[Jev 一次 choice]
-    E -->|返回候选 ID| F[映射本帧坐标]
-    F --> G[CU 单次操作]
-    G -->|点击或拖拽| H[等待动画结束]
-    H --> A
-    classDef observe fill:#EAF2FF,stroke:#3E6DC8,color:#183458;
-    classDef decide fill:#E7F6EE,stroke:#33875F,color:#185036;
-    classDef execute fill:#FFF1E6,stroke:#C47932,color:#724619;
-    classDef wait fill:#F3F4F6,stroke:#89919F,color:#46515F;
-    class A,B observe;
-    class C,D,E decide;
-    class F,G execute;
-    class W,H wait;
+sequenceDiagram
+    participant G as 游戏内 CSharp 模组
+    participant N as Node.js 编排与记忆
+    participant J as Jev 决策
+    N->>G: ① 观察：读取游戏内部状态
+    G-->>N: 玩家与资源 · 永久牌组<br/>战斗各牌堆 · 敌人可见意图<br/>地图 · 历史 · 当前界面
+    Note over G,N: 动画中 / 非玩家回合：等待，然后重新观察
+    N->>N: ② 组装自包含 JSON<br/>本地记忆 + legal_actions + 有界精确算术
+    Note over N,J: 完整候选动作包含动作、目标与参数<br/>流程推进 / 唯一合法动作：Node 可直接选择，跳过 Jev
+    N->>J: ③ 需要策略时：本轮 JSON 与完整候选动作
+    J-->>N: 仅返回一个已提供的动作 ID
+    N->>G: ④ 执行前重新读取状态
+    G-->>N: 最新状态快照
+    Note over G,N: 状态变化：丢弃过期决策，回到观察<br/>仅在状态与决策输入一致时继续执行
+    N->>G: ⑤ 命名管道：发送一个精确请求
+    G->>G: 模组调用游戏原生动作<br/>游戏结算并渲染动画
+    N->>G: ⑥ 重新观察新状态
+    G-->>N: 动作后的状态
+    N->>N: 更新本地记忆，继续观察
+    Note over G,J: 主循环运行于 CSharp + Node.js，无 Python 运行时<br/>决策输入不含隐藏 RNG 或未来抽牌顺序
+    Note over G,J: 可选兜底：截图 / 视觉 / Computer Use<br/>常规主循环不依赖这些能力

@@ -71,7 +71,7 @@ export function buildModCandidates(state) {
       break;
     case 'EVENT':
       if (state.event?.is_in_dialogue === true) add('advance_dialogue', { cmd: 'advance_dialogue', args: [1] }, 'Advance all current Ancient dialogue until choices appear.');
-      else if (state.event?.is_finished === true) add('event_proceed', { cmd: 'choose_event', args: [0] }, 'Leave the finished event and open the map.');
+      else if (state.event?.is_finished === true) add('event_proceed', { cmd: 'proceed' }, 'Leave the finished event and open the map.');
       else for (const option of state.event?.options || []) {
         if (option.is_locked === false && integer(option.index)) add(`event_${option.index}`, { cmd: 'choose_event', args: [option.index] }, `${option.title}: ${option.description || ''}${option.is_proceed ? ' Proceed onward.' : ''}`);
       }
@@ -90,7 +90,9 @@ export function buildModCandidates(state) {
             const effect = `${description}${Number.isFinite(preview?.damage) ? ` Deal ${preview.damage} damage per hit.` : ''}`;
             const hit = firstHitHpLoss(card, enemy);
             const lethal = hit && hit.hp_loss >= enemy.hp ? ' First hit depletes target HP.' : '';
-            add(`card_${card.index}_target_${enemy.combat_id}`, { ...request, target: enemy.combat_id }, `${effect} Target ${enemy.name} #${enemy.combat_id}.${lethal}`, { card_hand_index: card.index, target_combat_id: enemy.combat_id });
+            const revival = enemy.powers?.some(power => power.id === 'ILLUSION_POWER' && power.amount > 0);
+            const deathRule = revival ? ' Illusion: revives next turn at full HP; a knockdown only provides temporary relief.' : enemy.is_minion ? ' Minion: abandons combat when its leader dies.' : enemies.some(other => other.is_minion) && enemies.filter(other => !other.is_minion).length === 1 ? ' Last non-minion: defeating this leader makes its minions abandon combat.' : '';
+            add(`card_${card.index}_target_${enemy.combat_id}`, { ...request, target: enemy.combat_id }, `${effect} Target ${enemy.name} #${enemy.combat_id}.${lethal}${deathRule}`, { card_hand_index: card.index, target_combat_id: enemy.combat_id });
           }
         } else if (['AnyAlly', 'AnyPlayer'].includes(card.target_type) && Array.isArray(card.valid_target_ids)) {
           for (const target of card.valid_target_ids) if (integer(target)) {

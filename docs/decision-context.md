@@ -76,7 +76,6 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 
 `npm run context:benchmark` 是纯离线合成基准。已保存[本机记录](evidence/2026-09-20/context-benchmark.json)：30 张永久牌、55 地图节点、100 条游戏事件、12 条 Agent 动作的案例经无损整理从 40,638 降至 27,531 字节；准备阶段中位约 1.91 ms、P95 约 3.17 ms。另一个 55 节点双分支地图案例约 9.2 KB。RSS 记录包含整个 Node/Ajv 进程，不含游戏；这些数字不是实机采集耗时、Jev 网络延迟或策略胜率。
 
-当前模组 `0.111.0-context.2` 已部署并用于整局测试。构建产物在 `mods/sts2-cli-compat/out-context/`。`npm run context:preview` 可只读检查当前完整 JSON，不调用 Jev、不发送游戏动作，也不修改记忆。`npm start` 默认连续运行至正式结算、明确错误或步数上限。
+当前模组 `0.111.0-context.4` 已部署并用于整局测试。构建产物在 `mods/sts2-cli-compat/out-context/`。`npm run context:preview` 可只读检查当前完整 JSON，不调用 Jev、不发送游戏动作，也不修改记忆。`npm start` 默认连续运行至正式结算、明确错误或步数上限。
 
 真实长战斗也出现过 65,104 字节即被服务端拒绝的情况，说明字节门槛不能当作 token 保证。历史表布局现在还会按相同字段集合和事件类型共享实际恒定值，保持原有 record_table_v2 格式并通过逐项还原测试；该局面整理到 60,336 字节、31,165 输入 tokens 后成功续玩。
-

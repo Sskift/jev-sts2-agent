@@ -99,7 +99,7 @@ Jev 返回后，在发动作前再次读取 state；若动作相关 fingerprint 
 
 默认允许用户并发移动光标和切窗口，前后状态差异标记为来源未知，不自动归咎于 Agent。`--strict-desktop` 是视觉循环的可选无人干预检测。用户允许必要时短暂聚焦，但实际使用须留证，不把授权写成已完成的聚焦后备实现。
 
-早期 [流程图](docs/agent-loop.png) / [Mermaid 源码](docs/agent-loop.mmd)描述的是视觉闭环分支；当前主路线以本节和前述模组闭环为准。
+[流程图](docs/agent-loop.png) / [Mermaid 源码](docs/agent-loop.mmd)已同步为当前模组闭环，与现有飞书白板保持一致。
 
 ## 6. 工程入口与操作顺序
 

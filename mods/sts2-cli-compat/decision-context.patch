@@ -182,6 +182,141 @@ index 7567890..18964eb 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/Actions/ShopBuyCardHandler.cs b/STS2.Cli.Mod/Actions/ShopBuyCardHandler.cs
+index 483ae2a..046b754 100644
+--- a/STS2.Cli.Mod/Actions/ShopBuyCardHandler.cs
++++ b/STS2.Cli.Mod/Actions/ShopBuyCardHandler.cs
+@@ -1,5 +1,4 @@
+ using MegaCrit.Sts2.Core.Entities.Merchant;
+-using MegaCrit.Sts2.Core.Nodes.Rooms;
+ using STS2.Cli.Mod.Models.Messages;
+ using STS2.Cli.Mod.State;
+ using STS2.Cli.Mod.Utils;
+@@ -17,7 +16,7 @@ namespace STS2.Cli.Mod.Actions;
+ ///     <para>
+ ///         <b>CLI command:</b> <c>sts2 shop_buy_card &lt;card_id&gt; [--nth &lt;n&gt;]</c>
+ ///     </para>
+-///     <para><b>Scene:</b> Merchant room (shop).</para>
++    ///     <para><b>Scene:</b> Merchant room or accessible merchant event.</para>
+ /// </remarks>
+ public static class ShopBuyCardHandler
+ {
+@@ -38,13 +37,11 @@ public static class ShopBuyCardHandler
+ 
+         try
+         {
+-            // --- Guard: Check merchant room ---
+-            var merchantRoom = NMerchantRoom.Instance;
+-            if (merchantRoom == null || !merchantRoom.IsInsideTree())
++            // --- Guard: Check accessible merchant inventory ---
++            var inventory = ShopUtils.GetCurrentInventory(out _, out _);
++            if (inventory == null)
+                 return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
+ 
+-            var inventory = merchantRoom.Room.GetLocalInventory();
+-
+             // --- Find the card entry by ID + nth ---
+             var entry = FindCardEntry(inventory, cardId, nth);
+             if (entry == null)
+diff --git a/STS2.Cli.Mod/Actions/ShopBuyPotionHandler.cs b/STS2.Cli.Mod/Actions/ShopBuyPotionHandler.cs
+index 1197ced..e3c370e 100644
+--- a/STS2.Cli.Mod/Actions/ShopBuyPotionHandler.cs
++++ b/STS2.Cli.Mod/Actions/ShopBuyPotionHandler.cs
+@@ -1,5 +1,4 @@
+ using MegaCrit.Sts2.Core.Entities.Merchant;
+-using MegaCrit.Sts2.Core.Nodes.Rooms;
+ using STS2.Cli.Mod.Models.Messages;
+ using STS2.Cli.Mod.State;
+ using STS2.Cli.Mod.Utils;
+@@ -19,7 +18,7 @@ namespace STS2.Cli.Mod.Actions;
+ ///     <para>
+ ///         <b>CLI command:</b> <c>sts2 shop_buy_potion &lt;potion_id&gt; [--nth &lt;n&gt;]</c>
+ ///     </para>
+-///     <para><b>Scene:</b> Merchant room (shop).</para>
++    ///     <para><b>Scene:</b> Merchant room or accessible merchant event.</para>
+ /// </remarks>
+ public static class ShopBuyPotionHandler
+ {
+@@ -40,13 +39,11 @@ public static class ShopBuyPotionHandler
+ 
+         try
+         {
+-            // --- Guard: Check merchant room ---
+-            var merchantRoom = NMerchantRoom.Instance;
+-            if (merchantRoom == null || !merchantRoom.IsInsideTree())
++            // --- Guard: Check accessible merchant inventory ---
++            var inventory = ShopUtils.GetCurrentInventory(out _, out _);
++            if (inventory == null)
+                 return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
+ 
+-            var inventory = merchantRoom.Room.GetLocalInventory();
+-
+             // --- Find the potion entry by ID + nth ---
+             var entry = FindPotionEntry(inventory, potionId, nth);
+             if (entry == null)
+diff --git a/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs b/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
+index 8b37a1f..bcbdefe 100644
+--- a/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
++++ b/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
+@@ -1,5 +1,4 @@
+ using MegaCrit.Sts2.Core.Entities.Merchant;
+-using MegaCrit.Sts2.Core.Nodes.Rooms;
+ using STS2.Cli.Mod.Models.Messages;
+ using STS2.Cli.Mod.State;
+ using STS2.Cli.Mod.Utils;
+@@ -17,7 +16,7 @@ namespace STS2.Cli.Mod.Actions;
+ ///     <para>
+ ///         <b>CLI command:</b> <c>sts2 shop_buy_relic &lt;relic_id&gt; [--nth &lt;n&gt;]</c>
+ ///     </para>
+-///     <para><b>Scene:</b> Merchant room (shop).</para>
++    ///     <para><b>Scene:</b> Merchant room or accessible merchant event.</para>
+ /// </remarks>
+ public static class ShopBuyRelicHandler
+ {
+@@ -38,13 +37,11 @@ public static class ShopBuyRelicHandler
+ 
+         try
+         {
+-            // --- Guard: Check merchant room ---
+-            var merchantRoom = NMerchantRoom.Instance;
+-            if (merchantRoom == null || !merchantRoom.IsInsideTree())
++            // --- Guard: Check accessible merchant inventory ---
++            var inventory = ShopUtils.GetCurrentInventory(out _, out _);
++            if (inventory == null)
+                 return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
+ 
+-            var inventory = merchantRoom.Room.GetLocalInventory();
+-
+             // --- Find the relic entry by ID + nth ---
+             var entry = FindRelicEntry(inventory, relicId, nth);
+             if (entry == null)
+diff --git a/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs b/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs
+index 5235f87..f35f2a2 100644
+--- a/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs
++++ b/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs
+@@ -1,5 +1,4 @@
+ using MegaCrit.Sts2.Core.Entities.Merchant;
+-using MegaCrit.Sts2.Core.Nodes.Rooms;
+ using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
+ using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
+ using STS2.Cli.Mod.Actions.Utils;
+@@ -39,13 +38,11 @@ public static class ShopRemoveCardHandler
+ 
+         try
+         {
+-            // --- Guard: Check merchant room ---
+-            var merchantRoom = NMerchantRoom.Instance;
+-            if (merchantRoom == null || !merchantRoom.IsInsideTree())
++            // --- Guard: Check accessible merchant inventory ---
++            var inventory = ShopUtils.GetCurrentInventory(out _, out _);
++            if (inventory == null)
+                 return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
+ 
+-            var inventory = merchantRoom.Room.GetLocalInventory();
+-
+             // --- Guard: Check card removal entry exists ---
+             var entry = inventory.CardRemovalEntry;
+             if (entry == null)
 diff --git a/STS2.Cli.Mod/Models/State/CardStateDto.cs b/STS2.Cli.Mod/Models/State/CardStateDto.cs
 index 3a446ca..d4299bd 100644
 --- a/STS2.Cli.Mod/Models/State/CardStateDto.cs
@@ -318,10 +453,34 @@ index 1330f72..5a344eb 100644
 \ No newline at end of file
 +}
 diff --git a/STS2.Cli.Mod/Models/State/ShopStateDto.cs b/STS2.Cli.Mod/Models/State/ShopStateDto.cs
-index 6f45c8c..dd3c66d 100644
+index 6f45c8c..4e909f2 100644
 --- a/STS2.Cli.Mod/Models/State/ShopStateDto.cs
 +++ b/STS2.Cli.Mod/Models/State/ShopStateDto.cs
-@@ -47,6 +47,7 @@ public class ShopStateDto
+@@ -3,12 +3,22 @@ using System.Diagnostics.CodeAnalysis;
+ namespace STS2.Cli.Mod.Models.State;
+ 
+ /// <summary>
+-///     Shop (merchant room) state DTO containing all available items, prices, and player gold.
++///     Shop state DTO containing all available items, prices, and player gold.
+ /// </summary>
+ [SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+ public class ShopStateDto
+ {
++    /// <summary>
++    ///     Hosting event ID, or null for an ordinary merchant room.
++    /// </summary>
++    public string? EventId { get; set; }
++
++    /// <summary>
++    ///     Localized hosting event title, or null for an ordinary merchant room.
++    /// </summary>
++    public string? EventTitle { get; set; }
++
+     /// <summary>
+     ///     Cards available for purchase (character + colorless combined).
+     /// </summary>
+@@ -47,6 +57,7 @@ public class ShopStateDto
  [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
  public class ShopCardDto
  {
@@ -329,7 +488,7 @@ index 6f45c8c..dd3c66d 100644
      /// <summary>
      ///     0-based index in the combined card entries list.
      /// </summary>
-@@ -195,4 +196,4 @@ public class ShopCardRemovalDto
+@@ -195,4 +206,4 @@ public class ShopCardRemovalDto
      ///     Whether the card removal service has already been used this visit.
      /// </summary>
      public bool IsUsed { get; set; }
@@ -724,10 +883,71 @@ index a8c1c8c..e7d3873 100755
 \ No newline at end of file
 +}
 diff --git a/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs b/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
-index eac8d59..e62d9fe 100644
+index eac8d59..145d87d 100644
 --- a/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
-@@ -84,11 +84,12 @@ public static class ShopStateBuilder
+@@ -1,6 +1,4 @@
+ using MegaCrit.Sts2.Core.Entities.Merchant;
+-using MegaCrit.Sts2.Core.Nodes;
+-using MegaCrit.Sts2.Core.Nodes.Rooms;
+ using STS2.Cli.Mod.Models.State;
+ using STS2.Cli.Mod.Utils;
+ using static STS2.Cli.Mod.Utils.TextUtils;
+@@ -8,7 +6,7 @@ using static STS2.Cli.Mod.Utils.TextUtils;
+ namespace STS2.Cli.Mod.State.Builders;
+ 
+ /// <summary>
+-///     Builds <see cref="ShopStateDto" /> from the current <see cref="NMerchantRoom" />.
++///     Builds <see cref="ShopStateDto" /> from the current merchant room or merchant event.
+ ///     Reads the <see cref="MegaCrit.Sts2.Core.Entities.Merchant.MerchantInventory" /> data model
+ ///     to extract cards, relics, potions, and card removal service info.
+ /// </summary>
+@@ -17,37 +15,33 @@ public static class ShopStateBuilder
+     private static readonly ModLogger Logger = new("ShopStateBuilder");
+ 
+     /// <summary>
+-    ///     Builds the shop state from the current <see cref="NMerchantRoom" />.
+-    ///     Returns null if the merchant room is not found or not in the scene tree.
++    ///     Builds the shop state from the current accessible merchant inventory.
++    ///     Returns null if no merchant room or merchant event is accessible.
+     /// </summary>
+     public static ShopStateDto? Build()
+     {
+         try
+         {
+-            var merchantRoom = NRun.Instance?.MerchantRoom;
+-            if (merchantRoom == null || !merchantRoom.IsInsideTree())
++            var inventory = ShopUtils.GetCurrentInventory(out var canProceed, out var sourceEvent);
++            if (inventory == null)
+             {
+-                Logger.Warning("NMerchantRoom is null or not in tree");
++                Logger.Warning("No accessible merchant inventory found");
+                 return null;
+             }
+ 
+-            var inventory = merchantRoom.Room.GetLocalInventory();
+-
+             var cards = BuildCards(inventory);
+             var relics = BuildRelics(inventory);
+             var potions = BuildPotions(inventory);
+             var cardRemoval = BuildCardRemoval(inventory);
+             var playerGold = inventory.Player.Gold;
+ 
+-            // Check proceed button state
+-            var proceedButton = merchantRoom.ProceedButton;
+-            var canProceed = proceedButton.IsEnabled;
+-
+             Logger.Info($"Built shop state: cards={cards.Count}, relics={relics.Count}, potions={potions.Count}, " +
+                         $"cardRemoval={cardRemoval != null}, gold={playerGold}, canProceed={canProceed}");
+ 
+             return new ShopStateDto
+             {
++                EventId = sourceEvent?.Id.Entry,
++                EventTitle = sourceEvent != null ? GetLocText(sourceEvent.Title) : null,
+                 Cards = cards,
+                 Relics = relics,
+                 Potions = potions,
+@@ -84,11 +78,12 @@ public static class ShopStateBuilder
                      CardId = card?.Id.Entry ?? string.Empty,
                      CardName = card != null ? StripGameTags(card.Title) : string.Empty,
                      Description = card != null
@@ -755,7 +975,7 @@ index 024b98a..46d6a4f 100644
              }
  
 diff --git a/STS2.Cli.Mod/State/StateHandler.cs b/STS2.Cli.Mod/State/StateHandler.cs
-index 27bedca..8c4e294 100755
+index 27bedca..16b70b1 100755
 --- a/STS2.Cli.Mod/State/StateHandler.cs
 +++ b/STS2.Cli.Mod/State/StateHandler.cs
 @@ -52,8 +52,9 @@ public static class StateHandler
@@ -795,7 +1015,21 @@ index 27bedca..8c4e294 100755
          if (!RunManager.Instance.IsInProgress) return "UNKNOWN";
  
          // --- Combat and its sub-states ---
-@@ -214,4 +222,4 @@ public static class StateHandler
+@@ -199,9 +207,10 @@ public static class StateHandler
+                 }
+         }
+ 
+-        // --- Room-based screens ---
+-        var eventRoom = NEventRoom.Instance;
+-        if (eventRoom is not null && eventRoom.IsInsideTree()) return "EVENT";
++        // --- Room-based screens ---
++        var eventRoom = NEventRoom.Instance;
++        if (eventRoom is not null && eventRoom.IsInsideTree())
++            return ShopUtils.GetCurrentInventory(out _, out _) != null ? "SHOP" : "EVENT";
+ 
+         var restSiteRoom = NRestSiteRoom.Instance;
+         if (restSiteRoom is not null && restSiteRoom.IsInsideTree()) return "REST_SITE";
+@@ -214,4 +223,4 @@ public static class StateHandler
  
          return "UNKNOWN";
      }
@@ -825,6 +1059,72 @@ index 20475ea..3bc9877 100644
      }
 -}
 \ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Utils/ShopUtils.cs b/STS2.Cli.Mod/Utils/ShopUtils.cs
+new file mode 100644
+index 0000000..cb0f109
+--- /dev/null
++++ b/STS2.Cli.Mod/Utils/ShopUtils.cs
+@@ -0,0 +1,60 @@
++using MegaCrit.Sts2.Core.Entities.Merchant;
++using MegaCrit.Sts2.Core.Models;
++using MegaCrit.Sts2.Core.Models.Events;
++using MegaCrit.Sts2.Core.Nodes;
++using MegaCrit.Sts2.Core.Nodes.CommonUi;
++using MegaCrit.Sts2.Core.Nodes.Events.Custom;
++using MegaCrit.Sts2.Core.Nodes.Rooms;
++using MegaCrit.Sts2.Core.Nodes.Screens.ScreenContext;
++
++namespace STS2.Cli.Mod.Utils;
++
++/// <summary>
++///     Resolves the inventory shared by shop state extraction and purchase actions.
++/// </summary>
++public static class ShopUtils
++{
++    /// <summary>
++    ///     Gets the current merchant room's inventory, or the inventory already bound
++    ///     to an accessible FakeMerchant event UI. Does not open UI or generate stock.
++    /// </summary>
++    /// <param name="canProceed">Whether the current merchant's proceed button is enabled.</param>
++    /// <param name="sourceEvent">The event hosting this shop, or null for an ordinary merchant room.</param>
++    /// <returns>The current local inventory, or null if no shop is accessible.</returns>
++    public static MerchantInventory? GetCurrentInventory(out bool canProceed, out EventModel? sourceEvent)
++    {
++        canProceed = false;
++        sourceEvent = null;
++
++        var eventRoom = NEventRoom.Instance;
++        if (eventRoom != null && eventRoom.IsInsideTree())
++        {
++            if (EventUtils.GetEventModel(eventRoom) is not FakeMerchant { StartedFight: false } eventModel ||
++                eventRoom.CustomEventNode is not NFakeMerchant merchant || !merchant.IsVisibleInTree())
++                return null;
++
++            var inventoryNode = merchant.Inventory;
++            if (inventoryNode?.Inventory == null || !inventoryNode.IsInsideTree()) return null;
++
++            // A closed rug is inspectable only while the merchant can be opened normally.
++            // Once a fight starts, or another screen covers the event, its stock is unavailable.
++            var activeScreen = ActiveScreenContext.Instance.GetCurrentScreen();
++            var merchantButton = merchant.MerchantButton;
++            var canOpen = activeScreen == merchant &&
++                          merchantButton is { IsEnabled: true, IsLocalPlayerDead: false } &&
++                          merchantButton.IsVisibleInTree();
++            if (!(inventoryNode.IsOpen && activeScreen == inventoryNode) && !canOpen) return null;
++
++            var proceedButton = merchant.GetNodeOrNull<NProceedButton>("%ProceedButton");
++            canProceed = proceedButton is { IsEnabled: true } && proceedButton.IsVisibleInTree();
++            sourceEvent = eventModel;
++            return inventoryNode.Inventory;
++        }
++
++        var merchantRoom = NRun.Instance?.MerchantRoom;
++        if (merchantRoom == null || !merchantRoom.IsInsideTree()) return null;
++
++        canProceed = merchantRoom.ProceedButton.IsEnabled;
++        return merchantRoom.Room.GetLocalInventory();
++    }
 +}
 diff --git a/STS2.Cli.Mod/Utils/TextUtils.cs b/STS2.Cli.Mod/Utils/TextUtils.cs
 index d510bdd..3ab6190 100644

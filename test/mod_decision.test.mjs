@@ -29,6 +29,7 @@ test('selected character advances via embark, menu saves continue and event dial
   assert.deepEqual([...buildModCandidates(selected).keys()], ['embark']);
   assert.deepEqual(buildModCandidates({ screen: 'MENU', menu: { has_run_save: true } }).get('continue_run').request, { cmd: 'continue_run' });
   assert.deepEqual(buildModCandidates({ screen: 'EVENT', event: { is_in_dialogue: true } }).get('advance_dialogue').request, { cmd: 'advance_dialogue', args: [1] });
+  assert.deepEqual(buildModCandidates({ screen: 'EVENT', event: { is_finished: true, layout_type: 'Custom' } }).get('event_proceed').request, { cmd: 'proceed' }, 'Finished custom events need not have a standard option-button layout');
 });
 
 test('Jev must select an enumerated complete action, never arbitrary JSON or an absent ID', async () => {
