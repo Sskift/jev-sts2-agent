@@ -90,7 +90,7 @@ test('relic counter history carries changed values without duplicating the inven
   const fixed = { id: 'FIXED', description: 'Constant rule' };
   const counted = { id: 'COUNTED', description: 'Trigger every three attacks', counter: 1 };
   memory.data.observations.push({ floor: 1, changes: { relics: { before: [fixed, counted], after: [fixed, { ...counted, counter: 2 }] } } });
-  assert.deepEqual(memory.context(state).observations[0].changes.relics, {
-    added: [], removed: [], updated: [{ id: 'COUNTED', fields: { counter: { before: 1, after: 2 } } }]
-  });
+  const context = memory.context(state);
+  assert.deepEqual(context.observations, []);
+  assert.deepEqual(context.relic_updates, [{ observation_sequence: 0, floor: 1, id: 'COUNTED', field: 'counter', before: 1, after: 2 }]);
 });

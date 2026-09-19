@@ -67,6 +67,8 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 
 战斗动作通过 `card_hand_index` 和 `target_combat_id` 关联同一 JSON 中的手牌与敌人，携带完整命令和简短数值提示，不逐项复制完整卡牌规则。策略指令按战斗/非战斗场景提供，减少无关的提示文字。
 
+成功出牌若能按回合、实际牌副本和次数与游戏历史一一对应，将出牌时的规则、选择目标、nth 和返回界面附到 `CardPlayStartedEntry`，不再另列一份 Agent 动作。自动打牌或缺少完整结束记录使对应关系不明确时，保留原始两组记录。遗物字段变化使用 `memory.relic_updates` 的平面记录，并通过 `observation_sequence` 保持与生命等同时变化的先后关系。字段和值仍保留；完整原始日志也保存在本地。请求内不透明副本、文字和牌面引用使用短别名，别名本身不包含抽牌顺序等游戏信息。
+
 多张选牌若完整组合超过单题容量，先让 Jev 选择数量（仅数量可变时），再逐张组成选择集。每次仍携带完整 JSON；`screen_state.selection_planning` 明确当前阶段、目标数量、已选牌和剩余数量，所有未选牌都在候选中。`legal_actions[].planning_choice` 表示本地规划步骤，对应 `request: null`，绝不发送游戏命令。选满后才生成一次完整的 `card_ids` / `nth_values` 请求，并重新核对游戏状态。中途失败或状态改变不会提交部分选择。每一步的请求和结果分别留档；组合决策不冒称具有单次选择的置信度。
 
 升级选择的 `upgrade_preview`、`upgrade_preview_name`、`upgrade_preview_cost` 来自独立卡牌副本的原生升级预览计算；副本不注册到实时卡牌集合，也不升级玩家的原牌。基础费用和升级费用分别保留，X 费为 -1。

@@ -29,6 +29,50 @@ test('temporary Windows sharing violations do not lose the atomic memory write',
   assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')), memory.data);
 });
 
+test('frequent relic updates retain each value and ordering without repeated nested snapshots', () => {
+  const state = completeCombat(), memory = new DecisionMemory(); memory.observe(state);
+  const relic = { id: 'KUNAI', name: 'Kunai', description: 'Every 3 Attacks grant 1 Dexterity.', counter: 0, status: 'Normal' };
+  for (let i = 0; i < 12; i++) memory.data.observations.push({ floor: 1, combat_id: 'offline-combat', changes: {
+    relics: { before: [{ ...relic, counter: i % 3 }], after: [{ ...relic, counter: (i + 1) % 3 }] },
+    ...(i === 5 ? { hp: { before: 40, after: 35 } } : {})
+  } });
+  const original = structuredClone(memory.data.observations), result = memory.context(state);
+  assert.equal(result.relic_updates.length, 12);
+  assert.deepEqual(result.relic_updates.map(update => [update.observation_sequence, update.before, update.after]), Array.from({ length: 12 }, (_, i) => [i, i % 3, (i + 1) % 3]));
+  assert.equal(result.observations.length, 1);
+  assert.equal(result.observations[0].observation_sequence, 5);
+  assert.deepEqual(result.observations[0].changes.hp, { before: 40, after: 35 });
+  assert.deepEqual(memory.data.observations, original);
+  const built = packet(state, memory), packed = compactContext(built);
+  assert.deepEqual(expandRecordTables(packed).memory.relic_updates, built.memory.relic_updates);
+  validateDecisionPacket(packed);
+});
+
+test('matching card choices join the game history with rules and targets, while ambiguous autoplay stays separate', () => {
+  const state = completeCombat(), memory = new DecisionMemory(); memory.observe(state);
+  memory.begin({ cmd: 'play_card', id: 'STRIKE_IRONCLAD', nth: 0, target: 42 }, state);
+  memory.finish({ ok: true }, state);
+  state.decision_context.combat_history = [
+    { sequence: 0, round: 2, type: 'CardPlayStartedEntry', actor_id: 0, card_id: 'STRIKE_IRONCLAD', card_instance_id: 'STRIKE_IRONCLAD' },
+    { sequence: 1, round: 2, type: 'DamageReceivedEntry', actor_id: 42, amount: 6 },
+    { sequence: 2, round: 2, type: 'CardPlayFinishedEntry', actor_id: 0, card_id: 'STRIKE_IRONCLAD', card_instance_id: 'STRIKE_IRONCLAD' }
+  ];
+  const original = structuredClone(memory.data), result = packet(state, memory);
+  assert.equal(result.memory.actions.length, 0);
+  assert.equal(result.combat.history.length, 3);
+  assert.equal(result.combat.history[0].played_card_at_request.description, 'Deal 6 damage.');
+  assert.equal(result.combat.history[0].selected_target_combat_id, 42);
+  assert.equal(result.combat.history[0].selected_duplicate_nth, 0);
+  assert.deepEqual(memory.data, original);
+  const packed = compactContext(result), expanded = expandRecordTables(packed);
+  assert.ok(expanded.combat.history[0].played_card_at_request.card_state_ref);
+  validateDecisionPacket(packed);
+  state.decision_context.combat_history.push({ ...state.decision_context.combat_history[0], sequence: 3 });
+  const ambiguous = packet(state, memory);
+  assert.equal(ambiguous.memory.actions.length, 1);
+  assert.equal(ambiguous.combat.history[0].played_card_at_request, undefined);
+});
+
 test('map decisions have current player, permanent deck, rules, downstream graph and executable options together', () => {
   const graph = { act_index: 0, nodes: [
     { col: 0, row: 1, type: 'MONSTER', children: [{ col: 0, row: 2 }] },

@@ -314,7 +314,55 @@ export class DecisionMemory {
       if (observation.changes.master_deck?.before) observation.changes.master_deck = deckDifference(observation.changes.master_deck);
       for (const field of ['relics', 'potions']) if (observation.changes[field]?.before) observation.changes[field] = effectDifference(observation.changes[field]);
     }
-    return { coverage: `${this.data.coverage} Current-act completed rooms retain net resource/deck changes per room; earlier acts use one net change summary across its floor range. Strategic choices and event outcomes remain listed. Intermediate snapshots and expired combat actions stay in local logs. Successful travel already in map.visited and command echoes are not duplicated; other successful travel is in travel_history. Combat energy/Block use current values and engine history. Deck changes list added/removed copies; an upgrade replaces its former state. Relic/potion changes list added, removed and updated fields.`, actions: decisions, ...(travel.length ? { travel_history: travel } : {}), observations: relevant.filter(o => Object.keys(o.changes).length), pending: clone(this.data.pending) };
+    // Flatten frequently changing relic counters instead of repeating nested
+    // arrays for every card play. Sequence numbers retain their position beside
+    // simultaneous HP/resource changes; no observed field change is discarded.
+    const relicUpdates = [];
+    for (const [sequence, observation] of relevant.entries()) {
+      observation.observation_sequence = sequence;
+      const relics = observation.changes.relics;
+      if (!relics?.updated?.length) continue;
+      for (const update of relics.updated) for (const [field, values] of Object.entries(update.fields)) relicUpdates.push({ observation_sequence: sequence, floor: observation.floor, ...(observation.combat_id ? { combat_id: observation.combat_id } : {}), id: update.id, field, ...values });
+      relics.updated = [];
+      if (!relics.added.length && !relics.removed.length) delete observation.changes.relics;
+    }
+    if (!relicUpdates.length) for (const observation of relevant) delete observation.observation_sequence;
+    return { coverage: `${this.data.coverage} Current-act completed rooms retain net resource/deck changes per room; earlier acts use one net change summary across its floor range. Strategic choices and event outcomes remain listed. Intermediate snapshots and expired combat actions stay in local logs. Successful travel already in map.visited and command echoes are not duplicated; other successful travel is in travel_history. Combat energy/Block use current values and engine history. Deck changes list added/removed copies; an upgrade replaces its former state. Relic/potion changes list added, removed and updated fields. Relic field updates use relic_updates, sharing observation_sequence with observations to preserve their order and simultaneous changes.`, actions: decisions, ...(travel.length ? { travel_history: travel } : {}), observations: relevant.filter(o => Object.keys(o.changes).length), ...(relicUpdates.length ? { relic_updates: relicUpdates } : {}), pending: clone(this.data.pending) };
+  }
+}
+
+function mergeObservedCardPlays(combat, memoryContext) {
+  if (!combat?.history?.length) return;
+  const keyFor = (round, instance, id) => instance ? JSON.stringify([round, instance, id]) : null;
+  const groups = new Map();
+  for (const action of memoryContext.actions) {
+    if (!action.ok || action.request.cmd !== 'play_card' || !action.played_card_at_request) continue;
+    const card = action.played_card_at_request;
+    const key = keyFor(action.round, card.details?.instance_id, action.request.id);
+    if (!key) continue;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(action);
+  }
+  const merged = new Set();
+  for (const [key, actions] of groups) {
+    const matches = combat.history.filter(entry => keyFor(entry.round, entry.card_instance_id, entry.card_id) === key);
+    const starts = matches.filter(entry => entry.type === 'CardPlayStartedEntry');
+    const finishes = matches.filter(entry => entry.type === 'CardPlayFinishedEntry');
+    // Autoplay, human actions or an unfinished play make correspondence unclear.
+    // Retain both logs unless the entire round/instance group matches one to one.
+    if (starts.length !== actions.length || finishes.length !== actions.length) continue;
+    for (const [index, action] of actions.entries()) {
+      const entry = starts[index];
+      entry.played_card_at_request = action.played_card_at_request;
+      if (action.request.target !== undefined) entry.selected_target_combat_id = action.request.target;
+      if (action.request.nth !== undefined) entry.selected_duplicate_nth = action.request.nth;
+      entry.agent_after_screen = action.after_screen;
+      merged.add(action);
+    }
+  }
+  if (merged.size) {
+    memoryContext.actions = memoryContext.actions.filter(action => !merged.has(action));
+    combat.history_coverage += ' Matched successful Agent card choices are attached to CardPlayStartedEntry: then-current card rules, target, duplicate nth and resulting screen. Unmatched commands remain in memory.actions.';
   }
 }
 
@@ -387,6 +435,8 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     const ownShop = Number(map.nodes.find(n => keyOf(n) === keyOf(map.current_coord)).type === 'SHOP');
     screenState.shop.route_context = { steps_to_boss: route.nearest_steps_after_chosen_node.BOSS ?? null, future_shops_before_boss: { min: route.counts.SHOP.min - ownShop, max: route.counts.SHOP.max - ownShop }, note: 'Counts follow known map edges; movement relics may add future legal choices.' };
   }
+  const memoryContext = memory.context(state);
+  mergeObservedCardPlays(combat, memoryContext);
   const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.planning_choice ? { planning_choice: candidate.planning_choice } : {}), ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}), ...(candidate.combat_estimate ? { combat_estimate: candidate.combat_estimate } : {}) }));
   return validateDecisionPacket(aliasInstanceIds({
     schema_version: CONTEXT_VERSION,
@@ -405,7 +455,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
       }
     } : null,
     map, combat, screen_state: screenState,
-    memory: memory.context(state),
+    memory: memoryContext,
     rules: context?.glossary || [],
     information: { source: 'single mod main-thread snapshot plus explicitly scoped local memory', unknown: ['unobserved draw order; recorded card effects may establish partial knowledge', 'unrevealed question-mark contents and rewards', 'future enemy random choices', 'later acts', 'history before available observations', ...(context?.extraction_errors || []).filter(e => /^history\.\d+\.description: NullReferenceException$/.test(e)).map(e => `Unavailable history display text (${e}); typed event and recorded actions retained.`)], card_grouping: 'Each cards entry with count represents that many exactly equivalent card states; instance_ids distinguish copies. Never infer draw order from array order or IDs.', extraction_errors: (context?.extraction_errors || []).filter(e => !/^history\.\d+\.description: NullReferenceException$/.test(e)) },
     legal_actions: legalActions
@@ -419,7 +469,7 @@ function aliasInstanceIds(context) {
   const aliases = new Map();
   const visit = (item, key = '') => {
     if (typeof item === 'string' && /(^|_)ids?$/.test(key) && /^[a-f0-9]{32}$/.test(item)) {
-      if (!aliases.has(item)) aliases.set(item, `instance_${aliases.size + 1}`);
+      if (!aliases.has(item)) aliases.set(item, `i${aliases.size + 1}`);
       return aliases.get(item);
     }
     if (Array.isArray(item)) return item.map(value => visit(value, key));
@@ -442,7 +492,7 @@ export function deduplicateText(value) {
   visit(value);
   const ids = new Map();
   for (const [text, count] of counts) {
-    const id = `rule_${ids.size + 1}`, bytes = Buffer.byteLength(JSON.stringify(text));
+    const id = `t${ids.size + 1}`, bytes = Buffer.byteLength(JSON.stringify(text));
     const referenceBytes = Buffer.byteLength(JSON.stringify({ text_ref: id }));
     if (count * bytes > count * referenceBytes + bytes + id.length + 32) ids.set(text, id);
   }
@@ -467,10 +517,11 @@ export function recordTable(records) {
 
 function compactRecords(records, nested = true) {
   const layouts = [], lookup = new Map();
-  const constantKeys = new Set(['type', 'side', 'actor_id', 'floor', 'combat_id', 'screen', 'ok', 'source']);
+  const constantKeys = new Set(['type', 'side', 'actor_id', 'source_id', 'floor', 'combat_id', 'screen', 'ok', 'source', 'cmd', 'field']);
+  const isConstantKey = key => constantKeys.has(nested ? key : JSON.parse(key).at(-1));
   const rows = records.map(record => {
-    const constants = Object.fromEntries(Object.entries(record).filter(([key]) => constantKeys.has(key)));
-    const fields = Object.keys(record).filter(key => !constantKeys.has(key));
+    const constants = Object.fromEntries(Object.entries(record).filter(([key]) => isConstantKey(key)));
+    const fields = Object.keys(record).filter(key => !isConstantKey(key));
     const layout = { constants, fields }, signature = JSON.stringify(layout);
     if (!lookup.has(signature)) { lookup.set(signature, layouts.length); layouts.push(layout); }
     return [lookup.get(signature), ...fields.map(key => record[key])];
@@ -480,7 +531,8 @@ function compactRecords(records, nested = true) {
   // to records with the same shape and event type. No event or field is lost.
   const groups = new Map();
   for (const record of records) {
-    const key = JSON.stringify([Object.keys(record), record.type]);
+    const kind = nested ? record.type ?? record.request?.cmd ?? record.field : record['["type"]'] ?? record['["request","cmd"]'] ?? record['["field"]'];
+    const key = JSON.stringify([Object.keys(record), kind]);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(record);
   }
@@ -549,19 +601,19 @@ export function compactContext(context) {
     }
   }
   const cardStates = {}, known = new Map();
-  for (const action of copy.memory.actions || []) if (action.played_card_at_request) {
+  for (const action of [...(copy.memory.actions || []), ...(copy.combat?.history || [])]) if (action.played_card_at_request) {
     const card = clone(action.played_card_at_request), instance = card.details?.instance_id;
     if (card.details) delete card.details.instance_id;
     const signature = JSON.stringify(card);
     if (!known.has(signature)) {
-      const id = `played_${known.size + 1}`;
+      const id = `c${known.size + 1}`;
       known.set(signature, id); cardStates[id] = card;
     }
     action.played_card_at_request = { card_state_ref: known.get(signature), instance_id: instance };
   }
   if (known.size) copy.memory.card_states = cardStates;
   if (copy.combat?.history?.length) copy.combat.history = compactRecords(copy.combat.history);
-  for (const key of ['actions', 'observations']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
+  for (const key of ['actions', 'observations', 'relic_updates']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
   for (const container of [copy.deck, copy.combat?.draw_pile]) if (container?.cards?.length) container.cards = compactRecords(container.cards);
   for (const key of ['hand', 'discard_pile', 'exhaust_pile', 'play_pile', 'enemies']) if (copy.combat?.[key]?.length) copy.combat[key] = compactRecords(copy.combat[key]);
   if (copy.legal_actions?.length) copy.legal_actions = compactRecords(copy.legal_actions);

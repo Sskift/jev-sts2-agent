@@ -404,6 +404,9 @@
         "observations": {
           "$ref": "#/$defs/records"
         },
+        "relic_updates": {
+          "$ref": "#/$defs/records"
+        },
         "pending": {
           "type": [
             "object",
@@ -567,7 +570,7 @@
           "properties": {
             "text_ref": {
               "type": "string",
-              "pattern": "^rule_[0-9]+$"
+              "pattern": "^(rule_|t)[0-9]+$"
             }
           }
         }
