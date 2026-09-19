@@ -11,7 +11,7 @@ test('visible damage caps prevent a false lethal and defensive arithmetic expose
   const defend = combatForecast(combat, { cost: 1, block: 8 });
   assert.equal(defend.hp_remaining_if_end_turn, 4);
   assert.equal(defend.fatal_if_end_turn, false);
-  assert.equal(defend.energy_after_card, 1);
+  assert.equal(defend.energy_after_printed_cost, 1);
   enemy.powers = [];
   assert.equal(combatForecast(combat, bash, enemy).hp_remaining_if_end_turn, 2);
 });

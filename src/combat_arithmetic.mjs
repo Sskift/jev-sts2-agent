@@ -42,7 +42,7 @@ export function combatForecast(combat, card = null, target = null) {
       .map(power => ({ target_id: enemy.combat_id, power_id: power.id, enemy_turns_remaining_after_card: power.amount + Number(card?.id === 'FRANTIC_ESCAPE') })));
   const instantDeath = deathTimers.some(timer => timer.enemy_turns_remaining_after_card <= 1);
   return {
-    energy_after_card: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
+    energy_after_printed_cost: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
     first_hit_hp_loss: hit?.hp_loss ?? null,
     ...(areaHits ? { first_hit_hp_loss_by_target: areaHits } : {}),
     ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss, hp_remaining_after_declared_loss: combat.player.hp - selfHpLoss, fatal_from_declared_hp_loss: selfHpLoss >= combat.player.hp } : {}),
