@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { actionFingerprint, observeModBattle, runModLoop } from '../src/mod_loop.mjs';
+import { actionFingerprint, observeModBattle, runModLoop, observedEndTurnSelection } from '../src/mod_loop.mjs';
+import { DecisionMemory } from '../src/decision_context.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
 import { ModTransportError } from '../src/mod_client.mjs';
 import { withContext } from './fixtures/context.mjs';
@@ -58,6 +59,46 @@ function chooseAttack(state) {
   assert.ok(choice, 'Offline combat fixture needs an attack candidate');
   return choice;
 }
+
+function enemySelection() {
+  const state = combat();
+  state.screen = 'TRI_SELECT';
+  state.combat.is_player_turn = false;
+  state.combat.is_player_actions_disabled = true;
+  state.tri_select = { min_select: 1, max_select: 1, can_skip: false, cards: [{ index: 0, card_id: 'STATUS_A', card_name: 'Status A', description: 'A visible test effect.', cost: -1 }] };
+  return state;
+}
+
+test('end-turn transport timeout yields to an observed mandatory enemy selection without replay', async t => {
+  const initial = combat(), modal = enemySelection(), artifactDir = temporaryFolder(t);
+  const client = scriptedClient([initial, initial, modal, modal], async request => { throw new ModTransportError('Timed out after dispatch', { request, dispatched: true, code: 'MOD_TIMEOUT' }); });
+  const result = await runModLoop({ client, artifactDir, maxSteps: 1, intervalMs: 0, logger() {}, decide: () => ({ action: 'mod_command', request: { cmd: 'end_turn' } }) });
+  assert.equal(result.error, undefined);
+  assert.deepEqual(client.requests, [{ cmd: 'end_turn' }]);
+  const memory = JSON.parse(fs.readFileSync(path.join(artifactDir, 'memory.json')));
+  assert.equal(memory.pending, null);
+  assert.equal(memory.actions[0].result.turn_completed, false);
+  assert.equal(memory.actions[0].result.command_replayed, false);
+});
+
+test('a pending end-turn resumes at the observed selection, but different combat or active player phase stays unresolved', async t => {
+  const initial = combat(), modal = enemySelection(), artifactDir = temporaryFolder(t), memoryFile = path.join(artifactDir, 'memory.json');
+  const memory = new DecisionMemory({ file: memoryFile });
+  memory.observe(initial); memory.begin({ cmd: 'end_turn' }, initial);
+  const pending = structuredClone(memory.data.pending);
+  assert.ok(observedEndTurnSelection(pending, modal));
+  const wrong = structuredClone(modal); wrong.combat.is_player_turn = true;
+  assert.equal(observedEndTurnSelection(pending, wrong), null);
+  assert.equal(observedEndTurnSelection({ ...pending, combat_id: 'different' }, modal), null);
+  assert.equal(observedEndTurnSelection({ ...pending, request: { cmd: 'play_card' } }, modal), null);
+  assert.equal(observedEndTurnSelection({ ...pending, round: 5 }, modal), null);
+  const client = scriptedClient([modal, modal, initial]);
+  const result = await runModLoop({ client, artifactDir, memoryFile, maxSteps: 1, intervalMs: 0, logger() {}, decide: state => [...buildModCandidates(state).values()][0] });
+  assert.equal(result.error, undefined);
+  assert.deepEqual(client.requests, [{ cmd: 'tri_select_card', card_ids: ['STATUS_A'], nth_values: [0] }]);
+  const saved = JSON.parse(fs.readFileSync(memoryFile));
+  assert.equal(saved.actions.filter(action => action.request.cmd === 'end_turn').length, 1);
+});
 
 test('reward without observed combat never meets battle acceptance', () => {
   const battle = tracker();

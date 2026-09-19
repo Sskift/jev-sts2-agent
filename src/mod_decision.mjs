@@ -4,6 +4,7 @@ import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactContext, validateDecisionPacket } from './decision_context.mjs';
 import { combatForecast, firstHitHpLoss } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
+import { needsStrategyAssessment, prepareStrategyAssessment } from './strategy_assessment.mjs';
 
 const API_URL = 'https://api.typesafe.ai/v1/systemone';
 const integer = value => Number.isInteger(value) && value >= 0;
@@ -259,6 +260,7 @@ export function prepareModDecision(gameState, options = {}) {
   if (stage) candidates = stage.candidates;
   if (!candidates.size) return { action: 'wait', reason: `No complete supported action in ${gameState?.screen || 'unknown'}` };
   const context = buildDecisionContext(gameState, { candidates, memory: options.memory, selectionPlanning: stage?.state });
+  if (options.strategyAssessment) context.strategy_assessment = { source: 'Jev judgment of this observation, advisory rather than a verified fact', priority: options.strategyAssessment.priority, meaning: options.strategyAssessment.description };
   if (gameState.screen === 'MAP') for (const route of context.map?.routes || []) {
     const id = `map_${route.next_node.col}_${route.next_node.row}`, candidate = candidates.get(id);
     if (!candidate) continue;
@@ -271,7 +273,7 @@ export function prepareModDecision(gameState, options = {}) {
     state: context,
     questions: { next_action: {
       type: 'choice',
-      instructions: `${decisionInstructions(gameState)}${stage ? ' This is a multi-card planning stage: follow screen_state.selection_planning, choose the next component of the final set, and consider its synergy with already selected cards. A planning choice with request=null sends no game action. Every remaining card is available as a choice; the final complete set is submitted only after all choices.' : ''}`,
+      instructions: `${decisionInstructions(gameState)}${options.strategyAssessment ? ' Use strategy_assessment as an advisory view of the deck\'s largest current need. Compare the actual offered choices against that need and their costs; it does not require buying or taking a card. If nothing helps enough, skip or preserve resources. Reconsider the advice when a concrete option provides a better overall result.' : ''}${stage ? ' This is a multi-card planning stage: follow screen_state.selection_planning, choose the next component of the final set, and consider its synergy with already selected cards. A planning choice with request=null sends no game action. Every remaining card is available as a choice; the final complete set is submitted only after all choices.' : ''}`,
       criteria: Object.fromEntries([...candidates].map(([id, candidate]) => [id, { action_id: id, command: candidate.request?.cmd || 'plan_selection', ...(!gameState.combat || stage ? { effect: candidate.description } : {}) }]))
     } }
   };
@@ -291,10 +293,17 @@ export function prepareModDecision(gameState, options = {}) {
 }
 
 export async function makeModDecisionWithJev(gameState, options = {}) {
-  const prepared = options.prepared ?? prepareModDecision(gameState, options);
+  let prepared = options.prepared ?? prepareModDecision(gameState, options);
   if (prepared.action === 'wait') return prepared;
+  let assessment;
+  if (needsStrategyAssessment(gameState, options, prepared)) {
+    assessment = await choosePrepared(gameState, options, prepareStrategyAssessment(prepared, options));
+    options = { ...options, strategyAssessment: assessment };
+    prepared = prepareModDecision(gameState, options);
+  }
   if (prepared.selectionPlan) return assembleSelection(gameState, options, prepared, choosePrepared, prepareModDecision);
-  return choosePrepared(gameState, options, prepared);
+  const decision = await choosePrepared(gameState, options, prepared);
+  return assessment ? { ...decision, strategy_assessment: assessment, action_usage: decision.usage, usage: { input_tokens: (assessment.usage?.input_tokens || 0) + (decision.usage?.input_tokens || 0), output_tokens: (assessment.usage?.output_tokens || 0) + (decision.usage?.output_tokens || 0) } } : decision;
 }
 
 async function choosePrepared(gameState, options, prepared) {
@@ -323,7 +332,7 @@ async function choosePrepared(gameState, options, prepared) {
     throw new Error(`Jev API error ${response.status}${typeof kind === 'string' && /^[a-z_]{1,80}$/.test(kind) ? ` (${kind})` : ''}`);
   }
   const result = await response.json();
-  const answer = result.answers?.next_action;
+  const answer = result.answers?.[prepared.questionId || 'next_action'];
   if (answer?.type !== 'choice' || typeof answer.choice !== 'string' || !candidates.has(answer.choice)) throw new Error('Jev returned an invalid mod action choice');
   return { ...candidates.get(answer.choice), candidate_id: answer.choice, model: result.model, probabilities: answer.probabilities, confidence: answer.confidence, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
 }

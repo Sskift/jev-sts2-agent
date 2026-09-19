@@ -1,3 +1,152 @@
+diff --git a/STS2.Cli.Mod/Actions/EndTurnHandler.cs b/STS2.Cli.Mod/Actions/EndTurnHandler.cs
+index deb4503..a240f8f 100644
+--- a/STS2.Cli.Mod/Actions/EndTurnHandler.cs
++++ b/STS2.Cli.Mod/Actions/EndTurnHandler.cs
+@@ -1,5 +1,9 @@
++using Godot;
+ using MegaCrit.Sts2.Core.Combat;
+ using MegaCrit.Sts2.Core.Commands;
++using MegaCrit.Sts2.Core.Nodes.Combat;
++using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
++using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
+ using MegaCrit.Sts2.Core.Rooms;
+ using STS2.Cli.Mod.Actions.Utils;
+ using STS2.Cli.Mod.Models.Messages;
+@@ -10,7 +14,7 @@ namespace STS2.Cli.Mod.Actions;
+ /// <summary>
+ ///     Handles the <c>end_turn</c> CLI command.
+ ///     Ends the player's turn using the game's native PlayerCmd.
+-///     After ending the turn, waits for the enemy turn to complete and collects
++///     After ending the turn, waits for completion or a required card selection and collects
+ ///     execution results (damage, block, powers) from <c>CombatHistory</c>.
+ /// </summary>
+ /// <remarks>
+@@ -27,7 +31,7 @@ public static class EndTurnHandler
+     private static readonly ModLogger Logger = new("EndTurnHandler");
+ 
+     /// <summary>
+-    ///     Ends the player's turn, waits for the enemy turn to complete, and returns execution results.
++    ///     Ends the player's turn, waits for completion or a card selection, and returns execution results.
+     ///     Validates combat state and triggers the end turn command.
+     ///     Must be called on the Godot main thread (via <see cref="MainThreadExecutor" />).
+     /// </summary>
+@@ -54,8 +58,11 @@ public static class EndTurnHandler
+ 
+             var historyBefore = CombatManager.Instance.History.Entries.Count();
+ 
+-            // Bridge TurnStarted and CombatEnded events to a TaskCompletionSource
++            // Bridge turn/combat completion and visible selection prompts to the same wait.
+             var tcs = new TaskCompletionSource<string>();
++            string? selectionScreen = null;
++            var tree = (SceneTree)Engine.GetMainLoop();
++            using var timeoutCancellation = new CancellationTokenSource();
+ 
+             void OnTurnStarted(CombatState _)
+             {
+@@ -76,26 +83,49 @@ public static class EndTurnHandler
+                 tcs.TrySetResult("combat_ended");
+             }
+ 
++            void OnProcessFrame()
++            {
++                if (tcs.Task.IsCompleted) return;
++
++                try
++                {
++                    if (!CombatManager.Instance.IsInProgress) return;
++                    selectionScreen = FindSelectionScreen();
++                    if (selectionScreen != null) tcs.TrySetResult("selection_required");
++                }
++                catch (Exception ex)
++                {
++                    tcs.TrySetException(ex);
++                }
++            }
++
++            var frameCallback = Callable.From(OnProcessFrame);
+             CombatManager.Instance.TurnStarted += OnTurnStarted;
+             CombatManager.Instance.CombatEnded += OnCombatEnded;
+             playerCombatState.PlayerTurnPhaseChanged += OnPlayerTurnPhaseChanged;
+ 
+             try
+             {
++                // ProcessFrame is emitted on the Godot main thread. No timer/background
++                // continuation inspects scene nodes, and no polling task outlives this request.
++                if (tree.Connect(SceneTree.SignalName.ProcessFrame, frameCallback) != Error.Ok)
++                    throw new InvalidOperationException("Could not watch for end-turn card selection");
++
+                 // Use PlayerCmd.EndTurn (same as game UI)
+                 // canBackOut: false means the AI cannot undo the end-turn decision
+                 PlayerCmd.EndTurn(player, false);
+                 Logger.Info("EndTurn action executed via PlayerCmd, waiting for enemy turn...");
+ 
+-                // Wait for the next player turn or combat end (with timeout)
+-                var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(TurnTimeoutMs));
++                // A selection pauses the native turn until a separate selection command resolves it.
++                var completedTask = await Task.WhenAny(tcs.Task,
++                    Task.Delay(TurnTimeoutMs, timeoutCancellation.Token));
+                 if (completedTask != tcs.Task)
+                 {
+                     Logger.Warning("EndTurn timed out waiting for enemy turn to complete");
+                     return new { ok = false, error = "TIMEOUT", message = "Enemy turn did not complete in time" };
+                 }
+ 
+-                var reason = tcs.Task.Result;
++                var reason = await tcs.Task;
+                 Logger.Info($"EndTurn resolved: {reason}");
+ 
+                 // --- Collect results from CombatHistory ---
+@@ -110,16 +140,28 @@ public static class EndTurnHandler
+                     {
+                         action = "END_TURN",
+                         reason,
++                        turn_completed = reason != "selection_required",
++                        screen = selectionScreen,
+                         results
+                     }
+                 };
+             }
+             finally
+             {
+-                // Always unsubscribe to avoid leaking event handlers
+-                CombatManager.Instance.TurnStarted -= OnTurnStarted;
+-                CombatManager.Instance.CombatEnded -= OnCombatEnded;
+-                playerCombatState.PlayerTurnPhaseChanged -= OnPlayerTurnPhaseChanged;
++                try
++                {
++                    if (GodotObject.IsInstanceValid(tree) &&
++                        tree.IsConnected(SceneTree.SignalName.ProcessFrame, frameCallback))
++                        tree.Disconnect(SceneTree.SignalName.ProcessFrame, frameCallback);
++                }
++                finally
++                {
++                    // Always unsubscribe on completion, selection, timeout, or failure.
++                    timeoutCancellation.Cancel();
++                    CombatManager.Instance.TurnStarted -= OnTurnStarted;
++                    CombatManager.Instance.CombatEnded -= OnCombatEnded;
++                    playerCombatState.PlayerTurnPhaseChanged -= OnPlayerTurnPhaseChanged;
++                }
+             }
+         }
+         catch (Exception ex)
+@@ -128,4 +170,17 @@ public static class EndTurnHandler
+             return new { ok = false, error = "INTERNAL_ERROR", message = ex.Message };
+         }
+     }
++
++    private static string? FindSelectionScreen()
++    {
++        var overlay = NOverlayStack.Instance?.Peek();
++        if (overlay is NChooseACardSelectionScreen tri && tri.IsInsideTree() && tri.IsVisibleInTree())
++            return "TRI_SELECT";
++        if (overlay is NCardGridSelectionScreen grid && grid.IsInsideTree() && grid.IsVisibleInTree())
++            return "GRID_CARD_SELECT";
++        if (overlay == null && NPlayerHand.Instance is { IsInCardSelection: true } hand &&
++            hand.IsInsideTree() && hand.IsVisibleInTree())
++            return "HAND_SELECT";
++        return null;
++    }
+ }
 diff --git a/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs b/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs
 index bd7887e..f47b35d 100644
 --- a/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs

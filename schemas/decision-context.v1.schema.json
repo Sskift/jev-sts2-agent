@@ -23,6 +23,15 @@
   ],
   "additionalProperties": false,
   "properties": {
+    "strategy_assessment": {
+      "type": "object",
+      "required": ["source", "priority", "meaning"],
+      "properties": {
+        "source": { "$ref": "#/$defs/text" },
+        "priority": { "enum": ["reliable_defense", "efficient_damage", "multi_target_damage", "sustained_scaling", "draw_consistency", "energy_support", "immediate_recovery", "preserve_quality"] },
+        "meaning": { "$ref": "#/$defs/text" }
+      }
+    },
     "schema_version": {
       "const": "sts2.decision.v1"
     },

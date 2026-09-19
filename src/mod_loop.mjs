@@ -57,6 +57,20 @@ export function observeRun(progress, state, evidence) {
   }
 }
 
+// An enemy-turn selection proves end_turn was accepted and yielded to another
+// player decision. It does not prove the enemy turn has finished, and never
+// authorizes sending end_turn again.
+export function observedEndTurnSelection(pending, state) {
+  const selection = { TRI_SELECT: state.tri_select, GRID_CARD_SELECT: state.grid_card_select, HAND_SELECT: state.hand_select }[state.screen];
+  const cards = selection?.cards || selection?.selectable_cards;
+  if (pending?.request?.cmd !== 'end_turn' || pending.screen !== 'COMBAT' || pending.outcome_unknown
+    || !pending.combat_id || pending.combat_id !== state.decision_context?.combat_id
+    || pending.floor !== state.decision_context?.total_floor || pending.round !== state.combat?.turn_number
+    || state.combat?.is_player_turn !== false || state.combat?.is_player_actions_disabled !== true
+    || state.combat?.is_combat_ending !== false || !Array.isArray(cards) || !cards.length || !(selection.min_select > 0)) return null;
+  return { ok: true, data: { action: 'END_TURN', reason: 'observed_enemy_turn_selection', turn_completed: false, observed_screen: state.screen, command_replayed: false } };
+}
+
 export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 3000, intervalMs = 600, artifactDir = createSession(), memoryFile = path.join(artifactDir, 'memory.json'), signal, logger = console.log, stopAfterBattle = false } = {}) {
   if (!client) throw new Error('Mod client is required');
   const battle = { sawCombat: false, complete: false, failed: false, playedCards: 0, endedTurns: 0 };
@@ -86,7 +100,12 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       observeRun(progress, state, path.join(directory, 'before-state.json'));
       memory.data.run_progress = progress;
       memory.persist();
-      if (memory.data.pending && state.decision_context?.run_id === memory.data.run_id) throw Object.assign(new ContextError('An earlier action has an unresolved outcome; inspect saved memory before continuing.'), { outcomeUnknown: true });
+      if (memory.data.pending && state.decision_context?.run_id === memory.data.run_id) {
+        const observed = observedEndTurnSelection(memory.data.pending, state);
+        if (!observed) throw Object.assign(new ContextError('An earlier action has an unresolved outcome; inspect saved memory before continuing.'), { outcomeUnknown: true });
+        save(path.join(directory, 'pending-action-observed.json'), { pending: memory.data.pending, observed });
+        memory.finish(observed, state);
+      }
       await snapshot(directory, 'before');
       observeModBattle(battle, state, path.join(directory, 'before-state.json'));
       if ((progress.victory && state.game_over?.can_return_to_menu) || progress.failed || (stopAfterBattle && (battle.complete || battle.failed))) break;
@@ -97,7 +116,9 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       }
       let planningCalls = 0, planningDecisions = 0;
       const decision = await decide(state, { memory, prepared,
-        onRequest: payload => {
+        onRequest: (payload, metrics) => {
+          if (payload.questions.deck_priority) save(path.join(directory, 'jev-strategy-request.json'), payload);
+          else { save(path.join(directory, 'jev-request.json'), payload); save(path.join(directory, 'context-metrics.json'), metrics); }
           if (prepared.selectionPlan) save(path.join(directory, `jev-planning-request-${String(++planningCalls).padStart(4, '0')}.json`), payload);
         },
         onPlanningDecision: result => save(path.join(directory, `jev-planning-decision-${String(++planningDecisions).padStart(4, '0')}.json`), result)
@@ -124,20 +145,32 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       let response;
       try { response = await client.request(decision.request); }
       catch (error) {
-        if (!(error instanceof ModTransportError) || error.dispatched) throw error;
-        // A failed connection sent no command. Record that fact and make a new
-        // decision from a fresh observation; never replay a stale selection.
-        memory.finish({ ok: false, error: 'NOT_DISPATCHED' }, current);
-        save(path.join(directory, 'result.json'), { executed: false, reason: error.message });
-        logger(JSON.stringify({ step, screen: state.screen, wait: 'Mod connection unavailable; no action was sent' }));
-        await sleep(intervalMs);
-        continue;
+        if (!(error instanceof ModTransportError)) throw error;
+        if (error.dispatched) {
+          if (decision.request.cmd !== 'end_turn') throw error;
+          const observedState = await client.state({ includePileDetails: true });
+          save(path.join(directory, 'timeout-observation.json'), observedState);
+          response = observedEndTurnSelection(memory.data.pending, observedState);
+          if (!response) throw error;
+        } else {
+          // A failed connection sent no command. Record that fact and make a new
+          // decision from a fresh observation; never replay a stale selection.
+          memory.finish({ ok: false, error: 'NOT_DISPATCHED' }, current);
+          save(path.join(directory, 'result.json'), { executed: false, reason: error.message });
+          logger(JSON.stringify({ step, screen: state.screen, wait: 'Mod connection unavailable; no action was sent' }));
+          await sleep(intervalMs);
+          continue;
+        }
       }
       save(path.join(directory, 'response.json'), response);
       await sleep(intervalMs);
       const after = await client.state({ includePileDetails: true });
       save(path.join(directory, 'after-state.json'), after);
       await snapshot(directory, 'after');
+      if (!response.ok && response.error === 'TIMEOUT' && decision.request.cmd === 'end_turn') {
+        const observed = observedEndTurnSelection(memory.data.pending, after);
+        if (observed) { save(path.join(directory, 'timeout-response.json'), response); response = observed; }
+      }
       memory.finish(response, after);
       if (memory.data.pending) summary.outcomeUnknown = true;
       memory.observe(after);
