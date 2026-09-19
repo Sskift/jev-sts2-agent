@@ -173,13 +173,33 @@ test('memory removes only travel already in this act map and redundant successfu
   memory.data.actions = [travel, { ...travel, floor: 3 }, { ...travel, ok: false },
     { ...travel, request: { cmd: 'choose_map_node', args: [2, 2] } },
     { floor: 22, combat_id: null, ok: true, request: { cmd: 'reward_choose_card', card_id: 'ANGER', nth: 0 }, after_screen: 'REWARD', result: { card_id: 'ANGER', nth: 0, card_name: 'Anger+', upgraded: true, screen: 'REWARD' } }];
-  const projected = memory.context(state).actions;
-  assert.equal(projected.length, 4);
-  assert.equal(projected[0].floor, 3, 'Earlier act travel is retained even at matching coordinates');
-  assert.equal(projected[1].ok, false);
-  assert.deepEqual(projected[2].request.args, [2, 2]);
-  assert.deepEqual(projected[3].result, { card_name: 'Anger+', upgraded: true });
+  const projected = memory.context(state);
+  assert.equal(projected.actions.length, 2);
+  assert.equal(projected.travel_history[0].floor, 3, 'Earlier act travel is retained even at matching coordinates');
+  assert.equal(projected.actions[0].ok, false);
+  assert.equal(projected.travel_history[1].col, 2);
+  assert.equal(projected.travel_history[1].row, 2);
+  assert.deepEqual(projected.actions[1].result, { card_name: 'Anger+', upgraded: true });
   assert.equal(memory.data.actions.length, 5, 'Full local records remain untouched');
+});
+
+test('completed acts summarize resource changes while current rooms and strategic choices remain available', () => {
+  const state = completeCombat(), memory = new DecisionMemory();
+  state.decision_context.total_floor = 22;
+  state.decision_context.act_floor = 5;
+  memory.observe(state);
+  memory.data.actions = [{ floor: 4, combat_id: null, ok: true, request: { cmd: 'choose_event', args: [1] }, result: { event_id: 'KNOWN_EVENT' } }];
+  memory.data.observations = [
+    { floor: 4, combat_id: 'old', changes: { hp: { before: 80, after: 60 }, gold: { before: 0, after: 20 } } },
+    { floor: 4, combat_id: null, changes: { gold: { before: 20, after: 35 } } },
+    { floor: 17, combat_id: 'boss', changes: { hp: { before: 60, after: 40 }, gold: { before: 35, after: 135 } } },
+    { floor: 19, combat_id: 'recent', changes: { hp: { before: 80, after: 70 } } }
+  ];
+  const result = memory.context(state);
+  assert.equal(result.actions[0].result.event_id, 'KNOWN_EVENT');
+  assert.deepEqual(result.observations[0], { scope: 'earlier_acts', from_floor: 4, through_floor: 17, changes: { hp: { before: 80, after: 40 }, gold: { before: 0, after: 135 } } });
+  assert.equal(result.observations[1].floor, 19);
+  assert.equal(memory.data.observations.length, 4, 'Detailed local records are preserved');
 });
 
 test('route calculations preserve branch uncertainty and reject broken topology', () => {
@@ -273,6 +293,27 @@ test('JSON Schema rejects unknown protocol versions, missing choices and invalid
   const value = packet(completeCombat());
   value.rules = [{ title: 'Broken reference', description: { text_ref: 'rule_99' } }];
   assert.throws(() => validateDecisionPacket(value), /Dangling/);
+});
+
+test('historical deck references share only exactly identical current card states', () => {
+  const original = packet(completeCombat());
+  const card = original.deck.cards[0].card;
+  original.memory.observations = [{ floor: 1, changes: { master_deck: {
+    added: [{ card: structuredClone(card), count: 1 }],
+    removed: [{ card: { ...card, cost: 7 }, count: 1 }]
+  } } }];
+  const compact = compactContext(original);
+  validateDecisionPacket(compact);
+  const table = compact.memory.observations;
+  const observation = Array.isArray(table) ? table[0] : table.encoding === 'record_table_v1'
+    ? Object.fromEntries(table.layouts[table.rows[0][0]].map((key, i) => [key, table.rows[0][i + 1]]))
+    : { ...table.layouts[table.rows[0][0]].constants, ...Object.fromEntries(table.layouts[table.rows[0][0]].fields.map((key, i) => [key, table.rows[0][i + 1]])) };
+  const change = observation.changes.master_deck;
+  assert.equal(change.added[0].card.deck_group_index, 0);
+  assert.deepEqual(compact.deck.cards[change.added[0].card.deck_group_index].card, card);
+  assert.equal(change.removed[0].card.cost, 7, 'A historical variant keeps its own complete rules');
+  change.added[0].card.deck_group_index = 999;
+  assert.throws(() => validateDecisionPacket(compact), /Dangling permanent deck/);
 });
 
 test('potion choices use authoritative usability/targets and nth among every same-ID slot', () => {

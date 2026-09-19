@@ -22,6 +22,7 @@ export function combatForecast(combat, card = null, target = null) {
   let block = combat.player.block + immediateBlock;
   if (block === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) block = 6;
   const loss = Math.max(0, incoming - block);
+  const followup = card && target && hit ? followupAttackBudget(combat, card, target, hit) : null;
   return {
     energy_after_card: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
     first_hit_hp_loss: hit?.hp_loss ?? null,
@@ -30,7 +31,7 @@ export function combatForecast(combat, card = null, target = null) {
     hp_loss_if_end_turn: loss,
     hp_remaining_if_end_turn: combat.player.hp - loss,
     fatal_if_end_turn: loss >= combat.player.hp,
-    ...(card && target && hit ? { followup_attacks: followupAttackBudget(combat, card, target, hit) } : {})
+    ...(followup?.hand_indices.length ? { followup_attacks: followup } : {})
   };
 }
 

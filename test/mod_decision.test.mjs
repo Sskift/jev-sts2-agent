@@ -36,7 +36,9 @@ test('Jev must select an enumerated complete action, never arbitrary JSON or an 
   const options = { apiKey: 'offline-only', fetchImpl: async (_url, request) => {
     const payload = JSON.parse(request.body);
     assert.equal(payload.state.combat.enemies[0].combat_id, 42);
-    assert.match(payload.state.legal_actions.find(a => a.action_id === 'card_0_target_42').description, /Deal 6 damage/);
+    const offered = payload.state.legal_actions.find(a => a.action_id === 'card_0_target_42');
+    assert.equal(offered.target_combat_id, 42);
+    assert.match(payload.state.combat.hand.find(c => c.index === offered.card_hand_index).description, /Deal 6 damage/);
     assert.equal(payload.questions.next_action.criteria.card_0_target_42.action_id, 'card_0_target_42');
     return { ok: true, json: async () => ({ model: 'jev-test', answers: { next_action: { type: 'choice', choice: 'card_0_target_42', probabilities: { card_0_target_42: 1 } } } }) };
   } };

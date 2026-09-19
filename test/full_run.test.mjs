@@ -71,7 +71,7 @@ test('target-specific preview effects replace generic attack numbers in the chos
   } });
   const action = buildModCandidates(state).get('card_0_target_1');
   assert.match(action.description, /Deal 9 damage/);
-  assert.match(action.description, /would deal 7/);
+  assert.equal(action.combat_estimate.first_hit_hp_loss, 7);
 });
 
 test('completed combat tactical history stays local while resource changes carry forward', () => {

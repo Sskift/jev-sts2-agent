@@ -18,6 +18,7 @@ export function validateDecisionPacket(packet) {
   const visit = item => {
     if (!item || typeof item !== 'object') return;
     if (item.text_ref && typeof packet.text_dictionary?.[item.text_ref] !== 'string') throw new ContextError('Dangling rule reference in decision JSON');
+    if ('deck_group_index' in item && (!Number.isInteger(item.deck_group_index) || !packet.deck?.cards[item.deck_group_index])) throw new ContextError('Dangling permanent deck reference in decision JSON');
     if (['record_table_v1', 'record_table_v2'].includes(item.encoding)) for (const row of item.rows) {
       const layout = item.layouts[row[0]], fields = item.encoding === 'record_table_v2' ? layout?.fields : layout;
       if (!Number.isInteger(row[0]) || !Array.isArray(fields) || row.length !== fields.length + 1) throw new ContextError('Malformed decision history table');
@@ -250,7 +251,8 @@ export class DecisionMemory {
       // Successful card/turn effects are already in the same combat's complete
       // engine history. Keep the command, outcome and the card's then-current
       // rules, instead of duplicating each engine event in two histories.
-      if (action.ok && action.combat_id === combatId && ['play_card', 'end_turn'].includes(action.request.cmd)) delete action.result;
+      if (action.ok && combatId && action.combat_id === combatId && state.decision_context.combat_history?.length
+        && ['play_card', 'use_potion', 'end_turn'].includes(action.request.cmd)) delete action.result;
       if (action.ok && action.result && typeof action.result === 'object' && !Array.isArray(action.result)) {
         // Command echoes and success flags do not add information to a
         // successful action. Preserve every non-echo outcome/effect field.
@@ -266,18 +268,33 @@ export class DecisionMemory {
         for (const key of ['index', 'can_play', 'valid_target_ids', 'target_previews', 'tags', 'rarity']) delete card[key];
       }
     }
+    const travel = [], decisions = [];
+    for (const action of actions) {
+      if (action.ok && action.request.cmd === 'choose_map_node' && action.request.args?.length === 2) {
+        travel.push({ floor: action.floor, col: action.request.args[0], row: action.request.args[1], type: action.result?.type ?? 'UNKNOWN', arrived_screen: action.after_screen });
+      } else decisions.push(action);
+    }
     const observations = [], completedRooms = new Map();
     for (const observation of this.data.observations) {
-      if (!observation.combat_id || observation.combat_id === combatId) { observations.push(observation); continue; }
-      const room = completedRooms.get(observation.floor) || { floor: observation.floor, changes: {} };
+      if (observation.floor >= state.decision_context.total_floor
+        && (!observation.combat_id || observation.combat_id === combatId)) { observations.push(observation); continue; }
+      const previousAct = observation.floor <= currentActStart;
+      const key = previousAct ? 'earlier_acts' : observation.floor;
+      const room = completedRooms.get(key) || (previousAct
+        ? { scope: 'earlier_acts', from_floor: observation.floor, through_floor: observation.floor, changes: {} }
+        : { floor: observation.floor, changes: {} });
+      if (previousAct) room.through_floor = Math.max(room.through_floor, observation.floor);
       for (const [field, change] of Object.entries(observation.changes)) {
         if (['block', 'energy'].includes(field)) continue;
         room.changes[field] = { before: room.changes[field]?.before ?? change.before, after: change.after };
       }
-      completedRooms.set(observation.floor, room);
+      completedRooms.set(key, room);
     }
     const relevant = clone([...completedRooms.values(), ...observations]);
     for (const observation of relevant) {
+      for (const [field, change] of Object.entries(observation.changes)) {
+        if (JSON.stringify(change.before) === JSON.stringify(change.after)) delete observation.changes[field];
+      }
       // Current values and the engine's EnergySpent/BlockGained history already
       // describe combat resources. Do not send a second per-action snapshot log.
       if (combatId && observation.combat_id === combatId && state.decision_context.combat_history?.length) {
@@ -287,7 +304,7 @@ export class DecisionMemory {
       if (observation.changes.master_deck?.before) observation.changes.master_deck = deckDifference(observation.changes.master_deck);
       for (const field of ['relics', 'potions']) if (observation.changes[field]?.before) observation.changes[field] = effectDifference(observation.changes[field]);
     }
-    return { coverage: `${this.data.coverage} Completed rooms retain strategic choices, event outcomes and resource changes; expired combat actions and pure UI navigation remain in local logs. Successful travel already in map.visited and successful command echoes are not duplicated. Combat energy/Block use current player values and engine history instead of duplicate observation logs. Deck changes list added and removed copies; an upgrade replaces its former state. Relic/potion changes list added, removed and updated fields; unchanged fields remain as previously observed.`, actions: clone(actions), observations: relevant.filter(o => Object.keys(o.changes).length), pending: clone(this.data.pending) };
+    return { coverage: `${this.data.coverage} Current-act completed rooms retain net resource/deck changes per room; earlier acts use one net change summary across its floor range. Strategic choices and event outcomes remain listed. Intermediate snapshots and expired combat actions stay in local logs. Successful travel already in map.visited and command echoes are not duplicated; other successful travel is in travel_history. Combat energy/Block use current values and engine history. Deck changes list added/removed copies; an upgrade replaces its former state. Relic/potion changes list added, removed and updated fields.`, actions: decisions, ...(travel.length ? { travel_history: travel } : {}), observations: relevant.filter(o => Object.keys(o.changes).length), pending: clone(this.data.pending) };
   }
 }
 
@@ -446,6 +463,14 @@ function compactRecords(records) {
 export function compactContext(context) {
   const interned = deduplicateText(context);
   const copy = Buffer.byteLength(JSON.stringify(interned)) < Buffer.byteLength(JSON.stringify(context)) ? interned : clone(context);
+  const deckStates = new Map((copy.deck?.cards || []).map((group, index) => [JSON.stringify(group.card), index]));
+  for (const observation of copy.memory.observations || []) {
+    const change = observation.changes.master_deck;
+    for (const item of [...(change?.added || []), ...(change?.removed || [])]) {
+      const index = deckStates.get(JSON.stringify(item.card));
+      if (index !== undefined) item.card = { deck_group_index: index };
+    }
+  }
   const cardStates = {}, known = new Map();
   for (const action of copy.memory.actions || []) if (action.played_card_at_request) {
     const card = clone(action.played_card_at_request), instance = card.details?.instance_id;
