@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildModCandidates, makeModDecisionWithJev } from '../src/mod_decision.mjs';
+import { withContext } from './fixtures/context.mjs';
 
 const card = { index: 0, id: 'STRIKE_IRONCLAD', name: 'Strike', description: 'Deal 6 damage.', target_type: 'AnyEnemy', cost: 1, can_play: true, damage: 6 };
 const enemy = { combat_id: 42, name: 'Enemy', hp: 10, block: 0, is_alive: true };
@@ -31,11 +32,12 @@ test('selected character advances via embark, menu saves continue and event dial
 });
 
 test('Jev must select an enumerated complete action, never arbitrary JSON or an absent ID', async () => {
-  const state = combat();
+  const state = withContext(combat());
   const options = { apiKey: 'offline-only', fetchImpl: async (_url, request) => {
     const payload = JSON.parse(request.body);
-    assert.equal(payload.state.game_state.combat.enemies[0].combat_id, 42);
-    assert.match(payload.questions.next_action.criteria.card_0_target_42, /Deal 6 damage/);
+    assert.equal(payload.state.combat.enemies[0].combat_id, 42);
+    assert.match(payload.state.legal_actions.find(a => a.action_id === 'card_0_target_42').description, /Deal 6 damage/);
+    assert.equal(payload.questions.next_action.criteria.card_0_target_42.action_id, 'card_0_target_42');
     return { ok: true, json: async () => ({ model: 'jev-test', answers: { next_action: { type: 'choice', choice: 'card_0_target_42', probabilities: { card_0_target_42: 1 } } } }) };
   } };
   const decision = await makeModDecisionWithJev(state, options);

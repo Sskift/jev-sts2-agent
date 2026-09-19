@@ -2,23 +2,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ModClient } from './mod_client.mjs';
-import { makeModDecisionWithJev, buildModCandidates } from './mod_decision.mjs';
+import { makeModDecisionWithJev, prepareModDecision, buildModCandidates } from './mod_decision.mjs';
+import { DecisionMemory, ContextError, canonicalObservation } from './decision_context.mjs';
 import { createSession } from './artifacts.mjs';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const save = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n');
 
-// Ignore extraction timestamps and randomly ordered draw piles, but preserve
-// every action-relevant combat field and each candidate's exact wire request.
+// Every supplied decision fact invalidates an old answer when changed.
+// Extraction time and randomized draw order do not.
 export function actionFingerprint(state) {
   return JSON.stringify({
-    screen: state.screen,
-    context: state.combat ? null : { ...state, timestamp: undefined },
-    combat: state.combat ? {
-      turn: state.combat.turn_number, playerTurn: state.combat.is_player_turn,
-      disabled: state.combat.is_player_actions_disabled, ending: state.combat.is_combat_ending,
-      player: state.combat.player, hand: state.combat.hand, enemies: state.combat.enemies
-    } : null,
+    context: canonicalObservation(state),
     candidates: [...buildModCandidates(state)].map(([id, action]) => [id, action.request])
   });
 }
@@ -42,11 +37,11 @@ export function observeModBattle(tracker, state, evidence) {
   }
 }
 
-export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 80, intervalMs = 600, artifactDir = createSession(), signal, logger = console.log } = {}) {
+export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 80, intervalMs = 600, artifactDir = createSession(), memoryFile = path.join(artifactDir, 'memory.json'), signal, logger = console.log } = {}) {
   if (!client) throw new Error('Mod client is required');
   const battle = { sawCombat: false, complete: false, failed: false, playedCards: 0, endedTurns: 0 };
   const summary = { startedAt: new Date().toISOString(), mode: 'mod', decisionModel: 'jev-latest', artifactDir, steps: 0, battle };
-  const history = [];
+  const memory = new DecisionMemory({ file: memoryFile });
   let unchangedActions = 0, emptyCycles = 0;
   const snapshot = async (directory, name) => {
     if (!driver) return;
@@ -63,12 +58,19 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       summary.steps = step;
       const directory = path.join(artifactDir, `step-${String(step).padStart(4, '0')}`);
       fs.mkdirSync(directory);
-      const state = await client.state();
+      const state = await client.state({ includePileDetails: true });
       save(path.join(directory, 'before-state.json'), state);
+      memory.observe(state);
+      if (memory.data.pending && state.decision_context?.run_id === memory.data.run_id) throw Object.assign(new ContextError('An earlier action has an unresolved outcome; inspect saved memory before continuing.'), { outcomeUnknown: true });
       await snapshot(directory, 'before');
       observeModBattle(battle, state, path.join(directory, 'before-state.json'));
       if (battle.complete || battle.failed) break;
-      const decision = await decide(state, { recentActions: history.slice(-3) });
+      const prepared = prepareModDecision(state, { memory });
+      if (prepared.payload) {
+        save(path.join(directory, 'jev-request.json'), prepared.payload);
+        save(path.join(directory, 'context-metrics.json'), prepared.metrics);
+      }
+      const decision = await decide(state, { memory, prepared });
       save(path.join(directory, 'decision.json'), decision);
       if (signal?.aborted) break;
       if (decision.action === 'wait') {
@@ -79,21 +81,23 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       }
       emptyCycles = 0;
       // A user or animation may change state while Jev is answering.
-      const current = await client.state();
+      const current = await client.state({ includePileDetails: true });
       save(path.join(directory, 'pre-action-state.json'), current);
       if (actionFingerprint(current) !== actionFingerprint(state)) {
         save(path.join(directory, 'result.json'), { executed: false, reason: 'State changed during decision; observe again' });
         continue;
       }
+      memory.begin(decision.request, current);
       const response = await client.request(decision.request);
       save(path.join(directory, 'response.json'), response);
       await sleep(intervalMs);
-      const after = await client.state();
+      const after = await client.state({ includePileDetails: true });
       save(path.join(directory, 'after-state.json'), after);
       await snapshot(directory, 'after');
       const changed = actionFingerprint(after) !== actionFingerprint(state);
-      history.push({ request: decision.request, ok: response.ok, beforeScreen: state.screen, afterScreen: after.screen, changed, result: response.data || response.error });
-      history.splice(0, Math.max(0, history.length - 3));
+      memory.finish(response, after);
+      if (memory.data.pending) summary.outcomeUnknown = true;
+      memory.observe(after);
       if (response.ok && decision.request.cmd === 'play_card') battle.playedCards++;
       if (response.ok && decision.request.cmd === 'end_turn') battle.endedTurns++;
       observeModBattle(battle, after, path.join(directory, 'after-state.json'));
@@ -107,6 +111,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
     }
   } catch (error) {
     summary.error = error.message;
+    if (error.details) summary.errorDetails = error.details;
     summary.outcomeUnknown = Boolean(error.outcomeUnknown);
     summary.stoppedReason = 'error; no automatic action replay';
   } finally {
@@ -135,7 +140,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       const { WindowDriver } = await import('./window_driver.mjs');
       driver = new WindowDriver();
     }
-    const summary = await runModLoop({ client, driver, maxSteps, signal: controller.signal });
+    const summary = await runModLoop({ client, driver, maxSteps, signal: controller.signal, memoryFile: path.resolve('run-artifacts/mod-memory.json') });
     console.log(JSON.stringify(summary));
     if (!summary.battle.complete) process.exitCode = 2;
   } finally { client.close(); await driver?.close(); }

@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-20",
+  "protocol": "sts2.decision.v1",
+  "offlineTests": {
+    "failed": 0,
+    "command": "npm test",
+    "passed": 64
+  },
+  "dependencyAudit": {
+    "command": "npm audit --omit=dev",
+    "vulnerabilities": 0
+  },
+  "mod": {
+    "version": "0.111.0-context.1",
+    "warnings": 0,
+    "sourceCount": 103,
+    "outputSha256": "4B413BFA16653FE2EE028151EDCDAA09A66E48B3C47845F9FBDF34EACA07AB15",
+    "compileExitCode": 0,
+    "upstreamCommit": "e6ce5bb1f0e5af1213e59582b645c18027ded476",
+    "deployed": false,
+    "contextPatchSha256": "398EBD95088B31C6F0B0B15442B035E4318B15F5C01F8D5D1290E3C0CC0A6B4F",
+    "compatibilityPatchSha256": "44E098FCA2B679DD0952676FF2021398D95D8E6F6F0D40C1A6433137E1854EE1",
+    "contextSourceSha256": "DFDA0E057D3D521F898279A413536C89375C34EFBCF2D95447F649D2AE7A7F41",
+    "referenceCount": 186,
+    "gameAssemblySha256": "0861BFA1DF347538D932F22D580E75420F08082792EB914E53B4882764ACDBE9"
+  },
+  "liveGameActions": 0,
+  "liveModelCalls": 0,
+  "note": "Offline protocol checks and compilation only. The previous battle does not validate this context extension."
+}

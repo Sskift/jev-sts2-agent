@@ -5,9 +5,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { actionFingerprint, observeModBattle, runModLoop } from '../src/mod_loop.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
+import { withContext } from './fixtures/context.mjs';
 
 function combat(enemyHp = 20) {
-  return {
+  return withContext({
     screen: 'COMBAT', timestamp: 1000,
     combat: {
       encounter: 'Offline test encounter', turn_number: 1,
@@ -17,7 +18,7 @@ function combat(enemyHp = 20) {
       enemies: [{ combat_id: 42, name: 'Offline enemy', hp: enemyHp, block: 0, is_alive: true }],
       draw_pile: [{ id: 'DEFEND_IRONCLAD' }, { id: 'STRIKE_IRONCLAD' }]
     }
-  };
+  });
 }
 
 const reward = () => ({ screen: 'REWARD', rewards: { rewards: [{ type: 'gold', amount: 15 }] } });
@@ -121,7 +122,7 @@ test('same-scene combat change while deciding discards the stale request', async
 
 test('a changed event effect at the same option index discards the stale request', async t => {
   const artifactDir = temporaryFolder(t);
-  const event = description => ({ screen: 'EVENT', event: { event_id: 'OFFLINE_EVENT', is_in_dialogue: false, is_finished: false, options: [{ index: 0, title: 'Accept', description, is_locked: false }] } });
+  const event = description => withContext({ screen: 'EVENT', event: { event_id: 'OFFLINE_EVENT', is_in_dialogue: false, is_finished: false, options: [{ index: 0, title: 'Accept', description, is_locked: false }] } });
   const client = scriptedClient([event('Gain 10 gold.'), event('Lose 10 HP.')]);
   const summary = await runModLoop({ client, decide: state => [...buildModCandidates(state).values()][0], artifactDir, intervalMs: 0, maxSteps: 1, logger() {} });
   assert.equal(client.requests.length, 0, 'A same-index option may have a different effect after an event page changes');

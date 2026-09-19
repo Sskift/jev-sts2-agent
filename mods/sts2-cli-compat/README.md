@@ -6,6 +6,14 @@ Upstream review: [draft PR #1](https://github.com/longkerdandy/STS2-Cli-Mod/pull
 
 Read [UPSTREAM-NOTICE.md](UPSTREAM-NOTICE.md) for attribution and the unresolved upstream licensing status. No full upstream source or DLL is committed here.
 
+## Decision context extension (2026-09-20)
+
+The build now applies `decision-context.patch` after the original compatibility patch, and copies our `context/DecisionContextBuilder.cs` into the temporary source. It produces **0.111.0-context.1**, assembly version **0.111.0.2**. The original draft PR above only contains the v0.111 API compatibility changes; it does not contain or claim runtime verification of this new extension.
+
+The extension collects player, permanent deck, current-act map, card enhancements, rules and combat history in the same main-thread snapshot as the screen. It preserves combat beneath every overlay, reports extraction gaps, exports card/potion usability and targets, and fixes the observed missing `Amount` power description path. No hidden draw order, RNG, future encounter table or seed is exported. Run/card identities are random and scoped to the game objects, not a persistent save identifier.
+
+See the [decision protocol and coverage](../../docs/decision-context.md). New code requires this context contract; an older mod is rejected before a Jev/game-action request. The new binary has compiled against the installed game with 103 source files and 186 managed references, with no warnings/errors. It is **not deployed or live-tested in this phase**. The prior `0.111.0-local-compat` battle evidence below remains evidence only for that prior build.
+
 ## Changes
 
 - Three reads of the removed `CombatManager.IsPlayPhase` property now check the local player's `PlayerCombatState.Phase == PlayerTurnPhase.Play`.
@@ -35,7 +43,7 @@ git clone https://github.com/longkerdandy/STS2-Cli-Mod.git "$env:TEMP\sts2-cli-u
   -OutputDir './mods/sts2-cli-compat/out'
 ```
 
-All three paths are configurable. `SourceDir` is read through `git archive` at the pinned commit; its working tree is not modified and local edits are not included. The script exports that clean source under `OutputDir`, checks and applies `v0.111-compat.patch`, then compiles it. Output inside the game directory is rejected. Each run keeps a separate work directory for inspection and does not delete previous work.
+All three paths are configurable. `SourceDir` is read through `git archive` at the pinned commit; its working tree is not modified and local edits are not included. The script exports that clean source under `OutputDir`, checks/applies both patches, copies the context builder, then compiles it. Output inside the game directory is rejected. Each run keeps a separate work directory for inspection and does not delete previous work.
 
 To inspect patch applicability independently, check out the pinned commit in a disposable clone and run:
 
@@ -46,9 +54,9 @@ git -C path/to/disposable-clone apply --check path/to/jev-sts2-agent/mods/sts2-c
 
 Successful outputs:
 
-- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-local-compat`, assembly version `0.111.0.1`.
+- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.1`, assembly version `0.111.0.2`.
 - `compile.log` and `compile.rsp`, containing the build output and exact compiler inputs.
-- `build-evidence.json`, recording the upstream commit, patch and game assembly hashes, compiler location, source/reference counts, exit code, binary hash, and `deploymentPerformed: false`.
+- `build-evidence.json`, recording the upstream commit, both patch hashes, context builder and game assembly hashes, compiler location, source/reference counts, exit code, binary hash, and `deploymentPerformed: false`.
 
 The existing CLI executable remains a separate upstream component; this builds only the in-game mod.
 

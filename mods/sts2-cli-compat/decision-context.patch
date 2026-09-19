@@ -1,0 +1,252 @@
+diff --git a/STS2.Cli.Mod/Models/State/CardStateDto.cs b/STS2.Cli.Mod/Models/State/CardStateDto.cs
+index 3a446ca..248d999 100644
+--- a/STS2.Cli.Mod/Models/State/CardStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/CardStateDto.cs
+@@ -12,8 +12,11 @@ namespace STS2.Cli.Mod.Models.State;
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+ [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
+ [SuppressMessage("ReSharper", "CollectionNeverQueried.Global")]
+-public class CardStateDto
+-{
++public class CardStateDto
++{
++    public object? Details { get; set; }
++    public List<int> ValidTargetIds { get; set; } = [];
++
+     // -- DTO context --
+ 
+     /// <summary>
+@@ -128,4 +131,4 @@ public class CardStateDto
+     ///     Null when the card is playable.
+     /// </summary>
+     public string? UnplayableReason { get; set; }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Models/State/GameStateDto.cs b/STS2.Cli.Mod/Models/State/GameStateDto.cs
+index 6492648..008e8d1 100644
+--- a/STS2.Cli.Mod/Models/State/GameStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/GameStateDto.cs
+@@ -7,8 +7,10 @@ namespace STS2.Cli.Mod.Models.State;
+ /// </summary>
+ [SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+-public class GameStateDto
+-{
++public class GameStateDto
++{
++    public object? DecisionContext { get; set; }
++
+     /// <summary>
+     ///     Current screen/phase (COMBAT, MENU, MAP, SHOP, etc.)
+     /// </summary>
+@@ -116,4 +118,4 @@ public class GameStateDto
+     ///     Contains information about available game modes (standard, daily, custom).
+     /// </summary>
+     public SingleplayerSubmenuStateDto? SingleplayerSubmenu { get; set; }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Models/State/PileCardDto.cs b/STS2.Cli.Mod/Models/State/PileCardDto.cs
+index ee4139f..fc3c518 100644
+--- a/STS2.Cli.Mod/Models/State/PileCardDto.cs
++++ b/STS2.Cli.Mod/Models/State/PileCardDto.cs
+@@ -10,6 +10,8 @@ namespace STS2.Cli.Mod.Models.State;
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+ public class PileCardDto
+ {
++    public object? Details { get; set; }
++
+     /// <summary>
+     ///     Card model ID (e.g., "STRIKE_IRONCLAD", "DEFEND_SILENT").
+     /// </summary>
+@@ -49,4 +51,4 @@ public class PileCardDto
+     ///     Full description when --include-pile-details is enabled, null otherwise.
+     /// </summary>
+     public string? Description { get; set; }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Models/State/PotionStateDto.cs b/STS2.Cli.Mod/Models/State/PotionStateDto.cs
+index df03d5e..3f15171 100644
+--- a/STS2.Cli.Mod/Models/State/PotionStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/PotionStateDto.cs
+@@ -8,8 +8,11 @@ namespace STS2.Cli.Mod.Models.State;
+ /// </summary>
+ [SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+-public class PotionStateDto
+-{
++public class PotionStateDto
++{
++    public bool CanUse { get; set; }
++    public List<int> ValidTargetIds { get; set; } = [];
++
+     /// <summary>
+     ///     Slot index in the player's potion belt (0-based).
+     ///     Gaps indicate empty slots.
+@@ -45,4 +48,4 @@ public class PotionStateDto
+     ///     Targeting mode: Self, AnyEnemy, AllEnemies, AnyPlayer, etc.
+     /// </summary>
+     public required string TargetType { get; set; }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
+index de41515..83a3912 100644
+--- a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
+@@ -25,6 +25,8 @@ public static class CardStateBuilder
+ 
+             var state = new CardStateDto
+             {
++                Details = DecisionContextBuilder.CardDetails(card),
++                ValidTargetIds = DecisionContextBuilder.CardTargets(card),
+                 Index = index,
+                 Id = card.Id.Entry,
+                 Name = StripGameTags(card.Title),
+@@ -68,6 +70,7 @@ public static class CardStateBuilder
+         }
+         catch (Exception ex)
+         {
++            DecisionContextBuilder.Report($"hand card {index}: {ex.GetType().Name}");
+             Logger.Error($"Failed to build card state: {ex.Message}");
+             return null;
+         }
+@@ -91,9 +94,10 @@ public static class CardStateBuilder
+             }
+             catch (Exception ex2)
+             {
++                DecisionContextBuilder.Report($"card {card.Id.Entry} description: {ex2.GetType().Name}");
+                 Logger.Warning($"Failed to get formatted description: {ex2.Message}");
+                 return string.Empty;
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
+index 9547402..01e4c8a 100644
+--- a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
+@@ -149,6 +149,7 @@ public static class CombatStateBuilder
+ 
+         return new PileCardDto
+         {
++            Details = DecisionContextBuilder.CardDetails(card),
+             Id = card.Id.Entry,
+             Name = StripGameTags(card.Title),
+             Type = card.Type.ToString(),
+diff --git a/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs b/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs
+index 38c1138..03540fc 100644
+--- a/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs
+@@ -41,18 +41,20 @@ public static class IntentStateBuilder
+                         intentDto.Damage = attackIntent.GetSingleDamage(targets, creature);
+                         intentDto.Hits = attackIntent.Repeats > 0 ? attackIntent.Repeats : 1;
+                     }
+-                    catch (Exception ex)
+-                    {
++                    catch (Exception ex)
++                    {
++                        DecisionContextBuilder.Report($"attack intent damage: {ex.GetType().Name}");
+                         Logger.Warning($"Failed to extract attack damage: {ex.Message}");
+                     }
+ 
+                 intents.Add(intentDto);
+             }
+-            catch (Exception ex)
+-            {
++            catch (Exception ex)
++            {
++                DecisionContextBuilder.Report($"intent description: {ex.GetType().Name}");
+                 Logger.Warning($"Failed to build intent state: {ex.Message}");
+             }
+ 
+         return intents;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/PotionStateBuilder.cs b/STS2.Cli.Mod/State/Builders/PotionStateBuilder.cs
+index f9d7a73..711f8e0 100644
+--- a/STS2.Cli.Mod/State/Builders/PotionStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/PotionStateBuilder.cs
+@@ -27,8 +27,10 @@ public static class PotionStateBuilder
+ 
+             try
+             {
+-                result.Add(new PotionStateDto
+-                {
++                result.Add(new PotionStateDto
++                {
++                    CanUse = DecisionContextBuilder.CanUsePotion(potion),
++                    ValidTargetIds = DecisionContextBuilder.PotionTargets(potion),
+                     Slot = i,
+                     Id = potion.Id.Entry,
+                     Name = StripGameTags(potion.Title.GetFormattedText()),
+@@ -46,4 +48,4 @@ public static class PotionStateBuilder
+ 
+         return result;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/PowerStateBuilder.cs b/STS2.Cli.Mod/State/Builders/PowerStateBuilder.cs
+index 65f84d9..ab91a9b 100644
+--- a/STS2.Cli.Mod/State/Builders/PowerStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/PowerStateBuilder.cs
+@@ -32,7 +32,7 @@ public static class PowerStateBuilder
+                     Amount = power.DisplayAmount,
+                     Type = power.Type.ToString(),
+                     StackType = power.StackType.ToString(),
+-                    Description = StripGameTags(power.SmartDescription.GetFormattedText())
++                    Description = DecisionContextBuilder.PowerDescription(power)
+                 });
+             }
+             catch (Exception ex)
+@@ -42,4 +42,4 @@ public static class PowerStateBuilder
+ 
+         return result;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/StateHandler.cs b/STS2.Cli.Mod/State/StateHandler.cs
+index 27bedca..52250cb 100755
+--- a/STS2.Cli.Mod/State/StateHandler.cs
++++ b/STS2.Cli.Mod/State/StateHandler.cs
+@@ -52,8 +52,9 @@ public static class StateHandler
+     /// <param name="includePileDetails">Whether to include full card descriptions in pile listings.</param>
+     private static GameStateDto GetState(bool includePileDetails = false)
+     {
+-        try
+-        {
++        try
++        {
++            DecisionContextBuilder.Begin();
+             var state = new GameStateDto
+             {
+                 Screen = DetectScreen(),
+@@ -130,7 +131,12 @@ public static class StateHandler
+                     break;
+             }
+ 
+-            return state;
++            // Every overlay retains the underlying combat. The complete context
++            // is collected in this same main-thread read, without opening UI.
++            if (CombatManager.Instance.IsInProgress && state.Combat == null)
++                state.Combat = CombatStateBuilder.Build(includePileDetails);
++            state.DecisionContext = DecisionContextBuilder.Build(state);
++            return state;
+         }
+         catch (Exception ex)
+         {
+@@ -214,4 +220,4 @@ public static class StateHandler
+ 
+         return "UNKNOWN";
+     }
+-}
+\ No newline at end of file
++}

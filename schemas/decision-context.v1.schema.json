@@ -1,0 +1,568 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jev-sts2-agent:decision-context:v1",
+  "title": "STS2 self-contained Jev decision context",
+  "description": "The value sent as TypeSafe state. Every request contains all referenced text and all offered action parameters. Version changes require explicit migration.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "objective",
+    "screen",
+    "in_combat",
+    "run",
+    "player",
+    "resources",
+    "deck",
+    "map",
+    "combat",
+    "screen_state",
+    "memory",
+    "rules",
+    "information",
+    "legal_actions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "sts2.decision.v1"
+    },
+    "objective": {
+      "type": "object",
+      "required": [
+        "strategy",
+        "execution_checkpoint"
+      ],
+      "properties": {
+        "strategy": {
+          "$ref": "#/$defs/text"
+        },
+        "execution_checkpoint": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "screen": {
+      "type": "string"
+    },
+    "in_combat": {
+      "type": "boolean"
+    },
+    "run": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "run_id",
+            "combat_id",
+            "act_index",
+            "act_floor",
+            "total_floor",
+            "ascension",
+            "game_mode",
+            "modifiers"
+          ],
+          "properties": {
+            "run_id": {
+              "type": "string"
+            },
+            "combat_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "act_index": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "act_floor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_floor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ascension": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "game_mode": {
+              "type": "string"
+            },
+            "modifiers": {
+              "type": "array"
+            }
+          }
+        }
+      ]
+    },
+    "player": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "hp",
+            "max_hp",
+            "gold",
+            "deck_count",
+            "relics",
+            "potions",
+            "powers"
+          ],
+          "properties": {
+            "hp": {
+              "type": "number"
+            },
+            "max_hp": {
+              "type": "number"
+            },
+            "gold": {
+              "type": "number"
+            },
+            "deck_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "relics": {
+              "type": "array"
+            },
+            "potions": {
+              "type": "array"
+            },
+            "powers": {
+              "type": "array"
+            }
+          }
+        }
+      ]
+    },
+    "resources": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "potion_capacity"
+          ],
+          "properties": {
+            "potion_capacity": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "deck": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "count",
+            "cards",
+            "kind"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cards": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/cardGroup"
+              }
+            },
+            "kind": {
+              "$ref": "#/$defs/text"
+            }
+          }
+        }
+      ]
+    },
+    "map": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "act_index",
+            "nodes"
+          ],
+          "properties": {
+            "act_index": {
+              "type": "integer"
+            },
+            "nodes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "col",
+                  "row",
+                  "type",
+                  "children"
+                ],
+                "properties": {
+                  "col": {
+                    "type": "integer"
+                  },
+                  "row": {
+                    "type": "integer"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "children": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/coord"
+                    }
+                  }
+                }
+              }
+            },
+            "legal_next_nodes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/coord"
+              }
+            },
+            "routes": {
+              "type": "array"
+            },
+            "route_semantics": {
+              "$ref": "#/$defs/text"
+            }
+          }
+        }
+      ]
+    },
+    "combat": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "hand",
+            "draw_pile",
+            "discard_pile",
+            "exhaust_pile",
+            "play_pile",
+            "enemies",
+            "history",
+            "history_coverage"
+          ],
+          "properties": {
+            "hand": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/card"
+              }
+            },
+            "draw_pile": {
+              "type": "object",
+              "required": [
+                "order",
+                "cards"
+              ],
+              "properties": {
+                "order": {
+                  "const": "unknown"
+                },
+                "cards": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/cardGroup"
+                  }
+                }
+              }
+            },
+            "discard_pile": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/card"
+              }
+            },
+            "exhaust_pile": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/card"
+              }
+            },
+            "play_pile": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/card"
+              }
+            },
+            "enemies": {
+              "type": "array"
+            },
+            "history": {
+              "$ref": "#/$defs/records"
+            },
+            "history_coverage": {
+              "$ref": "#/$defs/text"
+            }
+          }
+        }
+      ]
+    },
+    "screen_state": {
+      "type": "object",
+      "description": "Exact current menu, event, shop, reward or selection DTO, including offered effects and selection constraints."
+    },
+    "memory": {
+      "type": "object",
+      "required": [
+        "coverage",
+        "actions",
+        "observations"
+      ],
+      "properties": {
+        "coverage": {
+          "$ref": "#/$defs/text"
+        },
+        "actions": {
+          "$ref": "#/$defs/records"
+        },
+        "observations": {
+          "$ref": "#/$defs/records"
+        },
+        "pending": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "description"
+        ],
+        "properties": {
+          "title": {
+            "$ref": "#/$defs/text"
+          },
+          "description": {
+            "$ref": "#/$defs/text"
+          }
+        }
+      }
+    },
+    "information": {
+      "type": "object",
+      "required": [
+        "source",
+        "unknown",
+        "card_grouping",
+        "extraction_errors"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/text"
+        },
+        "unknown": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "card_grouping": {
+          "$ref": "#/$defs/text"
+        },
+        "extraction_errors": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "legal_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "action_id",
+          "request",
+          "description"
+        ],
+        "properties": {
+          "action_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "$ref": "#/$defs/text"
+          },
+          "card_hand_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "target_combat_id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "request": {
+            "type": "object",
+            "required": [
+              "cmd"
+            ],
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "pattern": "^[a-z][a-z_]*$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "text_dictionary": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "text": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "required": [
+            "text_ref"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "text_ref": {
+              "type": "string",
+              "pattern": "^rule_[0-9]+$"
+            }
+          }
+        }
+      ]
+    },
+    "coord": {
+      "type": "object",
+      "required": [
+        "col",
+        "row"
+      ],
+      "properties": {
+        "col": {
+          "type": "integer"
+        },
+        "row": {
+          "type": "integer"
+        }
+      }
+    },
+    "card": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "description",
+        "cost"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/$defs/text"
+        },
+        "description": {
+          "$ref": "#/$defs/text"
+        },
+        "cost": {
+          "type": "number"
+        }
+      }
+    },
+    "cardGroup": {
+      "type": "object",
+      "required": [
+        "card",
+        "count",
+        "instance_ids"
+      ],
+      "properties": {
+        "card": {
+          "$ref": "#/$defs/card"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "instance_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "records": {
+      "oneOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "object",
+          "required": [
+            "encoding",
+            "layouts",
+            "rows"
+          ],
+          "properties": {
+            "encoding": {
+              "const": "record_table_v1"
+            },
+            "layouts": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -8,6 +8,8 @@
     "build:driver": "dotnet build native/WindowDriver/WindowDriver.csproj -c Release",
     "window:status": "node src/window_driver.mjs status",
     "mod:state": "node src/mod_client.mjs state",
+    "context:preview": "node scripts/context_preview.mjs",
+    "context:benchmark": "node scripts/context_benchmark.mjs",
     "start:mod": "node --use-system-ca src/mod_loop.mjs",
     "test": "node --test test/*.test.mjs",
     "sim": "node src/agent_loop.mjs --sim",
@@ -26,5 +28,8 @@
     "agent-loop"
   ],
   "author": "skift",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
 }

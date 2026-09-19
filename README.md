@@ -4,6 +4,10 @@ Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结�
 
 [仓库执行计划](feishu_plan.md) · [技术选型与资源预算](docs/technology-selection.md) · [飞书方案](https://icnainlav1b8.feishu.cn/docx/Ijr1dLJpio6JvNxfcAfcnvXKnUR)
 
+当前新增阶段是[完整决策上下文与 JSON 协议](docs/decision-context.md)：每个 Jev 请求自带本局、玩家、永久卡组、地图、战斗各牌堆、历史和 `legal_actions`；协议由 [JSON Schema](schemas/decision-context.v1.schema.json) 校验。[完整请求示例](docs/examples/decision-context.v1.json)来自合成测试。该扩展已完成离线验证和模组编译，尚未部署、尚未实机验证；下面首场战斗记录属于旧版本。
+
+更新后的 Agent 要求 `0.111.0-context.1` 模组，遇到旧版本会明确停止。下一阶段先部署新构建并用 `npm run context:preview` 只读检查，再做实机测试。本项目在 `master` 直接提交，不为自身改动提 PR。
+
 ## 当前状态
 
 - 运行栈为 Node.js + 游戏内 C# mod；可选常驻 C# / .NET 8 窗口驱动负责截图和 CU 后备。不需要 Python 或 Pillow。
@@ -34,6 +38,8 @@ Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结�
 在 `.env` 设置 `TYPESAFE_API_KEY`，或通过同名环境变量提供。仅在使用视觉后备时需要 Claude 配置：从 `%USERPROFILE%/.claude/settings.json` 的 env 读取地址和凭据，支持 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN` 或 `ANTHROPIC_API_KEY` 覆盖，模型固定 `claude-opus-5`。带模型请求的项目启动命令使用 `--use-system-ca` 保持 TLS 校验；凭据不写入日志或提交仓库。
 
 ## 启动与检查
+
+首次拉取或依赖更新后运行 `npm ci`。Node 使用锁定的 Ajv 8.20.0 校验决策协议；没有增加 Python 或额外后台服务。新版本测试顺序、部署边界和容量限制见[上下文说明](docs/decision-context.md#验证与下一阶段)。
 
 通过 Steam 启动二代，应用 ID 为 `2868840`：
 
@@ -94,6 +100,7 @@ npm run test:opus
 |---|---|
 | `src/mod_client.mjs` | pipe 协议、串行请求、超时与状态读取 |
 | `src/mod_decision.mjs` | 用结构化 `can_play`、卡牌 ID / `nth`、目标 `combat_id` 等产生完整候选并调用 Jev |
+| `src/decision_context.mjs` / `schemas/decision-context.v1.schema.json` | 完整 JSON 决策协议、规则校验、持久记忆、路线事实和无损整理 |
 | `src/mod_loop.mjs` | 主闭环、动作前状态一致性检查、动作后重读、无进展停止、战斗与证据跟踪 |
 | `src/vision_opus.mjs`、`src/decision_jev.mjs` | 视觉后备：识别可见界面，生成像素动作 |
 | `src/agent_loop.mjs` | 现有视觉循环、动作后观察、战斗跟踪和证据记录 |
