@@ -46,7 +46,10 @@ export function validateContext(state) {
   const context = state.decision_context;
   if (context?.schema_version !== 1 || !context.run_id) throw new ContextError('Complete decision context requires mod 0.111.0-context.1 or newer; install the context build before playing.');
   const errors = array(context.extraction_errors, 'extraction_errors');
-  if (errors.length) throw new ContextError('The mod reported incomplete decision context', { extraction_errors: errors });
+  // The game can no longer format a consumed potion's history text after its
+  // owner is detached. The typed event and local action/result remain intact.
+  const fatal = errors.filter(error => !/^history\.\d+\.description: NullReferenceException$/.test(error));
+  if (fatal.length) throw new ContextError('The mod reported incomplete decision context', { extraction_errors: fatal });
   const player = context.player;
   for (const field of ['act_index', 'act_floor', 'total_floor', 'ascension', 'potion_capacity']) if (!Number.isInteger(context[field]) || context[field] < 0) throw new ContextError(`Missing run.${field}`);
   array(context.modifiers, 'modifiers');
@@ -79,7 +82,7 @@ export function validateContext(state) {
     for (const enemy of state.combat.enemies) {
       checkEffects(array(enemy.powers, 'enemy.powers'), 'enemy.powers');
       array(enemy.intents, 'enemy.intents');
-      for (const intent of enemy.intents) if (!intent.description?.trim()) throw new ContextError('Enemy intent description is missing');
+      for (const intent of enemy.intents) if (!intent.description?.trim() && !intent.type) throw new ContextError('Enemy intent description and visible type are missing');
     }
     if (JSON.stringify(state.combat.player) !== JSON.stringify(player)) throw new ContextError('Player snapshots disagree inside one observation');
   }
@@ -145,6 +148,17 @@ function playerChanges(before, after) {
   return changes;
 }
 
+function deckDifference(change) {
+  const counts = groups => new Map(groups.map(g => [JSON.stringify(g.card), { card: g.card, count: g.count }]));
+  const before = counts(change.before), after = counts(change.after), added = [], removed = [];
+  for (const key of new Set([...before.keys(), ...after.keys()])) {
+    const delta = (after.get(key)?.count || 0) - (before.get(key)?.count || 0);
+    if (delta > 0) added.push({ card: after.get(key).card, count: delta });
+    if (delta < 0) removed.push({ card: before.get(key).card, count: -delta });
+  }
+  return { added, removed };
+}
+
 export class DecisionMemory {
   constructor({ file } = {}) {
     this.file = file;
@@ -171,7 +185,7 @@ export class DecisionMemory {
     }
     if (this.last && runId && runId === this.last.decision_context?.run_id) {
       const changes = playerChanges(this.last, state);
-      if (Object.keys(changes).length) this.data.observations.push({ floor: state.decision_context.total_floor, changes, source: 'observed snapshots; cause may be agent, game, or human' });
+      if (Object.keys(changes).length) this.data.observations.push({ floor: state.decision_context.total_floor, combat_id: state.decision_context.combat_id || this.last.decision_context?.combat_id || null, changes, source: 'observed snapshots; cause may be agent, game, or human' });
     }
     this.last = clone(state);
     this.persist();
@@ -181,6 +195,7 @@ export class DecisionMemory {
     const matching = state.combat?.hand?.filter(card => card.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.index - b.index);
     this.data.pending = { request: clone(request), floor: state.decision_context?.total_floor, combat_id: state.decision_context?.combat_id || null, round: state.combat?.turn_number, screen: state.screen,
       ...(request.cmd === 'play_card' ? { played_card_at_request: clone(matching?.[request.nth ?? 0]) } : {}) };
+    if (request.cmd === 'use_potion') this.data.pending.potion_at_request = clone(state.decision_context?.player?.potions.filter(p => p.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.slot - b.slot)[request.nth ?? 0]);
     this.persist();
   }
   finish(response, after) {
@@ -190,7 +205,31 @@ export class DecisionMemory {
   }
   context(state) {
     if (state.decision_context?.run_id !== this.data.run_id) return { coverage: 'No matching run memory', actions: [], observations: [] };
-    return { coverage: this.data.coverage, actions: clone(this.data.actions), observations: clone(this.data.observations), pending: clone(this.data.pending) };
+    const combatId = state.decision_context?.combat_id;
+    const actions = clone(this.data.actions.filter(a => !a.combat_id || a.combat_id === combatId));
+    for (const action of actions) {
+      // Successful card/turn effects are already in the same combat's complete
+      // engine history. Keep the command, outcome and the card's then-current
+      // rules, instead of duplicating each engine event in two histories.
+      if (action.ok && action.combat_id === combatId && ['play_card', 'end_turn'].includes(action.request.cmd)) delete action.result;
+      if (action.played_card_at_request) {
+        const card = action.played_card_at_request;
+        for (const key of ['index', 'can_play', 'valid_target_ids', 'target_previews', 'tags', 'rarity']) delete card[key];
+      }
+    }
+    const observations = [], completedRooms = new Map();
+    for (const observation of this.data.observations) {
+      if (!observation.combat_id || observation.combat_id === combatId) { observations.push(observation); continue; }
+      const room = completedRooms.get(observation.floor) || { floor: observation.floor, changes: {} };
+      for (const [field, change] of Object.entries(observation.changes)) {
+        if (['block', 'energy'].includes(field)) continue;
+        room.changes[field] = { before: room.changes[field]?.before ?? change.before, after: change.after };
+      }
+      completedRooms.set(observation.floor, room);
+    }
+    const relevant = clone([...completedRooms.values(), ...observations]);
+    for (const observation of relevant) if (observation.changes.master_deck?.before) observation.changes.master_deck = deckDifference(observation.changes.master_deck);
+    return { coverage: `${this.data.coverage} Completed combats retain room resource changes; their expired tactical actions are in local logs. Deck changes list added and removed copies; an upgrade replaces its former state.`, actions: clone(actions), observations: relevant, pending: clone(this.data.pending) };
   }
 }
 
@@ -205,8 +244,24 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     combat.draw_pile = { order: 'unknown', cards: groupCards(combat.draw_pile) };
     // Discard and exhaust are kept in their observed order, with full details.
     for (const enemy of combat.enemies) delete enemy.move_id; // Hidden state-machine label, not the visible intent.
+    for (const enemy of combat.enemies) for (const intent of enemy.intents) {
+      if (!intent.description?.trim()) intent.description = `Visible ${intent.type} intent. Exact effect is not specified by the displayed label.`;
+    }
+    const incoming = combat.enemies.filter(e => e.is_alive).flatMap(e => e.intents).reduce((sum, i) => sum + (Number.isFinite(i.damage) ? i.damage * (i.hits || 1) : 0), 0);
+    combat.visible_arithmetic = {
+      incoming_attack_damage: incoming,
+      current_block: context.player.block,
+      attack_damage_after_current_block: Math.max(0, incoming - context.player.block),
+      energy_remaining: context.player.energy,
+      note: 'Arithmetic from current visible intents only; excludes future intent changes and non-attack effects. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
+    };
     combat.play_pile = context.play_pile;
-    combat.history = context.combat_history;
+    combat.history = clone(context.combat_history);
+    for (const entry of combat.history) {
+      const verb = { CardDrawnEntry: 'drew', CardDiscardedEntry: 'discarded', CardExhaustedEntry: 'exhausted' }[entry.type];
+      if (verb) delete entry.description; // Typed event/card/actor already fully describe this; the game's Drawn text incorrectly says discarded.
+      else if (!entry.description) entry.description = `${entry.type}; formatting unavailable. See matching recorded action and resource changes; unrecorded details are unknown.`;
+    }
     combat.history_coverage = context.history_coverage;
   }
   const map = context?.map ? clone(context.map) : null;
@@ -223,9 +278,9 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     map.route_semantics = 'Counts include the chosen node and end at the first boss or known terminal. Min/max for different node types may describe different paths. UNKNOWN nodes are not assumed safe or a specific encounter.';
   }
   const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}) }));
-  return validateDecisionPacket({
+  return validateDecisionPacket(aliasInstanceIds({
     schema_version: CONTEXT_VERSION,
-    objective: { strategy: 'Survive and improve the run. Balance immediate combat survival, deck/relic synergies, resources, and visible future routes.', execution_checkpoint: 'Stop after the next verified combat victory; this is an execution limit, not a preference for reckless short-term play.' },
+    objective: { strategy: 'Win this entire run through all three acts and the final boss. Balance immediate survival, efficient combat, coherent deck/relic synergies, resources, and visible future routes.', execution_checkpoint: 'Continue through ordinary rewards and act transitions until the formal final victory screen.' },
     screen: state.screen, in_combat: Boolean(combat),
     run: context ? { run_id: context.run_id, combat_id: context.combat_id || null, act_index: context.act_index, act_floor: context.act_floor, total_floor: context.total_floor, ascension: context.ascension, game_mode: context.game_mode, modifiers: context.modifiers } : null,
     player: context?.player ?? null,
@@ -234,9 +289,26 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     map, combat, screen_state: screenState,
     memory: memory.context(state),
     rules: context?.glossary || [],
-    information: { source: 'single mod main-thread snapshot plus explicitly scoped local memory', unknown: ['unobserved draw order; recorded card effects may establish partial knowledge', 'unrevealed question-mark contents and rewards', 'future enemy random choices', 'later acts', 'history before available observations'], card_grouping: 'Each cards entry with count represents that many exactly equivalent card states; instance_ids distinguish copies. Never infer draw order from array order or IDs.', extraction_errors: context?.extraction_errors || [] },
+    information: { source: 'single mod main-thread snapshot plus explicitly scoped local memory', unknown: ['unobserved draw order; recorded card effects may establish partial knowledge', 'unrevealed question-mark contents and rewards', 'future enemy random choices', 'later acts', 'history before available observations', ...(context?.extraction_errors || []).filter(e => /^history\.\d+\.description: NullReferenceException$/.test(e)).map(e => `Unavailable history display text (${e}); typed event and recorded actions retained.`)], card_grouping: 'Each cards entry with count represents that many exactly equivalent card states; instance_ids distinguish copies. Never infer draw order from array order or IDs.', extraction_errors: (context?.extraction_errors || []).filter(e => !/^history\.\d+\.description: NullReferenceException$/.test(e)) },
     legal_actions: legalActions
-  });
+  }));
+}
+
+// Instance IDs are arbitrary identity labels, not gameplay facts. Use compact
+// request-local aliases consistently across every pile, action and history entry.
+// Original identities remain in local state logs and persistent memory.
+function aliasInstanceIds(context) {
+  const aliases = new Map();
+  const visit = (item, key = '') => {
+    if (typeof item === 'string' && /(^|_)ids?$/.test(key) && /^[a-f0-9]{32}$/.test(item)) {
+      if (!aliases.has(item)) aliases.set(item, `instance_${aliases.size + 1}`);
+      return aliases.get(item);
+    }
+    if (Array.isArray(item)) return item.map(value => visit(value, key));
+    if (item && typeof item === 'object') return Object.fromEntries(Object.entries(item).map(([name, value]) => [name, visit(value, name)]));
+    return item;
+  };
+  return visit(context);
 }
 
 // Losslessly intern repeated long rule text only when necessary. The dictionary
@@ -278,6 +350,18 @@ export function recordTable(records) {
 export function compactContext(context) {
   const interned = deduplicateText(context);
   const copy = Buffer.byteLength(JSON.stringify(interned)) < Buffer.byteLength(JSON.stringify(context)) ? interned : clone(context);
+  const cardStates = {}, known = new Map();
+  for (const action of copy.memory.actions || []) if (action.played_card_at_request) {
+    const card = clone(action.played_card_at_request), instance = card.details?.instance_id;
+    if (card.details) delete card.details.instance_id;
+    const signature = JSON.stringify(card);
+    if (!known.has(signature)) {
+      const id = `played_${known.size + 1}`;
+      known.set(signature, id); cardStates[id] = card;
+    }
+    action.played_card_at_request = { card_state_ref: known.get(signature), instance_id: instance };
+  }
+  if (known.size) copy.memory.card_states = cardStates;
   if (copy.combat?.history?.length) copy.combat.history = recordTable(copy.combat.history);
   for (const key of ['actions', 'observations']) if (copy.memory[key]?.length) copy.memory[key] = recordTable(copy.memory[key]);
   return copy;

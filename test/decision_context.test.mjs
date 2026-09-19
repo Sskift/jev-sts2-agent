@@ -159,7 +159,7 @@ test('long repeated rules can be restored exactly from the same request; oversiz
   const state = completeCombat();
   state.decision_context.glossary = [{ title: 'Distinct relevant rules', description: 'x'.repeat(40000) }];
   let calls = 0;
-  await assert.rejects(makeModDecisionWithJev(state, { apiKey: 'test', fetchImpl: async () => { calls++; } }), /no facts were truncated/);
+  await assert.rejects(makeModDecisionWithJev(state, { maxRequestBytes: 30000, apiKey: 'test', fetchImpl: async () => { calls++; } }), /no facts were truncated/);
   assert.equal(calls, 0);
 });
 

@@ -4,9 +4,9 @@ Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结�
 
 [仓库执行计划](feishu_plan.md) · [技术选型与资源预算](docs/technology-selection.md) · [飞书方案](https://icnainlav1b8.feishu.cn/docx/Ijr1dLJpio6JvNxfcAfcnvXKnUR)
 
-当前新增阶段是[完整决策上下文与 JSON 协议](docs/decision-context.md)：每个 Jev 请求自带本局、玩家、永久卡组、地图、战斗各牌堆、历史和 `legal_actions`；协议由 [JSON Schema](schemas/decision-context.v1.schema.json) 校验。[完整请求示例](docs/examples/decision-context.v1.json)来自合成测试。该扩展已完成离线验证和模组编译，尚未部署、尚未实机验证；下面首场战斗记录属于旧版本。
+当前阶段是整局通关开发与实测。每个 Jev 请求自带本局、玩家、永久卡组、地图、战斗各牌堆、相关历史和 `legal_actions`，已接入真实游戏。循环能继续普通奖励，并处理事件、选牌、商店、药水与休息；最终成功要求同一局经过三幕并显示正式胜利结算。[当前进展和待验证项](docs/full-run-progress.md)与下面旧版单场战斗记录分开维护。
 
-更新后的 Agent 要求 `0.111.0-context.1` 模组，遇到旧版本会明确停止。下一阶段先部署新构建并用 `npm run context:preview` 只读检查，再做实机测试。本项目在 `master` 直接提交，不为自身改动提 PR。
+当前部署构建为 `0.111.0-context.2`。`npm run context:preview` 可以只读检查完整请求，不调用 Jev、不执行游戏动作。本项目在 `master` 直接提交，不为自身改动提 PR。
 
 ## 当前状态
 
@@ -50,15 +50,15 @@ Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结�
 node src/mod_client.mjs ping
 npm run mod:state
 
-# 主通道：最多 80 步，仅用 Node + 游戏 mod
-npm start -- --max-steps 80
+# 主通道：默认最多 3000 步，仅用 Node + 游戏 mod
+npm start
 ```
 
 Agent 不必为每条命令启动 `sts2.exe`。pipe 为 `\\.\pipe\sts2-cli-mod`；上游协议每条连接处理一行 UTF-8 JSON 后关闭，因此 Node 串行调用并为每次请求创建连接，不假设多路复用或额外 request ID。`id` 是游戏实体 ID，不能用作传输序号。已发送动作超时后先读状态，不盲目重发。
 
-`npm start` 是结构化主循环，`npm run start:mod` 为同一路线的显式别名，默认最多 80 步；省略 `--screenshots` 可只记录结构化数据，不启动窗口驱动。动作前重读状态，防止用户操作或动画让 Jev 的选择过时；动作后再读状态，连续三次动作无变化即停下排查。请求超时或错误时停止，不自动重放。截图失败或最小化会留记录/跳过截图，不等于模组失败。Ctrl+C 发出停止请求，可能需等当前请求返回。
+`npm start` 是结构化主循环，`npm run start:mod` 为同一路线的显式别名，默认最多 3000 步；省略 `--screenshots` 可只记录结构化数据，不启动窗口驱动。动作前重读状态，防止用户操作或动画让 Jev 的选择过时；动作后再读状态，连续三次动作无变化即停下排查。已发送动作的结果不明时停止，不自动重放。只读状态可重试短连接重建时的瞬时 pipe 错误。Ctrl+C 发出停止请求，可能需等当前请求返回。
 
-完成标记要求在本次运行中观察到活敌战斗、至少一次成功的出牌响应，以及后续非空 `REWARD`；最终还需核对前后状态的实际变化，可附截图，不能把代码的标记单独当成验收。下节的 `start:vision` 是保留的视觉循环。
+`run_complete` 要求从第一幕开局观察到同一 run、经过 0/1/2 三个幕索引，最后读取到游戏正式 `GAME_OVER.is_victory`。普通 `REWARD` 会继续推进。进度与记忆保存在 `run-artifacts/mod-memory.json`，游戏保存的开局时间用于跨进程恢复 run 身份。下节的 `start:vision` 是保留的视觉循环。
 
 ## 视觉 / Computer Use 后备
 

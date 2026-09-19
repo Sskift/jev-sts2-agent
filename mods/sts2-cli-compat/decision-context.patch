@@ -1,8 +1,124 @@
+diff --git a/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs b/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs
+index bd7887e..62faa3e 100644
+--- a/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs
++++ b/STS2.Cli.Mod/Actions/GridSelectCardHandler.cs
+@@ -305,7 +305,12 @@ public static class GridSelectCardHandler
+     /// </summary>
+     private static IReadOnlyList<CardModel>? GetCards(NCardGridSelectionScreen screen)
+     {
+-        return UiUtils.GetPrivateField<IReadOnlyList<CardModel>>(typeof(NCardGridSelectionScreen), screen, "_cards");
++        var cards = UiUtils.GetPrivateField<IReadOnlyList<CardModel>>(typeof(NCardGridSelectionScreen), screen, "_cards");
++        if (cards is { Count: > 0 }) return cards;
++        var results = UiUtils.GetPrivateField<List<MegaCrit.Sts2.Core.Entities.Cards.CardCreationResult>>(screen, "_cardResults");
++        if (results is { Count: > 0 }) return results.Select(result => result.Card).ToArray();
++        var grid = GetGrid(screen);
++        return grid == null ? null : UiUtils.GetPrivateField<IReadOnlyList<CardModel>>(typeof(NCardGrid), grid, "_cards") ?? grid.CurrentlyDisplayedCards.ToArray();
+     }
+ 
+     /// <summary>
+@@ -313,7 +318,7 @@ public static class GridSelectCardHandler
+     /// </summary>
+     private static NCardGrid? GetGrid(NCardGridSelectionScreen screen)
+     {
+-        return UiUtils.GetPrivateField<NCardGrid>(typeof(NCardGridSelectionScreen), screen, "_grid");
++        return UiUtils.GetPrivateField<NCardGrid>(typeof(NCardGridSelectionScreen), screen, "_grid") ?? UiUtils.FindFirst<NCardGrid>(screen);
+     }
+ 
+     /// <summary>
+@@ -444,4 +449,4 @@ public static class GridSelectCardHandler
+             () => !GodotObject.IsInstanceValid(screen) || !screen.IsInsideTree(),
+             ActionUtils.UiTimeoutMs);
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Actions/RewardCardHandler.cs b/STS2.Cli.Mod/Actions/RewardCardHandler.cs
+index b91ccd1..49f7614 100644
+--- a/STS2.Cli.Mod/Actions/RewardCardHandler.cs
++++ b/STS2.Cli.Mod/Actions/RewardCardHandler.cs
+@@ -62,6 +62,14 @@ public static class RewardCardHandler
+ 
+         try
+         {
++            if (UiUtils.FindScreenInOverlay<NCardRewardSelectionScreen>() is { } opened)
++            {
++                var holder = FindCardHolderById(FindCardHolders(opened), cardId);
++                if (holder == null) return new { ok = false, error = "CARD_NOT_FOUND" };
++                holder.EmitSignal(NCardHolder.SignalName.Pressed, holder);
++                await WaitForCardScreenDismissed();
++                return new { ok = true, data = new { card_id = cardId, action = "CHOOSE_VISIBLE_CARD" } };
++            }
+             // --- Validation ---
+ 
+             var screen = UiUtils.FindScreenInOverlay<NRewardsScreen>();
+@@ -182,6 +190,14 @@ public static class RewardCardHandler
+ 
+         try
+         {
++            if (UiUtils.FindScreenInOverlay<NCardRewardSelectionScreen>() is { } opened)
++            {
++                var button = FindAlternativeButtons(opened).FirstOrDefault(b => b.IsEnabled);
++                if (button == null) return new { ok = false, error = "SKIP_NOT_AVAILABLE" };
++                button.ForceClick();
++                await WaitForCardScreenDismissed();
++                return new { ok = true, data = new { skipped = true } };
++            }
+             // --- Validation ---
+ 
+             var screen = UiUtils.FindScreenInOverlay<NRewardsScreen>();
+@@ -397,4 +413,4 @@ public static class RewardCardHandler
+ 
+         return buttons;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Actions/RewardClaimHandler.cs b/STS2.Cli.Mod/Actions/RewardClaimHandler.cs
+index 7567890..18964eb 100644
+--- a/STS2.Cli.Mod/Actions/RewardClaimHandler.cs
++++ b/STS2.Cli.Mod/Actions/RewardClaimHandler.cs
+@@ -104,13 +104,12 @@ public static class RewardClaimHandler
+                     message = "Card rewards must be claimed with choose_card or skipped with skip_card"
+                 };
+ 
+-            // CardRemovalReward not supported yet
+-            if (reward is CardRemovalReward)
+-                return new
+-                {
+-                    ok = false, error = "NOT_SUPPORTED",
+-                    message = "Card removal reward is not yet supported"
+-                };
++            if (reward is CardRemovalReward)
++            {
++                rewardButton.ForceClick();
++                await ActionUtils.PollUntilAsync(() => State.StateHandler.DetectScreen() == "GRID_CARD_SELECT", ActionUtils.UiTimeoutMs);
++                return new { ok = true, data = new { action = "CARD_REMOVAL_SELECTION" } };
++            }
+ 
+             // --- Claim the reward via ForceClick ---
+ 
+@@ -170,7 +169,8 @@ public static class RewardClaimHandler
+ 
+             var matches = rewardType.ToLowerInvariant() switch
+             {
+-                "gold" => reward is GoldReward,
++                "gold" => reward is GoldReward,
++                "cardremoval" => reward is CardRemovalReward,
+                 "potion" => reward is PotionReward pr &&
+                             (itemId == null || MatchesId(pr.Potion?.Id.Entry, itemId)),
+                 "relic" => reward is RelicReward rr &&
+@@ -241,4 +241,4 @@ public static class RewardClaimHandler
+             _ => reward.GetType().Name
+         };
+     }
+-}
+\ No newline at end of file
++}
 diff --git a/STS2.Cli.Mod/Models/State/CardStateDto.cs b/STS2.Cli.Mod/Models/State/CardStateDto.cs
-index 3a446ca..248d999 100644
+index 3a446ca..d4299bd 100644
 --- a/STS2.Cli.Mod/Models/State/CardStateDto.cs
 +++ b/STS2.Cli.Mod/Models/State/CardStateDto.cs
-@@ -12,8 +12,11 @@ namespace STS2.Cli.Mod.Models.State;
+@@ -12,8 +12,12 @@ namespace STS2.Cli.Mod.Models.State;
  [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
  [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
  [SuppressMessage("ReSharper", "CollectionNeverQueried.Global")]
@@ -12,11 +128,12 @@ index 3a446ca..248d999 100644
 +{
 +    public object? Details { get; set; }
 +    public List<int> ValidTargetIds { get; set; } = [];
++    public object? TargetPreviews { get; set; }
 +
      // -- DTO context --
  
      /// <summary>
-@@ -128,4 +131,4 @@ public class CardStateDto
+@@ -128,4 +132,4 @@ public class CardStateDto
      ///     Null when the card is playable.
      /// </summary>
      public string? UnplayableReason { get; set; }
@@ -92,20 +209,81 @@ index df03d5e..3f15171 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/Models/State/SelectableCardDto.cs b/STS2.Cli.Mod/Models/State/SelectableCardDto.cs
+index 1330f72..5a344eb 100644
+--- a/STS2.Cli.Mod/Models/State/SelectableCardDto.cs
++++ b/STS2.Cli.Mod/Models/State/SelectableCardDto.cs
+@@ -10,6 +10,7 @@ namespace STS2.Cli.Mod.Models.State;
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+ public class SelectableCardDto
+ {
++    public string? UpgradePreview { get; set; }
+     /// <summary>
+     ///     Index of the card in the selection screen (0-based).
+     /// </summary>
+@@ -39,4 +40,4 @@ public class SelectableCardDto
+     ///     Card description text.
+     /// </summary>
+     public string? Description { get; set; }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Models/State/ShopStateDto.cs b/STS2.Cli.Mod/Models/State/ShopStateDto.cs
+index 6f45c8c..dd3c66d 100644
+--- a/STS2.Cli.Mod/Models/State/ShopStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/ShopStateDto.cs
+@@ -47,6 +47,7 @@ public class ShopStateDto
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+ public class ShopCardDto
+ {
++    public int EnergyCost { get; set; }
+     /// <summary>
+     ///     0-based index in the combined card entries list.
+     /// </summary>
+@@ -195,4 +196,4 @@ public class ShopCardRemovalDto
+     ///     Whether the card removal service has already been used this visit.
+     /// </summary>
+     public bool IsUsed { get; set; }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/BundleSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/BundleSelectStateBuilder.cs
+index c38d702..735d23f 100644
+--- a/STS2.Cli.Mod/State/Builders/BundleSelectStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/BundleSelectStateBuilder.cs
+@@ -55,7 +55,7 @@ public static class BundleSelectStateBuilder
+                         CardName = StripGameTags(card.Title),
+                         CardType = card.Type.ToString(),
+                         Cost = card.EnergyCost.Canonical,
+-                        Description = StripGameTags(card.Description.GetFormattedText())
++                        Description = StripGameTags(card.GetDescriptionForPile(MegaCrit.Sts2.Core.Entities.Cards.PileType.Deck))
+                     });
+                 }
+ 
+@@ -91,7 +91,7 @@ public static class BundleSelectStateBuilder
+                             CardName = StripGameTags(card.Title),
+                             CardType = card.Type.ToString(),
+                             Cost = card.EnergyCost.Canonical,
+-                            Description = StripGameTags(card.Description.GetFormattedText())
++                            Description = StripGameTags(card.GetDescriptionForPile(MegaCrit.Sts2.Core.Entities.Cards.PileType.Deck))
+                         });
+                     }
+                 }
 diff --git a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-index de41515..83a3912 100644
+index de41515..b59556d 100644
 --- a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-@@ -25,6 +25,8 @@ public static class CardStateBuilder
+@@ -25,6 +25,9 @@ public static class CardStateBuilder
  
              var state = new CardStateDto
              {
 +                Details = DecisionContextBuilder.CardDetails(card),
 +                ValidTargetIds = DecisionContextBuilder.CardTargets(card),
++                TargetPreviews = DecisionContextBuilder.CardTargetPreviews(card),
                  Index = index,
                  Id = card.Id.Entry,
                  Name = StripGameTags(card.Title),
-@@ -68,6 +70,7 @@ public static class CardStateBuilder
+@@ -68,6 +71,7 @@ public static class CardStateBuilder
          }
          catch (Exception ex)
          {
@@ -113,7 +291,7 @@ index de41515..83a3912 100644
              Logger.Error($"Failed to build card state: {ex.Message}");
              return null;
          }
-@@ -91,9 +94,10 @@ public static class CardStateBuilder
+@@ -91,9 +95,10 @@ public static class CardStateBuilder
              }
              catch (Exception ex2)
              {
@@ -138,11 +316,132 @@ index 9547402..01e4c8a 100644
              Id = card.Id.Entry,
              Name = StripGameTags(card.Title),
              Type = card.Type.ToString(),
+diff --git a/STS2.Cli.Mod/State/Builders/GameOverStateBuilder.cs b/STS2.Cli.Mod/State/Builders/GameOverStateBuilder.cs
+index efe90a3..43125e9 100644
+--- a/STS2.Cli.Mod/State/Builders/GameOverStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/GameOverStateBuilder.cs
+@@ -2,6 +2,7 @@ using System.Collections;
+ using Godot;
+ using MegaCrit.Sts2.Core.Nodes.Screens.GameOverScreen;
+ using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
++using MegaCrit.Sts2.Core.Runs;
+ using STS2.Cli.Mod.Models.State;
+ using STS2.Cli.Mod.Utils;
+ 
+@@ -36,6 +37,7 @@ public static class GameOverStateBuilder
+             }
+ 
+             var runState = UiUtils.GetPrivateField<object>(screen, "_runState");
++            var history = UiUtils.GetPrivateField<RunHistory>(screen, "_history");
+             var score = UiUtils.GetPrivateFieldValue<int>(screen, "_score") ?? 0;
+ 
+             var isVictory = false;
+@@ -44,8 +46,8 @@ public static class GameOverStateBuilder
+ 
+             if (runState != null)
+             {
+-                isVictory = GetProperty<bool>(runState, "Win");
+-                floor = GetProperty<int>(runState, "CurrentFloor");
++                isVictory = history?.Win ?? false;
++                floor = GetProperty<int>(runState, "TotalFloor");
+                 characterId = GetCharacterId(runState);
+             }
+ 
+@@ -87,4 +89,4 @@ public static class GameOverStateBuilder
+         var id = characters[0]?.GetType().GetProperty("Id")?.GetValue(characters[0]);
+         return id?.GetType().GetProperty("Entry")?.GetValue(id) as string;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
+index aa3cb26..f309345 100644
+--- a/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
+@@ -1,5 +1,6 @@
+ using MegaCrit.Sts2.Core.CardSelection;
+ using MegaCrit.Sts2.Core.Models;
++using MegaCrit.Sts2.Core.Nodes.Cards;
+ using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
+ using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
+ using STS2.Cli.Mod.Models.State;
+@@ -77,7 +78,8 @@ public static class GridCardSelectStateBuilder
+                         CardName = StripGameTags(card.Title),
+                         CardType = card.Type.ToString(),
+                         Cost = card.EnergyCost.Canonical,
+-                        Description = StripGameTags(card.Description.GetFormattedText())
++                        UpgradePreview = selectionType == "upgrade" ? StripGameTags(card.GetDescriptionForUpgradePreview()) : null,
++                        Description = StripGameTags(card.GetDescriptionForPile(MegaCrit.Sts2.Core.Entities.Cards.PileType.Deck))
+                     });
+                 }
+                 catch (Exception ex)
+@@ -115,7 +117,12 @@ public static class GridCardSelectStateBuilder
+     /// </summary>
+     private static IReadOnlyList<CardModel>? GetCards(NCardGridSelectionScreen screen)
+     {
+-        return UiUtils.GetPrivateField<IReadOnlyList<CardModel>>(typeof(NCardGridSelectionScreen), screen, "_cards");
++        var cards = UiUtils.GetPrivateField<IReadOnlyList<CardModel>>(typeof(NCardGridSelectionScreen), screen, "_cards");
++        if (cards is { Count: > 0 }) return cards;
++        var results = UiUtils.GetPrivateField<List<MegaCrit.Sts2.Core.Entities.Cards.CardCreationResult>>(screen, "_cardResults");
++        if (results is { Count: > 0 }) return results.Select(result => result.Card).ToArray();
++        var grid = UiUtils.FindFirst<NCardGrid>(screen);
++        return grid == null ? null : UiUtils.GetPrivateField<IReadOnlyList<CardModel>>(typeof(NCardGrid), grid, "_cards") ?? grid.CurrentlyDisplayedCards.ToArray();
+     }
+ 
+     /// <summary>
+@@ -154,6 +161,7 @@ public static class GridCardSelectStateBuilder
+         {
+             var overlayStack = NOverlayStack.Instance;
+             if (overlayStack == null) return null;
++            if (overlayStack.Peek() is NCardGridSelectionScreen active) return active;
+ 
+             var children = overlayStack.GetChildren();
+             for (var i = children.Count - 1; i >= 0; i--)
+@@ -168,4 +176,4 @@ public static class GridCardSelectStateBuilder
+             return null;
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/HandSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/HandSelectStateBuilder.cs
+index a2ae24d..9da5e2e 100644
+--- a/STS2.Cli.Mod/State/Builders/HandSelectStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/HandSelectStateBuilder.cs
+@@ -120,7 +120,7 @@ public static class HandSelectStateBuilder
+                     CardName = StripGameTags(cardModel.Title),
+                     CardType = cardModel.Type.ToString(),
+                     Cost = cardModel.EnergyCost.Canonical,
+-                    Description = StripGameTags(cardModel.Description.GetFormattedText())
++                    Description = StripGameTags(cardModel.GetDescriptionForPile(MegaCrit.Sts2.Core.Entities.Cards.PileType.Hand))
+                 });
+             }
+         }
+@@ -152,7 +152,7 @@ public static class HandSelectStateBuilder
+                     CardName = StripGameTags(cardModel.Title),
+                     CardType = cardModel.Type.ToString(),
+                     Cost = cardModel.EnergyCost.Canonical,
+-                    Description = StripGameTags(cardModel.Description.GetFormattedText())
++                    Description = StripGameTags(cardModel.GetDescriptionForPile(MegaCrit.Sts2.Core.Entities.Cards.PileType.Hand))
+                 });
+             }
+         }
 diff --git a/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs b/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs
-index 38c1138..03540fc 100644
+index 38c1138..28d00b2 100644
 --- a/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs
-@@ -41,18 +41,20 @@ public static class IntentStateBuilder
+@@ -31,7 +31,9 @@ public static class IntentStateBuilder
+                 var intentDto = new IntentStateDto
+                 {
+                     Type = intent.IntentType.ToString(),
+-                    Description = StripGameTags(label.GetFormattedText())
++                    Description = intent.HasIntentTip
++                        ? StripGameTags(intent.GetHoverTip(targets, creature).Description)
++                        : StripGameTags(label.GetFormattedText())
+                 };
+ 
+                 // Extract damage info for attack intents
+@@ -41,18 +43,20 @@ public static class IntentStateBuilder
                          intentDto.Damage = attackIntent.GetSingleDamage(targets, creature);
                          intentDto.Hits = attackIntent.Repeats > 0 ? attackIntent.Repeats : 1;
                      }
@@ -213,8 +512,88 @@ index 65f84d9..ab91a9b 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/State/Builders/RewardStateBuilder.cs b/STS2.Cli.Mod/State/Builders/RewardStateBuilder.cs
+index a8c1c8c..e7d3873 100755
+--- a/STS2.Cli.Mod/State/Builders/RewardStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/RewardStateBuilder.cs
+@@ -3,6 +3,8 @@ using MegaCrit.Sts2.Core.Entities.Cards;
+ using MegaCrit.Sts2.Core.Models;
+ using MegaCrit.Sts2.Core.Nodes.Rewards;
+ using MegaCrit.Sts2.Core.Nodes.Screens;
++using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
++using MegaCrit.Sts2.Core.Nodes.Cards.Holders;
+ using MegaCrit.Sts2.Core.Rewards;
+ using STS2.Cli.Mod.Models.State;
+ using STS2.Cli.Mod.Utils;
+@@ -27,6 +29,12 @@ public static class RewardStateBuilder
+     {
+         try
+         {
++            if (UiUtils.FindScreenInOverlay<NCardRewardSelectionScreen>() is { } cardScreen)
++            {
++                var cards = cardScreen.GetNodeOrNull<Control>("UI/CardRow")?.GetChildren().OfType<NCardHolder>().Where(h => h.CardModel != null).Select((h, index) => BuildCardChoice(h.CardModel!, index)).ToList() ?? [];
++                var alternatives = cardScreen.GetNodeOrNull<Control>("UI/RewardAlternatives")?.GetChildren().OfType<NCardRewardAlternativeButton>();
++                return new RewardStateDto { CanSkip = alternatives?.Any(b => b.IsEnabled) == true, Rewards = [new RewardItemDto { Index = 0, Type = "Card", Description = "Choose a card", CardChoices = cards }] };
++            }
+             var screen = UiUtils.FindScreenInOverlay<NRewardsScreen>();
+             if (screen == null)
+             {
+@@ -117,6 +125,7 @@ public static class RewardStateBuilder
+                     item.PotionId = potion.Id.Entry;
+                     item.PotionName = StripGameTags(potion.Title.GetFormattedText());
+                     item.PotionRarity = potion.Rarity.ToString();
++                    item.Description += ": " + StripGameTags(potion.DynamicDescription.GetFormattedText());
+                 }
+ 
+                 break;
+@@ -164,6 +173,7 @@ public static class RewardStateBuilder
+                 {
+                     item.CardId = card.Id.Entry;
+                     item.CardName = StripGameTags(card.Title);
++                    item.Description += ": " + StripGameTags(GetCardDescription(card));
+                 }
+ 
+                 break;
+@@ -219,4 +229,4 @@ public static class RewardStateBuilder
+             }
+         }
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs b/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
+index eac8d59..e62d9fe 100644
+--- a/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/ShopStateBuilder.cs
+@@ -84,11 +84,12 @@ public static class ShopStateBuilder
+                     CardId = card?.Id.Entry ?? string.Empty,
+                     CardName = card != null ? StripGameTags(card.Title) : string.Empty,
+                     Description = card != null
+-                        ? StripGameTags(card.Description.GetFormattedText())
++                        ? StripGameTags(card.GetDescriptionForPile(MegaCrit.Sts2.Core.Entities.Cards.PileType.Deck))
+                         : string.Empty,
+                     CardType = card?.Type.ToString() ?? string.Empty,
+                     Rarity = card?.Rarity.ToString() ?? string.Empty,
+                     Cost = entry.Cost,
++                    EnergyCost = card?.EnergyCost.Canonical ?? 0,
+                     IsOnSale = entry.IsOnSale,
+                     IsStocked = entry.IsStocked
+                 });
+diff --git a/STS2.Cli.Mod/State/Builders/TriSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/TriSelectStateBuilder.cs
+index 024b98a..46d6a4f 100644
+--- a/STS2.Cli.Mod/State/Builders/TriSelectStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/TriSelectStateBuilder.cs
+@@ -58,7 +58,7 @@ public static class TriSelectStateBuilder
+                     CardName = StripGameTags(card.Title),
+                     CardType = card.Type.ToString(),
+                     Cost = card.EnergyCost.Canonical,
+-                    Description = StripGameTags(card.Description.GetFormattedText())
++                    Description = StripGameTags(card.GetDescriptionForPile(MegaCrit.Sts2.Core.Entities.Cards.PileType.Deck))
+                 });
+             }
+ 
 diff --git a/STS2.Cli.Mod/State/StateHandler.cs b/STS2.Cli.Mod/State/StateHandler.cs
-index 27bedca..52250cb 100755
+index 27bedca..8c4e294 100755
 --- a/STS2.Cli.Mod/State/StateHandler.cs
 +++ b/STS2.Cli.Mod/State/StateHandler.cs
 @@ -52,8 +52,9 @@ public static class StateHandler
@@ -243,9 +622,66 @@ index 27bedca..52250cb 100755
          }
          catch (Exception ex)
          {
-@@ -214,4 +220,4 @@ public static class StateHandler
+@@ -151,7 +157,9 @@ public static class StateHandler
+         if (UiUtils.FindSingleplayerSubmenu() != null) return "SINGLEPLAYER_SUBMENU";
+         if (UiUtils.FindMainMenu() != null) return "MENU";
+ 
+-        // All screens below require an active run
++        // A completed run can already have IsInProgress=false while its formal result is visible.
++        if (NOverlayStack.Instance?.Peek() is NGameOverScreen) return "GAME_OVER";
++        // All screens below require an active run
+         if (!RunManager.Instance.IsInProgress) return "UNKNOWN";
+ 
+         // --- Combat and its sub-states ---
+@@ -214,4 +222,4 @@ public static class StateHandler
  
          return "UNKNOWN";
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Utils/JsonOptions.cs b/STS2.Cli.Mod/Utils/JsonOptions.cs
+index 20475ea..3bc9877 100644
+--- a/STS2.Cli.Mod/Utils/JsonOptions.cs
++++ b/STS2.Cli.Mod/Utils/JsonOptions.cs
+@@ -25,11 +25,7 @@ public static class JsonOptions
+             PropertyNameCaseInsensitive = true,
+             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+-            WriteIndented = false,
+-            TypeInfoResolver = new DefaultJsonTypeInfoResolver
+-            {
+-                Modifiers = { IgnoreEmptyCollections }
+-            }
++            WriteIndented = false
+         };
+ 
+         return options;
+@@ -46,4 +42,4 @@ public static class JsonOptions
+                 property.ShouldSerialize = (_, value) =>
+                     value is ICollection { Count: > 0 };
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Utils/TextUtils.cs b/STS2.Cli.Mod/Utils/TextUtils.cs
+index d510bdd..8a8a99a 100644
+--- a/STS2.Cli.Mod/Utils/TextUtils.cs
++++ b/STS2.Cli.Mod/Utils/TextUtils.cs
+@@ -51,7 +51,9 @@ public static partial class TextUtils
+             return string.Empty;
+ 
+         var cleaned = StripBbCode(text);
+-        cleaned = StripRichText(cleaned);
++        cleaned = StripRichText(cleaned);
++        cleaned = Regex.Replace(cleaned, @"res://[^\s]*?energy_icon\.png", " Energy ");
++        cleaned = Regex.Replace(cleaned, @"res://[^\s]*?star_icon\.png", " Star ");
+ 
+         // Normalize whitespace
+         cleaned = WhitespaceRegex().Replace(cleaned, " ");
+@@ -81,4 +83,4 @@ public static partial class TextUtils
+             return null;
+         }
      }
 -}
 \ No newline at end of file

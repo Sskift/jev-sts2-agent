@@ -23,6 +23,12 @@ public static class DecisionContextBuilder
     private static readonly ConditionalWeakTable<object, Identity> Identities = new();
     private static readonly List<string> Issues = [];
     private static string IdentityOf(object value) => Identities.GetValue(value, static _ => new Identity()).Value;
+    private static string RunIdentity(RunState run)
+    {
+        // The saved start time survives game/agent restarts and contains no random seed.
+        var start = typeof(RunManager).GetField("_startTime", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(RunManager.Instance);
+        return start is long value && value > 0 ? $"run-{value}" : IdentityOf(run);
+    }
 
     public static void Begin() => Issues.Clear();
     public static void Report(string issue) => Issues.Add(issue);
@@ -77,6 +83,26 @@ public static class DecisionContextBuilder
             .Concat(combat.Players.SelectMany(p => p.PlayerCombatState?.Pets ?? []))
             .Where(c => c.IsAlive && c.CombatId.HasValue && card.CanPlayTargeting(c))
             .Select(c => (int)c.CombatId!.Value).Distinct().ToList();
+    }
+
+    public static object CardTargetPreviews(CardModel card)
+    {
+        var combat = CombatManager.Instance.IsInProgress ? CombatManager.Instance.DebugOnlyGetState() : null;
+        if (combat == null) return Array.Empty<object>();
+        return combat.Enemies.Concat(combat.Players.Select(p => p.Creature))
+            .Where(c => c.IsAlive && c.CombatId.HasValue && card.CanPlayTargeting(c))
+            .Select(target => new
+            {
+                target_id = (int)target.CombatId!.Value,
+                description = Read($"card.{card.Id.Entry}.target_description", () => StripGameTags(card.GetDescriptionForPile(PileType.Hand, target))),
+                damage = Read($"card.{card.Id.Entry}.damage_preview", () =>
+                {
+                    if (!card.DynamicVars.TryGetValue("Damage", out var value)) return (int?)null;
+                    var preview = value.Clone();
+                    preview.UpdateCardPreview(card, CardPreviewMode.Normal, target, true);
+                    return (int?)preview.PreviewValue;
+                })
+            }).ToArray();
     }
 
     public static object CardDetails(CardModel card) => new
@@ -175,7 +201,10 @@ public static class DecisionContextBuilder
                 card_id = card?.Id.Entry,
                 card_instance_id = card != null ? IdentityOf(card) : null,
                 result_pile = entry is CardPlayFinishedEntry play ? play.CardPlay.ResultPile.ToString() : null,
-                description = Read($"history.{index}.description", () => StripGameTags(entry.Description))
+                potion_id = entry is PotionUsedEntry potion ? potion.Potion.Id.Entry : null,
+                description = entry is PotionUsedEntry used ? $"Actor {entry.Actor?.CombatId} used {used.Potion.Id.Entry}."
+                    : entry is CardDrawnEntry ? $"Actor {entry.Actor?.CombatId} drew {card?.Id.Entry}."
+                    : Read($"history.{index}.description", () => StripGameTags(entry.Description))
             };
         }).ToArray();
     }
@@ -254,7 +283,7 @@ public static class DecisionContextBuilder
         var modifiers = run.Modifiers.Select(m => new { id = m.Id.Entry, name = GetLocText(m.Title), description = GetLocText(m.Description) }).ToArray();
         return new
         {
-            schema_version = 1, run_id = IdentityOf(run), combat_id = combat != null ? IdentityOf(combat) : null,
+            schema_version = 1, run_id = RunIdentity(run), combat_id = combat != null ? IdentityOf(combat) : null,
             act_index = run.CurrentActIndex, act_floor = run.ActFloor, total_floor = run.TotalFloor,
             ascension = run.AscensionLevel, game_mode = run.GameMode.ToString(), modifiers,
             player = playerDto, potion_capacity = player.PotionSlots.Count, master_deck = deck,

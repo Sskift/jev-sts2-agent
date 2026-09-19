@@ -96,7 +96,7 @@ test('death or game over prevents later reward from becoming a success', () => {
 test('a successful card then fresh rewards completes once and saves acceptance evidence', async t => {
   const artifactDir = temporaryFolder(t);
   const client = scriptedClient([combat(), combat(), reward()]);
-  const summary = await runModLoop({ client, decide: chooseAttack, artifactDir, intervalMs: 0, maxSteps: 5, logger() {} });
+  const summary = await runModLoop({ client, decide: chooseAttack, artifactDir, intervalMs: 0, maxSteps: 5, stopAfterBattle: true, logger() {} });
   assert.equal(summary.stoppedReason, 'battle_complete');
   assert.equal(summary.steps, 1);
   assert.equal(summary.battle.complete, true);

@@ -98,7 +98,18 @@ export class ModClient {
   }
 
   async state({ includePileDetails = false, timeoutMs = this.timeoutMs } = {}) {
-    const response = await this.request({ cmd: 'state', include_pile_details: includePileDetails }, { timeoutMs });
+    let response;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        response = await this.request({ cmd: 'state', include_pile_details: includePileDetails }, { timeoutMs });
+        break;
+      } catch (error) {
+        // The server creates a new short-lived pipe after each response. A read
+        // can briefly race its recreation. Only read-only state is retried.
+        if (!(error instanceof ModTransportError) || error.code !== 'MOD_PIPE_ERROR' || attempt === 2) throw error;
+        await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+      }
+    }
     if (!response.ok) {
       const error = new Error(`Mod state failed: ${response.error || 'UNKNOWN'}: ${response.message || ''}`);
       error.response = response;

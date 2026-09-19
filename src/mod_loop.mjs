@@ -37,11 +37,32 @@ export function observeModBattle(tracker, state, evidence) {
   }
 }
 
-export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 80, intervalMs = 600, artifactDir = createSession(), memoryFile = path.join(artifactDir, 'memory.json'), signal, logger = console.log } = {}) {
+export function observeRun(progress, state, evidence) {
+  const context = state.decision_context;
+  if (context?.run_id) {
+    if (progress.runId && progress.runId !== context.run_id) throw new ContextError('Run identity changed during this session');
+    progress.runId = context.run_id;
+    progress.startedAtFloor ??= context.total_floor;
+    progress.acts ||= [];
+    if (!progress.acts.includes(context.act_index)) progress.acts.push(context.act_index);
+    progress.floor = context.total_floor;
+    progress.hp = context.player?.hp;
+  }
+  if (state.screen === 'GAME_OVER') {
+    progress.formalResult = state.game_over;
+    progress.finalEvidence = evidence;
+    progress.failed = state.game_over?.is_victory === false;
+    progress.victory = state.game_over?.is_victory === true;
+    progress.complete = progress.victory && progress.startedAtFloor <= 1 && [0, 1, 2].every(act => progress.acts?.includes(act));
+  }
+}
+
+export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 3000, intervalMs = 600, artifactDir = createSession(), memoryFile = path.join(artifactDir, 'memory.json'), signal, logger = console.log, stopAfterBattle = false } = {}) {
   if (!client) throw new Error('Mod client is required');
   const battle = { sawCombat: false, complete: false, failed: false, playedCards: 0, endedTurns: 0 };
   const summary = { startedAt: new Date().toISOString(), mode: 'mod', decisionModel: 'jev-latest', artifactDir, steps: 0, battle };
   const memory = new DecisionMemory({ file: memoryFile });
+  const progress = summary.run = memory.data.run_progress || {};
   let unchangedActions = 0, emptyCycles = 0;
   const snapshot = async (directory, name) => {
     if (!driver) return;
@@ -61,10 +82,13 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       const state = await client.state({ includePileDetails: true });
       save(path.join(directory, 'before-state.json'), state);
       memory.observe(state);
+      observeRun(progress, state, path.join(directory, 'before-state.json'));
+      memory.data.run_progress = progress;
+      memory.persist();
       if (memory.data.pending && state.decision_context?.run_id === memory.data.run_id) throw Object.assign(new ContextError('An earlier action has an unresolved outcome; inspect saved memory before continuing.'), { outcomeUnknown: true });
       await snapshot(directory, 'before');
       observeModBattle(battle, state, path.join(directory, 'before-state.json'));
-      if (battle.complete || battle.failed) break;
+      if (progress.victory || progress.failed || (stopAfterBattle && (battle.complete || battle.failed))) break;
       const prepared = prepareModDecision(state, { memory });
       if (prepared.payload) {
         save(path.join(directory, 'jev-request.json'), prepared.payload);
@@ -98,16 +122,19 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       memory.finish(response, after);
       if (memory.data.pending) summary.outcomeUnknown = true;
       memory.observe(after);
+      observeRun(progress, after, path.join(directory, 'after-state.json'));
+      memory.data.run_progress = progress;
+      memory.persist();
       if (response.ok && decision.request.cmd === 'play_card') battle.playedCards++;
       if (response.ok && decision.request.cmd === 'end_turn') battle.endedTurns++;
       observeModBattle(battle, after, path.join(directory, 'after-state.json'));
       save(path.join(directory, 'result.json'), { request: decision.request, response, changed, battle: { ...battle } });
-      logger(JSON.stringify({ step, screen: state.screen, request: decision.request, ok: response.ok, changed, afterScreen: after.screen, hp: after.combat?.player?.hp, energy: after.combat?.player?.energy, enemies: after.combat?.enemies?.map(enemy => ({ name: enemy.name, hp: enemy.hp })), battle }));
+      logger(JSON.stringify({ step, screen: state.screen, request: decision.request, model: decision.model, ok: response.ok, changed, afterScreen: after.screen, act: after.decision_context?.act_index, floor: after.decision_context?.total_floor, hp: after.decision_context?.player?.hp, energy: after.combat?.player?.energy, enemies: after.combat?.enemies?.map(enemy => ({ name: enemy.name, hp: enemy.hp })) }));
       save(path.join(artifactDir, 'session.json'), summary);
       if (!response.ok) { summary.stoppedReason = `Mod rejected action: ${response.error}: ${response.message || ''}`; break; }
       unchangedActions = changed ? 0 : unchangedActions + 1;
       if (unchangedActions >= 3) { summary.stoppedReason = 'Three actions caused no observed state change; inspect unsupported overlay'; break; }
-      if (battle.complete || battle.failed) break;
+      if (progress.victory || progress.failed || (stopAfterBattle && (battle.complete || battle.failed))) break;
     }
   } catch (error) {
     summary.error = error.message;
@@ -116,7 +143,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
     summary.stoppedReason = 'error; no automatic action replay';
   } finally {
     summary.finishedAt = new Date().toISOString();
-    summary.stoppedReason ||= battle.complete ? 'battle_complete' : battle.failed ? 'battle_failed' : signal?.aborted ? 'interrupted' : 'max_steps';
+    summary.stoppedReason ||= progress.complete ? 'run_complete' : progress.victory ? 'victory_without_full_run_history' : progress.failed ? 'run_failed' : stopAfterBattle && battle.complete ? 'battle_complete' : signal?.aborted ? 'interrupted' : 'max_steps';
     save(path.join(artifactDir, 'session.json'), summary);
   }
   return summary;
@@ -124,7 +151,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
-  let maxSteps = 80, screenshots = false;
+  let maxSteps = 3000, screenshots = false;
   for (let index = 0; index < args.length; index++) {
     if (args[index] === '--screenshots') screenshots = true;
     else if (args[index] === '--max-steps') maxSteps = Number(args[++index]);
@@ -142,6 +169,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     }
     const summary = await runModLoop({ client, driver, maxSteps, signal: controller.signal, memoryFile: path.resolve('run-artifacts/mod-memory.json') });
     console.log(JSON.stringify(summary));
-    if (!summary.battle.complete) process.exitCode = 2;
+    if (!summary.run.complete) process.exitCode = 2;
   } finally { client.close(); await driver?.close(); }
 }
