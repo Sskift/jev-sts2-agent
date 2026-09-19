@@ -95,8 +95,12 @@ public static class DecisionContextBuilder
     {
         var combat = CombatManager.Instance.IsInProgress ? CombatManager.Instance.DebugOnlyGetState() : null;
         if (combat == null) return Array.Empty<object>();
-        return combat.Enemies.Concat(combat.Players.Select(p => p.Creature))
-            .Where(c => c.IsAlive && c.CombatId.HasValue && card.CanPlayTargeting(c))
+        // AllEnemies is played without a manual target. Preview its current recipients
+        // separately from legal command targets, without predicting random recipients.
+        var targets = card.TargetType == TargetType.AllEnemies
+            ? combat.HittableEnemies
+            : combat.Enemies.Concat(combat.Players.Select(p => p.Creature)).Where(card.CanPlayTargeting);
+        return targets.Where(c => c.IsAlive && c.CombatId.HasValue)
             .Select(target => new
             {
                 target_id = (int)target.CombatId!.Value,

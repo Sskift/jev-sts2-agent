@@ -61,3 +61,19 @@ test('Second Wind counts other non-attacks and exposes exhausted setup cards', (
   combat.hand = [wind, { index: 0, type: 'Attack' }];
   assert.equal(combatForecast(combat, wind).immediate_block_gain, 0, 'The played card is not itself exhausted');
 });
+
+test('an all-enemy attack uses each target preview and preserves surviving or unknown threats', () => {
+  const enemies = [
+    { combat_id: 1, hp: 6, block: 0, is_alive: true, intents: [{ damage: 10 }] },
+    { combat_id: 2, hp: 6, block: 3, is_alive: true, intents: [{ damage: 7 }] },
+    { combat_id: 3, hp: 6, block: 0, is_alive: true, intents: [{ damage: 4 }], powers: [{ id: 'SLIPPERY_POWER', amount: 1 }] },
+    { combat_id: 4, hp: 6, block: 0, is_alive: true, intents: [{ damage: 2 }] }
+  ];
+  const combat = { player: { hp: 20, energy: 2, block: 0 }, hand: [], enemies };
+  const area = { cost: 1, target_type: 'AllEnemies', target_previews: [1, 2, 3].map(target_id => ({ target_id, damage: 8 })) };
+  const estimate = combatForecast(combat, area);
+  assert.equal(estimate.hp_remaining_if_end_turn, 7, 'Only the first enemy loses all HP; the other three still threaten damage');
+  assert.deepEqual(estimate.first_hit_hp_loss_by_target.map(p => p.hp_loss), [8, 5, 1, null]);
+  assert.deepEqual(estimate.first_hit_hp_loss_by_target.map(p => p.hp_depleted), [true, false, false, false]);
+  assert.equal(combatForecast(combat, { ...area, target_type: 'RandomEnemy' }).hp_remaining_if_end_turn, -3, 'A random-target attack cannot claim to hit every enemy');
+});

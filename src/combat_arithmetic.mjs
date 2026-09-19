@@ -17,7 +17,13 @@ export function firstHitHpLoss(card, enemy) {
 export function combatForecast(combat, card = null, target = null) {
   const hit = target && card ? firstHitHpLoss(card, target) : null;
   const targetDepleted = hit && hit.hp_loss >= target.hp;
-  const incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !(targetDepleted && e.combat_id === target.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
+  const areaHits = card?.target_type === 'AllEnemies' ? combat.enemies.filter(e => e.is_alive && e.hp > 0).map(enemy => {
+    const preview = firstHitHpLoss(card, enemy);
+    return { target_id: enemy.combat_id, hp_loss: preview?.hp_loss ?? null, hp_depleted: Boolean(preview && preview.hp_loss >= enemy.hp) };
+  }) : null;
+  const depleted = new Set(areaHits?.filter(preview => preview.hp_depleted).map(preview => preview.target_id));
+  if (targetDepleted) depleted.add(target.combat_id);
+  const incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
   const exhausted = card?.id === 'SECOND_WIND' ? (combat.hand || []).filter(other => other.index !== card.index && other.type !== 'Attack') : null;
   const immediateBlock = card?.id === 'RAGE' || card?.type === 'Power' ? 0 : Math.max(0, card?.block || 0) * (exhausted ? exhausted.length : 1);
   let block = combat.player.block + immediateBlock;
@@ -26,13 +32,14 @@ export function combatForecast(combat, card = null, target = null) {
   const followup = card && target && hit ? followupAttackBudget(combat, card, target, hit) : null;
   // Sandpit is a visible, deterministic instant-death countdown. Ordinary
   // Block/HP cannot prevent it; Frantic Escape visibly adds one turn.
-  const deathTimers = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !(targetDepleted && e.combat_id === target.combat_id))
+  const deathTimers = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id))
     .flatMap(enemy => (enemy.powers || []).filter(p => p.id === 'SANDPIT_POWER' && p.amount > 0)
       .map(power => ({ target_id: enemy.combat_id, power_id: power.id, enemy_turns_remaining_after_card: power.amount + Number(card?.id === 'FRANTIC_ESCAPE') })));
   const instantDeath = deathTimers.some(timer => timer.enemy_turns_remaining_after_card <= 1);
   return {
     energy_after_card: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
     first_hit_hp_loss: hit?.hp_loss ?? null,
+    ...(areaHits ? { first_hit_hp_loss_by_target: areaHits } : {}),
     block_after_card: block,
     displayed_attacks_after_target_depletion: incoming,
     hp_loss_if_end_turn: instantDeath ? combat.player.hp : loss,
