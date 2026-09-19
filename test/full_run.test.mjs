@@ -83,3 +83,14 @@ test('completed combat tactical history stays local while resource changes carry
   assert.equal(context.actions.length, 1);
   assert.deepEqual(context.observations[0].changes, { hp: { before: 80, after: 70 } });
 });
+
+test('relic counter history carries changed values without duplicating the inventory', () => {
+  const state = withContext({ screen: 'MAP' });
+  const memory = new DecisionMemory(); memory.observe(state);
+  const fixed = { id: 'FIXED', description: 'Constant rule' };
+  const counted = { id: 'COUNTED', description: 'Trigger every three attacks', counter: 1 };
+  memory.data.observations.push({ floor: 1, changes: { relics: { before: [fixed, counted], after: [fixed, { ...counted, counter: 2 }] } } });
+  assert.deepEqual(memory.context(state).observations[0].changes.relics, {
+    added: [], removed: [], updated: [{ id: 'COUNTED', fields: { counter: { before: 1, after: 2 } } }]
+  });
+});

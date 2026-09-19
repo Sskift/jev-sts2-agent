@@ -159,6 +159,24 @@ function deckDifference(change) {
   return { added, removed };
 }
 
+function effectDifference(change) {
+  const key = item => `${item.id}:${item.slot ?? ''}`;
+  const before = new Map(change.before.map(item => [key(item), item]));
+  const after = new Map(change.after.map(item => [key(item), item]));
+  const added = [], removed = [], updated = [];
+  for (const id of new Set([...before.keys(), ...after.keys()])) {
+    const a = before.get(id), b = after.get(id);
+    if (!a) { added.push(b); continue; }
+    if (!b) { removed.push(a); continue; }
+    const fields = {};
+    for (const field of new Set([...Object.keys(a), ...Object.keys(b)])) {
+      if (JSON.stringify(a[field]) !== JSON.stringify(b[field])) fields[field] = { before: a[field] ?? null, after: b[field] ?? null };
+    }
+    if (Object.keys(fields).length) updated.push({ id: b.id, ...(b.slot !== undefined ? { slot: b.slot } : {}), fields });
+  }
+  return { added, removed, updated };
+}
+
 export class DecisionMemory {
   constructor({ file } = {}) {
     this.file = file;
@@ -228,8 +246,11 @@ export class DecisionMemory {
       completedRooms.set(observation.floor, room);
     }
     const relevant = clone([...completedRooms.values(), ...observations]);
-    for (const observation of relevant) if (observation.changes.master_deck?.before) observation.changes.master_deck = deckDifference(observation.changes.master_deck);
-    return { coverage: `${this.data.coverage} Completed combats retain room resource changes; their expired tactical actions are in local logs. Deck changes list added and removed copies; an upgrade replaces its former state.`, actions: clone(actions), observations: relevant, pending: clone(this.data.pending) };
+    for (const observation of relevant) {
+      if (observation.changes.master_deck?.before) observation.changes.master_deck = deckDifference(observation.changes.master_deck);
+      for (const field of ['relics', 'potions']) if (observation.changes[field]?.before) observation.changes[field] = effectDifference(observation.changes[field]);
+    }
+    return { coverage: `${this.data.coverage} Completed combats retain room resource changes; their expired tactical actions are in local logs. Deck changes list added and removed copies; an upgrade replaces its former state. Relic/potion changes list added, removed and updated fields; unchanged fields remain as previously observed.`, actions: clone(actions), observations: relevant, pending: clone(this.data.pending) };
   }
 }
 
@@ -253,7 +274,9 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
       current_block: context.player.block,
       attack_damage_after_current_block: Math.max(0, incoming - context.player.block),
       energy_remaining: context.player.energy,
-      note: 'Arithmetic from current visible intents only; excludes future intent changes and non-attack effects. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
+      fatal_if_end_turn_from_visible_attacks: Math.max(0, incoming - context.player.block) >= context.player.hp,
+      extra_block_needed_to_survive_visible_attacks: Math.max(0, incoming - context.player.block - context.player.hp + 1),
+      note: 'Arithmetic from current visible intents only. Action estimates use one hit and printed Block, excluding multi-hits, self-damage, draws, buffs, triggers, death prevention/revival and later actions. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
     };
     combat.visible_arithmetic.attack_budgets = combat.enemies.filter(enemy => enemy.is_alive).map(enemy => {
       const energy = Math.max(0, Math.min(30, context.player.energy || 0));
@@ -287,7 +310,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     map.routes = routeFacts(map, map.legal_next_nodes);
     map.route_semantics = 'Counts include the chosen node and end at the first boss or known terminal. Min/max for different node types may describe different paths. UNKNOWN nodes are not assumed safe or a specific encounter.';
   }
-  const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}) }));
+  const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}), ...(candidate.combat_estimate ? { combat_estimate: candidate.combat_estimate } : {}) }));
   return validateDecisionPacket(aliasInstanceIds({
     schema_version: CONTEXT_VERSION,
     objective: { strategy: 'Win this entire run through all three acts and the final boss. Balance immediate survival, efficient combat, coherent deck/relic synergies, resources, and visible future routes.', execution_checkpoint: 'Continue through ordinary rewards and act transitions until the formal final victory screen.' },

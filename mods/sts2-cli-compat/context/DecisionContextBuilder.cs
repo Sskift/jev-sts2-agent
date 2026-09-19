@@ -43,6 +43,10 @@ public static class DecisionContextBuilder
     {
         try
         {
+            // Use the same fully formatted tooltip as the visible power icon.
+            // SmartDescription alone omits owner-dependent variables (e.g. Slow).
+            var tooltip = power.HoverTips.OfType<HoverTip>().FirstOrDefault();
+            if (tooltip != null) return StripGameTags(tooltip.Description);
             var original = power.SmartDescription;
             var description = new LocString(original.LocTable, original.LocEntryKey);
             description.AddVariablesFrom(original);
