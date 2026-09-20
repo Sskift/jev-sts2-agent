@@ -88,5 +88,119 @@
     "failed": 0,
     "command": "node --test test/effect_lifecycle.test.mjs test/combat_arithmetic.test.mjs test/turn_projection.test.mjs test/turn_sequence.test.mjs test/context_compiler.test.mjs"
   },
-  "runtime_loaded": false
+  "runtime_loaded": true,
+  "same_run_reload": {
+    "runtime_commit": "7ad1ed7c9d4633bb9a316f67f03c3e7bfe5fa48a",
+    "previous_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume-2026-09-20T20-03-51.274Z",
+    "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume2-2026-09-20T20-13-57.386Z",
+    "run_id": "run-1789934018",
+    "screen": "REST_SITE",
+    "floor": 16,
+    "hp": 54,
+    "prior_pending": null,
+    "native": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume2-2026-09-20T20-13-57.386Z\\resume-native.json",
+      "sha256": "946beed99dd773e6dc760a4ea8a9849f3b556ec4736ebc15ec80747d37a99c19"
+    },
+    "first_live_proof": {
+      "request_file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume2-2026-09-20T20-13-57.386Z\\step-0009\\jev-turn_objective-0001.json",
+      "request_sha256": "133b155c594fe0127d0a7db1e65f6fcb7086f5f7129b4385df5840f6ac9ed3c4",
+      "effect": {
+        "source_id": "FAIRY_IN_A_BOTTLE",
+        "category": "potions",
+        "owner": "player",
+        "active": true,
+        "potion_slot": 1,
+        "live_rule": "When your HP would be reduced to 0, instead this potion is discarded and you heal to 30% of your Max HP.",
+        "wiki_rule_id": "potions/FAIRY_IN_A_BOTTLE",
+        "activation": "already_present",
+        "trigger": "ordinary_owner_death_check",
+        "expires": "consumed_when_triggered",
+        "consequence": "prevent_death_and_heal",
+        "timing_detail": "Automatic while held; no manual use is needed. Consumed before healing for 30% of maximum HP, minimum 1 before modifiers. Later damage can still kill. Forced death, including Sandpit, bypasses this prevention.",
+        "timing_coverage": "versioned_rule_adapter"
+      },
+      "model": "typesafe/jev-1.13-20260917",
+      "confirmed_request": {
+        "cmd": "play_card",
+        "id": "ARMAMENTS",
+        "nth": 0
+      },
+      "response": {
+        "ok": true,
+        "data": {
+          "status": "selection_required",
+          "next_action": "hand_select_card",
+          "card_index": 4,
+          "card_id": "ARMAMENTS",
+          "hand_select": {
+            "mode": "UpgradeSelect",
+            "prompt": "Confirm Card to Upgrade",
+            "min_select": 1,
+            "max_select": 1,
+            "cancelable": false,
+            "require_manual_confirmation": false,
+            "can_confirm": false,
+            "selected_count": 0,
+            "selectable_cards": [
+              {
+                "details": {
+                  "instance_id": "e9f9f2d00f3d4b289a19ecff95900f23",
+                  "upgrade_level": 0,
+                  "target_type": "Self"
+                },
+                "index": 0,
+                "card_id": "DEFEND_IRONCLAD",
+                "card_name": "Defend",
+                "card_type": "Skill",
+                "cost": 1,
+                "description": "Gain 5 Block."
+              },
+              {
+                "details": {
+                  "instance_id": "ecbda1aec0754eafaae7e53a57fd7113",
+                  "upgrade_level": 0,
+                  "target_type": "AnyEnemy"
+                },
+                "index": 1,
+                "card_id": "NEOWS_FURY",
+                "card_name": "Neow's Fury",
+                "card_type": "Attack",
+                "cost": 1,
+                "description": "Deal 10 damage. Put up to 2 cards from your Discard Pile into your Hand. Exhaust."
+              },
+              {
+                "details": {
+                  "instance_id": "af36cb73943c48c5a919ad55f149d281",
+                  "upgrade_level": 0,
+                  "target_type": "Self"
+                },
+                "index": 2,
+                "card_id": "STONE_ARMOR",
+                "card_name": "Stone Armor",
+                "card_type": "Power",
+                "cost": 1,
+                "description": "Gain 4 Plating."
+              },
+              {
+                "details": {
+                  "instance_id": "dcc1c1ffb74e4f68841ca69d51a52749",
+                  "upgrade_level": 0,
+                  "target_type": "AnyEnemy"
+                },
+                "index": 3,
+                "card_id": "STRIKE_IRONCLAD",
+                "card_name": "Strike",
+                "card_type": "Attack",
+                "cost": 1,
+                "description": "Deal 6 damage."
+              }
+            ],
+            "selected_cards": []
+          }
+        }
+      },
+      "after_state": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume2-2026-09-20T20-13-57.386Z\\step-0009\\after-state.json"
+    }
+  }
 }
