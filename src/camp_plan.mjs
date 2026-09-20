@@ -1,6 +1,6 @@
 import { ContextError } from './decision_context.mjs';
 import { compileModelRequest } from './context_compiler.mjs';
-import { campUpgradeTargets, publicCampTarget } from './camp_plan_state.mjs';
+import { distinctCampUpgradeTargets, publicCampTarget } from './camp_plan_state.mjs';
 
 function phase(prepared, payload, purpose, parseResult) {
   const metrics = { ...prepared.metrics, purpose };
@@ -10,13 +10,13 @@ function phase(prepared, payload, purpose, parseResult) {
 }
 
 export async function decideCamp(state, options, prepared, choose) {
-  const targets = campUpgradeTargets(state);
+  const targets = distinctCampUpgradeTargets(state);
   if (!targets.length || !prepared.candidates.has('rest_SMITH')) return null;
   if (targets.length > 255) throw new ContextError('Camp upgrade targets exceed the model choice limit; no target was discarded');
   const choices = new Map(targets.map(target => [`upgrade_${target.deck_index}`, target]));
   const conditional = phase(prepared, { ...prepared.payload, questions: { upgrade_target: {
     type: 'choice',
-    instructions: 'Assume Smith is chosen at this rest site. Which ONE actual card upgrade best improves this owned deck for the remaining visible route? Compare the exact before/after rules, frequency of drawing the card, supported combinations and existing strategic direction. This is a conditional target selection, not a decision to Smith instead of resting; no game action occurs.',
+    instructions: 'Assume Smith is chosen at this rest site. Which ONE actual card upgrade best improves this owned deck for the remaining visible route? Compare the exact before/after rules, frequency of drawing the upgraded copy, supported combinations and existing strategic direction. Fully equivalent copies share one option; it upgrades only the indicated single copy. This is a conditional target selection, not a decision to Smith instead of resting; no game action occurs.',
     criteria: Object.fromEntries([...choices].map(([id, target]) => [id, publicCampTarget(target)]))
   } } }, 'camp_upgrade_target', result => {
     const answer = result.answers?.upgrade_target;

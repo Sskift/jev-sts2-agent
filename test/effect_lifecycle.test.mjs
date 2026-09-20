@@ -71,6 +71,45 @@ test('timed effect discovery is rule-based and excludes already counted Toxic an
   assert.equal(uncomputedTurnEndHealthEffects(s.combat, [{ ...toxic, id: 'UNMODELED_CARD' }]).length, 2);
 });
 
+test('pile-dependent automatic plays distinguish current hand, exhaust and an unknown draw-pile top', () => {
+  const s = completeCombat();
+  const howl = { ...s.combat.hand[0], index: 1, can_play: false, id: 'HOWL_FROM_BEYOND', name: 'Howl from Beyond', cost: 3,
+    description: 'Deal 18 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.', details: { instance_id: 'howl' } };
+  s.combat.hand.push(howl);
+  s.combat.player.hand_count++;
+  s.decision_context.player = structuredClone(s.combat.player);
+  const before = structuredClone(s);
+  assert.equal(combatForecast(s.combat).hp_remaining_if_end_turn, 28, 'A hand-only Howl cannot auto-play from Exhaust');
+  const inactive = describeCombatEffects(s.combat).effects.find(e => e.source_id === howl.id);
+  assert.equal(inactive.active, false);
+  assert.equal(inactive.activation, 'enters_required_pile');
+  assert.equal(inactive.observed_pile, 'hand');
+  assert.equal(inactive.required_pile, 'exhaust_pile');
+  assert.doesNotThrow(() => compileModelRequest(prepareModDecision(s).payload));
+  assert.deepEqual(s, before);
+  s.combat.hand.pop(); s.combat.exhaust_pile.push(howl);
+  s.combat.player.hand_count--; s.combat.player.exhaust_count++;
+  s.decision_context.player = structuredClone(s.combat.player);
+  const end = combatForecast(s.combat);
+  assert.equal(end.hp_remaining_if_end_turn, null, 'An armed automatic attack is not simulated as zero damage');
+  assert.equal(end.uncomputed_turn_end_effects[0].observed_pile, 'exhaust_pile');
+  assert.equal(end.uncomputed_turn_end_effects[0].condition_evaluated, true);
+  assert.equal(describeCombatEffects(s.combat).effects.find(e => e.source_id === howl.id).active, true);
+  const projection = describeTurnProjection(s, [{ kind: 'end_turn' }]);
+  assert.equal(projection.known_effects_only.hp_if_ending, null);
+  const prepared = prepareModDecision(s);
+  prepared.payload.state.turn_planning = { phase_scope: 'Pile trigger fixture', energy_reservation: {
+    observed_energy: 2, remaining_after_printed_costs: 2, scope: 'No prefix', is_observed: false, includes_future_energy_gains: false, steps: [] }, conditional_projection: projection };
+  assert.doesNotThrow(() => compileModelRequest(prepared.payload));
+  s.combat.exhaust_pile.pop(); s.combat.draw_pile.push({ ...howl, id: 'I_AM_INVINCIBLE', type: 'Skill',
+    description: 'Gain 10 Block. At the end of your turn, if this is on top of your Draw Pile, play it.' });
+  const unknownTop = combatForecast(s.combat);
+  assert.equal(unknownTop.hp_remaining_if_end_turn, null);
+  assert.equal(unknownTop.uncomputed_turn_end_effects[0].condition_evaluated, false);
+  s.combat.discard_pile.push(s.combat.draw_pile.pop());
+  assert.equal(combatForecast(s.combat).hp_remaining_if_end_turn, 28);
+});
+
 test('an expiring bonus reports the declared consumer and distinguishes an unresolved draw from a complete ending', () => {
   const s = completeCombat();
   const setup = { ...s.combat.hand[0], id: 'ONE_TWO_PUNCH', type: 'Skill', description: 'This turn, your next Attack is played an extra time.', details: { instance_id: 'setup' } };

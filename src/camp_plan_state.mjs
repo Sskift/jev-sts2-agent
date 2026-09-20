@@ -4,6 +4,12 @@ const stable = value => Array.isArray(value) ? value.map(stable) : value && type
   ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stable(value[key])])) : value;
 const encode = value => JSON.stringify(stable(value));
 const brief = card => ({ name: card.name, description: card.description, cost: card.cost });
+const withoutIdentity = value => {
+  const copy = structuredClone(value);
+  delete copy.index; delete copy.deck_index; delete copy.instance_id;
+  if (copy.details) delete copy.details.instance_id;
+  return copy;
+};
 
 function basis(state) {
   const context = state.decision_context;
@@ -29,6 +35,20 @@ export function campUpgradeTargets(state) {
   return targets.every(Boolean) ? targets : [];
 }
 
+export function distinctCampUpgradeTargets(state) {
+  const groups = new Map();
+  for (const target of campUpgradeTargets(state)) {
+    const context = state.decision_context;
+    const preview = context.deck_upgrade_previews.find(p => p.deck_index === target.deck_index);
+    // Full native faces and previews must match, including enchantments and
+    // other per-copy properties. Similar names or descriptions are not enough.
+    const key = encode([withoutIdentity(context.master_deck[target.deck_index]), withoutIdentity(preview)]);
+    if (!groups.has(key)) groups.set(key, { ...target, equivalent_deck_indices: [] });
+    groups.get(key).equivalent_deck_indices.push(target.deck_index);
+  }
+  return [...groups.values()];
+}
+
 export function campPlanApplicable(plan, state) {
   return Boolean(plan && plan.run_id === state.decision_context?.run_id && plan.floor === state.decision_context?.total_floor
     && ['REST_SITE', 'GRID_CARD_SELECT'].includes(state.screen) && plan.basis === basis(state));
@@ -37,7 +57,8 @@ export function campPlanApplicable(plan, state) {
 export function publicCampTarget(target) {
   return { is_observed_effect: false, deck_index: target.deck_index, card_id: target.card_id,
     before: target.before, after: target.after,
-    scope: 'Conditional upgrade selected by Jev. No upgrade has occurred; apply this target only if Smith is chosen and the following native upgrade selection still matches.' };
+    ...(target.equivalent_deck_indices ? { equivalent_deck_indices: target.equivalent_deck_indices } : {}),
+    scope: 'Conditional upgrade selected by Jev. Upgrade ONE copy, not every equivalent copy. No upgrade has occurred; apply this target only if Smith is chosen and the following native upgrade selection still matches.' };
 }
 
 function matchesPreview(card, target) {
@@ -58,12 +79,7 @@ export function plannedCampSelection(plan, state, candidates) {
     // Old grid DTOs have no instance IDs. Only follow through when all deck
     // copies with this visible face are equivalent in their full native data.
     const equivalents = state.decision_context.master_deck.filter(card => card.id === plan.card_id && encode(brief(card)) === encode(plan.before));
-    const withoutIdentity = card => {
-      const copy = structuredClone(card); delete copy.index;
-      if (copy.details) delete copy.details.instance_id;
-      return encode(copy);
-    };
-    if (!equivalents.length || new Set(equivalents.map(withoutIdentity)).size !== 1) return null;
+    if (!equivalents.length || new Set(equivalents.map(card => encode(withoutIdentity(card)))).size !== 1) return null;
     selected = matching[0];
   }
   const copies = grid.cards.filter(card => card.card_id.toUpperCase() === selected.card_id.toUpperCase()).sort((a, b) => a.index - b.index);

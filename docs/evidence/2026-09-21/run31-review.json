@@ -1,0 +1,1508 @@
+{
+  "at": "2026-09-20T20:33:40.693Z",
+  "run_id": "run-1789934018",
+  "roots": [
+    "run-artifacts/run31-2026-09-20T19-53-34.016Z",
+    "run-artifacts/run31-resume-2026-09-20T20-03-51.274Z",
+    "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z"
+  ],
+  "final": {
+    "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/settled-game-over.json",
+    "sha256": "1e3b126a6e58f95ba776ffbda7f1eed07e50899d0ef749a0875a6bced9446fe9",
+    "is_victory": false,
+    "floor": 17,
+    "score": 171,
+    "epochs_discovered": 0,
+    "can_return_to_menu": false,
+    "can_continue": true
+  },
+  "memory": {
+    "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/final-memory.json",
+    "sha256": "743497f33c8f42309878625a7deabf5b18fa09c86c9e2e486ca1f8898dca3014",
+    "pending": null
+  },
+  "live_usage": {
+    "successful_responses": 1688,
+    "input_tokens": 34949254,
+    "output_tokens": 176157,
+    "cost_usd": 1.4678686680000004,
+    "actual_models": [
+      "typesafe/jev-1.13-20260917"
+    ],
+    "provider": "openrouter"
+  },
+  "camp": {
+    "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0001",
+    "native_healing": {
+      "index": 0,
+      "option_id": "HEAL",
+      "name": "Rest",
+      "description": "Heal for 30% of your Max HP (24).",
+      "is_enabled": true
+    },
+    "hp": 54,
+    "original_decision": {
+      "request": {
+        "cmd": "choose_rest_option",
+        "id": "SMITH"
+      },
+      "probabilities": {
+        "rest_HEAL": 0.41,
+        "rest_SMITH": 0.59
+      },
+      "confidence": 0.19,
+      "conditional_upgrade": {
+        "run_id": "run-1789934018",
+        "floor": 16,
+        "basis": "3d22b93a85ef4aa69a546b97627e967053ffe92913ab3677afd23f6cad1d14fd",
+        "deck_index": 0,
+        "instance_id": "9fa3a1647df745599d267dc5719f79ad",
+        "card_id": "STRIKE_IRONCLAD",
+        "before": {
+          "name": "Strike",
+          "description": "Deal 6 damage.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Strike+",
+          "description": "Deal 9 damage.",
+          "cost": 1
+        }
+      },
+      "upgrade_probabilities": {
+        "upgrade_0": 0.16,
+        "upgrade_5": 0.12,
+        "upgrade_15": 0.1,
+        "upgrade_2": 0.01,
+        "upgrade_6": 0.01,
+        "upgrade_7": 0.01,
+        "upgrade_1": 0.04,
+        "upgrade_18": 0.03,
+        "upgrade_4": 0.02,
+        "upgrade_10": 0.15,
+        "upgrade_17": 0.04,
+        "upgrade_14": 0.05,
+        "upgrade_12": 0.06,
+        "upgrade_8": 0.02,
+        "upgrade_19": 0.09,
+        "upgrade_3": 0.01,
+        "upgrade_11": 0.08
+      },
+      "upgrade_confidence": 0.12
+    },
+    "physical_upgrade_targets": 17,
+    "distinct_upgrade_targets": [
+      {
+        "id": "STRIKE_IRONCLAD",
+        "deck_indices": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "before": {
+          "name": "Strike",
+          "description": "Deal 6 damage.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Strike+",
+          "description": "Deal 9 damage.",
+          "cost": 1
+        }
+      },
+      {
+        "id": "DEFEND_IRONCLAD",
+        "deck_indices": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "before": {
+          "name": "Defend",
+          "description": "Gain 5 Block.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Defend+",
+          "description": "Gain 8 Block.",
+          "cost": 1
+        }
+      },
+      {
+        "id": "NEOWS_FURY",
+        "deck_indices": [
+          10
+        ],
+        "before": {
+          "name": "Neow's Fury",
+          "description": "Deal 10 damage. Put up to 2 cards from your Discard Pile into your Hand. Exhaust.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Neow's Fury+",
+          "description": "Deal 14 damage. Put up to 3 cards from your Discard Pile into your Hand. Exhaust.",
+          "cost": 1
+        }
+      },
+      {
+        "id": "ARMAMENTS",
+        "deck_indices": [
+          11
+        ],
+        "before": {
+          "name": "Armaments",
+          "description": "Gain 5 Block. Upgrade a card in your Hand.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Armaments+",
+          "description": "Gain 5 Block. Upgrade ALL cards in your Hand.",
+          "cost": 1
+        }
+      },
+      {
+        "id": "BATTLE_TRANCE",
+        "deck_indices": [
+          12
+        ],
+        "before": {
+          "name": "Battle Trance",
+          "description": "Draw 3 cards. You cannot draw additional cards this turn.",
+          "cost": 0
+        },
+        "after": {
+          "name": "Battle Trance+",
+          "description": "Draw 4 cards. You cannot draw additional cards this turn.",
+          "cost": 0
+        }
+      },
+      {
+        "id": "SHRUG_IT_OFF",
+        "deck_indices": [
+          14
+        ],
+        "before": {
+          "name": "Shrug It Off",
+          "description": "Gain 8 Block. Draw 1 card.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Shrug It Off+",
+          "description": "Gain 11 Block. Draw 1 card.",
+          "cost": 1
+        }
+      },
+      {
+        "id": "STONE_ARMOR",
+        "deck_indices": [
+          15
+        ],
+        "before": {
+          "name": "Stone Armor",
+          "description": "Gain 4 Plating.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Stone Armor+",
+          "description": "Gain 6 Plating.",
+          "cost": 1
+        }
+      },
+      {
+        "id": "PILLAGE",
+        "deck_indices": [
+          17
+        ],
+        "before": {
+          "name": "Pillage",
+          "description": "Deal 6 damage. Draw cards until you draw a non-Attack card.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Pillage+",
+          "description": "Deal 9 damage. Draw cards until you draw a non-Attack card.",
+          "cost": 1
+        }
+      },
+      {
+        "id": "HEADBUTT",
+        "deck_indices": [
+          18
+        ],
+        "before": {
+          "name": "Headbutt",
+          "description": "Deal 9 damage. Put a card from your Discard Pile on top of your Draw Pile.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Headbutt+",
+          "description": "Deal 12 damage. Put a card from your Discard Pile on top of your Draw Pile.",
+          "cost": 1
+        }
+      },
+      {
+        "id": "THUNDERCLAP",
+        "deck_indices": [
+          19
+        ],
+        "before": {
+          "name": "Thunderclap",
+          "description": "Deal 4 damage and apply 1 Vulnerable to ALL enemies.",
+          "cost": 1
+        },
+        "after": {
+          "name": "Thunderclap+",
+          "description": "Deal 7 damage and apply 1 Vulnerable to ALL enemies.",
+          "cost": 1
+        }
+      }
+    ]
+  },
+  "boss_turns": [
+    {
+      "turn": 1,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0009",
+      "hp": 54,
+      "boss_hp": 173,
+      "slippery": 8,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "ARMAMENTS",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "STONE_ARMOR",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "NEOWS_FURY",
+          "nth": 0,
+          "target": 1
+        }
+      ],
+      "end_hp": 54
+    },
+    {
+      "turn": 2,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0018",
+      "hp": 54,
+      "boss_hp": 171,
+      "slippery": 6,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "TAUNT",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "THUNDERCLAP",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        }
+      ],
+      "end_hp": 54
+    },
+    {
+      "turn": 3,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0022",
+      "hp": 54,
+      "boss_hp": 170,
+      "slippery": 5,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "BATTLE_TRANCE",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "SHRUG_IT_OFF",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 1,
+          "target": 1
+        }
+      ],
+      "end_hp": 43
+    },
+    {
+      "turn": 4,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0027",
+      "hp": 43,
+      "boss_hp": 169,
+      "slippery": 4,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "BATTLE_TRANCE",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 2,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "THUNDERCLAP",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "PILLAGE",
+          "nth": 0,
+          "target": 1
+        }
+      ],
+      "end_hp": 43
+    },
+    {
+      "turn": 5,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0032",
+      "hp": 43,
+      "boss_hp": 166,
+      "slippery": 1,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "SHRUG_IT_OFF",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "ARMAMENTS",
+          "nth": 0
+        }
+      ],
+      "end_hp": 43
+    },
+    {
+      "turn": 6,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0038",
+      "hp": 43,
+      "boss_hp": 166,
+      "slippery": 1,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "TAUNT",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 1
+        }
+      ],
+      "end_hp": 39
+    },
+    {
+      "turn": 7,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0042",
+      "hp": 39,
+      "boss_hp": 165,
+      "slippery": 0,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "HOWL_FROM_BEYOND",
+          "nth": 0
+        }
+      ],
+      "end_hp": 11
+    },
+    {
+      "turn": 8,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0044",
+      "hp": 11,
+      "boss_hp": 129,
+      "slippery": 0,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "BASH",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "SHRUG_IT_OFF",
+          "nth": 0
+        }
+      ],
+      "end_hp": 11
+    },
+    {
+      "turn": 9,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0047",
+      "hp": 11,
+      "boss_hp": 119,
+      "slippery": 0,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "ARMAMENTS",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "HEADBUTT",
+          "nth": 0,
+          "target": 1
+        }
+      ],
+      "end_hp": 5
+    },
+    {
+      "turn": 10,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0054",
+      "hp": 5,
+      "boss_hp": 92,
+      "slippery": 0,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "TAUNT",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "BASH",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "BATTLE_TRANCE",
+          "nth": 0
+        }
+      ],
+      "end_hp": 24
+    },
+    {
+      "turn": 11,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0058",
+      "hp": 24,
+      "boss_hp": 77,
+      "slippery": 0,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        }
+      ],
+      "end_hp": 4
+    },
+    {
+      "turn": 12,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0062",
+      "hp": 4,
+      "boss_hp": 64,
+      "slippery": 0,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "THUNDERCLAP",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "ARMAMENTS",
+          "nth": 0
+        },
+        {
+          "cmd": "play_card",
+          "id": "HEADBUTT",
+          "nth": 0,
+          "target": 1
+        }
+      ],
+      "end_hp": 4
+    },
+    {
+      "turn": 13,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0067",
+      "hp": 4,
+      "boss_hp": 40,
+      "slippery": 0,
+      "actions": [
+        {
+          "cmd": "play_card",
+          "id": "TAUNT",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 1
+        },
+        {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 1
+        }
+      ],
+      "end_hp": 0
+    }
+  ],
+  "endpoint_review": [
+    {
+      "turn": 1,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0017",
+      "source_sha256": "2a2ead38c33eb2a88c7fb2290a469486b5653d8fb5102289f5e034b011e85470",
+      "old_hp_if_ending": 54,
+      "current_hp_if_ending": 54,
+      "actual_hp": 54,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 2,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0021",
+      "source_sha256": "58d500dabfdf68933932593601c35b59f10ca3632d1b6b5d897a9376271c159d",
+      "old_hp_if_ending": 54,
+      "current_hp_if_ending": 54,
+      "actual_hp": 54,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 3,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0026",
+      "source_sha256": "57dc4e787beb3c71b36a735f7e26d47859b50a37ef2c65763242664755cf1489",
+      "old_hp_if_ending": null,
+      "current_hp_if_ending": 43,
+      "actual_hp": 43,
+      "old_unknown_effects": [
+        {
+          "category": "hand_card",
+          "source_id": "HOWL_FROM_BEYOND",
+          "hand_index": 0,
+          "description": "Deal 24 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.",
+          "timing": "declared_turn_end",
+          "condition_evaluated": false,
+          "affected_outputs": [
+            "end_turn_hp",
+            "end_turn_fatality",
+            "block_after_turn_end_effects"
+          ],
+          "scope": "The current rule mentions turn-end health, damage or Block, but this arithmetic does not evaluate its conditions, timing order, prevention or healing. It is not a claim that the effect will trigger. Use the full current rule; absent calculation is not zero effect."
+        }
+      ],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 4,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0031",
+      "source_sha256": "622e947e4275f94fd10ba6acafab149fbe94a68ac70c2a17e53c3ba8244d0057",
+      "old_hp_if_ending": 43,
+      "current_hp_if_ending": 43,
+      "actual_hp": 43,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 5,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0037",
+      "source_sha256": "374d95aabecc98697003e3e8328ea83c8944d95d51a691c222dfffb598a36b41",
+      "old_hp_if_ending": null,
+      "current_hp_if_ending": 43,
+      "actual_hp": 43,
+      "old_unknown_effects": [
+        {
+          "category": "hand_card",
+          "source_id": "HOWL_FROM_BEYOND",
+          "hand_index": 0,
+          "description": "Deal 24 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.",
+          "timing": "declared_turn_end",
+          "condition_evaluated": false,
+          "affected_outputs": [
+            "end_turn_hp",
+            "end_turn_fatality",
+            "block_after_turn_end_effects"
+          ],
+          "scope": "The current rule mentions turn-end health, damage or Block, but this arithmetic does not evaluate its conditions, timing order, prevention or healing. It is not a claim that the effect will trigger. Use the full current rule; absent calculation is not zero effect."
+        }
+      ],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 6,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0041",
+      "source_sha256": "3c23e12d65ee73437e1f4476b25fe9f3ba35eb04a1b78f2ed05ce47f10ea9261",
+      "old_hp_if_ending": 39,
+      "current_hp_if_ending": 39,
+      "actual_hp": 39,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 7,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0043",
+      "source_sha256": "d0b317e9062d7ea0335453f28331ce9e3f196cc6d41e60103e08f2deb3d4a464",
+      "old_hp_if_ending": 11,
+      "current_hp_if_ending": 11,
+      "actual_hp": 11,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 8,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0046",
+      "source_sha256": "3cc48cf6d8a2421b312d34c7daf4e5f8c2e17de2402b3784419d2354cd465052",
+      "old_hp_if_ending": 11,
+      "current_hp_if_ending": 11,
+      "actual_hp": 11,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 9,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0053",
+      "source_sha256": "b8240d5370d93c1f383c16591c9e921feca4fb1e9d9f11c31e564e770a039776",
+      "old_hp_if_ending": 5,
+      "current_hp_if_ending": 5,
+      "actual_hp": 5,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 10,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0057",
+      "source_sha256": "968ae9809732af16b5c253329ccb07a940c096eeaf8ea3d1058aeb458c30785f",
+      "old_hp_if_ending": null,
+      "current_hp_if_ending": null,
+      "actual_hp": 24,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 11,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0061",
+      "source_sha256": "af0d739810fab1290ca5c21930df5b34c283e1ce8f3cef405434971a932ada10",
+      "old_hp_if_ending": 4,
+      "current_hp_if_ending": 4,
+      "actual_hp": 4,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 12,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0066",
+      "source_sha256": "205564f79a41d65f23a3ae0a5eacd96b0f88437dff74f58d300ceb2e15e96628",
+      "old_hp_if_ending": null,
+      "current_hp_if_ending": 4,
+      "actual_hp": 4,
+      "old_unknown_effects": [
+        {
+          "category": "hand_card",
+          "source_id": "HOWL_FROM_BEYOND",
+          "hand_index": 1,
+          "description": "Deal 24 damage to ALL enemies. At the end of your turn, if this is in your Exhaust Pile, play it.",
+          "timing": "declared_turn_end",
+          "condition_evaluated": false,
+          "affected_outputs": [
+            "end_turn_hp",
+            "end_turn_fatality",
+            "block_after_turn_end_effects"
+          ],
+          "scope": "The current rule mentions turn-end health, damage or Block, but this arithmetic does not evaluate its conditions, timing order, prevention or healing. It is not a claim that the effect will trigger. Use the full current rule; absent calculation is not zero effect."
+        }
+      ],
+      "current_unknown_effects": []
+    },
+    {
+      "turn": 13,
+      "source": "run-artifacts/run31-resume2-2026-09-20T20-13-57.386Z/step-0070",
+      "source_sha256": "aef0b802372a84900d9512529469c8333befde17366a473fdc50267ea28a47dc",
+      "old_hp_if_ending": -2,
+      "current_hp_if_ending": -2,
+      "actual_hp": 0,
+      "old_unknown_effects": [],
+      "current_unknown_effects": []
+    }
+  ],
+  "native_sources": [
+    {
+      "type": "HowlFromBeyond",
+      "source": "temp/knowledge-research/HowlFromBeyond.cs",
+      "sha256": "0c72e55cfed2b58bc6d0f852504ac503cf347e0bfd44430c928ecbc5155794bf"
+    },
+    {
+      "type": "IAmInvincible",
+      "source": "temp/knowledge-research/IAmInvincible.cs",
+      "sha256": "652e9a3bd23d423fcca9564038fa30a60360c9a9f6c8189b1e1f0a88ea604d90"
+    }
+  ],
+  "validation": {
+    "targeted_tests": 21,
+    "failed": 0,
+    "log": "temp/run31-review-checks.log"
+  },
+  "limitations": [
+    "Development cases, not holdout or a win-rate measurement.",
+    "Pile-dependent automatic plays are recognized but not simulated. Draw-pile array order never establishes the top card.",
+    "No alternative play sequence has been executed in the game. Rest would supply 24 HP; that alone does not prove this run would win.",
+    "Replay uses confirmed pre-cutoff strategy memory and does not rerun the current room strategy assessment. A changed choice cannot be attributed to candidate grouping alone."
+  ],
+  "replay": {
+    "freeze": {
+      "source": "run-artifacts/run31-review/freeze.json",
+      "candidate_sha256": "d74fa88b5b090eab48c4a70652409279a3129d262725c1fce0cbae277a31f46c",
+      "baseline_commit": "0c28e42595c218b24d62f8376d01087a269b2bd6"
+    },
+    "cases": [
+      {
+        "root": "run-artifacts/run31-review/results/camp-floor16/grouped-upgrades/1",
+        "summary": {
+          "id": "camp-floor16",
+          "cohort": "development",
+          "label": "grouped-upgrades",
+          "repeat": 1,
+          "input_sha256": "2a15fec35aadc8a9251d2176923b08138dc053cafae5f115f2759660840e72a1",
+          "code_root": "C:\\Users\\skift\\jevmake",
+          "request": {
+            "cmd": "choose_rest_option",
+            "id": "SMITH"
+          },
+          "model": "typesafe/jev-1.13-20260917",
+          "usage": {
+            "input_tokens": 23007,
+            "output_tokens": 157
+          },
+          "calls": 2,
+          "responses": 2,
+          "elapsed_ms": 1417
+        },
+        "decision": {
+          "request": {
+            "cmd": "choose_rest_option",
+            "id": "SMITH"
+          },
+          "probabilities": {
+            "rest_SMITH": 0.62,
+            "rest_HEAL": 0.38
+          },
+          "confidence": 0.24,
+          "conditional_upgrade": {
+            "run_id": "run-1789934018",
+            "floor": 16,
+            "basis": "3d22b93a85ef4aa69a546b97627e967053ffe92913ab3677afd23f6cad1d14fd",
+            "deck_index": 10,
+            "instance_id": "1492540d6d2242099f68eb32bd3e1c44",
+            "card_id": "NEOWS_FURY",
+            "before": {
+              "name": "Neow's Fury",
+              "description": "Deal 10 damage. Put up to 2 cards from your Discard Pile into your Hand. Exhaust.",
+              "cost": 1
+            },
+            "after": {
+              "name": "Neow's Fury+",
+              "description": "Deal 14 damage. Put up to 3 cards from your Discard Pile into your Hand. Exhaust.",
+              "cost": 1
+            },
+            "equivalent_deck_indices": [
+              10
+            ]
+          },
+          "upgrade_probabilities": {
+            "upgrade_14": 0.06,
+            "upgrade_18": 0.06,
+            "upgrade_5": 0.07,
+            "upgrade_19": 0.09,
+            "upgrade_10": 0.22,
+            "upgrade_15": 0.09,
+            "upgrade_17": 0.03,
+            "upgrade_0": 0.18,
+            "upgrade_11": 0.06,
+            "upgrade_12": 0.14
+          },
+          "upgrade_confidence": 0.14
+        }
+      },
+      {
+        "root": "run-artifacts/run31-review/results/boss-turn5/pile-conditions/1",
+        "summary": {
+          "id": "boss-turn5",
+          "cohort": "development",
+          "label": "pile-conditions",
+          "repeat": 1,
+          "input_sha256": "17691ac05b364dfedc8644e8b3e7c012fea3ca615a02028e09a1183552dbb4ec",
+          "code_root": "C:\\Users\\skift\\jevmake",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Shrug It Off",
+              "card_id": "SHRUG_IT_OFF"
+            }
+          ],
+          "candidate_coverage": {
+            "inspected_prefixes": 23,
+            "enumerated_plans": 16,
+            "selected_plans": 16,
+            "first_action_variants": 5,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "eligible_plans": 16,
+            "assessed_plans": 16,
+            "distinct_allocations": 13,
+            "compared_plans": 4
+          },
+          "assessment_shortlist": [
+            {
+              "value": "variant_9",
+              "score": 2.13,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.28,
+                "2": 0.33,
+                "3": 0.32,
+                "4": 0.06
+              },
+              "confidence": 0.39,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "keep",
+              "score": 1.97,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.37,
+                "2": 0.28,
+                "3": 0.28,
+                "4": 0.05
+              },
+              "confidence": 0.16,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_14",
+              "score": 1.97,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.31,
+                "2": 0.38,
+                "3": 0.26,
+                "4": 0.03
+              },
+              "confidence": 0.44,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_15",
+              "score": 1.55,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.54,
+                "2": 0.35,
+                "3": 0.07,
+                "4": 0.02
+              },
+              "confidence": 0.51,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 1
+            }
+          ],
+          "comparison_audit": {
+            "comparisons": 12,
+            "preference_support": {
+              "variant_9": 1.52,
+              "keep": 1.58,
+              "variant_14": 1.825,
+              "variant_15": 1.075
+            },
+            "balanced_pairs": [
+              {
+                "candidates": [
+                  "variant_9",
+                  "keep"
+                ],
+                "preference_support": {
+                  "variant_9": 0.44,
+                  "keep": 0.56
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.44,
+                  "plan_b": 0.56,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.01,
+                  "plan_b": 0.015,
+                  "no_clear_difference": 0.975
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "keep",
+                  "keep"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_9",
+                  "variant_14"
+                ],
+                "preference_support": {
+                  "variant_9": 0.47,
+                  "variant_14": 0.53
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.47,
+                  "plan_b": 0.53,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.025,
+                  "plan_b": 0.015,
+                  "no_clear_difference": 0.96
+                },
+                "order_disagreement": true,
+                "selected_by_order": [
+                  "variant_9",
+                  "variant_14"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_9",
+                  "variant_15"
+                ],
+                "preference_support": {
+                  "variant_9": 0.6100000000000001,
+                  "variant_15": 0.39
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.6100000000000001,
+                  "plan_b": 0.39,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.04,
+                  "plan_b": 0.03,
+                  "no_clear_difference": 0.9299999999999999
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "variant_9",
+                  "variant_9"
+                ]
+              },
+              {
+                "candidates": [
+                  "keep",
+                  "variant_14"
+                ],
+                "preference_support": {
+                  "keep": 0.375,
+                  "variant_14": 0.625
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.375,
+                  "plan_b": 0.625,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.045000000000000005,
+                  "plan_b": 0.03,
+                  "no_clear_difference": 0.925
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "variant_14",
+                  "variant_14"
+                ]
+              },
+              {
+                "candidates": [
+                  "keep",
+                  "variant_15"
+                ],
+                "preference_support": {
+                  "keep": 0.645,
+                  "variant_15": 0.355
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.645,
+                  "plan_b": 0.355,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.07,
+                  "plan_b": 0.05,
+                  "no_clear_difference": 0.88
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "keep",
+                  "keep"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_14",
+                  "variant_15"
+                ],
+                "preference_support": {
+                  "variant_14": 0.6699999999999999,
+                  "variant_15": 0.33
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.6699999999999999,
+                  "plan_b": 0.33,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.035,
+                  "plan_b": 0.035,
+                  "no_clear_difference": 0.9299999999999999
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "variant_14",
+                  "variant_14"
+                ]
+              }
+            ],
+            "order_disagreements": [
+              {
+                "candidates": [
+                  "variant_9",
+                  "variant_14"
+                ],
+                "selected_by_order": [
+                  "variant_9",
+                  "variant_14"
+                ]
+              }
+            ],
+            "tied_at_top": [
+              "variant_14"
+            ],
+            "interpretation": "Position-balanced preference support among these finalists only, not correctness or win probability. Independent quality scores and bounded search can still omit a better plan."
+          },
+          "usage": {
+            "input_tokens": 205752,
+            "output_tokens": 1388
+          },
+          "calls": 10,
+          "responses": 10,
+          "elapsed_ms": 5926
+        },
+        "decision": {
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          }
+        }
+      },
+      {
+        "root": "run-artifacts/run31-review/results/boss-turn5-after-draw/pile-conditions/1",
+        "summary": {
+          "id": "boss-turn5-after-draw",
+          "cohort": "development",
+          "label": "pile-conditions",
+          "repeat": 1,
+          "input_sha256": "d33672aad9a92170d8b69a8fd4b05155e6f67646f94738d8557f5482ab5f380b",
+          "code_root": "C:\\Users\\skift\\jevmake",
+          "request": {
+            "cmd": "play_card",
+            "id": "ARMAMENTS",
+            "nth": 0
+          },
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Armaments",
+              "card_id": "ARMAMENTS"
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "candidate_coverage": {
+            "inspected_prefixes": 10,
+            "enumerated_plans": 5,
+            "selected_plans": 5,
+            "first_action_variants": 4,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "eligible_plans": 6,
+            "assessed_plans": 6,
+            "distinct_allocations": 6,
+            "compared_plans": 4
+          },
+          "assessment_shortlist": [
+            {
+              "value": "variant_5",
+              "score": 2,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.29,
+                "2": 0.38,
+                "3": 0.27,
+                "4": 0.04
+              },
+              "confidence": 0.43,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_4",
+              "score": 1.9,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.33,
+                "2": 0.42,
+                "3": 0.2,
+                "4": 0.03
+              },
+              "confidence": 0.47,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_2",
+              "score": 1.79,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.4,
+                "2": 0.42,
+                "3": 0.14,
+                "4": 0.03
+              },
+              "confidence": 0.48,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            }
+          ],
+          "comparison_audit": {
+            "comparisons": 12,
+            "preference_support": {
+              "variant_5": 1.235,
+              "variant_4": 2.11,
+              "variant_2": 1.59,
+              "keep": 1.065
+            },
+            "balanced_pairs": [
+              {
+                "candidates": [
+                  "variant_5",
+                  "variant_4"
+                ],
+                "preference_support": {
+                  "variant_5": 0.28,
+                  "variant_4": 0.72
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.28,
+                  "plan_b": 0.72,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.03,
+                  "plan_b": 0.03,
+                  "no_clear_difference": 0.94
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "variant_4",
+                  "variant_4"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_5",
+                  "variant_2"
+                ],
+                "preference_support": {
+                  "variant_5": 0.43500000000000005,
+                  "variant_2": 0.565
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.43500000000000005,
+                  "plan_b": 0.565,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.045,
+                  "plan_b": 0.045,
+                  "no_clear_difference": 0.91
+                },
+                "order_disagreement": true,
+                "selected_by_order": [
+                  "variant_5",
+                  "variant_2"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_5",
+                  "keep"
+                ],
+                "preference_support": {
+                  "variant_5": 0.52,
+                  "keep": 0.48
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.52,
+                  "plan_b": 0.48,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.03,
+                  "plan_b": 0.025,
+                  "no_clear_difference": 0.9450000000000001
+                },
+                "order_disagreement": true,
+                "selected_by_order": [
+                  "keep",
+                  "variant_5"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_4",
+                  "variant_2"
+                ],
+                "preference_support": {
+                  "variant_4": 0.64,
+                  "variant_2": 0.36000000000000004
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.6399999999999999,
+                  "plan_b": 0.36,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.015,
+                  "plan_b": 0.015,
+                  "no_clear_difference": 0.97
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "variant_4",
+                  "variant_4"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_4",
+                  "keep"
+                ],
+                "preference_support": {
+                  "variant_4": 0.75,
+                  "keep": 0.25
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.75,
+                  "plan_b": 0.25,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.01,
+                  "plan_b": 0.01,
+                  "no_clear_difference": 0.98
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "variant_4",
+                  "variant_4"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_2",
+                  "keep"
+                ],
+                "preference_support": {
+                  "variant_2": 0.665,
+                  "keep": 0.33499999999999996
+                },
+                "selection_basis": "balanced_overall_value",
+                "value_distribution": {
+                  "plan_a": 0.665,
+                  "plan_b": 0.33499999999999996,
+                  "no_clear_difference": 0
+                },
+                "survival_distribution": {
+                  "plan_a": 0.015,
+                  "plan_b": 0.01,
+                  "no_clear_difference": 0.975
+                },
+                "order_disagreement": false,
+                "selected_by_order": [
+                  "variant_2",
+                  "variant_2"
+                ]
+              }
+            ],
+            "order_disagreements": [
+              {
+                "candidates": [
+                  "variant_5",
+                  "variant_2"
+                ],
+                "selected_by_order": [
+                  "variant_5",
+                  "variant_2"
+                ]
+              },
+              {
+                "candidates": [
+                  "variant_5",
+                  "keep"
+                ],
+                "selected_by_order": [
+                  "keep",
+                  "variant_5"
+                ]
+              }
+            ],
+            "tied_at_top": [
+              "variant_4"
+            ],
+            "interpretation": "Position-balanced preference support among these finalists only, not correctness or win probability. Independent quality scores and bounded search can still omit a better plan."
+          },
+          "usage": {
+            "input_tokens": 122673,
+            "output_tokens": 1135
+          },
+          "calls": 6,
+          "responses": 6,
+          "elapsed_ms": 3955
+        },
+        "decision": {
+          "request": {
+            "cmd": "play_card",
+            "id": "ARMAMENTS",
+            "nth": 0
+          }
+        }
+      }
+    ],
+    "usage": {
+      "calls": 18,
+      "input_tokens": 351432,
+      "output_tokens": 2680,
+      "cost_usd": 0.014760143999999998,
+      "providers": [
+        "openrouter"
+      ],
+      "models": [
+        "typesafe/jev-1.13-20260917"
+      ]
+    },
+    "interpretation": "Camp still chose Smith with low confidence, but selected Neows Fury instead of Strike. Boss turn 5 still begins Defend then Shrug It Off; the inspected post-draw snapshot still selects Armaments. Changed representation and arithmetic coverage are verified; improved combat or run outcome is not established."
+  },
+  "game_assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9"
+}

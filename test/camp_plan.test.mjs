@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DecisionMemory } from '../src/decision_context.mjs';
 import { makeModDecisionWithJev, buildModCandidates } from '../src/mod_decision.mjs';
-import { campUpgradeTargets, plannedCampSelection } from '../src/camp_plan_state.mjs';
+import { campUpgradeTargets, distinctCampUpgradeTargets, plannedCampSelection } from '../src/camp_plan_state.mjs';
 import { withContext, fixtureCard } from './fixtures/context.mjs';
 
 function camp() {
@@ -25,9 +25,11 @@ async function decide(state, memory, finalChoice) {
   const requests = [];
   const result = await makeModDecisionWithJev(state, { memory, apiKey: 'fixture-only', fetchImpl: async (_url, request) => {
     const payload = JSON.parse(request.body); payload.state = JSON.parse(payload.state); requests.push(payload);
-    const key = Object.keys(payload.questions)[0], choice = key === 'upgrade_target' ? 'upgrade_1' : finalChoice;
+    const key = Object.keys(payload.questions)[0], choice = key === 'upgrade_target' ? 'upgrade_0' : finalChoice;
+    if (key === 'upgrade_target') assert.deepEqual(Object.keys(payload.questions[key].criteria), ['upgrade_0']);
     if (key === 'next_action') {
-      assert.equal(payload.state.intent.camp_planning.deck_index, 1);
+      assert.equal(payload.state.intent.camp_planning.deck_index, 0);
+      assert.deepEqual(payload.state.intent.camp_planning.equivalent_deck_indices, [0, 1]);
       assert.equal(payload.state.intent.camp_planning.after.description, 'Deal 9 damage.');
       assert.equal(payload.state.observation.screen_state.camp_planning, undefined);
       assert.equal(memory.data.pending, null, 'Planning has no dispatch side effects');
@@ -55,6 +57,20 @@ test('camp compares a concrete upgrade and follows its equivalent old-DTO copy o
   assert.deepEqual(selected.request, { cmd: 'grid_select_card', card_ids: ['STRIKE_IRONCLAD'], nth_values: [0] });
   memory.begin(selected.request, after); memory.finish({ ok: true }, state);
   assert.equal(memory.data.camp_upgrade_plan, undefined, 'Selection consumes the interaction intention');
+});
+
+test('camp grouping preserves native per-copy and upgrade differences without mutating observations', () => {
+  const state = camp(), before = structuredClone(state);
+  assert.equal(campUpgradeTargets(state).length, 2, 'Physical targets remain available for exact follow-through');
+  assert.equal(distinctCampUpgradeTargets(state).length, 1);
+  assert.deepEqual(state, before);
+  state.decision_context.master_deck[1].details.enchantment = { id: 'SHARP', amount: 2 };
+  assert.equal(distinctCampUpgradeTargets(state).length, 2, 'Full data, not card ID or face text, defines equivalence');
+  delete state.decision_context.master_deck[1].details.enchantment;
+  state.decision_context.deck_upgrade_previews[1].description = 'Deal 12 damage.';
+  assert.equal(distinctCampUpgradeTargets(state).length, 2);
+  state.decision_context.deck_upgrade_previews[1].instance_id = 'stale';
+  assert.equal(distinctCampUpgradeTargets(state).length, 0, 'An incomplete snapshot cannot silently omit alternatives');
 });
 
 test('resting discards the hypothetical upgrade, and a failed Smith never authorizes it', async () => {

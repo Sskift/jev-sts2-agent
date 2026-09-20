@@ -202,5 +202,35 @@
       },
       "after_state": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume2-2026-09-20T20-13-57.386Z\\step-0009\\after-state.json"
     }
+  },
+  "actual_consumption": {
+    "step": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume2-2026-09-20T20-13-57.386Z\\step-0057",
+    "before": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume2-2026-09-20T20-13-57.386Z\\step-0057\\before-state.json",
+      "sha256": "968ae9809732af16b5c253329ccb07a940c096eeaf8ea3d1058aeb458c30785f",
+      "hp": 5,
+      "round": 10
+    },
+    "after": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume2-2026-09-20T20-13-57.386Z\\step-0057\\after-state.json",
+      "sha256": "57b25f1e2c1b80d1acdb6857c0261f2d3e38353337f7f7a41fe70140e6481873",
+      "hp": 24,
+      "round": 11,
+      "potions": []
+    },
+    "request": {
+      "cmd": "end_turn"
+    },
+    "native_events": [
+      {
+        "sequence": 263,
+        "type": "PotionUsedEntry",
+        "round": 10,
+        "side": "Enemy",
+        "actor_id": 0,
+        "potion_id": "FAIRY_IN_A_BOTTLE",
+        "target_id": 0
+      }
+    ]
   }
 }

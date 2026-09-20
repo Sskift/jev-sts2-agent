@@ -23,6 +23,20 @@ const idOf = entity => entity.id.replace(/_POWER$/, '');
 export const effectTiming = id => timing[id.replace(/_POWER$/, '')] ?? null;
 const temporal = /\b(?:whenever|when|at the (?:end|start)|this turn|next turn|next (?:\d+ )?(?:Attack|Skill|card)|lose|die)\b/i;
 
+// Native v0.111.0 AfterAutoPostPlayPhaseEntered hooks. Pile membership is
+// visible; draw-pile enumeration never establishes which card is on top.
+const pileTriggers = {
+  HOWL_FROM_BEYOND: { pile: 'exhaust_pile', condition: 'in_exhaust_pile', condition_evaluated: true },
+  I_AM_INVINCIBLE: { pile: 'draw_pile', condition: 'on_top_of_draw_pile', condition_evaluated: false }
+};
+function cardSources(combat, hand = combat.hand || []) {
+  return [
+    ...hand.map(entity => ({ entity, pile: 'hand' })),
+    ...['draw_pile', 'discard_pile', 'exhaust_pile'].flatMap(pile => (combat[pile] || [])
+      .filter(entity => pileTriggers[entity.id]).map(entity => ({ entity, pile })))
+  ];
+}
+
 /** A compact effect ledger beside the current observation. No new judgment or
  * action policy: owner, activation, trigger, expiry and unknown coverage. */
 export function describeCombatEffects(combat) {
@@ -30,31 +44,35 @@ export function describeCombatEffects(combat) {
     ...(combat.player.powers || []).map(entity => ({ entity, category: 'powers', owner: 'player', active: true })),
     ...combat.enemies.filter(e => e.is_alive && e.hp > 0).flatMap(e => (e.powers || []).map(entity => ({ entity, category: 'powers', owner: e.combat_id, active: true }))),
     ...(combat.player.relics || []).map(entity => ({ entity, category: 'relics', owner: 'player', active: true })),
-    ...combat.hand.map(entity => ({ entity, category: 'cards', owner: 'player', active: ['BURN', 'TOXIC'].includes(entity.id) })),
+    ...cardSources(combat).map(({ entity, pile }) => ({ entity, pile, category: 'cards', owner: 'player',
+      active: pileTriggers[entity.id] ? pileTriggers[entity.id].pile === pile : ['BURN', 'TOXIC'].includes(entity.id) })),
     ...(combat.player.potions || []).map(entity => ({ entity, category: 'potions', owner: 'player', active: entity.usage === 'Automatic' }))
   ];
   const effects = [];
-  for (const { entity, category, owner, active } of sources) {
+  for (const { entity, category, owner, active, pile } of sources) {
     const id = idOf(entity), definition = timing[id], rule = lookupRule(category, entity.id);
+    const pileTrigger = category === 'cards' ? pileTriggers[id] : null;
     const description = entity.description || '';
     const potion = category === 'potions' ? potionEffectFacts(entity) : null;
     if (!definition && !potion && !temporal.test(description)) continue;
-    const expires = potion?.expires_at ?? definition?.expires ?? null;
+    const expires = potion?.expires_at ?? definition?.expires ?? (pileTrigger ? 'leaves_required_pile' : null);
     effects.push({ source_id: entity.id, category, owner, active,
       ...(entity.details?.instance_id ? { card_instance_id: entity.details.instance_id } : {}),
+      ...(pileTrigger ? { observed_pile: pile, required_pile: pileTrigger.pile, trigger_condition: pileTrigger.condition } : {}),
       ...(entity.slot === undefined ? {} : { potion_slot: entity.slot }),
       ...(Number.isFinite(entity.amount) ? { current_amount: entity.amount } : {}),
       live_rule: description, wiki_rule_id: rule ? `${category}/${rule.id}` : null,
-      activation: active ? 'already_present' : category === 'potions' ? 'after_use' : 'after_play',
-      trigger: definition?.trigger ?? (potion ? 'subsequent_matching_card_effects' : null), expires,
+      activation: active ? 'already_present' : pileTrigger ? 'enters_required_pile' : category === 'potions' ? 'after_use' : 'after_play',
+      trigger: definition?.trigger ?? (pileTrigger ? 'owner_auto_post_play_phase' : potion ? 'subsequent_matching_card_effects' : null), expires,
       ...(definition?.consequence ? { consequence: definition.consequence } : {}),
       ...(definition?.detail ? { timing_detail: definition.detail } : {}),
+      ...(pileTrigger ? { timing_detail: 'This automatic play requires the stated pile condition when the hook resolves. Being in hand or playing the card manually does not establish it. Draw-pile contents do not reveal the top card; automatic-play effects are not simulated.' } : {}),
       ...(potion ? { followup: potion.affected_quantity, amount_after_use: potion.amount, retroactive: false } : {}),
-      timing_coverage: definition || potion ? 'versioned_rule_adapter' : 'live_rule_only_do_not_assume_no_effect'
+      timing_coverage: definition || potion || pileTrigger ? 'versioned_rule_adapter' : 'live_rule_only_do_not_assume_no_effect'
     });
   }
   return { game_version: 'v0.111.0', effects,
-    scope: 'Resolved live rules and public timing semantics. Hand cards and manually used potions require activation; automatic potions are already armed while held. Wiki example numbers are never current stacks. This ledger describes causal timing, not fully simulated outcomes; read uncomputed effects in each candidate projection.',
+    scope: 'Resolved live rules and public timing semantics. Ordinary hand cards and manually used potions require activation; automatic potions are armed while held, and pile-dependent cards require their stated pile and trigger conditions. Wiki example numbers are never current stacks. This ledger describes causal timing, not fully simulated outcomes; read uncomputed effects in each candidate projection.',
     phase_order: ['player_actions_and_immediate_reactions', 'player_end_early_block', 'player_end_damage_and_expiry', 'enemy_start_countdowns', 'enemy_actions_and_reactions', 'enemy_end_expiry', 'next_player_turn_start'] };
 }
 
@@ -86,17 +104,22 @@ export function uncomputedTurnEndHealthEffects(combat, remainingHand = combat.ha
   const sources = [
     ...(combat.player.powers || []).map(p => ({ category: 'power', ...p })),
     ...(combat.player.relics || []).map(r => ({ category: 'relic', ...r })),
-    ...remainingHand.map(c => ({ category: 'hand_card', ...c }))
+    ...cardSources(combat, remainingHand).filter(({ entity, pile }) => !pileTriggers[entity.id] || pileTriggers[entity.id].pile === pile)
+      .map(({ entity, pile }) => ({ ...entity, category: pile === 'hand' ? 'hand_card' : 'pile_card', pile }))
   ];
   const knownBlock = source => source.id === 'PLATING_POWER' && Number.isFinite(source.amount) || source.id === 'ORICHALCUM'
     || source.id === 'CLOAK_CLASP' && /gain \d+ Block for each card in your Hand/i.test(source.description || '');
   return sources.filter(s => !knownBlock(s) && !known.some(e => e.source_id === s.id && (s.index === undefined || e.hand_index === s.index))
     && turnEnd.test(s.description || '') && healthChange.test(s.description || '')).map(s => ({
-    category: s.category, source_id: s.id, ...(s.index === undefined ? {} : { hand_index: s.index }),
+    category: s.category, source_id: s.id, ...(s.category === 'hand_card' && s.index !== undefined ? { hand_index: s.index } : {}),
+    ...(s.pile ? { observed_pile: s.pile } : {}),
+    ...(s.details?.instance_id ? { card_instance_id: s.details.instance_id } : {}),
     description: s.description, ...(s.amount === undefined ? {} : { amount: s.amount }),
-    timing: 'declared_turn_end', condition_evaluated: false,
+    timing: pileTriggers[s.id] ? 'owner_auto_post_play_phase' : 'declared_turn_end',
+    condition_evaluated: pileTriggers[s.id]?.condition_evaluated ?? false,
+    ...(pileTriggers[s.id] ? { condition: pileTriggers[s.id].condition } : {}),
     affected_outputs: ['end_turn_hp', 'end_turn_fatality', 'block_after_turn_end_effects'],
-    scope: 'The current rule mentions turn-end health, damage or Block, but this arithmetic does not evaluate its conditions, timing order, prevention or healing. It is not a claim that the effect will trigger. Use the full current rule; absent calculation is not zero effect.'
+    scope: 'The current rule mentions turn-end health, damage or Block. Only an explicitly marked pile condition is evaluated; automatic plays, timing order, prevention and healing are not simulated. This does not promise the trigger will remain available after other effects. Use the full current rule; absent calculation is not zero effect.'
   }));
 }
 
