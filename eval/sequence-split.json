@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "created_at": "2026-09-20",
+  "baseline_commit": "c829da4835c45fc63a03db4c973203e14d7b58b9",
+  "development_runs": ["run-1789888890", "run-1789890786", "run-1789894658", "run-1789896546", "run-1789903049", "run-1789907946"],
+  "holdout_run_numbers": [19, 24, 26],
+  "holdout_runs": ["run-1789879418", "run-1789900349", "run-1789906322"],
+  "compatible_encounter": true,
+  "holdout_turns": [2, 4],
+  "holdout_selection": "Before opening model results, select the first actionable snapshots of turns 2 and 4 in the latest encounter of each declared run that has both turns and passes the current raw-state schema. Record rejected encounters and never substitute cases based on model performance.",
+  "comparison": "Same saved state and confirmed pre-cutoff memory; baseline versus frozen candidate with the same Jev model, two repetitions. No game commands or future observations in model input.",
+  "assessment": "Inspect ordered energy, modifier use, current card identities, declared observation boundaries and preservation of existing benefits. A zero-damage X card can still have on-play value; do not impose a fixed strategy.",
+  "readiness": "Known regressions must have correct causal facts and executable prefixes. Repeated historical decisions must not retain predictable stale-card continuations or systematic modifier-order losses; held-out cases must show no material mechanical regression. This establishes readiness for observed live play, not a victory guarantee.",
+  "limitations": "Runs have historical development exposure. This is a prospective split for the sequence-dependency change, not a pristine benchmark. Previously inspected cases are regression examples, not fresh holdout evidence."
+}

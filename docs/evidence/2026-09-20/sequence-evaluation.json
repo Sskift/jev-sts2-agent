@@ -1,0 +1,2940 @@
+{
+  "date": "2026-09-20",
+  "baseline_commit": "c829da4835c45fc63a03db4c973203e14d7b58b9",
+  "initial_freeze": {
+    "at": "2026-09-20T15:16:24.632Z",
+    "baseline_commit": "c829da4835c45fc63a03db4c973203e14d7b58b9",
+    "candidate_sha256": "b01705f68b11bf44d80427b88361d4f7fe34b2b6096db05675b311d17c27164a",
+    "files": {
+      "scripts/replay_harness.mjs": "6f097bbebeb31075710d408839742f0d3a198cca3018c50458cff141efffc81e",
+      "eval/sequence-split.json": "9e722ba81ed204a789049bd53efb2c418e5532676bbf64ad89065ad00f076583",
+      "src/artifacts.mjs": "59f448cb3acb7d98b89fe9a66a7efe3962fedcd425e1038a8f63a335e190bd47",
+      "src/boss_recording.mjs": "21901c3c26889912eb424e383416853988111457e4c9af833fa87837263270db",
+      "src/camp_plan.mjs": "f4c35a7d45fc99b8b9719d7bb7f913508ce46f9fd4ee227b51889cf1466ed044",
+      "src/camp_plan_state.mjs": "e79568df7a8bdfec7c434a4fbd5fea2e69b292f56dc92c9070b3b3d634b67e88",
+      "src/card_flow_projection.mjs": "386556eeb5e39600490161d15e1eafc830ee86b33a5105ec7f0921145729678d",
+      "src/combat_arithmetic.mjs": "c76ba0052ee78c605cbe46f3540595c2db45cb6fe6fab9a05f73ae45262288ac",
+      "src/combat_positioning.mjs": "55e488750930da546012951eda665b4af0141f15169a8caf1627609fe09a2047",
+      "src/combat_reactions.mjs": "0e16e6921f61c0d6ba2dce310c88c45b8e6e2ecfd065458f9b5ded757fb61cd0",
+      "src/context_compiler.mjs": "62eafe2062663f06472ece65436d46292da998ff01c0b8cf80f22f89922813ac",
+      "src/decision_brief.mjs": "c4c692719991f905273e89dd35a11e5eea984bc56a25dbbdf6bb7bcc3cc36431",
+      "src/decision_context.mjs": "d57cb44b5faa951240f1a5afc6db36831b4ea7f21ddbcafad6e5146b4ac00f71",
+      "src/decision_instructions.mjs": "14b0ffc312cfc9fe9266d8691b288a69ac5e86d9570e795bb34e2a369bae2369",
+      "src/effect_lifecycle.mjs": "2f3aacefc6e83a76ea4765abcdb162d08aeba2014319408db9a27a6b2d98f4f7",
+      "src/history_scope.mjs": "53f1f96f9fe8d1845277a07db35556e21cd9dd8659b8688f4ed5cd9587b8345a",
+      "src/jev_client.mjs": "ad8f5f60238be5dd91001e7ff07df5060218ed42f6533135dfb50b3c9bf181c3",
+      "src/mod_client.mjs": "652044093a7c54b4c80cb5e2cb3833276eb995e5c7bc469cdcff62e696e5642c",
+      "src/mod_decision.mjs": "967c5e229c0c79132ccae708497f9a0e4e7a48233864dd8cf71096248c98aaea",
+      "src/mod_loop.mjs": "7eeb9118e7a7e01194fa8210e19a5c6eb8e82c055018deb16be9c32a2786c3cb",
+      "src/mod_selection.mjs": "34dc855c4674da0d8ca3b3723e97f581e66c33b893d700ea2985f88d2fb86e26",
+      "src/potion_effects.mjs": "bb02abeddff88ffbb1bd872df80da8c0cce7005efe45933b603e34f626645110",
+      "src/recording_files.mjs": "89d54ad7e2192a48ee9503fc16b630a43f055ac8221d41d6471cf5937a0db41b",
+      "src/rule_entities.mjs": "f06b9c157d6923f5ab841a46499a63d1e9aff04a9226a393f2808a69f863b1b7",
+      "src/rule_reference.mjs": "93a5118a682d23fc6abf90858923444367c52abcfeccd050f9b4c295b8ed5f00",
+      "src/run_strategy.mjs": "b44a45fdcb84cda83e5ad2fd1bdb1e578130de3a8fcb976aa03572359d2e9b69",
+      "src/run_strategy_state.mjs": "4a1b5f4c7fdafa676216fe0dbb577687581c557052cf762531dd1b72b5c75a47",
+      "src/strategy_assessment.mjs": "cfcc645c91d7449b4993bd7ec655e079d6736edccb8d0a3069f5b74c6ed3cf8d",
+      "src/turn_action_constraints.mjs": "ac229d80fff366f257c26fb3c4c166328cb718be33d93122d28c33fe17457560",
+      "src/turn_debuff_projection.mjs": "54ca5cbdd27cd3133f3407f064fae7cc0b191f551e9512aa62ac1aec55753ddf",
+      "src/turn_effects.mjs": "c178a447a52f03724529c95adaa4009a1960b2fe0e5deaf5f85e800aaeefe3e6",
+      "src/turn_plan.mjs": "b16bdf718b95eb526e28922d6fff290d713440e2d9ee78ec7a40cb398920bde5",
+      "src/turn_plan_comparison.mjs": "2dc61c66bd5019d4e572549daccc357bb5484eb8be4a25995f8ec6390938039c",
+      "src/turn_plan_refinement.mjs": "54697b7db9b198dc45edd7a9bb71d1edd5cd8ae4aaf6bfeba8966cd0a02cbdd1",
+      "src/turn_plan_state.mjs": "ff134dfdd7f4ba3dd2611cff465c3ff6c25909bcaf45c1d2c373a1a52c07238a",
+      "src/turn_projection.mjs": "2cbbb126e7ab9e7e309b7d6d71845195e410b4f027b3ff5eb9d6ad446bab61ee",
+      "src/turn_sequence.mjs": "eff189a7d6abd4bb50505b82cfaf03114c9ea5e648e53917da13d2f704ab0b11",
+      "src/window_driver.mjs": "732022556c922a4b61a7672e5676eb199cab6ad09ce97913ca92891f3d9ff094",
+      "schemas/decision-context.v1.schema.json": "e361bb3a7398e996053082713fe9e592988faa56e5d51aa190da87ecc2f04fea",
+      "schemas/model-context.v2.schema.json": "ea603511f83aa03688d94c8f2a70f68e3e10cba9d3c7043c128059d0f6a04f2c"
+    }
+  },
+  "boundary_repair_freeze": {
+    "at": "2026-09-20T15:20:42.405Z",
+    "baseline_commit": "c829da4835c45fc63a03db4c973203e14d7b58b9",
+    "candidate_sha256": "eeb163bd80fbbd02799e4f6dd86bce419193472cb013635bbc99d50de44031ce",
+    "files": {
+      "scripts/replay_harness.mjs": "6f097bbebeb31075710d408839742f0d3a198cca3018c50458cff141efffc81e",
+      "eval/sequence-split.json": "9e722ba81ed204a789049bd53efb2c418e5532676bbf64ad89065ad00f076583",
+      "src/artifacts.mjs": "59f448cb3acb7d98b89fe9a66a7efe3962fedcd425e1038a8f63a335e190bd47",
+      "src/boss_recording.mjs": "21901c3c26889912eb424e383416853988111457e4c9af833fa87837263270db",
+      "src/camp_plan.mjs": "f4c35a7d45fc99b8b9719d7bb7f913508ce46f9fd4ee227b51889cf1466ed044",
+      "src/camp_plan_state.mjs": "e79568df7a8bdfec7c434a4fbd5fea2e69b292f56dc92c9070b3b3d634b67e88",
+      "src/card_flow_projection.mjs": "386556eeb5e39600490161d15e1eafc830ee86b33a5105ec7f0921145729678d",
+      "src/combat_arithmetic.mjs": "c76ba0052ee78c605cbe46f3540595c2db45cb6fe6fab9a05f73ae45262288ac",
+      "src/combat_positioning.mjs": "55e488750930da546012951eda665b4af0141f15169a8caf1627609fe09a2047",
+      "src/combat_reactions.mjs": "0e16e6921f61c0d6ba2dce310c88c45b8e6e2ecfd065458f9b5ded757fb61cd0",
+      "src/context_compiler.mjs": "62eafe2062663f06472ece65436d46292da998ff01c0b8cf80f22f89922813ac",
+      "src/decision_brief.mjs": "c4c692719991f905273e89dd35a11e5eea984bc56a25dbbdf6bb7bcc3cc36431",
+      "src/decision_context.mjs": "d57cb44b5faa951240f1a5afc6db36831b4ea7f21ddbcafad6e5146b4ac00f71",
+      "src/decision_instructions.mjs": "14b0ffc312cfc9fe9266d8691b288a69ac5e86d9570e795bb34e2a369bae2369",
+      "src/effect_lifecycle.mjs": "2f3aacefc6e83a76ea4765abcdb162d08aeba2014319408db9a27a6b2d98f4f7",
+      "src/history_scope.mjs": "53f1f96f9fe8d1845277a07db35556e21cd9dd8659b8688f4ed5cd9587b8345a",
+      "src/jev_client.mjs": "ad8f5f60238be5dd91001e7ff07df5060218ed42f6533135dfb50b3c9bf181c3",
+      "src/mod_client.mjs": "652044093a7c54b4c80cb5e2cb3833276eb995e5c7bc469cdcff62e696e5642c",
+      "src/mod_decision.mjs": "967c5e229c0c79132ccae708497f9a0e4e7a48233864dd8cf71096248c98aaea",
+      "src/mod_loop.mjs": "7eeb9118e7a7e01194fa8210e19a5c6eb8e82c055018deb16be9c32a2786c3cb",
+      "src/mod_selection.mjs": "34dc855c4674da0d8ca3b3723e97f581e66c33b893d700ea2985f88d2fb86e26",
+      "src/potion_effects.mjs": "bb02abeddff88ffbb1bd872df80da8c0cce7005efe45933b603e34f626645110",
+      "src/recording_files.mjs": "89d54ad7e2192a48ee9503fc16b630a43f055ac8221d41d6471cf5937a0db41b",
+      "src/rule_entities.mjs": "f06b9c157d6923f5ab841a46499a63d1e9aff04a9226a393f2808a69f863b1b7",
+      "src/rule_reference.mjs": "93a5118a682d23fc6abf90858923444367c52abcfeccd050f9b4c295b8ed5f00",
+      "src/run_strategy.mjs": "b44a45fdcb84cda83e5ad2fd1bdb1e578130de3a8fcb976aa03572359d2e9b69",
+      "src/run_strategy_state.mjs": "4a1b5f4c7fdafa676216fe0dbb577687581c557052cf762531dd1b72b5c75a47",
+      "src/strategy_assessment.mjs": "cfcc645c91d7449b4993bd7ec655e079d6736edccb8d0a3069f5b74c6ed3cf8d",
+      "src/turn_action_constraints.mjs": "ac229d80fff366f257c26fb3c4c166328cb718be33d93122d28c33fe17457560",
+      "src/turn_debuff_projection.mjs": "54ca5cbdd27cd3133f3407f064fae7cc0b191f551e9512aa62ac1aec55753ddf",
+      "src/turn_effects.mjs": "c178a447a52f03724529c95adaa4009a1960b2fe0e5deaf5f85e800aaeefe3e6",
+      "src/turn_plan.mjs": "b16bdf718b95eb526e28922d6fff290d713440e2d9ee78ec7a40cb398920bde5",
+      "src/turn_plan_comparison.mjs": "2dc61c66bd5019d4e572549daccc357bb5484eb8be4a25995f8ec6390938039c",
+      "src/turn_plan_refinement.mjs": "54697b7db9b198dc45edd7a9bb71d1edd5cd8ae4aaf6bfeba8966cd0a02cbdd1",
+      "src/turn_plan_state.mjs": "ff134dfdd7f4ba3dd2611cff465c3ff6c25909bcaf45c1d2c373a1a52c07238a",
+      "src/turn_projection.mjs": "2cbbb126e7ab9e7e309b7d6d71845195e410b4f027b3ff5eb9d6ad446bab61ee",
+      "src/turn_sequence.mjs": "ea5303b3e2a2bfb0bdf017e01522d499060669b1db8e993028becde381160634",
+      "src/window_driver.mjs": "732022556c922a4b61a7672e5676eb199cab6ad09ce97913ca92891f3d9ff094",
+      "schemas/decision-context.v1.schema.json": "e361bb3a7398e996053082713fe9e592988faa56e5d51aa190da87ecc2f04fea",
+      "schemas/model-context.v2.schema.json": "ea603511f83aa03688d94c8f2a70f68e3e10cba9d3c7043c128059d0f6a04f2c"
+    }
+  },
+  "caveat": "The initial 24 held-out comparisons are retained unchanged. They revealed a retrieval checkpoint omission. Boundary repair was then evaluated in 4 confirmation plans; those are not independent holdout evidence. No live game commands were sent.",
+  "selection": [
+    {
+      "run": "run-1789879418",
+      "rejected": [],
+      "selected": [
+        {
+          "source": "run-artifacts\\2026-09-20T05-56-20-581Z-e993c2ed\\step-0118",
+          "floor": 24,
+          "turn": 2
+        },
+        {
+          "source": "run-artifacts\\2026-09-20T05-56-20-581Z-e993c2ed\\step-0127",
+          "floor": 24,
+          "turn": 4
+        }
+      ]
+    },
+    {
+      "run": "run-1789900349",
+      "rejected": [
+        {
+          "combat_id": "872533389326499abd452d847f97d786",
+          "reason": "Missing declared actionable turn"
+        }
+      ],
+      "selected": [
+        {
+          "source": "run-artifacts\\2026-09-20T11-00-04-270Z-80ddb435\\step-0032",
+          "floor": 27,
+          "turn": 2
+        },
+        {
+          "source": "run-artifacts\\2026-09-20T11-00-04-270Z-80ddb435\\step-0040",
+          "floor": 27,
+          "turn": 4
+        }
+      ]
+    },
+    {
+      "run": "run-1789906322",
+      "rejected": [],
+      "selected": [
+        {
+          "source": "run-artifacts\\2026-09-20T12-11-59-152Z-f7a98087\\step-0259",
+          "floor": 17,
+          "turn": 2
+        },
+        {
+          "source": "run-artifacts\\2026-09-20T12-11-59-152Z-f7a98087\\step-0271",
+          "floor": 17,
+          "turn": 4
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "baseline-c829": {
+      "plans": 12,
+      "errors": 0,
+      "calls": 263,
+      "input_tokens": 5085056,
+      "output_tokens": 33203,
+      "elapsed_ms": 164735
+    },
+    "candidate-final": {
+      "plans": 12,
+      "errors": 0,
+      "calls": 161,
+      "input_tokens": 3126194,
+      "output_tokens": 20535,
+      "elapsed_ms": 99622
+    },
+    "candidate-v4": {
+      "plans": 2,
+      "errors": 0,
+      "calls": 61,
+      "input_tokens": 1326001,
+      "output_tokens": 9674,
+      "elapsed_ms": 37503
+    },
+    "candidate-v3": {
+      "plans": 12,
+      "errors": 0,
+      "calls": 319,
+      "input_tokens": 6366768,
+      "output_tokens": 33174,
+      "elapsed_ms": 196415
+    },
+    "boundary-repair": {
+      "plans": 4,
+      "errors": 0,
+      "calls": 20,
+      "input_tokens": 309742,
+      "output_tokens": 1522,
+      "elapsed_ms": 11410
+    }
+  },
+  "results": [
+    {
+      "id": "holdout-19-turn-2",
+      "label": "baseline-c829",
+      "repeat": 1,
+      "input_sha256": "f017a85e7a6b5f22996a6c72969cb4b0dd3063f596e0c7f1882d95215dff9d35",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Colossus",
+          "card_id": "COLOSSUS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Bash+",
+          "card_id": "BASH",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "remove_threat",
+      "calls": 21,
+      "usage": {
+        "input_tokens": 429542,
+        "output_tokens": 1827
+      },
+      "elapsed_ms": 13744,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-19-turn-2/baseline-c829/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 47,
+        "min": 0,
+        "median": 0.24,
+        "max": 0.94,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-19-turn-2",
+      "label": "baseline-c829",
+      "repeat": 2,
+      "input_sha256": "f017a85e7a6b5f22996a6c72969cb4b0dd3063f596e0c7f1882d95215dff9d35",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Colossus",
+          "card_id": "COLOSSUS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Bash+",
+          "card_id": "BASH",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "remove_threat",
+      "calls": 21,
+      "usage": {
+        "input_tokens": 430190,
+        "output_tokens": 1827
+      },
+      "elapsed_ms": 13920,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-19-turn-2/baseline-c829/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 47,
+        "min": 0,
+        "median": 0.19,
+        "max": 0.96,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-19-turn-2",
+      "label": "candidate-final",
+      "repeat": 1,
+      "input_sha256": "f017a85e7a6b5f22996a6c72969cb4b0dd3063f596e0c7f1882d95215dff9d35",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Twin Strike",
+          "card_id": "TWIN_STRIKE",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Bash+",
+          "card_id": "BASH",
+          "target": 2
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "remove_threat",
+      "calls": 20,
+      "usage": {
+        "input_tokens": 419195,
+        "output_tokens": 1725
+      },
+      "elapsed_ms": 12495,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-19-turn-2/candidate-final/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 44,
+        "min": 0.01,
+        "median": 0.27,
+        "max": 0.93,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-19-turn-2",
+      "label": "candidate-final",
+      "repeat": 2,
+      "input_sha256": "f017a85e7a6b5f22996a6c72969cb4b0dd3063f596e0c7f1882d95215dff9d35",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Twin Strike",
+          "card_id": "TWIN_STRIKE",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Bash+",
+          "card_id": "BASH",
+          "target": 2
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "remove_threat",
+      "calls": 21,
+      "usage": {
+        "input_tokens": 438590,
+        "output_tokens": 1721
+      },
+      "elapsed_ms": 13662,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-19-turn-2/candidate-final/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 44,
+        "min": 0.04,
+        "median": 0.33,
+        "max": 0.82,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-19-turn-4",
+      "label": "baseline-c829",
+      "repeat": 1,
+      "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Anger",
+          "card_id": "ANGER",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Expect a Fight",
+          "card_id": "EXPECT_A_FIGHT"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 27,
+      "usage": {
+        "input_tokens": 576494,
+        "output_tokens": 5916
+      },
+      "elapsed_ms": 17517,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-19-turn-4/baseline-c829/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 146,
+        "min": 0.01,
+        "median": 0.54,
+        "max": 0.94,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-19-turn-4",
+      "label": "baseline-c829",
+      "repeat": 2,
+      "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Expect a Fight",
+          "card_id": "EXPECT_A_FIGHT"
+        },
+        {
+          "kind": "play_card",
+          "name": "Anger",
+          "card_id": "ANGER",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 28,
+      "usage": {
+        "input_tokens": 596613,
+        "output_tokens": 6067
+      },
+      "elapsed_ms": 17352,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-19-turn-4/baseline-c829/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 150,
+        "min": 0.01,
+        "median": 0.49,
+        "max": 0.96,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-19-turn-4",
+      "label": "candidate-final",
+      "repeat": 1,
+      "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Anger",
+          "card_id": "ANGER",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Expect a Fight",
+          "card_id": "EXPECT_A_FIGHT"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 29,
+      "usage": {
+        "input_tokens": 621435,
+        "output_tokens": 5920
+      },
+      "elapsed_ms": 19548,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-19-turn-4/candidate-final/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 146,
+        "min": 0.02,
+        "median": 0.44,
+        "max": 0.93,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-19-turn-4",
+      "label": "candidate-final",
+      "repeat": 2,
+      "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Anger",
+          "card_id": "ANGER",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Expect a Fight",
+          "card_id": "EXPECT_A_FIGHT"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 29,
+      "usage": {
+        "input_tokens": 621502,
+        "output_tokens": 5917
+      },
+      "elapsed_ms": 18930,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-19-turn-4/candidate-final/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 146,
+        "min": 0.01,
+        "median": 0.44,
+        "max": 0.93,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-2",
+      "label": "baseline-c829",
+      "repeat": 1,
+      "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Unrelenting",
+          "card_id": "UNRELENTING",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Taunt",
+          "card_id": "TAUNT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 21,
+      "usage": {
+        "input_tokens": 407290,
+        "output_tokens": 2183
+      },
+      "elapsed_ms": 13575,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-24-turn-2/baseline-c829/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 0,
+          "source_id": "UNRELENTING",
+          "reason": "The next Attack you play costs 0 Energy"
+        },
+        "violations": [
+          {
+            "sequence": 1,
+            "reason": "Action follows a required native observation."
+          },
+          {
+            "sequence": 2,
+            "reason": "Action follows a required native observation."
+          }
+        ],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 59,
+        "min": 0.01,
+        "median": 0.34,
+        "max": 0.96,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-2",
+      "label": "baseline-c829",
+      "repeat": 2,
+      "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Unrelenting",
+          "card_id": "UNRELENTING",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Taunt",
+          "card_id": "TAUNT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 21,
+      "usage": {
+        "input_tokens": 407209,
+        "output_tokens": 2183
+      },
+      "elapsed_ms": 12652,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-24-turn-2/baseline-c829/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 0,
+          "source_id": "UNRELENTING",
+          "reason": "The next Attack you play costs 0 Energy"
+        },
+        "violations": [
+          {
+            "sequence": 1,
+            "reason": "Action follows a required native observation."
+          },
+          {
+            "sequence": 2,
+            "reason": "Action follows a required native observation."
+          }
+        ],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 59,
+        "min": 0.02,
+        "median": 0.35,
+        "max": 0.96,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-2",
+      "label": "candidate-final",
+      "repeat": 1,
+      "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Taunt",
+          "card_id": "TAUNT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Unrelenting",
+          "card_id": "UNRELENTING",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 7,
+      "usage": {
+        "input_tokens": 116135,
+        "output_tokens": 483
+      },
+      "elapsed_ms": 3834,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-24-turn-2/candidate-final/1",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "UNRELENTING",
+          "reason": "The next Attack you play costs 0 Energy"
+        },
+        "violations": [
+          {
+            "sequence": 2,
+            "reason": "Action follows a required native observation."
+          }
+        ],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 7,
+        "min": 0.28,
+        "median": 0.54,
+        "max": 0.8,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-2",
+      "label": "candidate-final",
+      "repeat": 2,
+      "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Taunt",
+          "card_id": "TAUNT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Unrelenting",
+          "card_id": "UNRELENTING",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 7,
+      "usage": {
+        "input_tokens": 116135,
+        "output_tokens": 483
+      },
+      "elapsed_ms": 3786,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-24-turn-2/candidate-final/2",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "UNRELENTING",
+          "reason": "The next Attack you play costs 0 Energy"
+        },
+        "violations": [
+          {
+            "sequence": 2,
+            "reason": "Action follows a required native observation."
+          }
+        ],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 7,
+        "min": 0.25,
+        "median": 0.49,
+        "max": 0.79,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-4",
+      "label": "baseline-c829",
+      "repeat": 1,
+      "input_sha256": "002ded6312d4ffc1582a60424469013ccaa214b46f075d4f8a65b0adcf0cdfe8",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 28,
+      "usage": {
+        "input_tokens": 533008,
+        "output_tokens": 2671
+      },
+      "elapsed_ms": 17751,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-24-turn-4/baseline-c829/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 72,
+        "min": 0,
+        "median": 0.4,
+        "max": 0.98,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-4",
+      "label": "baseline-c829",
+      "repeat": 2,
+      "input_sha256": "002ded6312d4ffc1582a60424469013ccaa214b46f075d4f8a65b0adcf0cdfe8",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 26,
+      "usage": {
+        "input_tokens": 502347,
+        "output_tokens": 2649
+      },
+      "elapsed_ms": 16284,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-24-turn-4/baseline-c829/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 72,
+        "min": 0.03,
+        "median": 0.43,
+        "max": 0.93,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-4",
+      "label": "candidate-final",
+      "repeat": 1,
+      "input_sha256": "002ded6312d4ffc1582a60424469013ccaa214b46f075d4f8a65b0adcf0cdfe8",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Pommel Strike",
+          "card_id": "POMMEL_STRIKE",
+          "target": 1
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 5,
+      "usage": {
+        "input_tokens": 83322,
+        "output_tokens": 371
+      },
+      "elapsed_ms": 2955,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-24-turn-4/candidate-final/1",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "POMMEL_STRIKE",
+          "reason": "Draw 1 card"
+        },
+        "violations": [],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 5,
+        "min": 0.11,
+        "median": 0.43,
+        "max": 0.68,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-4",
+      "label": "candidate-final",
+      "repeat": 2,
+      "input_sha256": "002ded6312d4ffc1582a60424469013ccaa214b46f075d4f8a65b0adcf0cdfe8",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Pommel Strike",
+          "card_id": "POMMEL_STRIKE",
+          "target": 1
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 5,
+      "usage": {
+        "input_tokens": 83322,
+        "output_tokens": 371
+      },
+      "elapsed_ms": 2551,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-24-turn-4/candidate-final/2",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "POMMEL_STRIKE",
+          "reason": "Draw 1 card"
+        },
+        "violations": [],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 5,
+        "min": 0.1,
+        "median": 0.39,
+        "max": 0.71,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-2",
+      "label": "baseline-c829",
+      "repeat": 1,
+      "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Pommel Strike",
+          "card_id": "POMMEL_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 18,
+      "usage": {
+        "input_tokens": 305279,
+        "output_tokens": 2212
+      },
+      "elapsed_ms": 11550,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-26-turn-2/baseline-c829/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 2,
+          "source_id": "POMMEL_STRIKE",
+          "reason": "Draw 1 card"
+        },
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 58,
+        "min": 0.01,
+        "median": 0.43,
+        "max": 0.97,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-2",
+      "label": "baseline-c829",
+      "repeat": 2,
+      "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Pommel Strike",
+          "card_id": "POMMEL_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 18,
+      "usage": {
+        "input_tokens": 305285,
+        "output_tokens": 2212
+      },
+      "elapsed_ms": 11310,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-26-turn-2/baseline-c829/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 2,
+          "source_id": "POMMEL_STRIKE",
+          "reason": "Draw 1 card"
+        },
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 58,
+        "min": 0.02,
+        "median": 0.38,
+        "max": 0.97,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-2",
+      "label": "candidate-final",
+      "repeat": 1,
+      "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Pommel Strike",
+          "card_id": "POMMEL_STRIKE",
+          "target": 1
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 5,
+      "usage": {
+        "input_tokens": 67146,
+        "output_tokens": 383
+      },
+      "elapsed_ms": 2765,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-26-turn-2/candidate-final/1",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "POMMEL_STRIKE",
+          "reason": "Draw 1 card"
+        },
+        "violations": [],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 5,
+        "min": 0.21,
+        "median": 0.39,
+        "max": 0.74,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-2",
+      "label": "candidate-final",
+      "repeat": 2,
+      "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Pommel Strike",
+          "card_id": "POMMEL_STRIKE",
+          "target": 1
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 5,
+      "usage": {
+        "input_tokens": 67146,
+        "output_tokens": 383
+      },
+      "elapsed_ms": 2427,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-26-turn-2/candidate-final/2",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "POMMEL_STRIKE",
+          "reason": "Draw 1 card"
+        },
+        "violations": [],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 5,
+        "min": 0.24,
+        "median": 0.36,
+        "max": 0.78,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-4",
+      "label": "baseline-c829",
+      "repeat": 1,
+      "input_sha256": "2cc54a9792be18ce494b795de9a36e2d634d1a4ed701c66eae16349a52ba3b1d",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Uppercut+",
+          "card_id": "UPPERCUT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 17,
+      "usage": {
+        "input_tokens": 296515,
+        "output_tokens": 1728
+      },
+      "elapsed_ms": 9808,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-26-turn-4/baseline-c829/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 45,
+        "min": 0,
+        "median": 0.3,
+        "max": 0.83,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-4",
+      "label": "baseline-c829",
+      "repeat": 2,
+      "input_sha256": "2cc54a9792be18ce494b795de9a36e2d634d1a4ed701c66eae16349a52ba3b1d",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Neow's Fury",
+          "card_id": "NEOWS_FURY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 17,
+      "usage": {
+        "input_tokens": 295284,
+        "output_tokens": 1728
+      },
+      "elapsed_ms": 9272,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-26-turn-4/baseline-c829/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "NEOWS_FURY",
+          "reason": "Put up to 2 cards from your Discard Pile into your Hand"
+        },
+        "violations": [
+          {
+            "sequence": 2,
+            "reason": "Action follows a required native observation."
+          }
+        ],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 45,
+        "min": 0.05,
+        "median": 0.34,
+        "max": 0.84,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-4",
+      "label": "candidate-final",
+      "repeat": 1,
+      "input_sha256": "2cc54a9792be18ce494b795de9a36e2d634d1a4ed701c66eae16349a52ba3b1d",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Uppercut+",
+          "card_id": "UPPERCUT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Neow's Fury",
+          "card_id": "NEOWS_FURY",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 11,
+      "usage": {
+        "input_tokens": 188276,
+        "output_tokens": 1050
+      },
+      "elapsed_ms": 6588,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-26-turn-4/candidate-final/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "NEOWS_FURY",
+          "reason": "Put up to 2 cards from your Discard Pile into your Hand"
+        },
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 25,
+        "min": 0.01,
+        "median": 0.26,
+        "max": 0.88,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-4",
+      "label": "candidate-final",
+      "repeat": 2,
+      "input_sha256": "2cc54a9792be18ce494b795de9a36e2d634d1a4ed701c66eae16349a52ba3b1d",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Neow's Fury",
+          "card_id": "NEOWS_FURY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 17,
+      "usage": {
+        "input_tokens": 303990,
+        "output_tokens": 1728
+      },
+      "elapsed_ms": 10081,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/holdout-26-turn-4/candidate-final/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 0,
+          "source_id": "NEOWS_FURY",
+          "reason": "Put up to 2 cards from your Discard Pile into your Hand"
+        },
+        "violations": [
+          {
+            "sequence": 1,
+            "reason": "Action follows a required native observation."
+          },
+          {
+            "sequence": 2,
+            "reason": "Action follows a required native observation."
+          }
+        ],
+        "energy_left": 2
+      },
+      "confidence": {
+        "count": 45,
+        "min": 0.02,
+        "median": 0.24,
+        "max": 0.9,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-dev23-deadline",
+      "label": "candidate-v4",
+      "repeat": 1,
+      "input_sha256": "1f22179e1fcaf9010f098fea2fc77213048b311b567e62eb20ba9aaaa9adfd97",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Bully",
+          "card_id": "BULLY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 29,
+      "usage": {
+        "input_tokens": 626807,
+        "output_tokens": 4445
+      },
+      "elapsed_ms": 17732,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev23-deadline/candidate-v4/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 106,
+        "min": 0.01,
+        "median": 0.29,
+        "max": 0.97,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-dev23-deadline",
+      "label": "candidate-v4",
+      "repeat": 2,
+      "input_sha256": "1f22179e1fcaf9010f098fea2fc77213048b311b567e62eb20ba9aaaa9adfd97",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Bully",
+          "card_id": "BULLY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 32,
+      "usage": {
+        "input_tokens": 699194,
+        "output_tokens": 5229
+      },
+      "elapsed_ms": 19771,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev23-deadline/candidate-v4/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 126,
+        "min": 0.03,
+        "median": 0.32,
+        "max": 0.93,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-dev27-expiry",
+      "label": "candidate-v3",
+      "repeat": 1,
+      "input_sha256": "99977d9c65477b0f87fcf3abe8979dc7fa5091fb6fb22dbb52d2d6cfdd76e15a",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "remove_threat",
+      "calls": 9,
+      "usage": {
+        "input_tokens": 130552,
+        "output_tokens": 725
+      },
+      "elapsed_ms": 4852,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev27-expiry/candidate-v3/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 18,
+        "min": 0.11,
+        "median": 0.67,
+        "max": 0.91,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-dev27-expiry",
+      "label": "candidate-v3",
+      "repeat": 2,
+      "input_sha256": "99977d9c65477b0f87fcf3abe8979dc7fa5091fb6fb22dbb52d2d6cfdd76e15a",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "remove_threat",
+      "calls": 9,
+      "usage": {
+        "input_tokens": 130552,
+        "output_tokens": 725
+      },
+      "elapsed_ms": 4553,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev27-expiry/candidate-v3/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 1
+      },
+      "confidence": {
+        "count": 18,
+        "min": 0.14,
+        "median": 0.69,
+        "max": 0.91,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-20-turn-1",
+      "label": "candidate-v3",
+      "repeat": 1,
+      "input_sha256": "6ccf5685d0ef6c23e9f900a40eefbbdba2845678a6421f4aed6e361a58c598f4",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 18,
+      "usage": {
+        "input_tokens": 285490,
+        "output_tokens": 1773
+      },
+      "elapsed_ms": 10566,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-20-turn-1/candidate-v3/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 45,
+        "min": 0.02,
+        "median": 0.46,
+        "max": 0.88,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-20-turn-1",
+      "label": "candidate-v3",
+      "repeat": 2,
+      "input_sha256": "6ccf5685d0ef6c23e9f900a40eefbbdba2845678a6421f4aed6e361a58c598f4",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 28,
+      "usage": {
+        "input_tokens": 471321,
+        "output_tokens": 3024
+      },
+      "elapsed_ms": 15623,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-20-turn-1/candidate-v3/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 82,
+        "min": 0,
+        "median": 0.3,
+        "max": 0.83,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-1",
+      "label": "candidate-v3",
+      "repeat": 1,
+      "input_sha256": "d77aed1714ed6ba2f5a0cbec44faa3cefdc25c4b745b1f8c49f989e45783d638",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "use_potion",
+          "name": "Dexterity Potion",
+          "target": 0,
+          "slot": 0
+        },
+        {
+          "kind": "use_potion",
+          "name": "Strength Potion",
+          "target": 0,
+          "slot": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 50,
+      "usage": {
+        "input_tokens": 1079336,
+        "output_tokens": 4560
+      },
+      "elapsed_ms": 32103,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-1/candidate-v3/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 119,
+        "min": 0.01,
+        "median": 0.24,
+        "max": 0.98,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-1",
+      "label": "candidate-v3",
+      "repeat": 2,
+      "input_sha256": "d77aed1714ed6ba2f5a0cbec44faa3cefdc25c4b745b1f8c49f989e45783d638",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "use_potion",
+          "name": "Dexterity Potion",
+          "target": 0,
+          "slot": 0
+        },
+        {
+          "kind": "use_potion",
+          "name": "Strength Potion",
+          "target": 0,
+          "slot": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 51,
+      "usage": {
+        "input_tokens": 1096191,
+        "output_tokens": 4593
+      },
+      "elapsed_ms": 32905,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-1/candidate-v3/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 121,
+        "min": 0,
+        "median": 0.28,
+        "max": 0.97,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-3",
+      "label": "candidate-v3",
+      "repeat": 1,
+      "input_sha256": "1e5e7842fda19d693c2c993e687fdec2dd9774c21a2d04356d04ba7314fc1933",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Bully",
+          "card_id": "BULLY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 28,
+      "usage": {
+        "input_tokens": 576483,
+        "output_tokens": 2805
+      },
+      "elapsed_ms": 17439,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-3/candidate-v3/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 73,
+        "min": 0.01,
+        "median": 0.34,
+        "max": 0.85,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-3",
+      "label": "candidate-v3",
+      "repeat": 2,
+      "input_sha256": "1e5e7842fda19d693c2c993e687fdec2dd9774c21a2d04356d04ba7314fc1933",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Bully",
+          "card_id": "BULLY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 28,
+      "usage": {
+        "input_tokens": 576772,
+        "output_tokens": 2805
+      },
+      "elapsed_ms": 15832,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-3/candidate-v3/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 73,
+        "min": 0,
+        "median": 0.4,
+        "max": 0.85,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-22-turn-1",
+      "label": "candidate-v3",
+      "repeat": 1,
+      "input_sha256": "c2c0f03da7a863ffc505e36416cc38327953e446ad77deed50cdc26114927baf",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Perfected Strike",
+          "card_id": "PERFECTED_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Whirlwind+",
+          "card_id": "WHIRLWIND"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 29,
+      "usage": {
+        "input_tokens": 620309,
+        "output_tokens": 3895
+      },
+      "elapsed_ms": 19663,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-1/candidate-v3/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 108,
+        "min": 0.01,
+        "median": 0.24,
+        "max": 0.57,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-22-turn-1",
+      "label": "candidate-v3",
+      "repeat": 2,
+      "input_sha256": "c2c0f03da7a863ffc505e36416cc38327953e446ad77deed50cdc26114927baf",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Perfected Strike",
+          "card_id": "PERFECTED_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Whirlwind+",
+          "card_id": "WHIRLWIND"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "damage",
+      "calls": 29,
+      "usage": {
+        "input_tokens": 620585,
+        "output_tokens": 3895
+      },
+      "elapsed_ms": 18561,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-1/candidate-v3/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 108,
+        "min": 0.01,
+        "median": 0.23,
+        "max": 0.66,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-22-turn-3",
+      "label": "candidate-v3",
+      "repeat": 1,
+      "input_sha256": "1f9b5db1cd8528701cfca4a3e703cd40d3b274b2b9a02fbbc019679cfad4478a",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 20,
+      "usage": {
+        "input_tokens": 389915,
+        "output_tokens": 2187
+      },
+      "elapsed_ms": 12621,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-3/candidate-v3/1",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 48,
+        "min": 0.11,
+        "median": 0.42,
+        "max": 0.89,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "regression-holdout-22-turn-3",
+      "label": "candidate-v3",
+      "repeat": 2,
+      "input_sha256": "1f9b5db1cd8528701cfca4a3e703cd40d3b274b2b9a02fbbc019679cfad4478a",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 20,
+      "usage": {
+        "input_tokens": 389262,
+        "output_tokens": 2187
+      },
+      "elapsed_ms": 11697,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-3/candidate-v3/2",
+      "end_policy": "end_after_steps_unless_conditions_change",
+      "final_source_validation": {
+        "checkpoint": null,
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 48,
+        "min": 0.01,
+        "median": 0.39,
+        "max": 0.86,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-2",
+      "label": "boundary-repair",
+      "repeat": 1,
+      "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Taunt",
+          "card_id": "TAUNT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Unrelenting",
+          "card_id": "UNRELENTING",
+          "target": 1
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 5,
+      "usage": {
+        "input_tokens": 82994,
+        "output_tokens": 389
+      },
+      "elapsed_ms": 3377,
+      "artifact_dir": "run-artifacts/sequence-boundary-check/results/holdout-24-turn-2/boundary-repair/1",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "UNRELENTING",
+          "reason": "The next Attack you play costs 0 Energy"
+        },
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 5,
+        "min": 0.23,
+        "median": 0.53,
+        "max": 0.79,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-24-turn-2",
+      "label": "boundary-repair",
+      "repeat": 2,
+      "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Taunt",
+          "card_id": "TAUNT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Unrelenting",
+          "card_id": "UNRELENTING",
+          "target": 1
+        }
+      ],
+      "objective": "protect_hp",
+      "calls": 5,
+      "usage": {
+        "input_tokens": 82994,
+        "output_tokens": 389
+      },
+      "elapsed_ms": 2668,
+      "artifact_dir": "run-artifacts/sequence-boundary-check/results/holdout-24-turn-2/boundary-repair/2",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "UNRELENTING",
+          "reason": "The next Attack you play costs 0 Energy"
+        },
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 5,
+        "min": 0.33,
+        "median": 0.52,
+        "max": 0.76,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-4",
+      "label": "boundary-repair",
+      "repeat": 1,
+      "input_sha256": "2cc54a9792be18ce494b795de9a36e2d634d1a4ed701c66eae16349a52ba3b1d",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Uppercut+",
+          "card_id": "UPPERCUT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Neow's Fury",
+          "card_id": "NEOWS_FURY",
+          "target": 1
+        }
+      ],
+      "objective": "damage",
+      "calls": 5,
+      "usage": {
+        "input_tokens": 71877,
+        "output_tokens": 372
+      },
+      "elapsed_ms": 2820,
+      "artifact_dir": "run-artifacts/sequence-boundary-check/results/holdout-26-turn-4/boundary-repair/1",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "NEOWS_FURY",
+          "reason": "Put up to 2 cards from your Discard Pile into your Hand"
+        },
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 5,
+        "min": 0.28,
+        "median": 0.35,
+        "max": 0.77,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    },
+    {
+      "id": "holdout-26-turn-4",
+      "label": "boundary-repair",
+      "repeat": 2,
+      "input_sha256": "2cc54a9792be18ce494b795de9a36e2d634d1a4ed701c66eae16349a52ba3b1d",
+      "model": "typesafe/jev-1.13-20260917",
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Uppercut+",
+          "card_id": "UPPERCUT",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Neow's Fury",
+          "card_id": "NEOWS_FURY",
+          "target": 1
+        }
+      ],
+      "objective": "damage",
+      "calls": 5,
+      "usage": {
+        "input_tokens": 71877,
+        "output_tokens": 372
+      },
+      "elapsed_ms": 2545,
+      "artifact_dir": "run-artifacts/sequence-boundary-check/results/holdout-26-turn-4/boundary-repair/2",
+      "end_policy": "review_after_segment",
+      "final_source_validation": {
+        "checkpoint": {
+          "after_sequence": 1,
+          "source_id": "NEOWS_FURY",
+          "reason": "Put up to 2 cards from your Discard Pile into your Hand"
+        },
+        "violations": [],
+        "energy_left": 0
+      },
+      "confidence": {
+        "count": 5,
+        "min": 0.27,
+        "median": 0.3,
+        "max": 0.79,
+        "meaning": "Provider-reported Choice concentration, not win probability or demonstrated correctness; complete distributions remain in raw responses."
+      }
+    }
+  ],
+  "intermediate_attempts": [
+    {
+      "id": "regression-dev23-deadline",
+      "label": "candidate-v1",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Bully",
+          "card_id": "BULLY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 25,
+      "responses": 25,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev23-deadline/candidate-v1/1"
+    },
+    {
+      "id": "regression-dev23-deadline",
+      "label": "candidate-v2",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Bully",
+          "card_id": "BULLY",
+          "target": 1
+        },
+        {
+          "kind": "use_potion",
+          "name": "Colorless Potion",
+          "target": 0,
+          "slot": 0
+        }
+      ],
+      "calls": 34,
+      "responses": 34,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev23-deadline/candidate-v2/1"
+    },
+    {
+      "id": "regression-dev23-deadline",
+      "label": "candidate-v2",
+      "repeat": 2,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Bully",
+          "card_id": "BULLY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "use_potion",
+          "name": "Colorless Potion",
+          "target": 0,
+          "slot": 0
+        }
+      ],
+      "calls": 34,
+      "responses": 34,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev23-deadline/candidate-v2/2"
+    },
+    {
+      "id": "regression-dev23-deadline",
+      "label": "candidate-v3",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Perfected Strike",
+          "card_id": "PERFECTED_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 31,
+      "responses": 31,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev23-deadline/candidate-v3/1"
+    },
+    {
+      "id": "regression-dev23-deadline",
+      "label": "candidate-v3",
+      "repeat": 2,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Frantic Escape",
+          "card_id": "FRANTIC_ESCAPE"
+        },
+        {
+          "kind": "play_card",
+          "name": "Bully",
+          "card_id": "BULLY",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Perfected Strike",
+          "card_id": "PERFECTED_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 30,
+      "responses": 30,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev23-deadline/candidate-v3/2"
+    },
+    {
+      "id": "regression-dev27-expiry",
+      "label": "candidate-v1",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 7,
+      "responses": 7,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev27-expiry/candidate-v1/1"
+    },
+    {
+      "id": "regression-dev27-expiry",
+      "label": "candidate-v2",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 9,
+      "responses": 9,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev27-expiry/candidate-v2/1"
+    },
+    {
+      "id": "regression-dev27-expiry",
+      "label": "candidate-v2",
+      "repeat": 2,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 9,
+      "responses": 9,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-dev27-expiry/candidate-v2/2"
+    },
+    {
+      "id": "regression-holdout-20-turn-1",
+      "label": "candidate-v1",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 18,
+      "responses": 18,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-20-turn-1/candidate-v1/1"
+    },
+    {
+      "id": "regression-holdout-20-turn-1",
+      "label": "candidate-v2",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "use_potion",
+          "name": "Speed Potion",
+          "target": 0,
+          "slot": 0
+        },
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 18,
+      "responses": 18,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-20-turn-1/candidate-v2/1"
+    },
+    {
+      "id": "regression-holdout-20-turn-1",
+      "label": "candidate-v2",
+      "repeat": 2,
+      "sequence": [
+        {
+          "kind": "use_potion",
+          "name": "Speed Potion",
+          "target": 0,
+          "slot": 0
+        },
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 27,
+      "responses": 27,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-20-turn-1/candidate-v2/2"
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-1",
+      "label": "candidate-v1",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "use_potion",
+          "name": "Dexterity Potion",
+          "target": 0,
+          "slot": 0
+        },
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "use_potion",
+          "name": "Strength Potion",
+          "target": 0,
+          "slot": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 52,
+      "responses": 52,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-1/candidate-v1/1"
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-1",
+      "label": "candidate-v2",
+      "repeat": 1,
+      "error": "Jev API error 503 via openrouter",
+      "calls": 45,
+      "responses": 44,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-1/candidate-v2/1"
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-1",
+      "label": "candidate-v2",
+      "repeat": 2,
+      "sequence": [
+        {
+          "kind": "use_potion",
+          "name": "Strength Potion",
+          "target": 0,
+          "slot": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 58,
+      "responses": 58,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-1/candidate-v2/2"
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-3",
+      "label": "candidate-v1",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        }
+      ],
+      "calls": 3,
+      "responses": 3,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-3/candidate-v1/1"
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-3",
+      "label": "candidate-v2",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 16,
+      "responses": 16,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-3/candidate-v2/1"
+    },
+    {
+      "id": "regression-holdout-21-supplement-turn-3",
+      "label": "candidate-v2",
+      "repeat": 2,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 16,
+      "responses": 16,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-21-supplement-turn-3/candidate-v2/2"
+    },
+    {
+      "id": "regression-holdout-22-turn-1",
+      "label": "candidate-v1",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Perfected Strike",
+          "card_id": "PERFECTED_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Whirlwind+",
+          "card_id": "WHIRLWIND"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 17,
+      "responses": 17,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-1/candidate-v1/1"
+    },
+    {
+      "id": "regression-holdout-22-turn-1",
+      "label": "candidate-v2",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Setup Strike",
+          "card_id": "SETUP_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Perfected Strike",
+          "card_id": "PERFECTED_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 22,
+      "responses": 22,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-1/candidate-v2/1"
+    },
+    {
+      "id": "regression-holdout-22-turn-1",
+      "label": "candidate-v2",
+      "repeat": 2,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Setup Strike",
+          "card_id": "SETUP_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Perfected Strike",
+          "card_id": "PERFECTED_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 22,
+      "responses": 22,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-1/candidate-v2/2"
+    },
+    {
+      "id": "regression-holdout-22-turn-3",
+      "label": "candidate-v1",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 20,
+      "responses": 20,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-3/candidate-v1/1"
+    },
+    {
+      "id": "regression-holdout-22-turn-3",
+      "label": "candidate-v2",
+      "repeat": 1,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 21,
+      "responses": 21,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-3/candidate-v2/1"
+    },
+    {
+      "id": "regression-holdout-22-turn-3",
+      "label": "candidate-v2",
+      "repeat": 2,
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Armaments+",
+          "card_id": "ARMAMENTS"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 21,
+      "responses": 21,
+      "artifact_dir": "run-artifacts/sequence-evaluation/results/regression-holdout-22-turn-3/candidate-v2/2"
+    }
+  ],
+  "checks": {
+    "node_tests": 187,
+    "all_passed": true
+  },
+  "readiness": {
+    "known_sequence_regressions_resolved": true,
+    "ready_for_one_observed_live_run": true,
+    "stable_strategy_or_win_rate_demonstrated": false
+  }
+}

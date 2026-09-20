@@ -25,6 +25,7 @@ export function firstHitHpLoss(card, enemy) {
 }
 
 export function attackHitPreview(card) {
+  if (card._uncomputed_repetitions) return { hits: null, source: 'uncomputed_automatic_plays' };
   const hits = card.attack_preview?.hits;
   if (Number.isSafeInteger(hits) && hits >= 0) return { hits, source: 'native_preview' };
   if (card.cost < 0) return { hits: null, source: 'unknown_x_cost_repetitions' };
@@ -114,16 +115,20 @@ export function combatForecast(combat, card = null, target = null) {
   // this limited estimate, as with printed Block above.
   const rageBlock = card?.type === 'Attack' ? (combat.player.powers || []).filter(power => power.id === 'RAGE_POWER').reduce((sum, power) => sum + Math.max(0, power.amount || 0), 0) : 0;
   const block = combat.player.block + immediateBlock + rageBlock;
-  // Native v0.111.0: Orichalcum checks zero Block in VeryEarly, before Plating
-  // grants its current Amount in Early. Both grants are Unpowered; neither is
-  // immediate card Block or repeated between planned actions.
+  // Native v0.111.0: Cloak Clasp runs BeforeSideTurnEnd, Orichalcum
+  // checks zero Block in VeryEarly, then Plating grants Block in Early.
+  // These unpowered grants happen once after the manual sequence.
   const endTurnBlockGains = [];
   if (living.some(enemy => !depleted.has(enemy.combat_id))) {
+    const clasp = combat.player.relics?.find(relic => relic.id === 'CLOAK_CLASP');
+    const perCard = Number(clasp?.description?.match(/gain (\d+) Block for each card in your Hand/i)?.[1]);
+    if (Number.isFinite(perCard) && perCard > 0 && remainingHand.length) endTurnBlockGains.push({ source_id: 'CLOAK_CLASP', amount: perCard * remainingHand.length, timing: 'before_turn_end' });
+    const earlyBlock = block + endTurnBlockGains.reduce((sum, gain) => sum + gain.amount, 0);
+    if (earlyBlock === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) {
+      endTurnBlockGains.push({ source_id: 'ORICHALCUM', amount: 6, timing: 'turn_end_very_early', condition_checked: 'zero_after_before_turn_end_effects' });
+    }
     for (const power of combat.player.powers || []) if (power.id === 'PLATING_POWER' && power.amount > 0) {
       endTurnBlockGains.push({ source_id: power.id, amount: power.amount, timing: 'turn_end_early' });
-    }
-    if (block === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) {
-      endTurnBlockGains.push({ source_id: 'ORICHALCUM', amount: 6, timing: 'turn_end', condition_checked: 'zero_before_end_effects' });
     }
   }
   const blockIncludingEndTurnGains = block + endTurnBlockGains.reduce((sum, gain) => sum + gain.amount, 0);

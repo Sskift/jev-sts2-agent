@@ -34,7 +34,8 @@ test('a current lethal countdown cannot prove that an uncomputed sequence remain
   const result = describeTurnProjection(s, sequence);
   assert.equal(result.known_effects_only.hp_if_ending, null);
   assert.equal(result.known_effects_only.hp_loss_if_ending, null);
-  assert.match(result.omitted_effects.join(' '), /countdown.*uncomputed/);
+  assert.ok(result.omitted_effects.length > 0);
+  assert.equal(result.loss_deadlines[0].counter_after_declared_actions, 1, 'An unknown response must not invent a counter increase');
   assert.equal(s.combat.enemies[0].powers[0].amount, 1, 'Observed counters are unchanged');
 });
 

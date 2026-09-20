@@ -10,6 +10,7 @@ const timing = {
   CONSTRICT: { trigger: 'owner_turn_end_after_early_block', expires: 'applier_death_or_removal', consequence: 'blockable_damage_to_owner', detail: 'Current amount is damage at each owner turn end while its applier survives, in addition to displayed enemy attacks.' },
   PLATING: { trigger: 'owner_turn_end_early', expires: 'decrements_at_owner_turn_start', consequence: 'unpowered_block_to_owner', detail: 'Current stacks grant Block before end-turn damage. The later decrement is not an immediate reduction of this gain.' },
   ORICHALCUM: { trigger: 'player_turn_end_very_early', expires: 'while_owned', consequence: 'unpowered_block_to_player', detail: 'If Block is zero before early end effects, gain 6 Block; this check precedes Plating.' },
+  CLOAK_CLASP: { trigger: 'before_player_turn_end', expires: 'while_owned', consequence: 'unpowered_block_per_remaining_hand_card', detail: 'Uses cards still in hand after manual actions. This gain precedes the Orichalcum zero-Block check and is not modified by Dexterity or Frail.' },
   RAGE: { trigger: 'after_owner_plays_each_attack_card', expires: 'owner_turn_end', consequence: 'unpowered_block_to_owner', detail: 'Once per Attack play, not per hit; establish before the attacks that consume the opportunity.' },
   ONE_TWO_PUNCH: { trigger: 'next_owner_attack_play', expires: 'owner_turn_end_or_consumption', consequence: 'one_extra_play_per_qualifying_attack', detail: 'Current power stacks count qualifying Attack cards. Extra plays and their reactions are not included in unchanged damage previews.' },
   SANDPIT: { trigger: 'enemy_turn_start_countdown', expires: 'owner_death_or_countdown_resolution', consequence: 'player_death_at_zero', detail: 'Decrements at enemy turn start. HP and Block cannot prevent this loss condition; a delay changes the deadline, not the need to handle later deadlines.' },
@@ -59,7 +60,7 @@ export function describeCombatEffects(combat) {
 // This is dependency detection, not execution of arbitrary English rules.
 // A match means an endpoint cannot be fully calculated by the current adapter.
 const turnEnd = /\b(?:at|on) (?:the )?end of [^.]{0,28}\bturns?\b/i;
-const healthChange = /\b(?:damage|HP|health|heal|die|death)\b/i;
+const healthChange = /\b(?:damage|Block|HP|health|heal|die|death)\b/i;
 export function knownTurnEndDamage(combat, remainingHand, depleted = new Set()) {
   const events = [];
   for (const card of remainingHand) if (['BURN', 'TOXIC'].includes(card.id)) {
@@ -86,13 +87,15 @@ export function uncomputedTurnEndHealthEffects(combat, remainingHand = combat.ha
     ...(combat.player.relics || []).map(r => ({ category: 'relic', ...r })),
     ...remainingHand.map(c => ({ category: 'hand_card', ...c }))
   ];
-  return sources.filter(s => !known.some(e => e.source_id === s.id && (s.index === undefined || e.hand_index === s.index))
+  const knownBlock = source => source.id === 'PLATING_POWER' && Number.isFinite(source.amount) || source.id === 'ORICHALCUM'
+    || source.id === 'CLOAK_CLASP' && /gain \d+ Block for each card in your Hand/i.test(source.description || '');
+  return sources.filter(s => !knownBlock(s) && !known.some(e => e.source_id === s.id && (s.index === undefined || e.hand_index === s.index))
     && turnEnd.test(s.description || '') && healthChange.test(s.description || '')).map(s => ({
     category: s.category, source_id: s.id, ...(s.index === undefined ? {} : { hand_index: s.index }),
     description: s.description, ...(s.amount === undefined ? {} : { amount: s.amount }),
     timing: 'declared_turn_end', condition_evaluated: false,
     affected_outputs: ['end_turn_hp', 'end_turn_fatality', 'block_after_turn_end_effects'],
-    scope: 'The current rule mentions turn-end health or damage, but this arithmetic does not evaluate its conditions, timing order, prevention or healing. It is not a claim that the effect will trigger. Use the full current rule; absent calculation is not zero effect.'
+    scope: 'The current rule mentions turn-end health, damage or Block, but this arithmetic does not evaluate its conditions, timing order, prevention or healing. It is not a claim that the effect will trigger. Use the full current rule; absent calculation is not zero effect.'
   }));
 }
 

@@ -734,7 +734,7 @@
             "block_including_end_turn_gains": { "type": ["number", "null"] }, "incoming_attack": { "type": ["number", "null"] },
             "end_turn_block_gains": { "type": "array", "items": {
               "type": "object", "required": ["source_id", "amount", "timing"],
-              "properties": { "source_id": { "type": "string" }, "amount": { "type": "number", "minimum": 0 }, "timing": { "type": "string" } }
+              "properties": { "source_id": { "type": "string" }, "amount": { "type": "number", "minimum": 0 }, "timing": { "$ref": "#/$defs/text" } }
             } },
             "end_turn_damage_events": { "type": "array", "items": { "type": "object", "required": ["source_id", "amount", "timing", "damage_kind", "condition"],
               "properties": { "source_id": { "type": "string" }, "amount": { "type": "number", "minimum": 0 }, "timing": { "$ref": "#/$defs/text" }, "damage_kind": { "$ref": "#/$defs/text" }, "condition": { "$ref": "#/$defs/text" } } } },
@@ -747,6 +747,10 @@
             } }
           }
         },
+        "sequence_dependencies": { "type": "object", "required": ["is_observed", "steps", "checkpoint", "violations", "scope"],
+          "properties": { "is_observed": { "const": false }, "steps": { "type": "array" }, "checkpoint": { "type": ["object", "null"] }, "violations": { "type": "array" }, "scope": { "$ref": "#/$defs/text" } } },
+        "loss_deadlines": { "type": "array", "items": { "type": "object", "required": ["source_id", "owner_combat_id", "counter_after_declared_actions", "counter_after_upcoming_enemy_start", "enemy_starts_until_lethal_without_further_changes", "known_delay_cards", "scope"],
+          "properties": { "source_id": { "type": "string" }, "owner_combat_id": { "type": "integer" }, "counter_after_declared_actions": { "type": "integer" }, "counter_after_upcoming_enemy_start": { "type": ["integer", "null"] }, "enemy_starts_until_lethal_without_further_changes": { "type": "integer" }, "known_delay_cards": { "type": "object" }, "scope": { "$ref": "#/$defs/text" } } } },
         "positioning": { "$ref": "#/$defs/positioningProjection" },
         "uncomputed_turn_end_effects": { "type": "array", "items": { "type": "object", "required": ["category", "source_id", "description", "timing", "condition_evaluated", "affected_outputs", "scope"],
           "properties": { "category": { "enum": ["power", "relic", "hand_card"] }, "source_id": { "type": "string" }, "description": { "$ref": "#/$defs/text" }, "scope": { "$ref": "#/$defs/text" }, "condition_evaluated": { "const": false },

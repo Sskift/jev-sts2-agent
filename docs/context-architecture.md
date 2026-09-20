@@ -2,7 +2,7 @@
 
 The objective remains one autonomous standard run through all three acts and the formal victory screen. The implemented architecture addresses how the system represents a decision. It does not claim improved win rate before live evidence exists.
 
-Live play is currently paused. The current change is evaluated only against saved observations; see the [offline comparison](harness-evaluation.md).
+The sequence-dependency change has been evaluated against saved observations; see the [current sequence report](sequence-evaluation.md), [plan](plan.md) and [previous timing comparison](harness-evaluation.md). It is ready for an observed live validation run, without a new win-rate claim.
 
 ## Current problem
 
@@ -38,6 +38,8 @@ Question-specific choices remain in the native `questions` API field. A shared p
 `analysis.combat_effects` now carries a compact timing ledger: source, owner, current stacks, whether it is already active or requires playing/using, trigger, expiration and coverage. It joins versioned rules by ID while retaining native resolved text. Verified timing adapters distinguish player-end expiry from opposing-side-end expiry. Unsupported rules retain explicit unknown timing rather than acquiring an invented duration.
 
 Sequence analysis separately lists end-turn damage, remaining consumers of expiring bonuses and uncomputed reactions/health effects. Known Constrict damage requires a unique visible rule-named applier; ambiguous sources stay uncomputed. Arithmetic affected by uncomputed health effects cannot claim a final HP value. These are conditional facts, not policy choices or a complete simulator. All Jev requests and full API responses are recorded, including probability distributions when the provider returns them.
+
+`turn_sequence.mjs` supplies one ordered dependency walk for resource reservations, candidate values and plan comparisons. It applies inspectable upgrades, supported stat changes and X payments only to subsequent actions. It preserves the original observation and invalidates unsupported ranges. Draws, transformations, new powers and uncomputed next-card consumption end the declared executable segment; a native observation supplies the next segment. Full-plan labels also identify consumed/remaining potions, Block unused by calculated damage, and conditional loss deadlines. The turn objective is advisory, not a rule to maximize Block or damage regardless of overall value.
 
 The first implementation centralizes every existing request and preserves all its semantic content. It does not add more model calls, replace Jev's choices with heuristics, or claim a complete simulator. Rule links are based on category and stable IDs, not a list of favored cards. Coverage describes which data and rules were included, not whether all game mechanics have been modeled.
 

@@ -30,9 +30,9 @@ context.14 在手牌提供 `upgrade_preview`，在手牌选择的 selectable/sel
 
 第二十局第 6 层已实机验证完整升级依赖：Armaments 规划指定 Defend 实例 `67194354366d40a3b86c2cfdbef3333a`，HAND_SELECT 由计划直接选择同一实例；确认后同实例变为 Defend+、实际 Block 从 5 变 8，后续打出使已有 5 Block 变为 13，再打 Strike。选牌没有新独立模型选择；升级后复核保留本回合防御目标。见[实际状态与动作摘要](evidence/2026-09-20/live-upgrade-followthrough.json)。这验证了准备、选牌与使用的衔接，不证明该局面选择最优或整局胜率改善。
 
-条件算术单独列出能量、当前伤害/格挡预览和未模拟效果。支持已核实的 Stomp 每张先行 Attack 减 1 费，Rage 的一次一张攻击触发；不把所有触发都当作可预测。Orichalcum 不在中间步骤提前生效，旧 X 费次数不用于能量已改变后的伤害保证。需要完整模拟的能力、升级、药水、抽牌和目标修正仍以实际观察为准。
+条件算术通过 `turn_sequence.mjs` 共用有序资源与效果分析：可查看的升级、已解析的属性药水、Setup Strike、Tender、Stomp 与可确认的 Whirlwind X 支付影响后续动作，不能反向影响已打出的牌。无法确定的修正保持范围或未知；抽牌、变形、安装新能力和未计算的下一张牌触发结束当前可执行段，再读原生结果。Rage 按 Attack 出牌而非命中次数触发；零次伤害仍可能有独立出牌收益。
 
-第二十一局发现已生效 Plating 的规则完整可读，但旧的结束回合估算遗漏了它，使原始能力与派生数字不一致。现在把 `block_after_card` / 方案的 `block` 留给当前格挡与立即收益；`end_turn_block_gains` 列明来源、数量和触发时机，`block_including_end_turn_gains` 用于结束回合的有限伤害计算。已核对本机 v0.111.0：Orichalcum 先检查零格挡，Plating 后获得当前层数的 Unpowered 格挡，因此无立即格挡时两者可以叠加，不额外应用敏捷/脆弱，也不在下一张牌之前重复获得。
+`block_after_card` / 方案的 `block` 表示当前格挡与立即收益；`end_turn_block_gains` 列明来源、数量和时机，`block_including_end_turn_gains` 用于结束回合的有限伤害计算。原生 v0.111.0 中，Cloak Clasp 先按剩余手牌获得 Unpowered 格挡，再由 Orichalcum 检查零格挡，随后 Plating 获得当前层数的格挡。它们不额外应用敏捷／脆弱，也不在每张牌之间重复获得。方案列出被消耗／保留的药水及未被已计算伤害使用的格挡；普通格挡在下次己方回合开始时移除，不能直接算作持久收益。
 
 第二十一局第一幕 Boss 首回合的实际成对请求暴露了药水比较偏差：有无 Strength Potion 的方案都显示 27 伤害，因为算术忽略药水效果，模型最终移除了药水。原请求已经有 Strength / Dexterity 的关联规则，问题并非完全没有解释。现在数量、持续时间、影响对象和先后关系由 `potion_effects` 明确提供；数字移入 `known_effects_only`，未模拟效果单列，不能把相同的局部基线视为相同最终收益。原始状态与当时历史的只读完整管线回放改为 Dexterity Potion → Defend → Strength Potion → Strike → Strike（21 次模型请求），说明开始考虑持续增益；它仍在非攻击回合加入多余 Defend，不能据此宣称整体方案最优。回放没有发送游戏命令，记录在 `temp/potion-timing-replay/result.json`。
 
@@ -48,7 +48,7 @@ context.14 在手牌提供 `upgrade_preview`，在手牌选择的 selectable/sel
 
 只读开发样本已选出 Armaments → 升级 Perfected Strike → 攻击、Strike → Strike → 1 费 Stomp，以及在安全回合先 Juggernaut。Armaments 历史记录没有新字段，24 伤害升级显示按已核实的 6 张 Strike 计数与原生公式重建，不能声称是该历史时刻的实机导出。复杂 Rage 局面的计划还能补入剩余能量可打的牌，但目标、资源取舍和细节顺序仍有误判。增加回合目标或预选序列本身没有保证提升质量；早期变体曾提前结束或遗漏准备，未作为有效结果。
 
-规划、整套方案比较与结束复核统一说明：回合目标是优先级，不排除有价值的其余行动；未立刻击杀的伤害仍可能缩短战斗。免费动作也有反击、留牌、卡组变化等潜在代价，需要根据实际规则取舍。第十九局只读局面由仅打 Expect a Fight 改为接零费 Strike 攻击主敌人，仍不保证最优。
+规划、整套方案比较与结束复核统一说明：回合目标是可修订的意图，服从整局价值；未立刻击杀的伤害仍可能缩短战斗。零能量动作也有反击、留牌、消耗品和卡组变化等代价，需要根据实际规则取舍。条件倒计时单列动作后计数、敌方开始时的扣减、已知应对牌的位置，不靠正生命值推断安全。
 
 完整协议以紧凑 JSON 字符串放入原生 Decisions API 的 state，实际字段、文本字典和可逆表格不变。此前超限的请求成功返回 22,856 输入 tokens；服务端仍独立限制上下文，本地 90 KB 逻辑内容门槛不是 token 保证。请求日志保存实际 wire payload，分析时先 JSON.parse(payload.state) 还原协议。
 

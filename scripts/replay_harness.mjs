@@ -14,7 +14,8 @@ const args = process.argv.slice(2), mode = args.shift();
 const option = name => args.includes(name) ? args[args.indexOf(name) + 1] : undefined;
 const root = path.resolve(option('--artifacts') || 'run-artifacts');
 const output = path.resolve(option('--output') || 'run-artifacts/harness-evaluation');
-const split = read(new URL('../eval/harness-split.json', import.meta.url));
+const splitFile = option('--split') ? path.resolve(option('--split')) : new URL('../eval/harness-split.json', import.meta.url);
+const split = read(splitFile);
 
 function sessions(runId) {
   return fs.readdirSync(root, { withFileTypes: true }).filter(e => e.isDirectory())
@@ -62,16 +63,23 @@ if (mode === 'collect') {
     if (!fs.existsSync(path.join(output, 'freeze.json'))) throw new Error('Freeze candidate source before selecting holdout snapshots');
     for (const [index, run] of split.holdout_runs.entries()) {
       const dirs = steps(run);
-      const lastCombat = dirs.map(dir => read(path.join(dir, 'before-state.json'))).findLast(s => s.screen === 'COMBAT');
-      for (const turn of [1, 3]) {
-        const selected = dirs.find(dir => {
-          const s = read(path.join(dir, 'before-state.json'));
-          return s.screen === 'COMBAT' && s.decision_context.combat_id === lastCombat.decision_context.combat_id
-            && s.combat.turn_number === turn && s.combat.is_player_turn && !s.combat.is_player_actions_disabled && s.combat.hand.some(c => c.can_play);
-        });
-        if (!selected) throw new Error(`Missing predeclared holdout ${run}, turn ${turn}`);
-        snapshot(selected, `holdout-${20 + index}-turn-${turn}`, cohort);
+      const records = dirs.map(dir => ({ dir, state: read(path.join(dir, 'before-state.json')) })).filter(({state}) => state.screen === 'COMBAT');
+      const encounters = [...new Set(records.map(({state}) => state.decision_context.combat_id))].reverse();
+      const turns = split.holdout_turns || [1, 3], rejected = [];
+      const { prepareModDecision } = await import('../src/mod_decision.mjs');
+      let selected;
+      for (const combatId of split.compatible_encounter ? encounters : encounters.slice(0, 1)) {
+        const candidates = turns.map(turn => records.find(({ state: s }) => s.decision_context.combat_id === combatId
+          && s.combat.turn_number === turn && s.combat.is_player_turn && !s.combat.is_player_actions_disabled && s.combat.hand.some(c => c.can_play)));
+        try {
+          if (candidates.some(c => !c)) throw new Error('Missing declared actionable turn');
+          if (split.compatible_encounter) for (const {state} of candidates) prepareModDecision(state);
+          selected = candidates; break;
+        } catch(error) { rejected.push({ combat_id: combatId, reason: error.message }); }
       }
+      if (!selected) throw new Error(`Missing compatible predeclared holdout ${run}`);
+      write(path.join(output, `selection-${run}.json`), { run, rejected, selected: selected.map(({dir,state}) => ({ source: path.relative(process.cwd(),dir), floor: state.decision_context.total_floor, turn: state.combat.turn_number })) });
+      for (const {dir,state} of selected) snapshot(dir, `holdout-${split.holdout_run_numbers?.[index] ?? 20 + index}-turn-${state.combat.turn_number}`, cohort);
     }
   } else {
     const dir = path.resolve(option('--step') || '');
@@ -80,7 +88,7 @@ if (mode === 'collect') {
     snapshot(dir, option('--id') || 'development', cohort);
   }
 } else if (mode === 'freeze') {
-  const files = ['scripts/replay_harness.mjs', 'eval/harness-split.json', ...['src', 'schemas'].flatMap(dir => fs.readdirSync(dir).filter(f => /\.(mjs|json)$/.test(f)).map(f => path.join(dir, f)))];
+  const files = ['scripts/replay_harness.mjs', option('--split') || 'eval/harness-split.json', ...['src', 'schemas'].flatMap(dir => fs.readdirSync(dir).filter(f => /\.(mjs|json)$/.test(f)).map(f => path.join(dir, f)))];
   const hashes = Object.fromEntries(files.map(f => [f.replaceAll('\\', '/'), hash(fs.readFileSync(f))]));
   const frozen = { at: new Date().toISOString(), baseline_commit: split.baseline_commit, candidate_sha256: hash(JSON.stringify(hashes)), files: hashes };
   if (fs.existsSync(path.join(output, 'freeze.json'))) throw new Error('Freeze already exists; retain the original assessment instead of overwriting it');

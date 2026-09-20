@@ -3,8 +3,9 @@ import { describeTurnProjection, reserveSequence } from './turn_projection.mjs';
 import { potionEffectFacts } from './potion_effects.mjs';
 import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from './turn_effects.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
+import { inspectSequence } from './turn_sequence.mjs';
 
-const signature = steps => JSON.stringify(steps.map(step => [step.kind, step.card_instance_id, step.potion_id, step.slot, step.target]));
+const signature = steps => JSON.stringify(steps.map(step => [step.kind, step.card_instance_id, step.potion_id, step.slot, step.target, step.beneficiary_instance_id, step.next_card_instance_id]));
 const bindFollowthrough = (step, following) => {
   const consumer = nextCardKind(step.rules_at_planning);
   const next = following.find(candidate => candidate.kind === 'play_card'
@@ -21,8 +22,21 @@ const bindFollowthrough = (step, following) => {
 export function describePlanAlternative(state, steps) {
   const budget = reserveSequence(state, steps);
   const actions = reserveActionSequence(state, steps);
+  const sequence = inspectSequence(state, steps), projection = describeTurnProjection(state, steps);
+  const usedPotions = new Set(sequence.entries.filter(e => e.potion).map(e => e.potion.slot));
+  const potions = (state.combat.player.potions || []).map(p => ({ id: p.id, slot: p.slot }));
+  const known = projection.known_effects_only;
+  const blockable = known.incoming_attack === null ? null : known.incoming_attack + known.end_turn_damage_events.reduce((sum, event) => sum + event.amount, 0);
   let energyAfterPrintedCosts = state.combat.player.energy;
   return {
+    resource_consequences: {
+      consumed_potions: potions.filter(p => usedPotions.has(p.slot)),
+      potions_still_available: potions.filter(p => !usedPotions.has(p.slot)),
+      known_blockable_damage_before_block: blockable,
+      block_unused_by_known_damage: blockable === null || known.block_including_end_turn_gains === null ? null : Math.max(0, known.block_including_end_turn_gains - blockable),
+      ordinary_block_reset: 'At the next owner turn start; it protects through this enemy response, but does not carry to a later enemy turn without a retention rule.',
+      scope: 'Conditional on the declared actions. Consumed potions are unavailable afterward. Block accounting covers only calculated incoming damage; evaluate uncomputed triggers, retention and other uses of Block from the current rules.'
+    },
     ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map((step, index) => {
       energyAfterPrintedCosts -= budget.costs[index];
       const beneficiary = state.combat.hand.find(card => cardInstance(card) === step.beneficiary_instance_id);
@@ -34,11 +48,11 @@ export function describePlanAlternative(state, steps) {
         ...(beneficiary ? { intended_followthrough: beneficiary.name,
           ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
     }),
-    then: 'End turn, unless a new observation requires a revision.',
+    then: sequence.checkpoint ? 'Observe the changed native state and replan the remaining turn; no end-turn command is promised.' : 'End turn, unless a new observation requires a revision.',
     energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
-    conditional_preview: describeTurnProjection(state, steps),
+    conditional_preview: projection,
     ...(actions.constraints.length ? { action_reservation: actions } : {}),
-    limitation: 'Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers.'
+    limitation: 'Use ordered sequence dependencies and scoped calculations. Unresolved changes require observation; a checkpoint is not an end-turn outcome.'
   };
 }
 
@@ -151,7 +165,7 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
       plan.refinement_limit = 'Optional whole-plan comparisons skipped because the complete state leaves insufficient request space.';
       return;
     }
-    const instruction = 'Compare two mutually exclusive COMPLETE ordered plans starting from the actual current combat state. Choose the plan that better serves turn_planning.objective and winning the run. Both sequences have not happened. Evaluate the exact enemy targets, energy, rules, kills and remaining threats. A plan with the same kills and damage can preserve more HP through stronger Block. Check preparation before its beneficiaries and useful follow-through for setup. Ignore which plan was proposed earlier. Conditional arithmetic is incomplete; account for unconfirmed rules without assuming hidden outcomes.';
+    const instruction = 'Compare two mutually exclusive COMPLETE ordered plans starting from the actual current combat state. Choose the greater overall value toward winning the run. The proposed turn objective is advisory, not a requirement to maximize its named resource. Compare HP actually lost, enemy damage and removal, lasting benefits, changed card piles, and persistent resources consumed or preserved. Read resource_consequences with conditional_preview: additional expiring Block is valuable only through damage it prevents or another supported rule interaction. Check preparation before its beneficiaries and actual follow-through. Ignore which plan was proposed earlier. Conditional arithmetic is incomplete; evaluate uncomputed rules without inventing hidden outcomes.';
     const comparisonState = { phase_scope: 'Compare mutually exclusive complete plans from the ACTUAL current state. These proposed steps have NOT happened. Every option replaces the entire unexecuted proposed prefix; do not execute both the old prefix and an option.',
       proposed_steps: [], conditional_projection: [],
       energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
@@ -171,9 +185,6 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
     plan.steps = structuredClone(alternatives.get(selected));
     for (const [index, step] of plan.steps.entries()) {
       step.reserved_energy = reserveSequence(state, plan.steps).costs[index];
-      if (step.beneficiary_instance_id && !plan.steps.slice(index + 1).some(next => next.card_instance_id === step.beneficiary_instance_id)) {
-        delete step.beneficiary_instance_id; delete step.beneficiary_name; step.role = 'payoff';
-      }
     }
     plan.budget.remaining_after_printed_costs = reserveSequence(state, plan.steps).energy_left;
   }

@@ -2,7 +2,7 @@
 
 《Slay the Spire 2》游戏 Agent：**C# 模组读取实时状态 → Node.js 组织规则与上下文 → Jev 制定回合计划 → 模组执行 → 重新观察。** 游戏自行结算和渲染，正常循环不要求窗口置顶。
 
-目前是研究原型。27 局历史运行中，16 局通过第一幕，最远到第二幕 Boss，尚未通关。当前暂停新对局，使用历史局面改进 harness；模型回放不操作游戏，也不能证明整局胜率。
+目前是研究原型。27 局历史运行中，16 局通过第一幕，最远到第二幕 Boss，尚未通关。最新一轮已修复有序动作的状态传播和观察断点，达到可以开始一局受观察验证的工程条件；当前版本尚无新实战结果。历史回放仍暴露出目标选择不佳，不能据此声称稳定通关或胜率提升。
 
 ## 环境与启动
 
@@ -40,7 +40,9 @@ npm start                # 会操作游戏，仅在需要开始或继续实战�
 
 统一上下文区分观察、规则、相关历史、意图、条件分析和未知信息。每次模型请求自包含，不依赖 Jev 跨调用记忆。历史默认保留当前回合、上一轮敌方响应，以及仍影响当前决策的计数、延迟或牌序信息。
 
-Jev 在代码提供的目标与候选空间中选择构筑方向、回合目标、准备动作、顺序和完整方案。普通连续出牌沿用计划，抽牌、目标死亡、费用变化及选牌结果触发复核。框架与候选生成由代码定义，模型负责其中的判断；当前没有完整的跨回合战斗求解器。
+Jev 在代码提供的目标与候选空间中选择构筑方向、回合目标、准备动作、顺序和完整方案。回合目标是可修订的意图，服从整局价值。普通连续出牌沿用计划；抽牌、变形、回收／选牌、未计算的费用变化及新能力等，在原生结果可见后继续规划。框架与候选生成由代码定义，模型负责其中的判断；当前没有完整的跨回合战斗求解器。
+
+能量预留、候选描述和方案比较共用一次有序状态计算。已核实的升级、属性变化和 X 费支付只影响后续动作；起始牌面不会被当成始终不变的未来数值。完整方案列出消耗／保留的药水、格挡的有效期、已计算的伤害与倒计时、需要重新观察的位置。未计算的状态变化不会凭空生成新牌或确定的结束回合结果。
 
 效果表明确区分已生效能力与尚未打出的牌／药水，提供来源、作用对象、触发时机和失效时间。例如反伤按命中触发，Flame Barrier 持续到敌方回合结束，One-Two Punch 要在玩家回合结束前获得攻击消费者。方案同时列出已计算的回合末伤害、未计算效果以及临时增益的使用情况。
 
@@ -48,17 +50,19 @@ Jev 在代码提供的目标与候选空间中选择构筑方向、回合目标�
 
 ## 历史回放
 
-[数据划分与评估约定](eval/harness-split.json)固定开发局与 3 局本轮留出集；结果与局限见[评估报告](docs/harness-evaluation.md)。原始历史保存在本机 `run-artifacts/`，不随仓库分发。回放只向 Jev 请求决策，不连接游戏命名管道。
+最新[数据划分](eval/sequence-split.json)预先保留第 19、24、26 局，用 6 个局面进行新旧对照。[结果报告](docs/sequence-evaluation.md)同时保留改善、退步，以及留出评估发现断点漏判后的修复复核；修复复核不冒充独立留出结果。上一轮[效果时序报告](docs/harness-evaluation.md)继续保留。原始历史存于本机 `run-artifacts/`，不随仓库分发；回放只向 Jev 请求决策，不连接游戏命名管道。
 
 ```powershell
 # 从开发局的某一步提取当时观察与此前已确认的记忆
-npm run replay -- collect --step run-artifacts/<session>/step-0001 --id example
+npm run replay -- collect --split eval/sequence-split.json --output run-artifacts/replay-example --step run-artifacts/<session>/step-0001 --id example
 
 # 对同一个快照运行当前代码；结果包含原始请求、模型返回和有序方案
-npm run replay -- replay --case run-artifacts/harness-evaluation/cases/example.json
+npm run replay -- replay --split eval/sequence-split.json --output run-artifacts/replay-example --case run-artifacts/replay-example/cases/example.json
 ```
 
 可用 `--code <旧版本目录>` 对比旧 harness，用 `--repeat 2` 保留重复结果。快照带有输入哈希；留出集在代码冻结后运行。评估比较具体规则、顺序、资源和后果，不能把“选择变了”或模型高置信度直接当成改善。
+
+主循环和回放保存实际请求及完整响应，包括提供方返回的概率分布与置信度。置信度反映该次选择分布的集中程度，不是通关概率，也不保证选择正确。
 
 ## 代码结构与检查
 
@@ -67,7 +71,7 @@ npm run replay -- replay --case run-artifacts/harness-evaluation/cases/example.j
 | `src/mod_client.mjs`、`src/mod_loop.mjs` | 模组通信、执行核对与运行记录 |
 | `src/decision_context.mjs`、`src/context_compiler.mjs`、`schemas/` | 状态契约、记忆、统一模型上下文与容量管理 |
 | `src/rule_reference.mjs`、`src/effect_lifecycle.mjs` | 规则关联、效果时序与有效期 |
-| `src/turn_plan*.mjs`、`src/turn_projection.mjs` | 有序回合计划、方案比较和有限效果分析 |
+| `src/turn_plan*.mjs`、`src/turn_sequence.mjs`、`src/turn_projection.mjs` | 有序回合计划、依赖传播、观察断点和有限效果分析 |
 | `src/run_strategy*.mjs`、`src/camp_plan*.mjs` | 构筑方向和跨界面意图 |
 | `scripts/replay_harness.mjs` | 无游戏操作的历史对照回放 |
 | `native/WindowDriver/`、录屏脚本 | 可选窗口诊断与录像，不参与正常决策 |

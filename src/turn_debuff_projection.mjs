@@ -28,7 +28,7 @@ function scaledPreview(value, numerator, denominator, bound) {
 /** Separate conditional dependency analysis; never writes powers into a real
  * observation. It covers new Weak/Vulnerable from the declared adapters, not
  * arbitrary card effects, future enemy choices, or a complete combat engine. */
-export function projectDebuffDependencies(state, steps) {
+export function projectDebuffDependencies(state, steps, orderedEntries = null) {
   if (!steps.some(step => applications[state.combat.hand.find(card => card.details?.instance_id === step.card_instance_id)?.id])) return null;
   const observed = state.combat;
   const affected = new Set(), transitions = [], damage = [];
@@ -36,11 +36,11 @@ export function projectDebuffDependencies(state, steps) {
   const branches = ['min', 'max'].map(bound => ({ bound, enemies: structuredClone(observed.enemies) }));
   for (const [sequence, step] of steps.entries()) {
     if (step.kind === 'end_turn') break;
-    let card = observed.hand.find(c => c.details?.instance_id === step.card_instance_id);
+    let card = orderedEntries ? orderedEntries.find(e => e.sequence === sequence)?.card : observed.hand.find(c => c.details?.instance_id === step.card_instance_id);
     if (!card) continue;
     // A payment-stage count from the current hand cannot be reused after a
     // hypothetical prefix that may spend/gain energy or alter X payment.
-    if (card.cost < 0 && sequence > 0) card = { ...card, attack_preview: undefined };
+    if (!orderedEntries && card.cost < 0 && sequence > 0) card = { ...card, attack_preview: undefined };
     const ids = card.target_type === 'AllEnemies' ? observed.enemies.map(e => e.combat_id) : [step.target];
     for (const id of ids) {
       const original = observed.enemies.find(e => e.combat_id === id);
@@ -60,6 +60,10 @@ export function projectDebuffDependencies(state, steps) {
           if (newlyVulnerable && card.id !== 'OMNISLICE') {
             boosted = true; affected.add(id);
             preview = caps(original) || customMultiplier(observed, enemy, 'Vulnerable') ? null : scaledPreview(preview, 3, 2, bound);
+          }
+          if ((power(enemy, 'VULNERABLE_POWER')?.amount || 0) !== (power(original, 'VULNERABLE_POWER')?.amount || 0)
+            && /\bfor (?:each|every)\b[^.]*\bVulnerable\b/i.test(card.description)) {
+            affected.add(id); preview = null; // Both the base damage and multiplier changed; old previews cannot establish a point/range.
           }
           const hits = previewHitCount(card);
           if (preview === null || preview === undefined || hits === null) invalid.add(id);
