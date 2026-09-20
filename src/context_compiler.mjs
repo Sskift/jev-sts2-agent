@@ -24,6 +24,9 @@ const routes = [
   ['screen_state.preceding_observed_action', 'history.selection_trigger'],
   ['screen_state.skipped_card_rewards', 'history.skipped_card_rewards'],
   ['screen_state.selection_planning', 'intent.selection_planning'],
+  ['run_strategy.capability_assessment', 'analysis.run_capability_assessment'],
+  ['run_strategy.revisions', 'history.strategy_revisions'],
+  ['run_strategy', 'intent.run_strategy'],
   ['objective', 'intent.run_objective'],
   ['turn_plan', 'intent.persisted_turn_plan'],
   ['turn_planning', 'intent.current_planning'],
@@ -93,9 +96,9 @@ function entityLinks(observation, catalog) {
 function decisionFrame(source, questions, metrics, observation) {
   const phase = metrics.purpose || (source.screen_state?.selection_planning ? 'selection_assembly' : source.screen.toLowerCase());
   const planning = phase.startsWith('turn_') && phase !== 'turn_end_check';
-  const advisory = phase === 'option_assessment';
+  const advisory = ['option_assessment', 'run_strategy_assessment'].includes(phase);
   return {
-    phase, horizon: source.in_combat ? 'remaining_turn_with_full_run_objective' : 'current_choice_with_full_run_objective',
+    phase, horizon: phase === 'run_strategy_assessment' ? 'remaining_run' : source.in_combat ? 'remaining_turn_with_full_run_objective' : 'current_choice_with_full_run_objective',
     output_role: advisory ? 'advisory_assessment' : planning || phase === 'selection_assembly' ? 'unexecuted_plan_component' : 'legal_action_selection',
     observation_id: digestObservation(observation, source.text_dictionary), question_keys: Object.keys(questions),
     reference_paths: aliases,

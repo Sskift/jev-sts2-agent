@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:jev-sts2-agent:decision-context:v1",
   "title": "STS2 self-contained Jev decision context",
-  "description": "The value sent as TypeSafe state. Every request contains all referenced text and all offered action parameters. Version changes require explicit migration.",
+  "description": "Internal canonical decision state, compiled losslessly into the model-facing v2 domains. Contains every referenced text and offered action parameter.",
   "type": "object",
   "required": [
     "schema_version",
@@ -23,6 +23,38 @@
   ],
   "additionalProperties": false,
   "properties": {
+    "run_strategy": {
+      "type": ["object", "null"], "additionalProperties": false,
+      "required": ["source", "is_observed_fact", "run_id", "revision", "basis", "freshness", "development_priority", "anchor", "capability_assessment", "revisions", "scope"],
+      "properties": {
+        "source": { "const": "persisted_jev_judgment" }, "is_observed_fact": { "const": false },
+        "run_id": { "type": "string" }, "revision": { "type": "integer", "minimum": 1 },
+        "basis": {
+          "type": "object", "additionalProperties": false, "required": ["run_id", "act_index", "floor", "checkpoint", "build_id"],
+          "properties": { "run_id": { "type": "string" }, "act_index": { "type": "integer", "minimum": 0 },
+            "floor": { "type": "integer", "minimum": 0 }, "checkpoint": { "type": "string" }, "build_id": { "type": "string", "pattern": "^[a-f0-9]{24}$" } }
+        },
+        "freshness": { "type": "object", "additionalProperties": false, "required": ["needs_review", "reason"],
+          "properties": { "needs_review": { "type": "boolean" }, "reason": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/text" }] } } },
+        "development_priority": { "type": "object", "required": ["id", "meaning", "confidence"],
+          "properties": { "id": { "enum": ["single_target_damage", "multiple_enemy_control", "sustained_defense", "long_fight_scaling", "draw_consistency", "energy_efficiency", "recovery", "preserve_flexibility"] },
+            "meaning": { "$ref": "#/$defs/text" }, "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 } } },
+        "anchor": { "type": "object", "required": ["kind", "id", "name", "confidence"],
+          "properties": { "kind": { "enum": ["card", "relic", "none"] }, "id": { "type": ["string", "null"] },
+            "name": { "$ref": "#/$defs/text" }, "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 } } },
+        "capability_assessment": { "type": "object", "required": ["scale", "dimensions", "ratings"],
+          "properties": { "scale": { "$ref": "#/$defs/text" }, "dimensions": { "type": "object", "additionalProperties": { "$ref": "#/$defs/text" } },
+            "ratings": { "type": "object", "additionalProperties": false,
+              "required": ["single_target_damage", "multiple_enemy_control", "sustained_defense", "long_fight_scaling", "draw_consistency", "energy_efficiency", "recovery"],
+              "properties": {
+                "single_target_damage": { "$ref": "#/$defs/strategicRating" }, "multiple_enemy_control": { "$ref": "#/$defs/strategicRating" },
+                "sustained_defense": { "$ref": "#/$defs/strategicRating" }, "long_fight_scaling": { "$ref": "#/$defs/strategicRating" },
+                "draw_consistency": { "$ref": "#/$defs/strategicRating" }, "energy_efficiency": { "$ref": "#/$defs/strategicRating" },
+                "recovery": { "$ref": "#/$defs/strategicRating" }
+              } } } },
+        "revisions": { "$ref": "#/$defs/records" }, "scope": { "$ref": "#/$defs/text" }
+      }
+    },
     "turn_plan": {
       "type": ["object", "null"],
       "required": ["source", "revision", "turn", "objective", "status", "next_step", "ordered_steps"],
@@ -632,6 +664,10 @@
     }
   },
   "$defs": {
+    "strategicRating": {
+      "type": "object", "additionalProperties": false, "required": ["score", "confidence"],
+      "properties": { "score": { "type": "number", "minimum": 0, "maximum": 3 }, "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 } }
+    },
     "positioning": {
       "type": "object", "additionalProperties": false,
       "required": ["source", "player_combat_id", "facing", "back_attack_multiplier", "intents_include_current_facing", "enemies", "targeting_rule", "death_rule", "preview_scope"],

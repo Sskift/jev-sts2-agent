@@ -1,6 +1,7 @@
 import { decisionInstructions } from "./decision_instructions.mjs";
 import { getJevModel, requestJev, JEV_REQUEST_BUDGET } from './jev_client.mjs';
 import { compileModelRequest } from './context_compiler.mjs';
+import { refreshRunStrategy } from './run_strategy.mjs';
 import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactDecisionRequest, validateDecisionPacket, cardRewardKey, presentCurrentRecords } from './decision_context.mjs';
 import { potionEffectFacts, potionForRequest } from './potion_effects.mjs';
@@ -351,6 +352,18 @@ export function prepareModDecision(gameState, options = {}) {
 export async function makeModDecisionWithJev(gameState, options = {}) {
   let prepared = options.prepared ?? prepareModDecision(gameState, options);
   if (prepared.action === 'wait') return prepared;
+  const strategy = await refreshRunStrategy(gameState, options, prepared, choosePrepared);
+  if (strategy) prepared = prepareModDecision(gameState, options);
+  const decision = await decidePrepared(gameState, options, prepared);
+  return { ...decision,
+    ...(options.memory?.data.run_strategy ? { run_strategy_revision: options.memory.data.run_strategy.revision } : {}),
+    ...(strategy ? { run_strategy_usage: strategy.usage, usage: {
+      input_tokens: (strategy.usage?.input_tokens || 0) + (decision.usage?.input_tokens || 0),
+      output_tokens: (strategy.usage?.output_tokens || 0) + (decision.usage?.output_tokens || 0)
+    } } : {}) };
+}
+
+async function decidePrepared(gameState, options, prepared) {
   if (options.turnPlanning !== false) {
     const selection = plannedUpgradeSelection(options.memory?.data.turn_plan, gameState, prepared.candidates);
     if (selection) return { ...selection, model: 'jev-turn-plan-selection', turn_plan: options.memory.data.turn_plan, context_metrics: prepared.metrics };

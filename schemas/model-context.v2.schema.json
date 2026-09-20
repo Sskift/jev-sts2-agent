@@ -12,7 +12,7 @@
       "required": ["phase", "horizon", "output_role", "observation_id", "question_keys", "reference_paths", "contract"],
       "properties": {
         "phase": { "type": "string", "minLength": 1 },
-        "horizon": { "enum": ["remaining_turn_with_full_run_objective", "current_choice_with_full_run_objective"] },
+        "horizon": { "enum": ["remaining_run", "remaining_turn_with_full_run_objective", "current_choice_with_full_run_objective"] },
         "output_role": { "enum": ["advisory_assessment", "unexecuted_plan_component", "legal_action_selection"] },
         "observation_id": { "type": "string", "pattern": "^[a-f0-9]{24}$" },
         "question_keys": { "type": "array", "uniqueItems": true, "minItems": 1, "items": { "type": "string" } },

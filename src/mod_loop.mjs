@@ -133,9 +133,13 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
         save(path.join(directory, 'context-metrics.json'), prepared.metrics);
       }
       let planningCalls = 0, planningDecisions = 0;
-      const decision = await decide(state, { memory, prepared,
+      const decision = await decide(state, { memory, prepared, runStrategy: true,
         onRequest: (payload, metrics) => {
-          if (metrics.purpose === 'option_assessment') save(path.join(directory, 'jev-strategy-request.json'), payload);
+          if (metrics.purpose === 'run_strategy_assessment') {
+            save(path.join(directory, 'jev-run-strategy-request.json'), payload);
+            save(path.join(directory, 'context-run-strategy.json'), metrics);
+          }
+          else if (metrics.purpose === 'option_assessment') save(path.join(directory, 'jev-strategy-request.json'), payload);
           else if (metrics.purpose?.startsWith('turn_')) {
             const sequence = String(++planningCalls).padStart(4, '0');
             save(path.join(directory, `jev-${metrics.purpose}-${sequence}.json`), payload);
@@ -144,7 +148,8 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
           else { save(path.join(directory, 'jev-request.json'), payload); save(path.join(directory, 'context-metrics.json'), metrics); }
           if (prepared.selectionPlan) save(path.join(directory, `jev-planning-request-${String(++planningCalls).padStart(4, '0')}.json`), payload);
         },
-        onPlanningDecision: result => save(path.join(directory, `jev-planning-decision-${String(++planningDecisions).padStart(4, '0')}.json`), result)
+        onPlanningDecision: result => save(path.join(directory, `jev-planning-decision-${String(++planningDecisions).padStart(4, '0')}.json`), result),
+        onRunStrategy: result => save(path.join(directory, 'run-strategy-decision.json'), result)
       });
       save(path.join(directory, 'decision.json'), decision);
       if (signal?.aborted) break;

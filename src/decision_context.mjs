@@ -9,6 +9,7 @@ import { combatFrame, observedCombatChange, buildDecisionBrief } from './decisio
 import { sameTurn, publicTurnPlan, turnGuard, advanceTurnPlan } from './turn_plan_state.mjs';
 import { potionEffectFacts } from './potion_effects.mjs';
 import { positioningError } from './combat_positioning.mjs';
+import { publicRunStrategy } from './run_strategy_state.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -21,6 +22,17 @@ export function validateDecisionPacket(rawPacket) {
   const packet = expandRecordTables(rawPacket);
   if (!protocolCheck(packet)) throw new ContextError('Decision JSON does not match the versioned protocol', { errors: clone(protocolCheck.errors) });
   if (packet.in_combat !== Boolean(packet.combat)) throw new ContextError('in_combat contradicts combat data');
+  if (packet.run_strategy && packet.run_strategy.run_id !== packet.run?.run_id) throw new ContextError('Strategic intention belongs to another run');
+  if (packet.run_strategy) {
+    const strategy = packet.run_strategy;
+    if (strategy.basis.run_id !== strategy.run_id || strategy.freshness.needs_review !== (strategy.freshness.reason !== null)) throw new ContextError('Strategic review metadata is inconsistent');
+    if (!strategy.freshness.needs_review) {
+      const anchor = strategy.anchor;
+      const present = anchor.kind === 'none' ? anchor.id === null : anchor.kind === 'card'
+        ? packet.deck.cards.some(group => group.card.id === anchor.id) : packet.player.relics.some(relic => relic.id === anchor.id);
+      if (!present) throw new ContextError('Current strategic anchor does not belong to the owned build');
+    }
+  }
   if (packet.combat) {
     const issue = positioningError({ ...packet.combat, player: packet.player });
     if (issue) throw new ContextError(issue);
@@ -535,6 +547,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     screen: state.screen, in_combat: Boolean(combat),
     decision_brief: buildDecisionBrief(source, memory),
     turn_plan: publicTurnPlan(memory.data.turn_plan, source),
+    run_strategy: publicRunStrategy(source, memory),
     run: context ? { run_id: context.run_id, combat_id: context.combat_id || null, act_index: context.act_index, act_floor: context.act_floor, total_floor: context.total_floor, ascension: context.ascension, game_mode: context.game_mode, modifiers: context.modifiers } : null,
     player: context?.player ?? null,
     resources: context ? { potion_capacity: context.potion_capacity,
@@ -750,6 +763,7 @@ export function compactContext(context, { deduplicate = true } = {}) {
     }
   }
   for (const key of ['actions', 'observations', 'relic_updates', 'travel_history']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
+  if (copy.run_strategy?.revisions?.length) copy.run_strategy.revisions = compactRecords(copy.run_strategy.revisions);
   for (const container of [copy.deck, copy.combat?.draw_pile]) if (container?.cards?.length) container.cards = compactRecords(container.cards);
   for (const key of ['hand', 'discard_pile', 'exhaust_pile', 'play_pile', 'enemies']) if (copy.combat?.[key]?.length) copy.combat[key] = compactRecords(copy.combat[key]);
   if (copy.legal_actions?.length) copy.legal_actions = compactRecords(copy.legal_actions);
