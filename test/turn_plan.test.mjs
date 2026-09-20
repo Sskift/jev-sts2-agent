@@ -35,6 +35,11 @@ function fakeJev(answers, seen = []) {
   return async (_url, request) => {
     const body = JSON.parse(request.body), selected = answers.shift(); seen.push(body);
     assert.ok(selected, 'Unexpected extra Jev decision');
+    if (!body.questions.next_action) {
+      assert.equal(selected, 'keep');
+      return { ok: true, json: async () => ({ model: 'jev-test', usage: { input_tokens: 100 },
+        answers: Object.fromEntries(Object.keys(body.questions).map(id => [id, { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 1 }, confidence: 1 }])) }) };
+    }
     assert.ok(Object.hasOwn(body.questions.next_action.criteria, selected), `Missing choice ${selected}`);
     return { ok: true, json: async () => ({ model: 'jev-test', usage: { input_tokens: 100 }, answers: { next_action: { type: 'choice', choice: selected, probabilities: { [selected]: 1 }, confidence: 1 } } }) };
   };
@@ -97,6 +102,52 @@ test('next-Attack preparation binds the exact payoff instance before the first c
   assert.equal(result.turn_plan.steps[1].card_type, 'Attack');
 });
 
+test('independent two-plan judgments share full state and a missing result commits no partial plan', async () => {
+  const state = stateWith([
+    card('ARMAMENTS', 'arm', 0, { name: 'Armaments', type: 'Skill', target_type: 'Self', description: 'Gain 5 Block. Upgrade a card in your Hand.', block: 5 }),
+    card('BASH', 'attack', 1, { name: 'Bash', type: 'Attack', cost: 2 }),
+    card('ANGER', 'free', 2, { name: 'Anger', type: 'Attack', cost: 0 }),
+    card('DEFEND', 'defense', 3, { name: 'Defend', type: 'Skill', target_type: 'Self', block: 5 })
+  ]);
+  for (const omitAnswer of [false, true]) {
+    const memory = new DecisionMemory(); memory.observe(state);
+    const ordinary = ['damage', 'card_1_target_42', 'card_0', 'manual', 'none', 'end_turn'];
+    let sawMultiple = false, compared = 0;
+    const fetchImpl = async (_url, request) => {
+      const body = JSON.parse(request.body);
+      let answers;
+      if (body.questions.next_action) {
+        const selected = ordinary.shift();
+        assert.ok(Object.hasOwn(body.questions.next_action.criteria, selected));
+        answers = { next_action: { type: 'choice', choice: selected } };
+      } else {
+        const full = expandRecordTables(body.state), entries = Object.entries(body.questions);
+        assert.equal(full.combat.hand.length, 4);
+        assert.ok(full.deck && full.map && full.memory && full.rule_reference);
+        assert.equal(full.turn_planning.objective.id, 'damage');
+        assert.deepEqual(full.turn_planning.proposed_steps, []);
+        assert.ok(Buffer.byteLength(request.body) <= 70000);
+        sawMultiple ||= entries.length > 1;
+        compared += entries.length;
+        for (const [, question] of entries) assert.deepEqual(Object.keys(question.criteria), ['plan_a', 'plan_b']);
+        answers = Object.fromEntries(entries.slice(omitAnswer ? 1 : 0).map(([id]) => [id, { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 0.6, plan_b: 0.4 } }]));
+      }
+      return { ok: true, json: async () => ({ model: 'jev-test', usage: { input_tokens: 100 }, answers }) };
+    };
+    const decision = makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl });
+    if (omitAnswer) await assert.rejects(decision, /invalid turn-plan comparison/);
+    else {
+      const result = await decision;
+      assert.equal(sawMultiple, true);
+      assert.ok(compared > 1);
+      assert.equal(result.request.id, 'ARMAMENTS');
+      assert.ok(result.planning_trace.some(item => item.stage === 'refine_pairs' && item.comparisons.length > 1));
+    }
+    assert.equal(memory.data.turn_plan, undefined);
+    assert.equal(memory.data.pending, null);
+  }
+});
+
 test('upgrade modal follows the beneficiary chosen before preparation and confirms it before reviewing the suffix', async () => {
   const state = stateWith([card('ARMAMENTS', 'arm', 0, { name: 'Armaments', type: 'Skill', target_type: 'Self', description: 'Upgrade a card.' }), card('BASH', 'attack', 1, { name: 'Bash', cost: 2 })]);
   const memory = new DecisionMemory(); memory.observe(state);
@@ -152,7 +203,7 @@ test('draw results invalidate the suffix while retaining the objective and confi
   assert.equal(next.turn_plan.revision, 1);
   assert.equal(next.turn_plan.completed_actions[0].request.id, 'BATTLE_TRANCE');
   assert.equal(next.request.id, 'BASH');
-  assert.equal(seen.some(body => Object.hasOwn(body.questions.next_action.criteria, 'finish_combat')), false);
+  assert.equal(seen.some(body => Object.hasOwn(body.questions.next_action?.criteria || {}, 'finish_combat')), false);
 });
 
 test('dead targets, missing cards, costs and external changes require review; next turns and runs do not inherit a plan', () => {

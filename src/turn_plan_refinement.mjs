@@ -18,9 +18,8 @@ const bindFollowthrough = (step, following) => {
 // Compare concrete complete plans, not another disconnected next-card choice.
 // These are bounded local alternatives, not an exhaustive solver. Every current
 // legal action remains available in the main planning stages.
-export async function refineTurnPlan(state, plan, prepared, ask) {
+export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
   if (plan.end_policy !== 'end_after_steps_unless_conditions_change') return;
-  const seen = new Set([signature(plan.steps)]);
   const label = steps => {
     const budget = reserveSequence(state, steps), projection = projectTurnPrefix(state, steps);
     return {
@@ -32,15 +31,22 @@ export async function refineTurnPlan(state, plan, prepared, ask) {
             ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
       }),
       then: 'End turn, unless a new observation requires a revision.',
-      energy_left: budget.energy_left,
+      energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
       conditional_preview: { block: projection.block, hp_if_ending: projection.hp_if_ending_after_prefix,
+        hp_loss_if_ending: state.combat.player.hp - projection.hp_if_ending_after_prefix,
         incoming_attack: projection.incoming_attack_after_prefix,
-        enemies: projection.remaining_enemies.map(({ combat_id, hp }) => ({ combat_id, hp })),
+        enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
+          const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
+          return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block };
+        }),
         unconfirmed_effects: projection.unresolved_effects },
       limitation: 'Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers.'
     };
   };
   for (let pass = 0; pass < 2; pass++) {
+    // A candidate rejected against the old incumbent can improve the newly
+    // selected plan. Deduplicate only within a pass, never across baselines.
+    const seen = new Set([signature(plan.steps)]);
     const end = plan.steps.at(-1), prefix = plan.steps.slice(0, -1), alternatives = new Map([['keep', plan.steps]]);
     const add = steps => {
       const key = signature(steps);
@@ -95,7 +101,8 @@ export async function refineTurnPlan(state, plan, prepared, ask) {
       }
     }
     if (alternatives.size === 1) break;
-    // Keep the original in every comparison and then compare batch winners.
+    // Every candidate enters a balanced pairwise tournament. Similar good
+    // plans cannot split a large Choice distribution and hide one another.
     // No candidate is pruned by a damage heuristic or a card-specific strategy.
     const keep = { value: 'keep', label: label(plan.steps) };
     const maxLabels = Math.min(12000, prepared.metrics.max_request_bytes - prepared.metrics.request_bytes - 6000);
@@ -103,29 +110,21 @@ export async function refineTurnPlan(state, plan, prepared, ask) {
       plan.refinement_limit = 'Optional whole-plan comparisons skipped because the complete state leaves insufficient request space.';
       return;
     }
-    const instruction = 'Compare these COMPLETE ordered turn plans under turn_planning.objective. Choose the most useful whole turn. Compare total enemy HP removed, kills, remaining incoming damage, Block and energy, rather than one impressive card. When a cheaper sequence achieves the same kills, its spare energy can fund defense or setup. Check whether a buff/debuff/upgrade comes before its beneficiaries and whether spending remaining energy improves survival or damage. A non-immediate preparation must have useful follow-through. Do not stop merely because one card already served the objective. Do not reorder a payoff before a preparation that improves it without a concrete benefit. Conditional arithmetic is incomplete; use the explicit rules for unknown effects. Keeping the original plan is valid if alternatives waste resources or disrupt it.';
+    const instruction = 'Compare two mutually exclusive COMPLETE ordered plans starting from the actual current combat state. Choose the plan that better serves turn_planning.objective and winning the run. Both sequences have not happened. Evaluate the exact enemy targets, energy, rules, kills and remaining threats. A plan with the same kills and damage can preserve more HP through stronger Block. Check preparation before its beneficiaries and useful follow-through for setup. Ignore which plan was proposed earlier. Conditional arithmetic is incomplete; account for unconfirmed rules without assuming hidden outcomes.';
     const comparisonState = { phase_scope: 'Compare mutually exclusive complete plans from the ACTUAL current state. These proposed steps have NOT happened. Every option replaces the entire unexecuted proposed prefix; do not execute both the old prefix and an option.',
       proposed_steps: [], conditional_projection: [],
       energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy, scope: 'No option has executed. Each option contains its own complete energy reservation and conditional outcome.' } };
-    const comparePlans = choices => ask('refine', instruction, choices, comparisonState);
-    const winners = new Set(['keep']);
-    let batch = { keep }, bytes = Buffer.byteLength(JSON.stringify(batch));
-    const compare = async () => { if (Object.keys(batch).length > 1) winners.add(await comparePlans(batch)); };
-    for (const [id, steps] of [...alternatives].slice(1)) {
-      const item = { value: id, label: label(steps) }, size = Buffer.byteLength(JSON.stringify(item)) + id.length + 5;
-      if (bytes + size > maxLabels || Object.keys(batch).length >= 30) { await compare(); batch = { keep }; bytes = Buffer.byteLength(JSON.stringify(batch)); }
-      batch[id] = item; bytes += size;
+    let remaining = [...alternatives].map(([value, steps]) => ({ value, label: label(steps) }));
+    while (remaining.length > 1) {
+      const pairs = [];
+      for (let index = 0; index + 1 < remaining.length; index += 2) pairs.push(remaining.slice(index, index + 2));
+      const selected = comparePairs ? await comparePairs(pairs, instruction, comparisonState)
+        : await Promise.all(pairs.map(pair => ask('refine', instruction, { plan_a: pair[0], plan_b: pair[1] }, comparisonState)));
+      if (selected.length !== pairs.length || selected.some((id, index) => !pairs[index].some(item => item.value === id))) throw new Error('Invalid turn-plan tournament winner');
+      const byId = new Map(remaining.map(item => [item.value, item]));
+      remaining = selected.map(id => byId.get(id)).concat(remaining.length % 2 ? [remaining.at(-1)] : []);
     }
-    await compare();
-    let selected = 'keep';
-    if (winners.size > 1) {
-      const finalists = Object.fromEntries([...winners].map(id => [id, { value: id, label: label(alternatives.get(id)) }]));
-      if (Buffer.byteLength(JSON.stringify(finalists)) <= maxLabels) selected = await ask('refine_final', instruction, finalists, comparisonState);
-      else for (const id of [...winners].filter(id => id !== 'keep')) {
-        // Tournament rounds also respect the same bounded request size.
-        selected = await ask('refine_final', instruction, { incumbent: { value: selected, label: label(alternatives.get(selected)) }, challenger: { value: id, label: label(alternatives.get(id)) } }, comparisonState);
-      }
-    }
+    const selected = remaining[0].value;
     if (selected === 'keep') break;
     plan.steps = structuredClone(alternatives.get(selected));
     for (const [index, step] of plan.steps.entries()) {

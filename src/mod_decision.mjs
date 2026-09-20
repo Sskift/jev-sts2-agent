@@ -355,7 +355,7 @@ async function choosePrepared(gameState, options, prepared) {
   if (gameState.screen === 'REWARD' && gameState.rewards?.rewards.length === 1 && gameState.rewards.rewards[0].type === 'Card' && (prepared.skippedCardRewards?.includes(0) || (last?.ok && !last.card_reward_key && last.request.cmd === 'reward_skip_card' && last.floor === gameState.decision_context?.total_floor)) && candidates.has('proceed') && [...candidates.values()].every(candidate => ['proceed', 'reward_choose_card', 'reward_skip_card'].includes(candidate.request?.cmd))) {
     return { ...candidates.get('proceed'), candidate_id: 'proceed', model: 'complete-selected-skip', context_metrics: metrics };
   }
-  if (!prepared.assessmentChoices && candidates.size === 1) {
+  if (!prepared.assessmentChoices && !prepared.parseResult && candidates.size === 1) {
     const [candidate_id, candidate] = candidates.entries().next().value;
     return { ...candidate, candidate_id, model: 'forced-single-action', context_metrics: metrics };
   }
@@ -375,6 +375,7 @@ async function choosePrepared(gameState, options, prepared) {
     throw new Error(`Jev API error ${response.status}${typeof kind === 'string' && /^[a-z_]{1,80}$/.test(kind) ? ` (${kind})` : ''}`);
   }
   const result = await response.json();
+  if (prepared.parseResult) return { ...prepared.parseResult(result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
   if (prepared.assessmentChoices) return { ...parseStrategyAssessment(prepared, result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
   const answer = result.answers?.next_action;
   if (answer?.type !== 'choice' || typeof answer.choice !== 'string' || !candidates.has(answer.choice)) throw new Error('Jev returned an invalid mod action choice');

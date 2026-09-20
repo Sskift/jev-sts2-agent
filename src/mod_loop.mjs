@@ -86,7 +86,7 @@ export function observedEventProgress(before, request, after) {
   return { ok: true, data: { action: 'CHOOSE_EVENT', reason: 'observed_event_progress', observed_event_id: after.event.event_id, command_replayed: false } };
 }
 
-export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 3000, intervalMs = 600, artifactDir = createSession(), memoryFile = path.join(artifactDir, 'memory.json'), signal, logger = console.log, stopAfterBattle = false } = {}) {
+export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 3000, intervalMs = 600, artifactDir = createSession(), memoryFile = path.join(artifactDir, 'memory.json'), signal, logger = console.log, stopAfterBattle = false, onObservation, onBeforeAction } = {}) {
   if (!client) throw new Error('Mod client is required');
   const battle = { sawCombat: false, complete: false, failed: false, playedCards: 0, endedTurns: 0 };
   const summary = { startedAt: new Date().toISOString(), mode: 'mod', decisionModel: 'jev-latest', artifactDir, steps: 0, battle };
@@ -111,6 +111,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       fs.mkdirSync(directory);
       const state = await client.state({ includePileDetails: true });
       save(path.join(directory, 'before-state.json'), state);
+      await onObservation?.(state);
       memory.observe(state);
       observeRun(progress, state, path.join(directory, 'before-state.json'));
       memory.data.run_progress = progress;
@@ -150,6 +151,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       emptyCycles = 0;
       if (decision.action !== 'mod_command' || !decision.request) throw new ContextError('Decision is not a complete dispatchable game command');
       validateModRequest(decision.request);
+      await onBeforeAction?.(state, decision);
       // A user or animation may change state while Jev is answering.
       const current = await client.state({ includePileDetails: true });
       save(path.join(directory, 'pre-action-state.json'), current);
@@ -182,6 +184,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       await sleep(intervalMs);
       const after = await client.state({ includePileDetails: true });
       save(path.join(directory, 'after-state.json'), after);
+      await onObservation?.(after);
       await snapshot(directory, 'after');
       if (!response.ok && response.error === 'TIMEOUT' && decision.request.cmd === 'end_turn') {
         const observed = observedEndTurnSelection(memory.data.pending, after);

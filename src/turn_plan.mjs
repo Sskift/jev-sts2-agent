@@ -90,6 +90,47 @@ export async function decideTurn(state, options, prepared, choose) {
     trace.push(record); options.onPlanningDecision?.(record);
     return decision.planning_value;
   }
+  async function comparePairs(pairs, instructions, extra) {
+    // Questions in one request are independent. Each contains exactly two
+    // complete plans and shares the same full observed context and turn goal.
+    const comparisonState = { ...prepared.payload.state, turn_planning: planningState(extra) };
+    validateDecisionPacket(comparisonState);
+    const winners = [];
+    let batch = [];
+    const payloadFor = items => ({ model: prepared.payload.model, state: comparisonState,
+      questions: Object.fromEntries(items.map((pair, index) => [`comparison_${index}`, {
+        type: 'choice', instructions: `${instructions} ${references}`,
+        criteria: { plan_a: pair[0].label, plan_b: pair[1].label }
+      }])) });
+    async function flush() {
+      if (!batch.length) return;
+      const payload = payloadFor(batch), body = JSON.stringify(payload);
+      const decision = await choose(state, options, { candidates: prepared.candidates, payload, body,
+        metrics: { ...prepared.metrics, request_bytes: Buffer.byteLength(body), question_count: batch.length, purpose: 'turn_refine_pairs' },
+        parseResult(result) {
+          const comparisons = batch.map((pair, index) => {
+            const answer = result.answers?.[`comparison_${index}`];
+            if (answer?.type !== 'choice' || !['plan_a', 'plan_b'].includes(answer.choice)) throw new Error('Jev returned an invalid turn-plan comparison');
+            return { selected: pair[answer.choice === 'plan_a' ? 0 : 1].value,
+              options: { plan_a: pair[0].value, plan_b: pair[1].value }, probabilities: answer.probabilities, confidence: answer.confidence };
+          });
+          return { action: 'compare_turn_plans', comparisons };
+        } });
+      usage.input_tokens += decision.usage?.input_tokens || 0;
+      usage.output_tokens += decision.usage?.output_tokens || 0;
+      winners.push(...decision.comparisons.map(comparison => comparison.selected));
+      const record = { stage: 'refine_pairs', comparisons: decision.comparisons, model: decision.model, usage: decision.usage };
+      trace.push(record); options.onPlanningDecision?.(record);
+      batch = [];
+    }
+    for (const pair of pairs) {
+      if (batch.length && (batch.length >= 32 || Buffer.byteLength(JSON.stringify(payloadFor([...batch, pair]))) > prepared.metrics.max_request_bytes)) await flush();
+      if (Buffer.byteLength(JSON.stringify(payloadFor([pair]))) > prepared.metrics.max_request_bytes) throw new ContextError('Complete pairwise turn context exceeds the request budget; no game action sent');
+      batch.push(pair);
+    }
+    await flush();
+    return winners;
+  }
   async function dispatch(candidate, selectedPlan, cursor) {
     if (!candidate) throw new ContextError('No legal first command in the completed turn plan');
     if (candidate.request.cmd === 'end_turn' && prepared.candidates.size > 1) {
@@ -223,7 +264,7 @@ export async function decideTurn(state, options, prepared, choose) {
   if (!plan.steps.length) throw new ContextError('Turn planner produced no executable prefix');
   plan.budget = { initial_energy: state.combat.player.energy, remaining_after_printed_costs: energy,
     scope: 'Current printed costs plus verified Stomp reductions. Future changes and automatic effects must be confirmed from live observations.' };
-  if (options.refineTurnPlan !== false) await refineTurnPlan(state, plan, prepared, ask);
+  if (options.refineTurnPlan !== false) await refineTurnPlan(state, plan, prepared, ask, comparePairs);
   plan.model = trace.find(item => item.model !== 'forced-single-action')?.model || 'forced-single-action';
   return dispatch(resolvePlanStep(plan.steps[0], state, prepared.candidates), plan, 0);
 }
