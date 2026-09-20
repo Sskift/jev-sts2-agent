@@ -130,7 +130,7 @@ export function buildModCandidates(state) {
       if (!selection) break;
       if (selection.can_confirm === true) add('hand_confirm', { cmd: 'hand_confirm_selection' }, `Confirm the ${selection.selected_count} currently selected cards.`);
       if (selection.selected_count < selection.max_select) for (const { card, nth } of indexedCopies(selection.selectable_cards || [], 'card_id')) {
-        add(`hand_select_${card.index}`, { cmd: 'hand_select_card', card_ids: [card.card_id], nth_values: [nth] }, `${selection.prompt || 'Choose a hand card'}: ${card.card_name}; ${card.description || ''}`, { card_hand_index: card.index });
+        add(`hand_select_${card.index}`, { cmd: 'hand_select_card', card_ids: [card.card_id], nth_values: [nth] }, `${selection.prompt || 'Choose a hand card'}: ${card.card_name}, cost ${card.cost < 0 ? 'X' : card.cost}; ${card.description || ''}`, { card_hand_index: card.index });
       }
       break;
     }

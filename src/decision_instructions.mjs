@@ -10,5 +10,9 @@ export function decisionInstructions(state) {
   const noDisplayedAttack = enemies.length && enemies.every(enemy => enemy.intents?.length && enemy.intents.every(intent => ['Buff', 'Defend', 'Debuff', 'StatusCard'].includes(intent.type) && !(intent.damage > 0)));
   const setup = state.screen === 'COMBAT' && noDisplayedAttack && state.combat.hand.some(card => card.type === 'Power' && card.can_play)
     ? ' No living enemy currently displays attack damage. Consider establishing useful lasting Powers now, while their costs fit the available energy. Block normally expires before it helps against a later turn. Spending energy on optional draw first can make a useful Power already in hand unaffordable; compare that opportunity cost before drawing. Check other visible triggers and countdowns.' : '';
-  return `${common} ${state.combat ? combat : betweenRooms}${rewards}${setup}`;
+  const potionTiming = state.screen === 'COMBAT' && state.combat.player.potions?.some(potion => potion.id === 'SPEED_POTION')
+    ? ' Temporary Dexterity gives no Block by itself and does not increase existing Block. Use it before useful card-generated Block this turn; its benefit expires at turn end. If no useful Block can follow, saving the potion for another turn or fight is valuable. Check affordable cards and available draws rather than drinking it merely because damage is incoming.' : '';
+  const selection = ['HAND_SELECT', 'GRID_CARD_SELECT', 'TRI_SELECT'].includes(state.screen)
+    ? ' Follow the selection prompt literally. Selecting a card to Exhaust removes it from this combat without playing its printed effect; the chosen attack deals no damage. Compare what the sacrificed card would contribute now and on later draws against the other sacrifices. Prefer losing an unneeded card over an affordable strong attack or useful lasting Power, unless visible exhaust synergies justify the loss. Discarding, upgrading, removing, retrieving and playing a selected card have different consequences; do not confuse them.' : '';
+  return `${common} ${state.combat ? combat : betweenRooms}${rewards}${setup}${potionTiming}${selection}`;
 }
