@@ -230,7 +230,8 @@ export function buildModCandidates(state) {
       const estimate = combatForecast(state.combat, card, target);
       action.combat_estimate = estimate;
       const unknownBlock = estimate.block_preview?.amount === null;
-      action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn}${estimate.fatal_if_end_turn && !unknownBlock ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
+      action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn ?? 'unknown'}${estimate.fatal_if_end_turn && !unknownBlock ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
+      if (estimate.incoming_attack_preview_valid === false) action.description += ` Facing changes to ${estimate.positioning.facing_after_sequence}; current enemy intent damage is stale for this outcome. Do not reuse it as the final incoming damage.`;
       if (unknownBlock) action.description += ' Block contribution is UNKNOWN, not zero: this HP number omits that effect and cannot establish fatality. Evaluate the complete live rule.';
       else if (estimate.block_preview) action.description += ` Immediate Block ${estimate.block_preview.amount} from the resolved live first sentence; its native numeric preview is absent.`;
       if (estimate.active_rage_block_gain) action.description += ` Active Rage adds ${estimate.active_rage_block_gain} Block for playing this Attack (once per card, already included in the estimate).`;
@@ -319,6 +320,7 @@ export function prepareModDecision(gameState, options = {}) {
             ...(estimate.attack_hp_loss !== undefined ? { target_hp_loss: estimate.attack_hp_loss } : {}),
             ...(estimate.attack_hp_loss_by_target ? { hp_loss_by_target: estimate.attack_hp_loss_by_target } : {}),
             end_now_hp: estimate.hp_remaining_if_end_turn,
+            ...(estimate.positioning ? { positioning: estimate.positioning } : {}),
             ...(estimate.active_rage_block_gain ? { rage_block_included: estimate.active_rage_block_gain } : {}),
             ...(estimate.followup_attacks?.hand_indices.length ? { conditional_followups: estimate.followup_attacks } : {}),
             ...(estimate.attack_trigger_potential ? { conditional_attack_block: { hand_indices: estimate.attack_trigger_potential.hand_indices, additional_block_if_all_played: estimate.attack_trigger_potential.additional_block_if_all_played } } : {})

@@ -1,3 +1,5 @@
+import { projectPositioning } from './combat_positioning.mjs';
+
 // Arithmetic over player-visible facts only. These are single-action estimates,
 // not a combat simulator: draws, general triggered effects and future choices stay unknown.
 export const intentDamage = enemy => (enemy.intents || []).reduce((sum, intent) => sum + (Number.isFinite(intent.damage) ? intent.damage * (intent.hits || 1) : 0), 0);
@@ -75,6 +77,8 @@ export function combatForecast(combat, card = null, target = null) {
   }) : null;
   const depleted = new Set(areaHits?.filter(preview => preview.hp_depleted).map(preview => preview.target_id));
   if (targetDepleted) depleted.add(target.combat_id);
+  const positioning = projectPositioning(combat, card ? [{ kind: 'play_card', target: target?.combat_id }] : [], depleted);
+  const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
   const incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
   const exhausted = card?.id === 'SECOND_WIND' ? (combat.hand || []).filter(other => other.index !== card.index && other.type !== 'Attack') : null;
   const remainingHand = (combat.hand || []).filter(other => other.index !== card?.index && !exhausted?.some(removed => removed.index === other.index));
@@ -123,9 +127,10 @@ export function combatForecast(combat, card = null, target = null) {
     ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
     displayed_attacks_after_target_depletion: incoming,
-    hp_loss_if_end_turn: instantDeath ? combat.player.hp : loss,
-    hp_remaining_if_end_turn: instantDeath ? 0 : combat.player.hp - loss,
-    fatal_if_end_turn: instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null ? null : loss >= combat.player.hp,
+    ...(positioning ? { positioning, incoming_attack_preview_valid: !facingUnresolved } : {}),
+    hp_loss_if_end_turn: instantDeath ? combat.player.hp : facingUnresolved ? null : loss,
+    hp_remaining_if_end_turn: instantDeath ? 0 : facingUnresolved ? null : combat.player.hp - loss,
+    fatal_if_end_turn: instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null || facingUnresolved ? null : loss >= combat.player.hp,
     ...(exhausted ? { exhausted_hand_cards: exhausted.map(c => ({ index: c.index, id: c.id, type: c.type })), immediate_block_gain: immediateBlock } : {}),
     ...(deathTimers.length ? { death_timers: deathTimers, instant_death_if_end_turn: instantDeath } : {}),
     ...(followup?.hand_indices.length ? { followup_attacks: followup } : {}),

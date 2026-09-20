@@ -1,4 +1,5 @@
 import { attackHpLoss, combatForecast, intentDamage } from './combat_arithmetic.mjs';
+import { projectPositioning } from './combat_positioning.mjs';
 
 export function sequenceEnergyBudget(state, steps) {
   let energy = state.combat.player.energy, attacks = 0;
@@ -30,7 +31,7 @@ export function describeTurnProjection(state, steps) {
     fully_simulated: false,
     known_effects_only: {
       block: projection.block, hp_if_ending: projection.hp_if_ending_after_prefix,
-      hp_loss_if_ending: state.combat.player.hp - projection.hp_if_ending_after_prefix,
+      hp_loss_if_ending: projection.hp_if_ending_after_prefix === null ? null : state.combat.player.hp - projection.hp_if_ending_after_prefix,
       block_including_end_turn_gains: projection.block_including_end_turn_gains,
       end_turn_block_gains: projection.end_turn_block_gains,
       incoming_attack: projection.incoming_attack_after_prefix,
@@ -39,6 +40,7 @@ export function describeTurnProjection(state, steps) {
         return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block };
       })
     },
+    ...(projection.positioning ? { positioning: projection.positioning } : {}),
     omitted_effects: projection.unresolved_effects,
     interpretation: 'Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.',
     scope: projection.scope
@@ -81,12 +83,18 @@ export function projectTurnPrefix(state, steps) {
     if (!/^(?:Deal [\d.]+ damage\.?|Gain [\d.]+ Block\.?)$/i.test(card.description.trim()) && card.id !== 'RAGE') unresolved.push(`${card.name}: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed`);
   }
   const end = combatForecast(combat);
+  const depleted = new Set(combat.enemies.filter(enemy => !enemy.is_alive || enemy.hp <= 0).map(enemy => enemy.combat_id));
+  const positioning = projectPositioning(state.combat, steps, depleted);
+  const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
+  if (facingUnresolved) unresolved.push('Player facing changes: current enemy intent damage includes the previous facing; final incoming damage and HP are unknown until new native previews are observed.');
   return {
     scope: 'Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, Second Wind hand exhaustion, and active Plating/Orichalcum once at turn end. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices.',
     remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
     block: combat.player.block, block_including_end_turn_gains: end.block_including_end_turn_gains, end_turn_block_gains: end.end_turn_block_gains,
     hp_after_declared_self_loss: combat.player.hp,
-    hp_if_ending_after_prefix: end.hp_remaining_if_end_turn, incoming_attack_after_prefix: end.displayed_attacks_after_target_depletion,
+    hp_if_ending_after_prefix: facingUnresolved ? null : end.hp_remaining_if_end_turn,
+    incoming_attack_after_prefix: facingUnresolved ? null : end.displayed_attacks_after_target_depletion,
+    ...(positioning ? { positioning } : {}),
     unresolved_effects: [...new Set(unresolved)]
   };
 }

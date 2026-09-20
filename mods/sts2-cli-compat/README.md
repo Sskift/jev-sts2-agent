@@ -64,11 +64,13 @@ git -C path/to/disposable-clone apply --check path/to/jev-sts2-agent/mods/sts2-c
 
 Successful outputs:
 
-- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.13`, assembly version `0.111.0.14`.
+- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.17`, assembly version `0.111.0.18`.
 - `compile.log` and `compile.rsp`, containing the build output and exact compiler inputs.
 - `build-evidence.json`, recording the upstream commit, both patch hashes, context builder and game assembly hashes, compiler location, source/reference counts, exit code, binary hash, and `deploymentPerformed: false`.
 
 The existing CLI executable remains a separate upstream component; this builds only the in-game mod.
+
+Context.17 exports the visible `SurroundedPower.Facing` property and enemy Back Attack sides as `combat.positioning`. The snapshot states which enemies are behind the player and that native intent damage already includes the current facing multiplier. It does not temporarily change the power or recompute hypothetical damage by mutating the live game. Node invalidates conditional incoming/HP arithmetic after a planned facing change and reads fresh native previews after confirmed actions. The mod was built and loaded after run 21's formal defeat; live Surrounded extraction still awaits the next naturally encountered battle with that mechanic.
 
 ## Why the .NET 8 compiler works here
 

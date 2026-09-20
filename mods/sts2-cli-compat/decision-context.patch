@@ -2080,3 +2080,19 @@ index d510bdd..3e4f595 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/Models/State/CombatStateDto.cs b/STS2.Cli.Mod/Models/State/CombatStateDto.cs
+--- a/STS2.Cli.Mod/Models/State/CombatStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/CombatStateDto.cs
+@@ -11,6 +11,12 @@ public class CombatStateDto
+ {
++    /// <summary>
++    ///     Visible Surrounded facing and enemy sides, or null outside that mechanic.
++    ///     Built with the rest of this main-thread observation.
++    /// </summary>
++    public object? Positioning { get; set; }
++
+     // --- Combat metadata ---
+ 
+     /// <summary>
+     ///     The encounter ID for this combat (e.g. "jaw_worm", "hexaghost").
+     ///     Null if encounter information is unavailable.

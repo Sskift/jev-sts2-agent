@@ -451,6 +451,9 @@
             },
             "history_coverage": {
               "$ref": "#/$defs/text"
+            },
+            "positioning": {
+              "$ref": "#/$defs/positioning"
             }
           }
         }
@@ -629,6 +632,36 @@
     }
   },
   "$defs": {
+    "positioning": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source", "player_combat_id", "facing", "back_attack_multiplier", "intents_include_current_facing", "enemies", "targeting_rule", "death_rule", "preview_scope"],
+      "properties": {
+        "source": { "const": "native_visible_surrounded_state" },
+        "player_combat_id": { "type": "integer" },
+        "facing": { "enum": ["Left", "Right"] },
+        "back_attack_multiplier": { "const": 1.5 },
+        "intents_include_current_facing": { "const": true },
+        "enemies": { "type": "array", "items": {
+          "type": "object", "additionalProperties": false, "required": ["combat_id", "side", "attacking_from_behind"],
+          "properties": { "combat_id": { "type": "integer" }, "side": { "enum": ["Left", "Right", "None"] }, "attacking_from_behind": { "type": "boolean" } }
+        } },
+        "targeting_rule": { "$ref": "#/$defs/text" }, "death_rule": { "$ref": "#/$defs/text" }, "preview_scope": { "$ref": "#/$defs/text" }
+      }
+    },
+    "positioningProjection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["is_observed", "observed_facing", "facing_after_sequence", "current_intents_still_applicable", "enemies_after_sequence", "scope"],
+      "properties": {
+        "is_observed": { "const": false },
+        "observed_facing": { "enum": ["Left", "Right"] }, "facing_after_sequence": { "enum": ["Left", "Right"] },
+        "current_intents_still_applicable": { "type": "boolean" },
+        "enemies_after_sequence": { "type": "array", "items": {
+          "type": "object", "additionalProperties": false, "required": ["combat_id", "side", "attacking_from_behind", "facing_damage_multiplier"],
+          "properties": { "combat_id": { "type": "integer" }, "side": { "enum": ["Left", "Right", "None"] }, "attacking_from_behind": { "type": "boolean" }, "facing_damage_multiplier": { "enum": [1, 1.5] } }
+        } },
+        "scope": { "$ref": "#/$defs/text" }
+      }
+    },
     "turnProjection": {
       "type": "object", "additionalProperties": false,
       "required": ["calculation_status", "fully_simulated", "known_effects_only", "omitted_effects", "interpretation", "scope"],
@@ -639,8 +672,8 @@
           "type": "object", "additionalProperties": false,
           "required": ["block", "hp_if_ending", "hp_loss_if_ending", "block_including_end_turn_gains", "end_turn_block_gains", "incoming_attack", "enemies"],
           "properties": {
-            "block": { "type": "number" }, "hp_if_ending": { "type": "number" }, "hp_loss_if_ending": { "type": "number" },
-            "block_including_end_turn_gains": { "type": "number" }, "incoming_attack": { "type": "number" },
+            "block": { "type": "number" }, "hp_if_ending": { "type": ["number", "null"] }, "hp_loss_if_ending": { "type": ["number", "null"] },
+            "block_including_end_turn_gains": { "type": "number" }, "incoming_attack": { "type": ["number", "null"] },
             "end_turn_block_gains": { "type": "array", "items": {
               "type": "object", "required": ["source_id", "amount", "timing"],
               "properties": { "source_id": { "type": "string" }, "amount": { "type": "number", "minimum": 0 }, "timing": { "type": "string" } }
@@ -654,6 +687,7 @@
             } }
           }
         },
+        "positioning": { "$ref": "#/$defs/positioningProjection" },
         "omitted_effects": { "type": "array", "items": { "$ref": "#/$defs/text" } },
         "interpretation": { "$ref": "#/$defs/text" }, "scope": { "$ref": "#/$defs/text" }
       }

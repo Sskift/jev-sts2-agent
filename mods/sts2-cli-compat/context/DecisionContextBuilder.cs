@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Map;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Runs;
 using STS2.Cli.Mod.Models.State;
 using static STS2.Cli.Mod.Utils.TextUtils;
@@ -275,6 +276,35 @@ public static class DecisionContextBuilder
         return tips.Values.ToArray();
     }
 
+    private static object? Positioning(Player player, CombatState combat)
+    {
+        var surrounded = player.Creature.Powers.OfType<SurroundedPower>().FirstOrDefault();
+        if (surrounded == null) return null;
+        var facing = surrounded.Facing.ToString();
+        return new
+        {
+            source = "native_visible_surrounded_state",
+            player_combat_id = (int?)player.Creature.CombatId,
+            facing,
+            back_attack_multiplier = 1.5m,
+            intents_include_current_facing = true,
+            enemies = combat.Enemies.Where(e => e.CombatId.HasValue).Select(enemy =>
+            {
+                var side = enemy.HasPower<BackAttackLeftPower>() ? "Left"
+                    : enemy.HasPower<BackAttackRightPower>() ? "Right" : "None";
+                return new
+                {
+                    combat_id = (int)enemy.CombatId!.Value,
+                    side,
+                    attacking_from_behind = side != "None" && side != facing
+                };
+            }).ToArray(),
+            targeting_rule = "Before a player card or potion resolves, an explicit target with a Back Attack side turns the player toward that side. Targeting self or an enemy without a side does not turn; untargeted area effects do not turn.",
+            death_rule = "After an enemy dies without death prevention, automatically face the remaining hittable enemies if all are on the same side.",
+            preview_scope = "Displayed enemy intent damage already includes the CURRENT facing multiplier. Do not multiply it again. A planned change of facing invalidates those attack previews; read the next observed state for exact damage."
+        };
+    }
+
     public static object? Build(GameStateDto screen)
     {
         if (!RunManager.Instance.IsInProgress) return null;
@@ -287,6 +317,8 @@ public static class DecisionContextBuilder
         var player = run.Players[0];
         var pcs = player.PlayerCombatState;
         var combat = CombatManager.Instance.IsInProgress ? CombatManager.Instance.DebugOnlyGetState() : null;
+        if (combat != null && screen.Combat != null)
+            screen.Combat.Positioning = Read("combat.positioning", () => Positioning(player, combat));
         var playerDto = screen.Combat?.Player ?? Read("player", () => PlayerStateBuilder.Build(player));
         var deck = Cards(player.Deck.Cards, PileType.Deck);
         var deckUpgradePreviews = DeckUpgradePreviews(player.Deck.Cards, screen.Screen);

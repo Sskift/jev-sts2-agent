@@ -23,6 +23,7 @@ export function turnGuard(state) {
   return {
     energy: combat.player.energy, hp: combat.player.hp, powers: combat.player.powers,
     relics: combat.player.relics, orbs: combat.player.orbs,
+    positioning: combat.positioning,
     hand: combat.hand.map(card => ({ instance_id: cardInstance(card), cost: card.cost, description: card.description, can_play: card.can_play })),
     enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, hp: enemy.hp, is_alive: enemy.is_alive, intents: enemy.intents, powers: enemy.powers }))
   };
@@ -116,7 +117,7 @@ function changesRequiringReview(before, after, step, remaining) {
   const reasons = [];
   const cost = step?.kind === 'play_card' ? step.cost_at_dispatch < 0 ? before.energy : step.cost_at_dispatch : 0;
   if (after.energy !== before.energy - cost) reasons.push('Energy differs from the reserved printed cost; new actions may be possible.');
-  for (const field of ['hp', 'powers', 'relics', 'orbs']) if (!same(before[field], after[field])) reasons.push(`Player ${field} changed.`);
+  for (const field of ['hp', 'powers', 'relics', 'orbs', 'positioning']) if (!same(before[field], after[field])) reasons.push(`Player ${field} changed.`);
   const old = new Map(before.hand.map(card => [card.instance_id, card]));
   for (const card of after.hand) {
     const previous = old.get(card.instance_id);

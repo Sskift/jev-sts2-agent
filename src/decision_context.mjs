@@ -8,6 +8,7 @@ import { buildRuleReference } from './rule_reference.mjs';
 import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
 import { sameTurn, publicTurnPlan, turnGuard, advanceTurnPlan } from './turn_plan_state.mjs';
 import { potionEffectFacts } from './potion_effects.mjs';
+import { positioningError } from './combat_positioning.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -20,6 +21,10 @@ export function validateDecisionPacket(rawPacket) {
   const packet = expandRecordTables(rawPacket);
   if (!protocolCheck(packet)) throw new ContextError('Decision JSON does not match the versioned protocol', { errors: clone(protocolCheck.errors) });
   if (packet.in_combat !== Boolean(packet.combat)) throw new ContextError('in_combat contradicts combat data');
+  if (packet.combat) {
+    const issue = positioningError({ ...packet.combat, player: packet.player });
+    if (issue) throw new ContextError(issue);
+  }
   if (packet.resources?.potion_effects) {
     const resolveText = value => value?.text_ref ? packet.text_dictionary?.[value.text_ref] : value;
     const expected = (packet.player?.potions || []).map(potion => potionEffectFacts({ ...potion, description: resolveText(potion.description) })).filter(Boolean);
@@ -112,6 +117,8 @@ export function validateContext(state) {
   };
   for (const field of ['relics', 'potions', 'powers']) checkEffects(player[field], `player.${field}`);
   if (state.combat) {
+    const issue = positioningError(state.combat);
+    if (issue) throw new ContextError(issue);
     if (!context.combat_id) throw new ContextError('Missing combat identity');
     array(context.combat_history, 'combat_history');
     array(context.play_pile, 'play_pile');
@@ -467,6 +474,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     const incoming = combat.enemies.filter(e => e.is_alive).flatMap(e => e.intents).reduce((sum, i) => sum + (Number.isFinite(i.damage) ? i.damage * (i.hits || 1) : 0), 0);
     combat.visible_arithmetic = {
       incoming_attack_damage: incoming,
+      ...(combat.positioning ? { incoming_attack_facing: combat.positioning.facing, includes_current_back_attack_multiplier: true } : {}),
       current_block: context.player.block,
       attack_damage_after_current_block: Math.max(0, incoming - context.player.block),
       energy_remaining: context.player.energy,
