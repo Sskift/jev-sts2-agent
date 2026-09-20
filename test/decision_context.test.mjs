@@ -488,6 +488,25 @@ test('legacy map DTO cannot disclose an unrevealed extra boss through a future e
   assert.deepEqual(value.map.nodes.find(n => n.row === 1).children, []);
 });
 
+test('long combat timeline retains every event, sequence and round boundary', () => {
+  const context = packet(completeCombat());
+  const events = Array.from({ length: 360 }, (_, index) => ({
+    sequence: 70 + index, round: Math.floor(index / 20) + 1,
+    type: index % 2 ? 'EnergySpentEntry' : 'BlockGainedEntry',
+    side: 'Player', actor_id: 0, amount: index % 5
+  }));
+  context.combat.history = events;
+  const packed = compactContext(context);
+  assert.equal(packed.combat.history.encoding, 'event_timeline_v1');
+  assert.deepEqual(expandRecordTables(packed).combat.history, events);
+  validateDecisionPacket(packed);
+  context.combat.history[50].sequence++;
+  assert.notEqual(compactContext(context).combat.history.encoding, 'event_timeline_v1', 'Do not invent continuity across a gap');
+  const malformed = { ...packed.combat.history, rounds: [[1, 1]] };
+  assert.throws(() => expandRecordTables(malformed), /Malformed event timeline/);
+  assert.throws(() => expandRecordTables({ ...malformed, rounds: [[0, 1], [0, 2]] }), /Malformed event timeline/);
+});
+
 test('ally-targeted cards never add an implicit self target that the mod disallows', () => {
   const state = completeCombat();
   state.combat.hand[0].target_type = 'AnyAlly';

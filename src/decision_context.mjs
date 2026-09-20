@@ -619,6 +619,20 @@ function compactRecords(records, nested = true) {
 export function expandRecordTables(item) {
   if (!item || typeof item !== 'object') return item;
   if (Array.isArray(item)) return item.map(expandRecordTables);
+  if (item.encoding === 'event_timeline_v1') {
+    const events = expandRecordTables(item.events);
+    if (!Array.isArray(events) || !events.length || !Number.isInteger(item.sequence_start)
+      || !Array.isArray(item.rounds) || !item.rounds.length || !Array.isArray(item.rounds[0]) || item.rounds[0][0] !== 0
+      || item.rounds.some((entry, index) => !Array.isArray(entry) || entry.length !== 2
+        || !entry.every(Number.isInteger) || entry[0] < 0 || entry[0] >= events.length
+        || (index > 0 && entry[0] <= item.rounds[index - 1][0]))) throw new ContextError('Malformed event timeline');
+    let segment = 0;
+    return events.map((event, index) => {
+      if (!event || typeof event !== 'object' || Array.isArray(event) || 'sequence' in event || 'round' in event) throw new ContextError('Malformed event timeline event');
+      if (item.rounds[segment + 1]?.[0] === index) segment++;
+      return { sequence: item.sequence_start + index, round: item.rounds[segment][1], ...event };
+    });
+  }
   if (item.encoding === 'record_map_v1') {
     const records = expandRecordTables(item.records);
     if (!Array.isArray(item.keys) || !Array.isArray(records) || item.keys.length !== records.length
@@ -673,7 +687,22 @@ export function compactContext(context) {
     const packed = { encoding: 'record_map_v1', keys: Object.keys(cardStates), records: compactRecords(Object.values(cardStates)) };
     copy.memory.card_states = JSON.stringify(packed).length < JSON.stringify(cardStates).length ? packed : cardStates;
   }
-  if (copy.combat?.history?.length) copy.combat.history = compactRecords(copy.combat.history);
+  if (copy.combat?.history?.length) {
+    const history = copy.combat.history;
+    copy.combat.history = compactRecords(history);
+    // Native sequence numbers are consecutive. Store that exact progression
+    // once, and each round boundary once, retaining every event in order.
+    if (history.every((event, index) => Number.isInteger(event.sequence)
+      && event.sequence === history[0].sequence + index && Number.isInteger(event.round))) {
+      const rounds = [];
+      const events = history.map(({ sequence, round, ...event }, index) => {
+        if (!index || round !== history[index - 1].round) rounds.push([index, round]);
+        return event;
+      });
+      const timeline = { encoding: 'event_timeline_v1', sequence_start: history[0].sequence, rounds, events: compactRecords(events) };
+      if (JSON.stringify(timeline).length < JSON.stringify(copy.combat.history).length) copy.combat.history = timeline;
+    }
+  }
   for (const key of ['actions', 'observations', 'relic_updates']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
   for (const container of [copy.deck, copy.combat?.draw_pile]) if (container?.cards?.length) container.cards = compactRecords(container.cards);
   for (const key of ['hand', 'discard_pile', 'exhaust_pile', 'play_pile', 'enemies']) if (copy.combat?.[key]?.length) copy.combat[key] = compactRecords(copy.combat[key]);
