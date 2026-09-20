@@ -1263,7 +1263,7 @@ index de41515..baed13c 100644
                  Index = index,
                  Id = card.Id.Entry,
                  Name = StripGameTags(card.Title),
-@@ -52,12 +59,21 @@ public static class CardStateBuilder
+@@ -52,12 +59,24 @@ public static class CardStateBuilder
                  if (tag != CardTag.None)
                      state.Tags.Add(tag.ToString());
  
@@ -1272,7 +1272,11 @@ index de41515..baed13c 100644
 +                card.DynamicVars.TryGetValue("CalculatedDamage", out damageVar))
                  state.Damage = (int)damageVar.PreviewValue;
  
-             if (card.DynamicVars.TryGetValue("Block", out var blockVar))
+-            if (card.DynamicVars.TryGetValue("Block", out var blockVar))
++            // Read the native calculated preview too (e.g. Expect a Fight's Strength scaling).
++            // Generic Power amounts such as Rage's later-attack trigger are not Block previews.
++            if (card.DynamicVars.TryGetValue(BlockVar.defaultName, out var blockVar) ||
++                card.DynamicVars.TryGetValue(CalculatedBlockVar.defaultName, out blockVar))
                  state.Block = (int)blockVar.PreviewValue;
  
 +            // Rage applies its Power amount; it gains no immediate Block when played.
@@ -1286,7 +1290,7 @@ index de41515..baed13c 100644
              if (card.Enchantment is { } enchantment)
                  state.Enchantment = enchantment.Id.Entry;
  
-@@ -68,6 +84,7 @@ public static class CardStateBuilder
+@@ -68,6 +87,7 @@ public static class CardStateBuilder
          }
          catch (Exception ex)
          {
@@ -1294,7 +1298,7 @@ index de41515..baed13c 100644
              Logger.Error($"Failed to build card state: {ex.Message}");
              return null;
          }
-@@ -91,9 +108,10 @@ public static class CardStateBuilder
+@@ -91,9 +111,10 @@ public static class CardStateBuilder
              }
              catch (Exception ex2)
              {

@@ -1,4 +1,5 @@
 import { ContextError } from './decision_context.mjs';
+import { JEV_REQUEST_BUDGET } from './jev_client.mjs';
 
 const assessedCommands = new Set(['reward_choose_card', 'shop_buy_card', 'shop_buy_relic', 'shop_buy_potion', 'shop_remove_card']);
 const levels = [
@@ -27,7 +28,7 @@ export function prepareStrategyAssessment(prepared, options) {
     criteria: levels
   }]));
   const payload = { model: prepared.payload.model, state: prepared.payload.state, questions };
-  const body = JSON.stringify(payload), bytes = Buffer.byteLength(body), max = options.maxRequestBytes ?? 70000;
+  const body = JSON.stringify(payload), bytes = Buffer.byteLength(body), max = options.maxRequestBytes ?? JEV_REQUEST_BUDGET;
   if (bytes > max) throw new ContextError('Complete strategy context exceeds the configured request budget', { request_bytes: bytes, max_request_bytes: max });
   return { candidates: prepared.candidates, assessmentChoices, payload, body, metrics: { ...prepared.metrics, request_bytes: bytes, candidate_count: prepared.candidates.size, question_count: assessmentChoices.size, purpose: 'option_assessment' } };
 }

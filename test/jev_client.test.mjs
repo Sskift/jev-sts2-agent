@@ -26,11 +26,27 @@ test('OpenRouter native Decisions preserves structured state, batched questions 
       assert.equal(url, 'https://openrouter.ai/api/alpha/decisions');
       assert.equal(request.headers.Authorization, 'Bearer router-test');
       const sent = JSON.parse(request.body);
-      assert.deepEqual(sent, { ...payload, model: '~typesafe/jev-latest' });
+      assert.equal(typeof sent.state, 'string');
+      assert.deepEqual({ ...sent, state: JSON.parse(sent.state) }, { ...payload, model: '~typesafe/jev-latest' });
       assert.deepEqual(logged, sent);
       assert.equal(request.body.includes('router-test'), false);
       return { ok: true, json: async () => result };
     } }), result);
+});
+
+test('JSON text preserves Unicode, quotes, newlines and all nested facts; byte budget excludes HTTP escaping', async () => {
+  const payload = { model: 'jev-latest', state: { note: '牌 "A"\nsecond line', nested: [{ cost: 0, active: false, absent: null }] }, questions: {} };
+  const bytes = Buffer.byteLength(JSON.stringify(payload));
+  let metrics;
+  await requestJev(payload, { env: { TYPESAFE_API_KEY: 'offline' }, metrics: { max_request_bytes: bytes },
+    onRequest: (_payload, m) => { metrics = m; }, fetchImpl: async (_url, request) => {
+      const sent = JSON.parse(request.body);
+      assert.deepEqual(JSON.parse(sent.state), payload.state);
+      assert.equal(metrics.content_bytes, bytes);
+      assert.ok(metrics.request_bytes > metrics.content_bytes);
+      return { ok: true, json: async () => ({}) };
+    } });
+  assert.equal(metrics.state_encoding, 'compact_json_text');
 });
 
 test('provider failures stop without fallback or exposing response secrets', async () => {

@@ -1,3 +1,4 @@
+import { parseJevRequest } from './fixtures/jev.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -7,6 +8,7 @@ import { DecisionMemory, expandRecordTables } from '../src/decision_context.mjs'
 import { makeModDecisionWithJev, prepareModDecision, buildModCandidates } from '../src/mod_decision.mjs';
 import { planStep, inspectTurnPlan, turnFingerprint, resolvePlanStep, plannedUpgradeSelection } from '../src/turn_plan_state.mjs';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
+import { refineTurnPlan } from '../src/turn_plan_refinement.mjs';
 
 const card = (id, instance, index, extra = {}) => fixtureCard(id, {
   index, can_play: true, target_type: 'AnyEnemy', target_previews: [{ target_id: 42, damage: 6 }],
@@ -33,24 +35,51 @@ function savedPlan(state, ids) {
 }
 function fakeJev(answers, seen = []) {
   return async (_url, request) => {
-    const body = JSON.parse(request.body), selected = answers.shift(); seen.push(body);
-    assert.ok(selected, 'Unexpected extra Jev decision');
+    const body = parseJevRequest(request.body); seen.push(body);
     if (!body.questions.next_action) {
-      assert.equal(selected, 'keep');
       return { ok: true, json: async () => ({ model: 'jev-test', usage: { input_tokens: 100 },
         answers: Object.fromEntries(Object.keys(body.questions).map(id => [id, { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 1 }, confidence: 1 }])) }) };
     }
+    const selected = answers.shift();
+    assert.ok(selected, 'Unexpected extra Jev decision');
     assert.ok(Object.hasOwn(body.questions.next_action.criteria, selected), `Missing choice ${selected}`);
     return { ok: true, json: async () => ({ model: 'jev-test', usage: { input_tokens: 100 }, answers: { next_action: { type: 'choice', choice: selected, probabilities: { [selected]: 1 }, confidence: 1 } } }) };
   };
 }
 const noModel = () => { throw new Error('A valid turn plan must execute without another independent card choice'); };
 
+test('complete-plan comparison can replace two separated defenses with one stronger card while preserving free attacks', async () => {
+  const state = stateWith([
+    card('EXPECT_A_FIGHT', 'strong', 0, { name: 'Expect a Fight', cost: 3, type: 'Skill', target_type: 'Self', description: 'Gain 25 Block. Gains 5 additional Block for each Strength you have.', block: 25 }),
+    card('DEFEND_IRONCLAD', 'd1', 1, { name: 'Defend', cost: 1, type: 'Skill', target_type: 'Self', description: 'Gain 5 Block.', block: 5 }),
+    card('ANGER', 'a1', 2, { name: 'Anger', cost: 0 }),
+    card('DEFEND_IRONCLAD', 'd2', 3, { name: 'Defend', cost: 1, type: 'Skill', target_type: 'Self', description: 'Gain 5 Block.', block: 5 }),
+    card('STRIKE_IRONCLAD', 'a2', 4, { name: 'Strike', cost: 0 })
+  ]);
+  const plan = savedPlan(state, ['card_1', 'card_2_target_42', 'card_3', 'card_4_target_42', 'end_turn']);
+  plan.end_policy = 'end_after_steps_unless_conditions_change'; plan.budget = {};
+  const prepared = prepareModDecision(state), original = structuredClone(state);
+  let offered = false;
+  const isTarget = option => {
+    const actions = option.label.ordered_sequence.map(step => step.action);
+    return actions.length === 3 && actions.includes('Expect a Fight') && actions.includes('Anger') && actions.includes('Strike');
+  };
+  await refineTurnPlan(state, plan, prepared, noModel, async pairs => pairs.map(pair => {
+    const target = pair.find(isTarget);
+    if (target) { offered = true; assert.equal(target.label.energy_spent, 3); assert.equal(target.label.conditional_preview.block, 25); }
+    return (target || pair[0]).value;
+  }));
+  assert.ok(offered, 'The model must see the consolidated alternative even though a one-card replacement is unaffordable');
+  assert.equal(plan.steps.filter(step => step.kind === 'play_card').length, 3);
+  assert.deepEqual(plan.steps.filter(step => ['a1', 'a2'].includes(step.card_instance_id)).map(step => step.card_instance_id), ['a1', 'a2']);
+  assert.deepEqual(state, original);
+});
+
 test('constructs an objective, ordered preparation and payoff before dispatch, with complete state in every question', async () => {
   const arm = card('ARMAMENTS', 'arm', 0, { name: 'Armaments', type: 'Skill', target_type: 'Self', description: 'Gain 5 Block. Upgrade a card in your Hand.', block: 5 });
   const payoff = card('BASH', 'attack', 1, { name: 'Bash', cost: 2 });
   const state = stateWith([arm, payoff]), memory = new DecisionMemory(); memory.observe(state);
-  const seen = [], answers = ['damage', 'card_1_target_42', 'card_0', 'manual', 'keep'];
+  const seen = [], answers = ['damage', 'card_1_target_42', 'card_0', 'manual'];
   const result = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl: fakeJev(answers, seen) });
   assert.equal(result.request.id, 'ARMAMENTS');
   assert.deepEqual(result.turn_plan.steps.map(step => [step.kind, step.card_instance_id]), [['play_card', 'arm'], ['play_card', 'attack'], ['end_turn', undefined]]);
@@ -114,7 +143,7 @@ test('independent two-plan judgments share full state and a missing result commi
     const ordinary = ['damage', 'card_1_target_42', 'card_0', 'manual', 'none', 'end_turn'];
     let sawMultiple = false, compared = 0;
     const fetchImpl = async (_url, request) => {
-      const body = JSON.parse(request.body);
+      const body = parseJevRequest(request.body);
       let answers;
       if (body.questions.next_action) {
         const selected = ordinary.shift();
@@ -198,7 +227,7 @@ test('draw results invalidate the suffix while retaining the objective and confi
   memory.finish({ ok: true }, after); memory.observe(after);
   assert.match(memory.data.turn_plan.review_reasons.join(' '), /new or returned card/);
   const seen = [];
-  const next = await makeModDecisionWithJev(after, { memory, apiKey: 'offline', fetchImpl: fakeJev(['revise_remaining', 'card_1_target_42', 'none', 'card_0_target_42', 'keep'], seen) });
+  const next = await makeModDecisionWithJev(after, { memory, apiKey: 'offline', fetchImpl: fakeJev(['revise_remaining', 'card_1_target_42', 'none', 'card_0_target_42'], seen) });
   assert.equal(next.turn_plan.objective.id, 'damage');
   assert.equal(next.turn_plan.revision, 1);
   assert.equal(next.turn_plan.completed_actions[0].request.id, 'BATTLE_TRANCE');

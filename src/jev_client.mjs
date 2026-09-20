@@ -6,6 +6,9 @@ const PROVIDERS = {
   openrouter: { url: 'https://openrouter.ai/api/alpha/decisions', key: 'OPENROUTER_API_KEY', model: 'typesafe/jev-1.13' }
 };
 
+// Content budget before HTTP JSON escaping, not a tokenizer or provider limit.
+export const JEV_REQUEST_BUDGET = 90000;
+
 function localEnv() {
   const file = path.join(process.cwd(), '.env');
   const values = {};
@@ -37,10 +40,17 @@ export function getJevModel(options = {}) { return getJevConfig(options).model; 
 export async function requestJev(payload, options = {}) {
   const config = getJevConfig({ ...options, model: payload.model || options.model });
   if (!config.apiKey) throw new Error(`${config.keyName} not found`);
-  const wirePayload = { ...payload, model: config.model };
+  const logicalPayload = { ...payload, model: config.model };
+  const contentBytes = Buffer.byteLength(JSON.stringify(logicalPayload));
+  // The native API accepts state as a string. Explicit compact JSON used fewer
+  // input tokens in measured requests, without removing or summarizing facts.
+  const encodeState = options.stateEncoding !== 'object' && payload.state && typeof payload.state === 'object';
+  const wirePayload = { ...logicalPayload, state: encodeState ? JSON.stringify(payload.state) : payload.state };
   const body = JSON.stringify(wirePayload);
-  const metrics = options.metrics ? { ...options.metrics, request_bytes: Buffer.byteLength(body) } : undefined;
-  if (metrics && metrics.request_bytes > metrics.max_request_bytes) throw new Error('Complete context exceeds the configured request budget');
+  const metrics = options.metrics ? { ...options.metrics, content_bytes: contentBytes, request_bytes: Buffer.byteLength(body),
+    state_encoding: encodeState ? 'compact_json_text' : typeof payload.state === 'string' ? 'text' : 'object',
+    byte_budget_scope: 'Logical request before HTTP string escaping; the provider independently enforces token limits.' } : undefined;
+  if (metrics && contentBytes > metrics.max_request_bytes) throw new Error('Complete context exceeds the configured request budget');
   options.onRequest?.(wirePayload, metrics);
   const response = await (options.fetchImpl || globalThis.fetch)(config.url, {
     method: 'POST', headers: { Authorization: `Bearer ${config.apiKey}`, 'Content-Type': 'application/json' },

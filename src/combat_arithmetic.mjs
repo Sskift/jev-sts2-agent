@@ -56,6 +56,16 @@ export function attackHpLoss(card, enemy) {
   return { damage, hp_loss: hpLoss, hits: limit, limits: [...limits], block_after: remaining.block, powers_after: remaining.powers };
 }
 
+export function immediateBlockPreview(card) {
+  if (!card || card.id === 'RAGE' || card.type === 'Power') return { amount: 0, source: 'no_immediate_block' };
+  if (Number.isFinite(card.block)) return { amount: Math.max(0, card.block), source: 'native_preview' };
+  // Only a complete, unconditional FIRST sentence in the resolved live text.
+  // Do not parse future triggers, per-card multipliers, or static Wiki values.
+  const literal = card.description?.trim().match(/^Gain (\d+(?:\.\d+)?) Block\.(?:\s|$)/);
+  if (literal) return { amount: Number(literal[1]), source: 'resolved_live_first_sentence' };
+  return { amount: /\bBlock\b/.test(card.description || '') ? null : 0, source: 'no_native_preview' };
+}
+
 export function combatForecast(combat, card = null, target = null) {
   const hit = target && card ? attackHpLoss(card, target) : null;
   const targetDepleted = hit && hit.hp_loss >= target.hp;
@@ -72,7 +82,8 @@ export function combatForecast(combat, card = null, target = null) {
   const allTargetsDepleted = living.length > 0 && living.every(enemy => depleted.has(enemy.combat_id));
   const endTurnHandDamage = allTargetsDepleted ? 0 : remainingHand.filter(other => other.id === 'TOXIC').reduce((sum, other) => sum + Math.max(0, other.damage || 0), 0);
   const selfHpLoss = Math.max(0, card?.hp_loss || 0);
-  const immediateBlock = card?.id === 'RAGE' || card?.type === 'Power' ? 0 : Math.max(0, card?.block || 0) * (exhausted ? exhausted.length : 1);
+  const blockPreview = immediateBlockPreview(card);
+  const immediateBlock = (blockPreview.amount ?? 0) * (exhausted ? exhausted.length : 1);
   // The active power grants unpowered Block once per Attack card, not per hit.
   // Dexterity/Frail do not modify this amount. Other block hooks remain outside
   // this limited estimate, as with printed Block above.
@@ -95,11 +106,12 @@ export function combatForecast(combat, card = null, target = null) {
     ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss, hp_remaining_after_declared_loss: combat.player.hp - selfHpLoss, fatal_from_declared_hp_loss: selfHpLoss >= combat.player.hp } : {}),
     ...(endTurnHandDamage ? { end_turn_hand_damage: endTurnHandDamage } : {}),
     block_after_card: block,
+    ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
     displayed_attacks_after_target_depletion: incoming,
     hp_loss_if_end_turn: instantDeath ? combat.player.hp : loss,
     hp_remaining_if_end_turn: instantDeath ? 0 : combat.player.hp - loss,
-    fatal_if_end_turn: instantDeath || loss >= combat.player.hp,
+    fatal_if_end_turn: instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null ? null : loss >= combat.player.hp,
     ...(exhausted ? { exhausted_hand_cards: exhausted.map(c => ({ index: c.index, id: c.id, type: c.type })), immediate_block_gain: immediateBlock } : {}),
     ...(deathTimers.length ? { death_timers: deathTimers, instant_death_if_end_turn: instantDeath } : {}),
     ...(followup?.hand_indices.length ? { followup_attacks: followup } : {}),

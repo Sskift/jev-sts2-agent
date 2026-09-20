@@ -1,9 +1,10 @@
+import { parseJevRequest } from './fixtures/jev.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { buildDecisionContext, DecisionMemory, groupCards, routeFacts, deduplicateText, compactContext, compactDecisionRequest, validateDecisionPacket, expandRecordTables } from '../src/decision_context.mjs';
+import { buildDecisionContext, DecisionMemory, groupCards, routeFacts, deduplicateText, compactContext, compactDecisionRequest, compactPlanningRequest, validateDecisionPacket, expandRecordTables } from '../src/decision_context.mjs';
 import { buildModCandidates, prepareModDecision, makeModDecisionWithJev } from '../src/mod_decision.mjs';
 import { actionFingerprint, runModLoop } from '../src/mod_loop.mjs';
 import { completeCombat, withContext, fixtureCard } from './fixtures/context.mjs';
@@ -339,11 +340,31 @@ test('modal request packing preserves every copy, rule, map edge and criterion a
   assert.match(prepared.payload.questions.next_action.instructions, /top of the Draw Pile is not in hand/);
 });
 
+test('planning shares existing rule references without altering encoded state or question instructions', () => {
+  const rule = 'Deal 9 damage. Draw 1 card from the unknown draw order.';
+  const added = 'A proposed sequence is not an observed game result. '.repeat(4);
+  const original = { model: 'jev-latest', state: { text_dictionary: { t1: 'Existing text', t7: rule },
+    encoded: { encoding: 'record_table_v1', layouts: [['description']], rows: [[0, { text_ref: 't7' }]] },
+    turn_planning: { proposed_steps: [{ name: 'Card A', rules: rule, note: added }, { name: 'Card B', rules: rule, note: added }] } },
+    questions: { a: { type: 'choice', instructions: added, criteria: { one: rule, two: added } },
+      b: { type: 'choice', instructions: added, criteria: { one: added, two: rule } } } };
+  const saved = structuredClone(original), packed = compactPlanningRequest(original);
+  assert.deepEqual(original, saved);
+  assert.deepEqual(packed.state.encoded, original.state.encoded);
+  assert.equal(packed.state.text_dictionary.t7, rule);
+  for (const question of Object.values(packed.questions)) assert.equal(question.instructions, added);
+  const expand = item => item?.text_ref ? packed.state.text_dictionary[item.text_ref] : Array.isArray(item) ? item.map(expand)
+    : item && typeof item === 'object' ? Object.fromEntries(Object.entries(item).map(([k, v]) => [k, expand(v)])) : item;
+  assert.deepEqual(expand(expandRecordTables(packed.state.turn_planning)), original.state.turn_planning);
+  assert.deepEqual(expand(packed.questions), original.questions);
+  assert.ok(JSON.stringify(packed).length < JSON.stringify(original).length);
+});
+
 test('every independent atomic action request contains the full JSON context and exactly the offered action IDs', async () => {
   const state = completeCombat(), memory = new DecisionMemory(); memory.observe(state);
   const requests = [];
   const fetchImpl = async (_url, options) => {
-    const request = JSON.parse(options.body); requests.push(request);
+    const request = parseJevRequest(options.body); requests.push(request);
     assert.equal(request.state.schema_version, 'sts2.decision.v1');
     assert.deepEqual(Object.keys(request.questions.next_action.criteria), request.state.legal_actions.map(a => a.action_id));
     return { ok: true, json: async () => ({ model: 'offline', usage: { input_tokens: 2400 }, answers: { next_action: { type: 'choice', choice: 'end_turn' } } }) };

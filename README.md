@@ -45,6 +45,8 @@ OPENROUTER_API_KEY=在本地填写
 
 OpenRouter 使用原生 `https://openrouter.ai/api/alpha/decisions`，保留 `state/questions/answers`、多问题批处理和概率分布。两种接入共用回合计划和上下文管线；不会在失败时自动更换模型或计费账号。`JEV_MODEL=jev-latest` 会在 OpenRouter 映射为 `~typesafe/jev-latest`。接口依据 [OpenRouter 官方 SDK](https://github.com/OpenRouterTeam/typescript-sdk/blob/main/src/funcs/alphaDecisionsCreate.ts)。
 
+完整 JSON 状态会以紧凑 JSON 文本放入 `state`，避免接入方的对象序列化扩大模型输入；所有字段及问题保持提供。请求日志里的字符串状态可用 `JSON.parse(payload.state)` 还原，详见[上下文与容量实测](docs/decision-context.md)。
+
 仅在使用视觉后备时需要 Claude 配置：从 `%USERPROFILE%/.claude/settings.json` 的 env 读取地址和凭据，支持 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN` 或 `ANTHROPIC_API_KEY` 覆盖，模型固定 `claude-opus-5`。带模型请求的项目启动命令使用 `--use-system-ca` 保持 TLS 校验；凭据不写入日志或提交仓库。
 
 ## 启动与检查

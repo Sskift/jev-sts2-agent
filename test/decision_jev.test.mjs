@@ -1,3 +1,4 @@
+import { parseJevRequest } from './fixtures/jev.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { makeDecisionWithJev } from '../src/decision_jev.mjs';
@@ -10,7 +11,7 @@ function combat(overrides = {}) {
 }
 function choose(choice, inspect = () => {}) {
   return { apiKey: 'offline-test', fetchImpl: async (_url, request) => {
-    const payload = JSON.parse(request.body);
+    const payload = parseJevRequest(request.body);
     inspect(payload);
     return { ok: true, json: async () => ({ model: 'test-model', answers: { next_action: { type: 'choice', choice, probabilities: { [choice]: 1 }, confidence: 0.01 } }, usage: { input_tokens: 1, output_tokens: 1 } }) };
   }};

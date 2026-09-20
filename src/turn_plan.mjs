@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { validateDecisionPacket, ContextError } from './decision_context.mjs';
+import { validateDecisionPacket, ContextError, compactPlanningRequest } from './decision_context.mjs';
 import { sameTurn, planStep, resolvePlanStep, inspectTurnPlan, turnFingerprint, cardInstance } from './turn_plan_state.mjs';
 import { projectTurnPrefix, reserveSequence } from './turn_projection.mjs';
 import { turnStrategyInstructions } from './decision_instructions.mjs';
@@ -65,11 +65,7 @@ export async function decideTurn(state, options, prepared, choose) {
     objective: plan?.objective,
     proposed_steps: plan?.steps.map(step => ({ kind: step.kind, role: step.role, name: step.name, rules: step.rules_at_planning, cost: step.cost_at_planning, target: step.target })),
     retained_cards: plan?.retained_cards.map(step => ({ name: step.name, rules: step.rules_at_planning, hand_index: state.combat.hand.find(card => cardInstance(card) === step.card_instance_id)?.index })),
-    observed_turn_situation: {
-      hp: state.combat.player.hp, block: state.combat.player.block, energy: state.combat.player.energy,
-      enemies: state.combat.enemies.filter(enemy => enemy.is_alive).map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, intents: enemy.intents })),
-      hand: state.combat.hand.map(card => ({ index: card.index, name: card.name, cost: card.cost, rules: card.description, ...(card.upgrade_preview ? { upgrade_preview: card.upgrade_preview } : {}) }))
-    },
+    observed_turn_situation: 'Use player for current HP, Block, energy and powers; combat.hand for every current card and upgrade preview; combat.enemies for current targets, HP, Block, powers and intents. These complete records are shared by every question and may use record tables.',
     conditional_projection: projectTurnPrefix(state, plan?.steps || []),
     energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: plan?.budget ? reserveSequence(state, plan.steps)?.energy_left ?? energy : energy,
       scope: 'Current printed costs, plus the verified Stomp discount of 1 for each earlier planned Attack; X spends the remainder. Draws, new energy, other discounts, triggers and automatic plays are unconfirmed; execution must reobserve them.' },
@@ -78,8 +74,8 @@ export async function decideTurn(state, options, prepared, choose) {
   async function ask(stage, instructions, choices, extra = {}) {
     const candidates = new Map(Object.entries(choices).map(([id, value]) => [id, { action: 'plan_turn', request: null, planning_value: value.value, description: typeof value.label === 'string' ? value.label : JSON.stringify(value.label) }]));
     if (!candidates.size || candidates.size > 255) throw new ContextError('Invalid turn-planning candidate count');
-    const payload = { model: prepared.payload.model, state: { ...prepared.payload.state, turn_planning: planningState(extra) },
-      questions: { next_action: { type: 'choice', instructions: `${instructions} ${['objective', 'payoff', 'review'].includes(stage) ? turnStrategyInstructions(state) : ''} ${references}`, criteria: Object.fromEntries(Object.entries(choices).map(([id, value]) => [id, value.label])) } } };
+    const payload = compactPlanningRequest({ model: prepared.payload.model, state: { ...prepared.payload.state, turn_planning: planningState(extra) },
+      questions: { next_action: { type: 'choice', instructions: `${instructions} ${['objective', 'payoff', 'review'].includes(stage) ? turnStrategyInstructions(state) : ''} ${references}`, criteria: Object.fromEntries(Object.entries(choices).map(([id, value]) => [id, value.label])) } } });
     validateDecisionPacket(payload.state);
     const body = JSON.stringify(payload), bytes = Buffer.byteLength(body);
     if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete turn-planning context exceeds the request budget; no game action sent', { request_bytes: bytes });
@@ -97,7 +93,7 @@ export async function decideTurn(state, options, prepared, choose) {
     validateDecisionPacket(comparisonState);
     const winners = [];
     let batch = [];
-    const payloadFor = items => ({ model: prepared.payload.model, state: comparisonState,
+    const payloadFor = items => compactPlanningRequest({ model: prepared.payload.model, state: comparisonState,
       questions: Object.fromEntries(items.map((pair, index) => [`comparison_${index}`, {
         type: 'choice', instructions: `${instructions} ${references}`,
         criteria: { plan_a: pair[0].label, plan_b: pair[1].label }
@@ -137,12 +133,12 @@ export async function decideTurn(state, options, prepared, choose) {
       // Phase handoff deserves an actual-state check: a conditional prefix may
       // underestimate a free draw or leave useful resources. This is once at
       // the proposed end, not a new independent choice after every card.
-      const payload = { ...prepared.payload, state: { ...prepared.payload.state,
+      const payload = compactPlanningRequest({ ...prepared.payload, state: { ...prepared.payload.state,
         turn_planning: planningState({ phase_scope: 'The planned prefix has been executed and confirmed. Review the ACTUAL current state before ending the player turn.', objective: selectedPlan.objective,
           proposed_steps: [], conditional_projection: projectTurnPrefix(state, []),
           energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy, scope: 'Actual remaining resources before the end-turn handoff.' } }) },
         questions: { next_action: { ...prepared.payload.questions.next_action,
-          instructions: `The prior planned prefix is complete. Before ending this player turn, check the actual remaining hand, energy, potions and threats. Preserve turn_planning.objective. If a useful continuation exists, select its next action and retain the objective; otherwise choose end_turn. A free draw can reveal playable cards even after planned attacks. ${prepared.payload.questions.next_action.instructions}` } } };
+          instructions: `The prior planned prefix is complete. Before ending this player turn, check the actual remaining hand, energy, potions and threats. Preserve turn_planning.objective. If a useful continuation exists, select its next action and retain the objective; otherwise choose end_turn. A free draw can reveal playable cards even after planned attacks. ${prepared.payload.questions.next_action.instructions}` } } });
       validateDecisionPacket(payload.state);
       const body = JSON.stringify(payload), bytes = Buffer.byteLength(body);
       if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete end-turn checkpoint exceeds the request budget; no action sent');

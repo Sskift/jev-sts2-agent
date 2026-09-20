@@ -533,18 +533,21 @@ function aliasInstanceIds(context) {
 
 // Losslessly intern repeated long rule text only when necessary. The dictionary
 // is in this very request, never an assumed server-side cache or previous call.
-export function deduplicateText(value) {
+export function deduplicateText(value, { dictionary = {} } = {}) {
   const counts = new Map();
-  const eligible = field => !/(^|_)ids?$/.test(field) && !['schema_version', 'screen', 'cmd', 'encoding', 'type'].includes(field);
+  const eligible = field => !/(^|_)ids?$/.test(field) && !['schema_version', 'screen', 'cmd', 'encoding', 'type', 'instructions'].includes(field);
   const visit = (item, field = '') => {
     if (typeof item === 'string' && eligible(field) && Buffer.byteLength(item) >= 24) counts.set(item, (counts.get(item) || 0) + 1);
     else if (Array.isArray(item)) item.forEach(v => visit(v, field));
     else if (item && typeof item === 'object') Object.entries(item).forEach(([key, v]) => visit(v, key));
   };
   visit(value);
-  const ids = new Map();
+  const ids = new Map(Object.entries(dictionary).map(([id, text]) => [text, id]));
+  let nextId = 1;
   for (const [text, count] of counts) {
-    const id = `t${ids.size + 1}`, bytes = Buffer.byteLength(JSON.stringify(text));
+    if (ids.has(text)) continue;
+    while (Object.hasOwn(dictionary, `t${nextId}`) || [...ids.values()].includes(`t${nextId}`)) nextId++;
+    const id = `t${nextId}`, bytes = Buffer.byteLength(JSON.stringify(text));
     const referenceBytes = Buffer.byteLength(JSON.stringify({ text_ref: id }));
     if (count * bytes > count * referenceBytes + bytes + id.length + 32) ids.set(text, id);
   }
@@ -703,7 +706,7 @@ export function compactContext(context, { deduplicate = true } = {}) {
       if (JSON.stringify(timeline).length < JSON.stringify(copy.combat.history).length) copy.combat.history = timeline;
     }
   }
-  for (const key of ['actions', 'observations', 'relic_updates']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
+  for (const key of ['actions', 'observations', 'relic_updates', 'travel_history']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
   for (const container of [copy.deck, copy.combat?.draw_pile]) if (container?.cards?.length) container.cards = compactRecords(container.cards);
   for (const key of ['hand', 'discard_pile', 'exhaust_pile', 'play_pile', 'enemies']) if (copy.combat?.[key]?.length) copy.combat[key] = compactRecords(copy.combat[key]);
   if (copy.legal_actions?.length) copy.legal_actions = compactRecords(copy.legal_actions);
@@ -728,5 +731,14 @@ export function compactContext(context, { deduplicate = true } = {}) {
 export function compactDecisionRequest(payload) {
   const { state, questions, text_dictionary } = deduplicateText({ state: payload.state, questions: payload.questions });
   const packed = { ...payload, state: compactContext({ ...state, text_dictionary }, { deduplicate: false }), questions };
+  return Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(payload)) ? packed : payload;
+}
+
+/** Pack newly added planning facts without reinterpreting encoded table cells. */
+export function compactPlanningRequest(payload) {
+  const extra = deduplicateText({ planning: payload.state.turn_planning, questions: payload.questions }, { dictionary: payload.state.text_dictionary });
+  const planning = extra.planning;
+  for (const field of ['proposed_steps', 'retained_cards']) if (planning?.[field]?.length) planning[field] = compactRecords(planning[field]);
+  const packed = { ...payload, state: { ...payload.state, turn_planning: planning, text_dictionary: extra.text_dictionary }, questions: extra.questions };
   return Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(payload)) ? packed : payload;
 }

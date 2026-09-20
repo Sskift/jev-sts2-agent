@@ -1,5 +1,5 @@
 import { decisionInstructions } from "./decision_instructions.mjs";
-import { getJevModel, requestJev } from './jev_client.mjs';
+import { getJevModel, requestJev, JEV_REQUEST_BUDGET } from './jev_client.mjs';
 import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactDecisionRequest, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
 import { combatForecast, firstHitHpLoss, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
@@ -228,7 +228,10 @@ export function buildModCandidates(state) {
       const target = state.combat.enemies.find(e => e.combat_id === action.target_combat_id);
       const estimate = combatForecast(state.combat, card, target);
       action.combat_estimate = estimate;
-      action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn}${estimate.fatal_if_end_turn ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
+      const unknownBlock = estimate.block_preview?.amount === null;
+      action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn}${estimate.fatal_if_end_turn && !unknownBlock ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
+      if (unknownBlock) action.description += ' Block contribution is UNKNOWN, not zero: this HP number omits that effect and cannot establish fatality. Evaluate the complete live rule.';
+      else if (estimate.block_preview) action.description += ` Immediate Block ${estimate.block_preview.amount} from the resolved live first sentence; its native numeric preview is absent.`;
       if (estimate.active_rage_block_gain) action.description += ` Active Rage adds ${estimate.active_rage_block_gain} Block for playing this Attack (once per card, already included in the estimate).`;
       if (card?.cost < 0 && !card.attack_preview) action.description += ' X-cost: per-hit damage does not guarantee a hit. Without a known hit count this estimate assumes no attack repetitions; use current energy, card rules and modifiers.';
       if (estimate.declared_self_hp_loss) action.description += ` Printed self HP loss ${estimate.declared_self_hp_loss}; HP after that loss ${estimate.hp_remaining_after_declared_loss}${estimate.fatal_from_declared_hp_loss ? ' (LETHAL SELF-LOSS before waiting for enemies)' : ''}. Check any loss-prevention effects.`;
@@ -304,6 +307,7 @@ export function prepareModDecision(gameState, options = {}) {
           ...(estimate ? { limited_calculation: {
             energy_left: estimate.energy_after_printed_cost,
             block: estimate.block_after_card,
+            ...(estimate.block_preview ? { block_preview: estimate.block_preview } : {}),
             ...(estimate.attack_hp_loss !== undefined ? { target_hp_loss: estimate.attack_hp_loss } : {}),
             ...(estimate.attack_hp_loss_by_target ? { hp_loss_by_target: estimate.attack_hp_loss_by_target } : {}),
             end_now_hp: estimate.hp_remaining_if_end_turn,
@@ -315,7 +319,7 @@ export function prepareModDecision(gameState, options = {}) {
     } }
   };
   const originalBytes = Buffer.byteLength(JSON.stringify(payload));
-  const maxBytes = options.maxRequestBytes ?? 70000;
+  const maxBytes = options.maxRequestBytes ?? JEV_REQUEST_BUDGET;
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw new ContextError('Invalid Jev request byte budget');
   const shouldPack = originalBytes > Math.min(maxBytes, 30000);
   if (shouldPack) payload = compactDecisionRequest(payload);
@@ -323,8 +327,9 @@ export function prepareModDecision(gameState, options = {}) {
   const body = JSON.stringify(payload), requestBytes = Buffer.byteLength(body);
   const metrics = { request_bytes: requestBytes, original_bytes: originalBytes, max_request_bytes: maxBytes, compression: shouldPack ? 'lossless_records_and_text' : 'none', candidate_count: candidates.size };
   // Byte length is only a local size guard, not the provider's token limit.
-  // A live 66,970-byte request used 32,114 input tokens. The provider still
-  // enforces its context limit, and any HTTP rejection stops before game input.
+  // Compact JSON state text is sent without provider-side object formatting.
+  // This budget excludes HTTP escaping and still is not a token guarantee;
+  // any provider rejection stops before game input.
   if (requestBytes > maxBytes) throw new ContextError('Complete context exceeds the configured request budget; no facts were truncated and no model/action request was sent.', metrics);
   return { candidates, payload, body, metrics, skippedCardRewards, ...(selectionPlan ? { selectionPlan, selectionProgress: stage.progress } : {}) };
 }

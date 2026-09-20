@@ -1,3 +1,4 @@
+import { parseJevRequest } from './fixtures/jev.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { makeModDecisionWithJev } from '../src/mod_decision.mjs';
@@ -13,7 +14,7 @@ const scores = { option_0: { type: 'score', score: 2.4, confidence: 0.7 }, optio
 test('incremental option judgments share complete state and leave every final action selectable', async () => {
   const requests = [];
   const decision = await makeModDecisionWithJev(shop(), { apiKey: 'offline', fetchImpl: async (_url, request) => {
-    const payload = JSON.parse(request.body); requests.push(payload);
+    const payload = parseJevRequest(request.body); requests.push(payload);
     assert.equal(payload.state.player.hp, 70);
     assert.equal(payload.state.deck.count, 1);
     assert.ok(payload.state.map.nodes.length);
@@ -52,7 +53,7 @@ test('one offered card still gets a real assessment and a high score never force
   let calls = 0;
   const result = await makeModDecisionWithJev(state, { apiKey: 'offline', fetchImpl: async (_url, request) => {
     calls++;
-    const payload = JSON.parse(request.body);
+    const payload = parseJevRequest(request.body);
     if (!payload.questions.next_action) return reply({ option_0: { type: 'score', score: 3 } });
     assert.ok(payload.questions.next_action.criteria.proceed);
     return reply({ next_action: { type: 'choice', choice: 'proceed' } });

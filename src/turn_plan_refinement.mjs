@@ -76,6 +76,34 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
         if (add(replaced) && reserveSequence(state, replaced).energy_left > originalEnergy) releasedEnergyPlans.push(replaced);
       }
     }
+    // A single stronger play may replace TWO existing plays. One-to-one
+    // substitutions cannot express this when the new card costs more than
+    // either old card but fits after both are removed. Preserve the order of
+    // all remaining actions, and compare both original placement positions.
+    let consolidatedAdded = 0;
+    consolidated: for (const candidate of prepared.candidates.values()) {
+      if (!['play_card', 'use_potion'].includes(candidate.request.cmd)) continue;
+      const newStep = planStep(state, candidate);
+      // This neighborhood adds an unused resource. Recreating an existing
+      // preparation would erase its already selected beneficiary/dependency.
+      if (prefix.some(step => newStep.kind === 'play_card'
+        ? step.card_instance_id === newStep.card_instance_id
+        : step.kind === 'use_potion' && step.slot === newStep.slot)) continue;
+      for (let first = 0; first + 1 < prefix.length; first++) {
+        for (let second = first + 1; second < prefix.length; second++) {
+          for (const position of new Set([first, second - 1])) {
+            const remaining = structuredClone(prefix.filter((_, index) => index !== first && index !== second));
+            const replacement = bindFollowthrough(planStep(state, candidate), remaining.slice(position));
+            remaining.splice(position, 0, replacement);
+            if (add([...remaining, end])) consolidatedAdded++;
+            if (consolidatedAdded >= 96) {
+              plan.refinement_limit = 'Two-to-one substitutions were bounded to 96 alternatives per pass; this is not exhaustive search.';
+              break consolidated;
+            }
+          }
+        }
+      }
+    }
     // Compare a cheaper substitution together with a concrete use of its
     // released energy. Otherwise a plan ending with spare energy can lose to
     // the incumbent before its defense/setup follow-through is even offered.

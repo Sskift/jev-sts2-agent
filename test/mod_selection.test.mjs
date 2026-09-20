@@ -1,3 +1,4 @@
+import { parseJevRequest } from './fixtures/jev.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -17,7 +18,7 @@ function selection(size = 24, min = 4, max = min) {
 function mockModel(choices, inspect = () => {}) {
   let call = 0;
   return async (_url, request) => {
-    const payload = JSON.parse(request.body);
+    const payload = parseJevRequest(request.body);
     inspect(payload, call);
     const choice = choices[call++];
     assert.ok(choice, 'Unexpected extra model call');

@@ -32,6 +32,7 @@ export function projectTurnPrefix(state, steps) {
     // Orichalcum belongs to turn end, not each intermediate card preview.
     const intermediate = { ...combat, player: { ...combat.player, relics: combat.player.relics.filter(relic => relic.id !== 'ORICHALCUM') } };
     const estimate = combatForecast(intermediate, card, target);
+    if (estimate.block_preview?.amount === null) unresolved.push(`${card.name}: Block contribution is unknown, not zero; HP arithmetic omits it`);
     const targets = card.target_type === 'AllEnemies' ? combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) : target ? [target] : [];
     for (const enemy of targets) {
       const hit = attackHpLoss(card, enemy);

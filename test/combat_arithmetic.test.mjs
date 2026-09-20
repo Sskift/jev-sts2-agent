@@ -1,6 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { combatForecast, firstHitHpLoss, attackHpLoss } from '../src/combat_arithmetic.mjs';
+import { combatForecast, firstHitHpLoss, attackHpLoss, immediateBlockPreview } from '../src/combat_arithmetic.mjs';
+
+test('missing native Block uses only an unconditional resolved first sentence and never guesses conditional effects', () => {
+  const card = { id: 'EXPECT_A_FIGHT', type: 'Skill', cost: 3, description: 'Gain 25 Block. Gains 5 additional Block for each Strength you have.' };
+  const combat = { player: { hp: 26, block: 0, energy: 3 }, hand: [card], enemies: [{ combat_id: 1, hp: 50, block: 0, is_alive: true, intents: [{ damage: 28, hits: 1 }] }] };
+  const result = combatForecast(combat, card);
+  assert.equal(result.block_after_card, 25);
+  assert.equal(result.hp_remaining_if_end_turn, 23);
+  assert.equal(result.block_preview.source, 'resolved_live_first_sentence');
+  assert.equal(immediateBlockPreview({ ...card, block: 30 }).amount, 30, 'The authoritative numeric preview wins');
+  for (const description of ['If the enemy intends to attack, gain 25 Block.', 'Gain 5 Block for each card in hand.', 'At the start of next turn, gain 25 Block.']) {
+    assert.equal(immediateBlockPreview({ ...card, description }).amount, null);
+    assert.equal(combatForecast(combat, { ...card, description }).fatal_if_end_turn, null);
+  }
+  assert.equal(immediateBlockPreview({ ...card, id: 'RAGE', description: 'Whenever you play an Attack, gain 3 Block.' }).amount, 0);
+  assert.equal(immediateBlockPreview({ ...card, type: 'Power' }).amount, 0);
+});
 
 test('visible damage caps prevent a false lethal and defensive arithmetic exposes survival', () => {
   const enemy = { combat_id: 1, hp: 15, block: 0, is_alive: true, powers: [{ id: 'SLIPPERY_POWER', amount: 1, name: 'Slippery' }], intents: [{ damage: 2, hits: 3 }] };

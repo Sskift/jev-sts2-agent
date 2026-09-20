@@ -1,3 +1,4 @@
+import { parseJevRequest } from './fixtures/jev.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildModCandidates, makeModDecisionWithJev, prepareModDecision } from '../src/mod_decision.mjs';
@@ -66,7 +67,7 @@ test('selected character advances via embark, menu saves continue and event dial
 test('Jev must select an enumerated complete action, never arbitrary JSON or an absent ID', async () => {
   const state = withContext(combat());
   const options = { turnPlanning: false, apiKey: 'offline-only', fetchImpl: async (_url, request) => {
-    const payload = JSON.parse(request.body);
+    const payload = parseJevRequest(request.body);
     assert.equal(payload.state.combat.enemies[0].combat_id, 42);
     const offered = payload.state.legal_actions.find(a => a.action_id === 'card_0_target_42');
     assert.equal(offered.target_combat_id, 42);
