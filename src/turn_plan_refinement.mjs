@@ -3,6 +3,16 @@ import { projectTurnPrefix, reserveSequence } from './turn_projection.mjs';
 import { handUpgradeMode, preservesPlanDependencies } from './turn_effects.mjs';
 
 const signature = steps => JSON.stringify(steps.map(step => [step.kind, step.card_instance_id, step.potion_id, step.slot, step.target]));
+const bindFollowthrough = (step, following) => {
+  const next = following.find(candidate => candidate.kind === 'play_card');
+  if (!next) return step;
+  const nextCard = /\b(?:your|the) next card\b/i.test(step.rules_at_planning || '');
+  if (handUpgradeMode(step.rules_at_planning) || nextCard) {
+    step.role = 'preparation'; step.beneficiary_instance_id = next.card_instance_id; step.beneficiary_name = next.name;
+    if (nextCard) step.next_card_instance_id = next.card_instance_id;
+  }
+  return step;
+};
 
 // Compare concrete complete plans, not another disconnected next-card choice.
 // These are bounded local alternatives, not an exhaustive solver. Every current
@@ -15,13 +25,15 @@ export async function refineTurnPlan(state, plan, prepared, ask) {
     return {
       ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map(step => {
         const beneficiary = state.combat.hand.find(card => cardInstance(card) === step.beneficiary_instance_id);
-        return { action: step.name, ...(step.target !== undefined ? { target: step.target } : {}), rules: step.rules_at_planning,
+        const card = state.combat.hand.find(card => cardInstance(card) === step.card_instance_id);
+        return { action: step.name, ...(card ? { hand_index: card.index, printed_cost: card.cost } : {}), ...(step.target !== undefined ? { target: step.target } : {}), rules: step.rules_at_planning,
           ...(beneficiary ? { intended_followthrough: beneficiary.name,
             ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
       }),
       then: 'End turn, unless a new observation requires a revision.',
       energy_left: budget.energy_left,
       conditional_preview: { block: projection.block, hp_if_ending: projection.hp_if_ending_after_prefix,
+        incoming_attack: projection.incoming_attack_after_prefix,
         enemies: projection.remaining_enemies.map(({ combat_id, hp }) => ({ combat_id, hp })),
         unconfirmed_effects: projection.unresolved_effects },
       limitation: 'Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers.'
@@ -32,13 +44,43 @@ export async function refineTurnPlan(state, plan, prepared, ask) {
     const add = steps => {
       const key = signature(steps);
       if (seen.has(key) || !reserveSequence(state, steps) || !preservesPlanDependencies(steps)) return;
+      const cards = [...steps, ...(plan.retained_cards || [])].map(step => step.card_instance_id).filter(Boolean);
+      const potions = steps.filter(step => step.kind === 'use_potion').map(step => step.slot);
+      if (new Set(cards).size !== cards.length || new Set(potions).size !== potions.length) return;
       seen.add(key); alternatives.set(`variant_${alternatives.size}`, steps);
+      return true;
     };
     // Adjacent swaps explicitly test local timing, e.g. Vulnerable before an
     // attack. One insertion tests whether stopping leaves a useful card unused.
     for (let index = 0; index + 1 < prefix.length; index++) {
       const copy = structuredClone(prefix); [copy[index], copy[index + 1]] = [copy[index + 1], copy[index]];
       add([...copy, end]);
+    }
+    // An expensive payoff can crowd out useful defense or setup even when its
+    // order is correct. Compare substitutions (including target changes), then
+    // let the next refinement pass use any released energy. Never reuse one
+    // physical card or consume a card reserved for an automatic effect.
+    const releasedEnergyPlans = [], originalEnergy = reserveSequence(state, plan.steps).energy_left;
+    for (let index = 0; index < prefix.length; index++) {
+      for (const candidate of prepared.candidates.values()) {
+        if (!['play_card', 'use_potion'].includes(candidate.request.cmd)) continue;
+        const replacement = bindFollowthrough(planStep(state, candidate), prefix.slice(index + 1));
+        const replaced = [...prefix.slice(0, index), replacement, ...prefix.slice(index + 1), end];
+        if (add(replaced) && reserveSequence(state, replaced).energy_left > originalEnergy) releasedEnergyPlans.push(replaced);
+      }
+    }
+    // Compare a cheaper substitution together with a concrete use of its
+    // released energy. Otherwise a plan ending with spare energy can lose to
+    // the incumbent before its defense/setup follow-through is even offered.
+    // This optional neighborhood is bounded and round-robins substitutions;
+    // the main planning stages still expose every actual legal action.
+    let coupledAdded = 0;
+    coupled: for (const candidate of prepared.candidates.values()) {
+      if (!['play_card', 'use_potion'].includes(candidate.request.cmd)) continue;
+      for (const replaced of releasedEnergyPlans) {
+        if (add([...replaced.slice(0, -1), planStep(state, candidate), end])) coupledAdded++;
+        if (coupledAdded >= 96) { plan.refinement_limit = 'Coupled cheaper-substitution continuations were bounded to 96 alternatives per pass; this is not exhaustive search.'; break coupled; }
+      }
     }
     const occupiedCards = new Set([...prefix, ...(plan.retained_cards || [])].map(step => step.card_instance_id).filter(Boolean));
     const occupiedPotions = new Set(prefix.filter(step => step.kind === 'use_potion').map(step => step.slot));
@@ -47,10 +89,7 @@ export async function refineTurnPlan(state, plan, prepared, ask) {
       const step = planStep(state, candidate);
       if (occupiedCards.has(step.card_instance_id) || (step.kind === 'use_potion' && occupiedPotions.has(step.slot))) continue;
       for (let index = 0; index <= prefix.length; index++) {
-        const inserted = structuredClone(step), next = prefix[index];
-        if (handUpgradeMode(step.rules_at_planning) && next?.kind === 'play_card') {
-          inserted.role = 'preparation'; inserted.beneficiary_instance_id = next.card_instance_id; inserted.beneficiary_name = next.name;
-        }
+        const inserted = bindFollowthrough(structuredClone(step), prefix.slice(index));
         add([...prefix.slice(0, index), inserted, ...prefix.slice(index), end]);
       }
     }
@@ -63,10 +102,14 @@ export async function refineTurnPlan(state, plan, prepared, ask) {
       plan.refinement_limit = 'Optional whole-plan comparisons skipped because the complete state leaves insufficient request space.';
       return;
     }
-    const instruction = 'Compare these COMPLETE ordered turn plans under turn_planning.objective. Choose the most useful whole turn. Check whether a buff/debuff/upgrade comes before its beneficiaries and whether spending remaining energy improves survival or damage. A non-immediate preparation must have useful follow-through. Do not stop merely because one card already served the objective. Do not reorder a payoff before a preparation that improves it without a concrete benefit. Conditional arithmetic is incomplete; use the explicit rules for unknown effects. Keeping the original plan is valid if alternatives waste resources or disrupt it.';
+    const instruction = 'Compare these COMPLETE ordered turn plans under turn_planning.objective. Choose the most useful whole turn. Compare total enemy HP removed, kills, remaining incoming damage, Block and energy, rather than one impressive card. When a cheaper sequence achieves the same kills, its spare energy can fund defense or setup. Check whether a buff/debuff/upgrade comes before its beneficiaries and whether spending remaining energy improves survival or damage. A non-immediate preparation must have useful follow-through. Do not stop merely because one card already served the objective. Do not reorder a payoff before a preparation that improves it without a concrete benefit. Conditional arithmetic is incomplete; use the explicit rules for unknown effects. Keeping the original plan is valid if alternatives waste resources or disrupt it.';
+    const comparisonState = { phase_scope: 'Compare mutually exclusive complete plans from the ACTUAL current state. These proposed steps have NOT happened. Every option replaces the entire unexecuted proposed prefix; do not execute both the old prefix and an option.',
+      proposed_steps: [], conditional_projection: [],
+      energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy, scope: 'No option has executed. Each option contains its own complete energy reservation and conditional outcome.' } };
+    const comparePlans = choices => ask('refine', instruction, choices, comparisonState);
     const winners = new Set(['keep']);
     let batch = { keep }, bytes = Buffer.byteLength(JSON.stringify(batch));
-    const compare = async () => { if (Object.keys(batch).length > 1) winners.add(await ask('refine', instruction, batch)); };
+    const compare = async () => { if (Object.keys(batch).length > 1) winners.add(await comparePlans(batch)); };
     for (const [id, steps] of [...alternatives].slice(1)) {
       const item = { value: id, label: label(steps) }, size = Buffer.byteLength(JSON.stringify(item)) + id.length + 5;
       if (bytes + size > maxLabels || Object.keys(batch).length >= 30) { await compare(); batch = { keep }; bytes = Buffer.byteLength(JSON.stringify(batch)); }
@@ -76,10 +119,10 @@ export async function refineTurnPlan(state, plan, prepared, ask) {
     let selected = 'keep';
     if (winners.size > 1) {
       const finalists = Object.fromEntries([...winners].map(id => [id, { value: id, label: label(alternatives.get(id)) }]));
-      if (Buffer.byteLength(JSON.stringify(finalists)) <= maxLabels) selected = await ask('refine_final', instruction, finalists);
+      if (Buffer.byteLength(JSON.stringify(finalists)) <= maxLabels) selected = await ask('refine_final', instruction, finalists, comparisonState);
       else for (const id of [...winners].filter(id => id !== 'keep')) {
         // Tournament rounds also respect the same bounded request size.
-        selected = await ask('refine_final', instruction, { incumbent: { value: selected, label: label(alternatives.get(selected)) }, challenger: { value: id, label: label(alternatives.get(id)) } });
+        selected = await ask('refine_final', instruction, { incumbent: { value: selected, label: label(alternatives.get(selected)) }, challenger: { value: id, label: label(alternatives.get(id)) } }, comparisonState);
       }
     }
     if (selected === 'keep') break;
