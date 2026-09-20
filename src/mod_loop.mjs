@@ -136,7 +136,11 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       const decision = await decide(state, { memory, prepared,
         onRequest: (payload, metrics) => {
           if (metrics.purpose === 'option_assessment') save(path.join(directory, 'jev-strategy-request.json'), payload);
-          else if (metrics.purpose?.startsWith('turn_')) save(path.join(directory, `jev-${metrics.purpose}-${String(++planningCalls).padStart(4, '0')}.json`), payload);
+          else if (metrics.purpose?.startsWith('turn_')) {
+            const sequence = String(++planningCalls).padStart(4, '0');
+            save(path.join(directory, `jev-${metrics.purpose}-${sequence}.json`), payload);
+            save(path.join(directory, `context-${metrics.purpose}-${sequence}.json`), metrics);
+          }
           else { save(path.join(directory, 'jev-request.json'), payload); save(path.join(directory, 'context-metrics.json'), metrics); }
           if (prepared.selectionPlan) save(path.join(directory, `jev-planning-request-${String(++planningCalls).padStart(4, '0')}.json`), payload);
         },

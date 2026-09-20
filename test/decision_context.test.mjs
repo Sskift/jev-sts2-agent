@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { buildDecisionContext, DecisionMemory, groupCards, routeFacts, deduplicateText, compactContext, compactDecisionRequest, compactPlanningRequest, validateDecisionPacket, expandRecordTables } from '../src/decision_context.mjs';
+import { buildDecisionContext, DecisionMemory, groupCards, routeFacts, deduplicateText, compactContext, compactDecisionRequest, compactPlanningRequest, validateDecisionPacket, expandRecordTables, presentCurrentRecords } from '../src/decision_context.mjs';
 import { buildModCandidates, prepareModDecision, makeModDecisionWithJev } from '../src/mod_decision.mjs';
 import { actionFingerprint, runModLoop } from '../src/mod_loop.mjs';
 import { completeCombat, withContext, fixtureCard } from './fixtures/context.mjs';
@@ -460,6 +460,19 @@ test('nested record tables preserve all candidates, card copies, costs and neste
   };
   assert.deepEqual(text(expandRecordTables(compact)), original);
   assert.ok(JSON.stringify(compact).length < JSON.stringify(original).length);
+  const payload = { state: compact, questions: { choice: { type: 'choice', criteria: { a: 'Keep all facts' } } } };
+  const saved = structuredClone(payload), bytes = Buffer.byteLength(JSON.stringify(payload));
+  const readable = presentCurrentRecords(payload, bytes + 100000, 100000);
+  assert.ok(Array.isArray(readable.payload.state.combat.hand));
+  assert.ok(readable.expanded_fields.includes('combat.hand'));
+  assert.deepEqual(text(expandRecordTables(readable.payload.state)), original);
+  assert.deepEqual(readable.payload.state.memory, compact.memory, 'History keeps its complete existing encoding');
+  assert.deepEqual(readable.payload.questions, payload.questions);
+  validateDecisionPacket(readable.payload.state);
+  const bounded = presentCurrentRecords(payload, bytes + 25);
+  assert.ok(bounded.bytes <= bytes + 25, 'An oversized expansion never displaces another field');
+  assert.deepEqual(text(expandRecordTables(bounded.payload.state)), original);
+  assert.deepEqual(payload, saved, 'Presentation must not mutate shared context across independent questions');
   const corrupted = structuredClone(compact);
   const table = corrupted.combat.hand;
   if (table.encoding === 'record_table_v3') {

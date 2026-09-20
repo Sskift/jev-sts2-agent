@@ -777,3 +777,37 @@ export function compactPlanningRequest(payload) {
   const packed = { ...payload, state: { ...payload.state, turn_planning: planning, text_dictionary: extra.text_dictionary }, questions: extra.questions };
   return Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(payload)) ? packed : payload;
 }
+
+// Prefer ordinary named records for the current decision when space permits.
+// Historical tables remain intact. Each expansion is lossless and atomic, and
+// cannot displace any facts, questions, or choices to make room.
+export function presentCurrentRecords(payload, maxRequestBytes, maxExpansionBytes = 3000) {
+  const initialBytes = Buffer.byteLength(JSON.stringify(payload));
+  const ceiling = Math.min(maxRequestBytes, initialBytes + maxExpansionBytes);
+  const state = structuredClone(payload.state), shown = { ...payload, state }, expanded = [];
+  const resolve = value => {
+    if (value && typeof value === 'object' && Object.keys(value).length === 1 && typeof value.text_ref === 'string') {
+      const text = state.text_dictionary?.[value.text_ref];
+      if (typeof text !== 'string') throw new ContextError('Dangling rule reference in current-state presentation');
+      return text;
+    }
+    return Array.isArray(value) ? value.map(resolve) : value && typeof value === 'object'
+      ? Object.fromEntries(Object.entries(value).map(([key, item]) => [key, resolve(item)])) : value;
+  };
+  const paths = [['combat', 'hand'], ['combat', 'enemies'], ['player'], ['resources'],
+    ['turn_plan'], ['turn_planning'], ['screen_state'], ['legal_actions'], ['decision_brief']];
+  let bytes = initialBytes;
+  for (const keys of paths) {
+    const owner = keys.length === 1 ? state : state[keys[0]], key = keys.at(-1);
+    const original = owner?.[key];
+    if (!original) continue;
+    const ordinary = resolve(expandRecordTables(original));
+    if (JSON.stringify(ordinary) === JSON.stringify(original)) continue;
+    owner[key] = ordinary;
+    const nextBytes = Buffer.byteLength(JSON.stringify(shown));
+    if (nextBytes <= ceiling) { bytes = nextBytes; expanded.push(keys.join('.')); }
+    else owner[key] = original;
+  }
+  return { payload: expanded.length ? shown : payload, bytes,
+    presentation: expanded.length ? 'current_records_expanded' : 'packed', expanded_fields: expanded };
+}

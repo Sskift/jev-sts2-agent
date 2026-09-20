@@ -1,7 +1,7 @@
 import { decisionInstructions } from "./decision_instructions.mjs";
 import { getJevModel, requestJev, JEV_REQUEST_BUDGET } from './jev_client.mjs';
 import { validateModRequest } from './mod_client.mjs';
-import { buildDecisionContext, ContextError, compactDecisionRequest, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
+import { buildDecisionContext, ContextError, compactDecisionRequest, validateDecisionPacket, cardRewardKey, presentCurrentRecords } from './decision_context.mjs';
 import { potionEffectFacts, potionForRequest } from './potion_effects.mjs';
 import { combatForecast, firstHitHpLoss, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
@@ -362,7 +362,8 @@ export async function makeModDecisionWithJev(gameState, options = {}) {
 }
 
 async function choosePrepared(gameState, options, prepared) {
-  const { candidates, payload, metrics } = prepared;
+  const { candidates, payload } = prepared;
+  let { metrics } = prepared;
   const last = options.memory?.data.actions.at(-1);
   if (gameState.screen === 'REWARD' && gameState.rewards?.rewards.length === 1 && gameState.rewards.rewards[0].type === 'Card' && (prepared.skippedCardRewards?.includes(0) || (last?.ok && !last.card_reward_key && last.request.cmd === 'reward_skip_card' && last.floor === gameState.decision_context?.total_floor)) && candidates.has('proceed') && [...candidates.values()].every(candidate => ['proceed', 'reward_choose_card', 'reward_skip_card'].includes(candidate.request?.cmd))) {
     return { ...candidates.get('proceed'), candidate_id: 'proceed', model: 'complete-selected-skip', context_metrics: metrics };
@@ -372,7 +373,11 @@ async function choosePrepared(gameState, options, prepared) {
     return { ...candidate, candidate_id, model: 'forced-single-action', context_metrics: metrics };
   }
   const started = performance.now();
-  const result = await requestJev(payload, { ...options, metrics });
+  const presentation = options.contextPresentation === 'packed' ? { payload, bytes: Buffer.byteLength(JSON.stringify(payload)), presentation: 'packed', expanded_fields: [] }
+    : presentCurrentRecords(payload, metrics.max_request_bytes);
+  validateDecisionPacket(presentation.payload.state);
+  metrics = { ...metrics, request_bytes: presentation.bytes, presentation: presentation.presentation, expanded_fields: presentation.expanded_fields };
+  const result = await requestJev(presentation.payload, { ...options, metrics });
   if (prepared.parseResult) return { ...prepared.parseResult(result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
   if (prepared.assessmentChoices) return { ...parseStrategyAssessment(prepared, result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
   const answer = result.answers?.next_action;
