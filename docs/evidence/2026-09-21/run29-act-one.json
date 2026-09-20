@@ -1,0 +1,134 @@
+{
+  "at": "2026-09-20T18:00:32.767Z",
+  "run_number": 29,
+  "run_id": "run-1789925824",
+  "runtime_commit": "9b590b225206ff76e9271af27546415f71a24212",
+  "provider": "openrouter",
+  "requested_model": "typesafe/jev-1.13",
+  "boss": {
+    "encounter": "CEREMONIAL_BEAST_BOSS",
+    "start_player_hp": 77,
+    "start_enemy_hp": [
+      {
+        "name": "Ceremonial Beast",
+        "hp": 252
+      }
+    ],
+    "final_turn": 11,
+    "final_request": {
+      "cmd": "play_card",
+      "id": "WHIRLWIND",
+      "nth": 0
+    },
+    "player_hp_at_reward": 47
+  },
+  "evidence": [
+    {
+      "file": "run-artifacts/run29-2026-09-20T17-37-00.808Z/step-0238/before-state.json",
+      "sha256": "5c53eef2b882c829b207941ccbed27418cdcb39868cc53e52a2fc2bc75e6c4f4",
+      "screen": "COMBAT",
+      "run_id": "run-1789925824",
+      "act": 0,
+      "floor": 17,
+      "hp": 77,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run29-2026-09-20T17-37-00.808Z/step-0283/before-state.json",
+      "sha256": "c968a96d40381551973268f62d64b3d1ec56a1918b9eb7b9a26361759854130f",
+      "screen": "COMBAT",
+      "run_id": "run-1789925824",
+      "act": 0,
+      "floor": 17,
+      "hp": 41,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run29-2026-09-20T17-37-00.808Z/step-0283/after-state.json",
+      "sha256": "efed5d042f47959f1dbc004c2d0ddd776e473a9621e54bdadb75d892e363215e",
+      "screen": "UNKNOWN",
+      "run_id": "run-1789925824",
+      "act": 0,
+      "floor": 17,
+      "hp": 47,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run29-2026-09-20T17-37-00.808Z/step-0295/before-state.json",
+      "sha256": "0e0acaa9a38ce2498ad61a4b051791fac7e5b5cf31baffa736d12fcda6be3f8d",
+      "screen": "REWARD",
+      "run_id": "run-1789925824",
+      "act": 0,
+      "floor": 17,
+      "hp": 47,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run29-2026-09-20T17-37-00.808Z/step-0298/before-state.json",
+      "sha256": "bb3f49363b0936ee210c82b835693b669444c10755e627a7562b914a686d6229",
+      "screen": "MAP",
+      "run_id": "run-1789925824",
+      "act": 1,
+      "floor": 17,
+      "hp": 47,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run29-2026-09-20T17-37-00.808Z/step-0299/before-state.json",
+      "sha256": "89eacd1292c6ba2d427303763f8634a8743b88d909f6d59daa535c41d6e40a98",
+      "screen": "EVENT",
+      "run_id": "run-1789925824",
+      "act": 1,
+      "floor": 18,
+      "hp": 80,
+      "game_mode": "Standard",
+      "ascension": 0
+    }
+  ],
+  "post_boss_actions": [
+    {
+      "step": "step-0295",
+      "screen": "REWARD",
+      "request": {
+        "cmd": "reward_choose_card",
+        "reward_type": "card",
+        "nth": 0,
+        "card_id": "AGGRESSION"
+      }
+    },
+    {
+      "step": "step-0296",
+      "screen": "REWARD",
+      "request": {
+        "cmd": "reward_claim",
+        "reward_type": "gold",
+        "nth": 0
+      }
+    },
+    {
+      "step": "step-0297",
+      "screen": "REWARD",
+      "request": {
+        "cmd": "proceed"
+      }
+    },
+    {
+      "step": "step-0298",
+      "screen": "MAP",
+      "request": {
+        "cmd": "choose_map_node",
+        "args": [
+          3,
+          0
+        ]
+      }
+    }
+  ],
+  "scope": "Last boss action passed through a temporary UNKNOWN transition, then native boss rewards and Act 2 were observed with the same run ID. This is not final run victory or evidence that the later route patch was used.",
+  "final_goal_complete": false
+}
