@@ -29,19 +29,32 @@ function argumentsOf(text) {
   return [...args, text.slice(start).trim()];
 }
 const numeric = value => /^-?\d+(?:\.\d+)?[fm]?$/.test(value || '') ? Number(value.replace(/[fm]$/, '')) : null;
+const ruleId = type => type.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase();
+
+function moveBody(source, method) {
+  if (!/^\w+$/.test(method || '')) return '';
+  const declaration = new RegExp(`(?:private|protected|public)\\s+(?:(?:override|async|virtual|static)\\s+)*Task(?:<[^>]+>)?\\s+${method}\\s*\\(`).exec(source);
+  return declaration ? balanced(source, source.indexOf('{', declaration.index), '{', '}') : '';
+}
+
+// A rule reference is deliberately weaker than an effect. Creating, inspecting
+// or conditionally applying a typed object makes its rule relevant, but says
+// nothing about actual targets, quantity, timing, or successful application.
+function referencedRules(body) {
+  const cards = [...body.matchAll(/(?:CreateCard|ModelDb\.Card|AddToCombatAndPreview)<(\w+)>\s*\(/g)].map(m => ruleId(m[1]));
+  const powers = [...body.matchAll(/(?:ModelDb\.Power|PowerCmd\.(?:Apply|Remove))<(\w+)>\s*\(/g)].map(m => ruleId(m[1].replace(/Power$/, '')));
+  return [...new Set(cards)].map(id => ({ category: 'cards', id }))
+    .concat([...new Set(powers)].map(id => ({ category: 'powers', id })));
+}
 
 // Resolve only a named move's direct card-generation calls. Amounts describe
 // one invocation, not a simulated enemy turn; guards and hand overflow remain
 // explicit. A symbolic amount is never turned into a guessed number.
-function generatedCards(source, method) {
-  if (!/^\w+$/.test(method || '')) return [];
-  const declaration = new RegExp(`(?:private|protected|public)\\s+(?:(?:override|async|virtual|static)\\s+)*Task(?:<[^>]+>)?\\s+${method}\\s*\\(`).exec(source);
-  if (!declaration) return [];
-  const body = balanced(source, source.indexOf('{', declaration.index), '{', '}');
+function generatedCards(body) {
   return [...body.matchAll(/CardPileCmd\.AddToCombatAndPreview<(\w+)>\(/g)].map(match => {
     const args = argumentsOf(balanced(body, body.indexOf('(', match.index)));
     const pile = args[1]?.match(/^PileType\.(\w+)$/)?.[1];
-    return { card_id: match[1].replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase(),
+    return { card_id: ruleId(match[1]),
       destination: pile ?? null, count: numeric(args[2]),
       ...(numeric(args[2]) === null ? { count_expression: args[2] ?? 'unknown' } : {}),
       recipients: args[0] === 'targets' ? 'move_targets' : 'unresolved',
@@ -65,8 +78,10 @@ export function extractPattern(source) {
     if (node.type === 'move') {
       node.move_id = node.id.replace(/_MOVE$/, '');
       node.intents = [...args.slice(2).join(',').matchAll(/new (\w+)Intent\(/g)].map(m => m[1]);
-      const cards = generatedCards(source, args[1]);
+      const move = moveBody(source, args[1]);
+      const cards = generatedCards(move), references = referencedRules(move);
       if (cards.length) node.generated_cards = cards;
+      if (references.length) node.rule_references = references;
       if (/MustPerformOnceBeforeTransitioning\s*=\s*true/.test(body.slice(match.index, body.indexOf(';', match.index)))) node.must_perform_once = true;
     } else node.branches = [];
     if (states.some(s => s.id === node.id)) gaps.push(`Duplicate state ${node.id}`);
@@ -135,7 +150,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   const data = { schema_version: 1, game_version: 'v0.111.0', extracted_at: new Date().toISOString(),
     source: 'Local installed sts2.dll; static inspection only. No native code or live RNG is invoked.',
     assembly_sha256: createHash('sha256').update(fs.readFileSync(assembly)).digest('hex'),
-    semantics: { base_weight: 'Relative random weight before repeat restrictions, cooldowns and conditions; not an unconditional probability.', max_consecutive: 'Maximum consecutive selections, not a branch weight.', cooldown: 'Disallow if this move occurred among the last N moves.', condition: 'Conditional branches take the first true predicate. Predicates are unevaluated; never assume private flags or missing history.' }, entries };
+    semantics: { base_weight: 'Relative random weight before repeat restrictions, cooldowns and conditions; not an unconditional probability.', max_consecutive: 'Maximum consecutive selections, not a branch weight.', cooldown: 'Disallow if this move occurred among the last N moves.', condition: 'Conditional branches take the first true predicate. Predicates are unevaluated; never assume private flags or missing history.', rule_references: 'Rule types directly referenced by the named move method. References are not confirmed effects: conditions, quantities, recipients, destinations, helper methods and timing are not inferred. They never add powers or cards to the observed state.' }, entries };
   fs.mkdirSync(path.dirname(output), { recursive: true }); fs.writeFileSync(output, JSON.stringify(data, null, 2) + '\n');
   console.log(JSON.stringify({ monsters: monsters.length, with_states: Object.values(entries).filter(e => e.states.length).length,
     gaps: Object.entries(entries).filter(([, e]) => e.gaps.length).map(([id, e]) => ({ id, gaps: e.gaps })) }, null, 2));

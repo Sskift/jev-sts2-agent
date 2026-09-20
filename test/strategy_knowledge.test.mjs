@@ -30,6 +30,7 @@ test('all 115 pinned patterns have unique nodes and resolved edges; dynamic cons
     for (const s of pattern.states) {
       if (s.next) assert.ok(ids.has(s.next), `${id}/${s.next}`);
       if (s.type !== 'move') { assert.ok(s.branches.length, id); for (const b of s.branches) assert.ok(ids.has(b.next), id); }
+      for (const reference of s.rule_references || []) assert.ok(lookupRule(reference.category, reference.id), `${id}/${reference.category}/${reference.id}`);
     }
   }
   assert.ok(enemyPattern('AXEBOT').gaps.some(g => g.includes('construction')));
@@ -77,6 +78,27 @@ test('move card generation keeps symbolic amounts and conditional invocation lim
   assert.equal(effects[1].card_id, 'FRANTIC_ESCAPE');
   assert.equal(effects[1].count, null);
   assert.equal(effects[1].count_expression, 'Amount');
+});
+
+test('move references link constructed cards and powers without inventing effects or scanning unrelated methods', () => {
+  const graph = extractPattern(`GenerateMoveStateMachine() {
+    MoveState a = new MoveState("A", Emit, new StatusIntent(2));
+    return new MonsterMoveStateMachine(list, a);
+  }
+  private async Task Emit(IReadOnlyList<Creature> targets) {
+    if (condition) { var card = base.CombatState.CreateCard<FranticEscape>(player); }
+    var power = ModelDb.Power<SandpitPower>().ToMutable();
+    await PowerCmd.Apply<WeakPower>(context, targets, amount, owner, null);
+  }
+  private Task Unused() { return CardPileCmd.AddToCombatAndPreview<Toxic>(targets, PileType.Hand, 2, null); }
+  `);
+  const node = graph.states[0];
+  assert.deepEqual(node.rule_references, [
+    { category: 'cards', id: 'FRANTIC_ESCAPE' },
+    { category: 'powers', id: 'SANDPIT' },
+    { category: 'powers', id: 'WEAK' }
+  ]);
+  assert.equal(node.generated_cards, undefined, 'A constructed card has no inferred count, destination or application');
 });
 
 test('knowledge stays relevant and advisory, and revival progress is not permanent removal', () => {

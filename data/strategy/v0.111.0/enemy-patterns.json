@@ -1,14 +1,15 @@
 {
   "schema_version": 1,
   "game_version": "v0.111.0",
-  "extracted_at": "2026-09-20T18:26:45.384Z",
+  "extracted_at": "2026-09-20T19:12:07.442Z",
   "source": "Local installed sts2.dll; static inspection only. No native code or live RNG is invoked.",
   "assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
   "semantics": {
     "base_weight": "Relative random weight before repeat restrictions, cooldowns and conditions; not an unconditional probability.",
     "max_consecutive": "Maximum consecutive selections, not a branch weight.",
     "cooldown": "Disallow if this move occurred among the last N moves.",
-    "condition": "Conditional branches take the first true predicate. Predicates are unevaluated; never assume private flags or missing history."
+    "condition": "Conditional branches take the first true predicate. Predicates are unevaluated; never assume private flags or missing history.",
+    "rule_references": "Rule types directly referenced by the named move method. References are not confirmed effects: conditions, quantities, recipients, destinations, helper methods and timing are not inferred. They never add powers or cards to the observed state."
   },
   "entries": {
     "AEONGLASS": {
@@ -51,6 +52,16 @@
               "count_expression": "WitherAmount",
               "recipients": "move_targets",
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "WITHER"
+            },
+            {
+              "category": "powers",
+              "id": "STRENGTH"
             }
           ],
           "next": "EBB_MOVE"
@@ -150,6 +161,12 @@
             "Defend",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "HAMMER_UPPERCUT_MOVE"
         },
         {
@@ -168,6 +185,16 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            },
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
           ],
           "next": "ONE_TWO_MOVE"
         }
@@ -271,6 +298,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "THRASH2_MOVE"
         },
         {
@@ -352,6 +385,12 @@
           "intents": [
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
+          ],
           "next": "THRASH_MOVE"
         }
       ],
@@ -380,6 +419,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "BEAT_MOVE"
         }
       ],
@@ -407,6 +452,12 @@
           "move_id": "WAKE",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "SLASHES_MOVE"
         },
@@ -490,6 +541,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "RITUAL"
+            }
+          ],
           "next": "DARK_STRIKE_MOVE"
         },
         {
@@ -518,6 +575,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "PLOW"
+            }
+          ],
           "next": "PLOW_MOVE"
         },
         {
@@ -527,6 +590,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "PLOW_MOVE"
         },
@@ -547,6 +616,12 @@
           "intents": [
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "RINGING"
+            }
+          ],
           "next": "STOMP_MOVE"
         },
         {
@@ -565,6 +640,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "BEAST_CRY_MOVE"
         }
@@ -605,6 +686,12 @@
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
             }
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "DAZED"
+            }
+          ],
           "next": "CLAMP_MOVE"
         }
       ],
@@ -643,6 +730,12 @@
           "move_id": "GOOP",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
           ],
           "next": "WHIP_SLAP_MOVE"
         }
@@ -712,6 +805,16 @@
             "MultiAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            },
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
+          ],
           "next": "ADAPT_MOVE"
         },
         {
@@ -720,6 +823,12 @@
           "move_id": "ADAPT",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "GUARDED_STRIKE_MOVE"
         },
@@ -750,6 +859,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "REPEATER_BLAST_MOVE"
         },
         {
@@ -760,6 +875,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "REPEATER_BLAST_MOVE_2"
         },
         {
@@ -769,6 +890,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "EXPEL_MOVE"
         },
@@ -797,6 +924,12 @@
           "move_id": "INCANTATION",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "RITUAL"
+            }
           ],
           "next": "DARK_STRIKE_MOVE"
         },
@@ -836,6 +969,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "WRITHE_MOVE"
         },
         {
@@ -845,6 +984,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
           ],
           "next": "BULK_MOVE"
         },
@@ -905,6 +1050,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "RITUAL"
+            }
+          ],
           "next": "SAVAGE_MOVE"
         },
         {
@@ -932,6 +1083,16 @@
           "move_id": "PHEROMONE_SPIT",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            },
+            {
+              "category": "powers",
+              "id": "PERSONAL_HIVE"
+            }
           ],
           "next": "BEES_MOVE"
         },
@@ -987,6 +1148,12 @@
           "move_id": "ENRAGE",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "RAND"
         },
@@ -1052,6 +1219,12 @@
               "count": 3,
               "recipients": "move_targets",
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "DAZED"
             }
           ],
           "next": "DISTRACT_MOVE"
@@ -1160,6 +1333,12 @@
             "SingleAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
+          ],
           "next": "RAND_ATTACK_MOVE"
         },
         {
@@ -1168,6 +1347,12 @@
           "move_id": "ENRAGE",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "RAND_MOVE"
         },
@@ -1264,6 +1449,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -1324,6 +1515,12 @@
           "intents": [
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -1333,6 +1530,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
           ],
           "next": "RAND"
         },
@@ -1412,6 +1615,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "BRANCH"
         },
         {
@@ -1421,6 +1630,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "HEADBUTT_MOVE"
         },
@@ -1466,6 +1681,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
           ],
           "next": "RAND"
         },
@@ -1528,6 +1749,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "HALF_HEALTH"
         },
         {
@@ -1546,6 +1773,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
           ],
           "next": "STRIKE_DOWN_EVIL"
         },
@@ -1607,6 +1840,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "ACID_GOOP"
         }
       ],
@@ -1654,6 +1893,12 @@
             "SingleAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
+          ],
           "next": "THUNDER_STRIKE"
         },
         {
@@ -1663,6 +1908,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "SHOCKING_SLAP"
         }
@@ -1693,6 +1944,12 @@
             "MultiAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
+          ],
           "next": "HEHE_MOVE"
         },
         {
@@ -1702,6 +1959,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "GIMME_MOVE"
         }
@@ -1770,6 +2033,16 @@
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
             }
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "DAZED"
+            },
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
+          ],
           "next": "SWIPE_MOVE"
         }
       ],
@@ -1788,6 +2061,12 @@
           "move_id": "TENDERIZING_GOOP",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "TENDER"
+            }
           ],
           "next": "RAND"
         },
@@ -1872,6 +2151,12 @@
             "SingleAttack",
             "Buff",
             "Defend"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VITAL_SPARK"
+            }
           ],
           "next": "JAB_MOVE"
         }
@@ -1982,6 +2267,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "QUICK_SLASH_MOVE"
         }
       ],
@@ -2004,6 +2295,12 @@
             "SingleAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
+          ],
           "next": "ORB_OF_WEAKNESS_MOVE"
         },
         {
@@ -2013,6 +2310,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
           ],
           "next": "BEAM_MOVE"
         },
@@ -2031,6 +2334,12 @@
           "move_id": "RITUAL",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "ORB_OF_FRAILTY_MOVE"
         }
@@ -2079,6 +2388,12 @@
             "SingleAttack",
             "Heal",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "CurseOfKnowledgeBranch"
         },
@@ -2151,6 +2466,16 @@
             "Debuff",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            },
+            {
+              "category": "powers",
+              "id": "DEXTERITY"
+            }
+          ],
           "next": "SLASH_MOVE"
         },
         {
@@ -2202,6 +2527,12 @@
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
             }
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "SLIMED"
+            }
+          ],
           "next": "CLUMP_SHOT"
         }
       ],
@@ -2239,6 +2570,12 @@
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
             }
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "SLIMED"
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -2274,6 +2611,12 @@
           "intents": [
             "SingleAttack",
             "CardDebuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "SMOGGY"
+            }
           ],
           "next": "BLOAT_MOVE"
         },
@@ -2337,6 +2680,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "SMASH_MOVE"
         }
       ],
@@ -2357,6 +2706,12 @@
             "SingleAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
+          ],
           "next": "CURL_AND_GROW_MOVE"
         },
         {
@@ -2375,6 +2730,12 @@
           "intents": [
             "Defend",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "POUNCE_MOVE"
         }
@@ -2404,6 +2765,12 @@
           "move_id": "DAMPEN",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "DAMPEN"
+            }
           ],
           "next": "RAM_MOVE"
         },
@@ -2459,6 +2826,12 @@
           "move_id": "ROAR",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            }
           ],
           "next": "RAND"
         },
@@ -2528,6 +2901,12 @@
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
             }
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "BURN"
+            }
+          ],
           "next": "WINDUP_MOVE"
         },
         {
@@ -2537,6 +2916,12 @@
           "intents": [
             "Defend",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "HEAVY_CLEAVE_MOVE"
         },
@@ -2575,6 +2960,12 @@
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
             }
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "TOXIC"
+            }
+          ],
           "next": "BITE_MOVE"
         },
         {
@@ -2593,6 +2984,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "TOXIC_MOVE"
         },
@@ -2646,6 +3043,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "BUTT_MOVE"
         },
         {
@@ -2686,6 +3089,12 @@
           "intents": [
             "Status"
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "DAZED"
+            }
+          ],
           "next": "NOISE_MOVE"
         }
       ],
@@ -2722,6 +3131,12 @@
           "intents": [
             "Summon"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "MINION"
+            }
+          ],
           "next": "SMASH_MOVE"
         },
         {
@@ -2741,6 +3156,12 @@
             "SingleAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            }
+          ],
           "next": "SUMMON_BRANCH_STATE"
         },
         {
@@ -2749,6 +3170,12 @@
           "move_id": "NUTRITIONAL_PASTE",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "SMASH_MOVE"
         },
@@ -2801,6 +3228,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "SOAR"
+            }
+          ],
           "next": "VERDICT"
         },
         {
@@ -2810,6 +3243,16 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            },
+            {
+              "category": "powers",
+              "id": "SOAR"
+            }
           ],
           "next": "MAGISTRATE_SCRUTINY"
         }
@@ -2893,6 +3336,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "BITE_MOVE"
         },
         {
@@ -2941,6 +3390,12 @@
               "count": 3,
               "recipients": "move_targets",
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "INFECTION"
             }
           ],
           "next": "LASH_MOVE"
@@ -3006,6 +3461,12 @@
             "MultiAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
+          ],
           "next": "STRONG_PUNCH_MOVE"
         }
       ],
@@ -3027,6 +3488,12 @@
           "intents": [
             "CardDebuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "CHAINS_OF_BINDING"
+            }
+          ],
           "next": "YOU_ARE_MINE_MOVE"
         },
         {
@@ -3035,6 +3502,20 @@
           "move_id": "YOU_ARE_MINE",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            },
+            {
+              "category": "powers",
+              "id": "WEAK"
+            },
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            }
           ],
           "next": "YOURE_MINE_NOW_BRANCH"
         },
@@ -3059,6 +3540,12 @@
           "intents": [
             "Buff",
             "Defend"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "BURN_BRIGHT_FOR_ME_BRANCH"
         },
@@ -3101,6 +3588,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "OFF_WITH_YOUR_HEAD_MOVE"
         }
       ],
@@ -3139,6 +3632,12 @@
           "move_id": "CHARGE_UP",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "LASER_MOVE"
         },
@@ -3194,6 +3693,12 @@
           "move_id": "MORE_TEETH",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "CHEW"
         },
@@ -3252,6 +3757,12 @@
             "Buff",
             "Defend"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "SEA_KICK_MOVE"
         }
       ],
@@ -3270,6 +3781,12 @@
           "move_id": "PRESSURIZE",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "JET_MOVE"
         },
@@ -3298,6 +3815,12 @@
           "move_id": "SHRINKER",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "SHRINK"
+            }
           ],
           "next": "CHOMP_MOVE"
         },
@@ -3355,6 +3878,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "PIERCING_STABS_MOVE"
         },
         {
@@ -3392,6 +3921,12 @@
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
             }
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "SLIMED"
+            }
+          ],
           "next": "FURIOUS_PUMMELING_MOVE"
         },
         {
@@ -3401,6 +3936,16 @@
           "intents": [
             "Debuff",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            },
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "SMOTHER_MOVE"
         },
@@ -3438,6 +3983,12 @@
           "move_id": "CONSTRICT",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "CONSTRICT"
+            }
           ],
           "next": "rand"
         },
@@ -3494,6 +4045,12 @@
             "SingleAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -3512,6 +4069,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "RAND"
         },
@@ -3563,6 +4126,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "ROLL_OUT_MOVE"
         },
         {
@@ -3596,6 +4165,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "ENERGY_ORB_MOVE"
         }
@@ -3644,6 +4219,12 @@
           "intents": [
             "Status"
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "BECKON"
+            }
+          ],
           "next": "DE_GAS_MOVE"
         },
         {
@@ -3663,6 +4244,12 @@
             "SingleAttack",
             "Status"
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "BECKON"
+            }
+          ],
           "next": "FADE_MOVE"
         },
         {
@@ -3671,6 +4258,12 @@
           "move_id": "FADE",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "INTANGIBLE"
+            }
           ],
           "next": "SCREAM_MOVE"
         },
@@ -3681,6 +4274,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            }
           ],
           "next": "BECKON_MOVE"
         }
@@ -3719,6 +4318,16 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            },
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
           ],
           "next": "RAND"
         },
@@ -3759,6 +4368,12 @@
           "move_id": "HEX",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "HEX"
+            }
           ],
           "next": "SOUL_SLASH"
         },
@@ -3814,6 +4429,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "THORNS"
+            }
+          ],
           "next": "SPIKE_EXPLOSION_MOVE"
         },
         {
@@ -3822,6 +4443,12 @@
           "move_id": "SPIKE_EXPLOSION",
           "intents": [
             "SingleAttack"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "THORNS"
+            }
           ],
           "next": "TONGUE_LASH_MOVE"
         },
@@ -3852,6 +4479,12 @@
             "SingleAttack",
             "Debuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
+          ],
           "next": "STAB_MOVE"
         }
       ],
@@ -3881,6 +4514,12 @@
             "MultiAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VIGOR"
+            }
+          ],
           "next": "CRASH_MOVE"
         },
         {
@@ -3898,6 +4537,12 @@
           "move_id": "TERROR",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            }
           ],
           "next": "CRASH_MOVE"
         }
@@ -3919,6 +4564,20 @@
             "Heal",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "PAINFUL_STABS"
+            },
+            {
+              "category": "powers",
+              "id": "NEMESIS"
+            },
+            {
+              "category": "powers",
+              "id": "ADAPTABLE"
+            }
+          ],
           "must_perform_once": true,
           "next": "REVIVE_BRANCH"
         },
@@ -3938,6 +4597,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "VULNERABLE"
+            }
           ],
           "next": "BITE_MOVE"
         },
@@ -3984,6 +4649,16 @@
               "count_expression": "BurningGrowlBurnCount",
               "recipients": "move_targets",
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "BURN"
+            },
+            {
+              "category": "powers",
+              "id": "STRENGTH"
             }
           ],
           "next": "PHASE3_LACERATE_MOVE"
@@ -4040,6 +4715,12 @@
             "MultiAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "SMASH_MOVE"
         }
       ],
@@ -4077,6 +4758,12 @@
           "intents": [
             "MultiAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "CRASH_MOVE"
         }
@@ -4116,6 +4803,12 @@
             "MultiAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "BASH_MOVE"
         }
       ],
@@ -4136,6 +4829,12 @@
             "Debuff",
             "Defend",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "DEXTERITY"
+            }
           ],
           "next": "DREAD"
         },
@@ -4165,6 +4864,16 @@
           "intents": [
             "Buff",
             "Status"
+          ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "FRANTIC_ESCAPE"
+            },
+            {
+              "category": "powers",
+              "id": "SANDPIT"
+            }
           ],
           "next": "THRASH_MOVE"
         },
@@ -4202,6 +4911,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "THRASH_MOVE_2"
         }
       ],
@@ -4221,6 +4936,12 @@
           "intents": [
             "Debuff",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "EYE_LASERS"
         },
@@ -4267,6 +4988,12 @@
           "move_id": "SAIL",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "RAND"
         },
@@ -4319,6 +5046,12 @@
             "SingleAttack",
             "CardDebuff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "SWIPE"
+            }
+          ],
           "next": "FLUTTER_MOVE"
         },
         {
@@ -4345,6 +5078,12 @@
           "move_id": "FLUTTER",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FLUTTER"
+            }
           ],
           "next": "HAT_TRICK_MOVE"
         },
@@ -4374,6 +5113,12 @@
           "intents": [
             "MultiAttack"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "THORNS"
+            }
+          ],
           "next": "WHIRL_MOVE"
         },
         {
@@ -4391,6 +5136,12 @@
           "move_id": "SPIKEN",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "THORNS"
+            }
           ],
           "next": "SPIKE_SPIT_MOVE"
         },
@@ -4480,6 +5231,12 @@
           "intents": [
             "Summon"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "HATCH"
+            }
+          ],
           "next": "NIBBLE_MOVE"
         },
         {
@@ -4507,6 +5264,12 @@
           "move_id": "TRACK",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
           ],
           "next": "HOUNDS_MOVE"
         },
@@ -4545,6 +5308,12 @@
           "intents": [
             "Buff",
             "Defend"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "BURROWED"
+            }
           ],
           "next": "BELOW_MOVE"
         },
@@ -4603,6 +5372,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "UNLOAD_MOVE"
         }
       ],
@@ -4638,6 +5413,12 @@
               "count": 1,
               "recipients": "move_targets",
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "SLIMED"
             }
           ],
           "next": "RAND"
@@ -4712,6 +5493,12 @@
           "move_id": "SCREECH",
           "intents": [
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "FRAIL"
+            }
           ],
           "next": "RAND"
         },
@@ -4803,6 +5590,12 @@
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
             }
           ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "WOUND"
+            }
+          ],
           "next": "PREPARE_MOVE"
         },
         {
@@ -4811,6 +5604,12 @@
           "move_id": "PREPARE",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "INK_BLOT_MOVE"
         }
@@ -4831,6 +5630,12 @@
           "intents": [
             "SingleAttack",
             "CardDebuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "TANGLED"
+            }
           ],
           "next": "CHOMP_MOVE"
         },
@@ -4869,6 +5674,12 @@
           "intents": [
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STEAM_ERUPTION"
+            }
+          ],
           "next": "STOMP_MOVE"
         },
         {
@@ -4880,6 +5691,16 @@
             "Debuff",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            },
+            {
+              "category": "powers",
+              "id": "STEAM_ERUPTION"
+            }
+          ],
           "next": "RAM_MOVE"
         },
         {
@@ -4889,6 +5710,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STEAM_ERUPTION"
+            }
           ],
           "next": "SIPHON_MOVE"
         },
@@ -4900,6 +5727,12 @@
             "Heal",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STEAM_ERUPTION"
+            }
+          ],
           "next": "PRESSURE_GUN_MOVE"
         },
         {
@@ -4909,6 +5742,12 @@
           "intents": [
             "SingleAttack",
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STEAM_ERUPTION"
+            }
           ],
           "next": "PRESSURE_UP_MOVE"
         },
@@ -4920,6 +5759,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STEAM_ERUPTION"
+            }
+          ],
           "next": "STOMP_MOVE"
         },
         {
@@ -4928,6 +5773,12 @@
           "move_id": "ABOUT_TO_BLOW",
           "intents": [
             "Stun"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STEAM_ERUPTION"
+            }
           ],
           "must_perform_once": true,
           "next": "EXPLODE_MOVE"
@@ -4977,6 +5828,16 @@
               "count": 1,
               "recipients": "move_targets",
               "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
+          "rule_references": [
+            {
+              "category": "cards",
+              "id": "INFECTION"
+            },
+            {
+              "category": "powers",
+              "id": "STRENGTH"
             }
           ],
           "next": "NASTY_BITE_MOVE"
@@ -5061,6 +5922,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "WRITHE_MOVE"
         },
         {
@@ -5070,6 +5937,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
           ],
           "next": "BULK_MOVE"
         },
@@ -5141,6 +6014,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "WRITHE_MOVE"
         },
         {
@@ -5150,6 +6029,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
           ],
           "next": "BULK_MOVE"
         },
@@ -5221,6 +6106,12 @@
             "SingleAttack",
             "Buff"
           ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
+          ],
           "next": "WRITHE_MOVE"
         },
         {
@@ -5230,6 +6121,12 @@
           "intents": [
             "SingleAttack",
             "Debuff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "WEAK"
+            }
           ],
           "next": "BULK_MOVE"
         },
@@ -5290,6 +6187,12 @@
           "move_id": "WAR_CHANT",
           "intents": [
             "Buff"
+          ],
+          "rule_references": [
+            {
+              "category": "powers",
+              "id": "STRENGTH"
+            }
           ],
           "next": "RAND"
         },

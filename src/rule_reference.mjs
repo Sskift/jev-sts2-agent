@@ -82,6 +82,7 @@ export function buildRuleReference(state) {
     for (const move of row.moves || []) for (const power of move.powers || []) add('powers', power.power_id);
     if (category === 'monsters') for (const move of enemyPattern(row.id)?.states || []) {
       for (const generated of move.generated_cards || []) add('cards', generated.card_id);
+      for (const reference of move.rule_references || []) add(reference.category, reference.id);
     }
     if (category === 'encounters') for (const monster of row.monsters || []) add('monsters', monster.id);
     for (const variable of Object.keys(row.vars || {})) if (variable !== 'Power' && variable.endsWith('Power')) add('powers', variable);

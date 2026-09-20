@@ -1,0 +1,56 @@
+{
+  "at": "2026-09-20T19:16:32.707Z",
+  "run_id": "run-1789929587",
+  "basis": {
+    "old_runtime_commit": "86fda8756c85b8fe5dc6e660585516c00f69477a",
+    "old_live_request": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0351/jev-turn_objective-0001.json",
+    "old_request_sha256": "d9b4629526368261605da02e00c481829fe58175c02318da52d946a81d302616",
+    "old_request_has_frantic_escape": false,
+    "old_request_has_sandpit": false,
+    "game_version": "v0.111.0",
+    "assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
+    "insatiable_source_sha256": "e6872ce2901d65ca9156ad73ffa433801add41e0de7c30dd47b7e90baa9e683b"
+  },
+  "change": {
+    "rule_reference_count": 156,
+    "moves": 139,
+    "monsters": 92,
+    "unresolved_ids": [],
+    "prior_graph_and_generated_effects_unchanged": true,
+    "first_move_references": [
+      {
+        "category": "cards",
+        "id": "FRANTIC_ESCAPE"
+      },
+      {
+        "category": "powers",
+        "id": "SANDPIT"
+      }
+    ],
+    "scope": "Rule types directly referenced by the named move method. References are not confirmed effects: conditions, quantities, recipients, destinations, helper methods and timing are not inferred. They never add powers or cards to the observed state."
+  },
+  "validation": {
+    "checks_passed": 51,
+    "complete_current_context_with_memory_bytes": 66761,
+    "contains_frantic_escape": true,
+    "contains_sandpit": true,
+    "mode": "Compile-only. No additional Jev decision or game command."
+  },
+  "reload_checkpoint": {
+    "file": "temp/run30-before-rule-reload.json",
+    "sha256": "1e7fced014f6cc66aaa75866e2472694e7313f1ab260b25719beb73471588fb2",
+    "run_id": "run-1789929587",
+    "act": 1,
+    "floor": 29,
+    "hp": 61,
+    "turn": 2,
+    "pending": null,
+    "old_controller_result": "temp/run30-result.json",
+    "old_controller_stopped_reason": "interrupted"
+  },
+  "limitations": [
+    "Typed references supply related rules, not the guaranteed application, initial amount, destination or outcome of a move. Live counters and piles retain priority.",
+    "Only the named move method is inspected. Other helpers, alternative construction forms and conditional execution can remain uncovered.",
+    "This establishes context coverage and schema compatibility; no win-rate or decision-quality improvement is claimed."
+  ]
+}

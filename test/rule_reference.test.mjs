@@ -34,6 +34,21 @@ test('enemy move generation links future card rules before those cards enter obs
   assert.deepEqual(state, before, 'Public move effects must never become an observed card or legal action');
 });
 
+test('upcoming boss references include response cards and death rules before their first native application', () => {
+  const state = completeCombat();
+  state.decision_context.map.boss = { id: 'THE_INSATIABLE_BOSS', name: 'The Insatiable' };
+  const before = structuredClone(state), reference = buildRuleReference(state);
+  const escape = reference.entries.cards.find(c => c.id === 'FRANTIC_ESCAPE');
+  assert.match(escape.base_rules, /Increase Sandpit by 1/);
+  assert.match(reference.entries.powers.find(p => p.id === 'SANDPIT').rule_template, /eaten and die/);
+  const monster = reference.entries.monsters.find(m => m.id === 'THE_INSATIABLE');
+  assert.ok(monster.related_rules.includes('cards/FRANTIC_ESCAPE'));
+  assert.ok(monster.related_rules.includes('powers/SANDPIT'));
+  const compiled = compileModelRequest(prepareModDecision(state).payload);
+  assert.match(JSON.stringify(compiled.payload.state.knowledge), /FRANTIC_ESCAPE/);
+  assert.deepEqual(state, before, 'A visible future boss rule is knowledge, not a current power, card or legal command');
+});
+
 test('base/upgrade/X rules stay separate and never replace current combat values', () => {
   const state = stateWith({ combat: { hand: [{ id: 'RAGE', block: 0, rage_block_per_attack: 5 }, { id: 'WHIRLWIND', cost: -1, damage: 12 }], player: { powers: [{ id: 'RAGE_POWER', amount: 5, description: 'Gain 5 Block per Attack.' }] } } });
   const before = structuredClone(state), rules = buildRuleReference(state);
