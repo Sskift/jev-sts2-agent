@@ -10,6 +10,8 @@ import { selectionStage, assembleSelection } from './mod_selection.mjs';
 import { needsStrategyAssessment, prepareStrategyAssessment, parseStrategyAssessment } from './strategy_assessment.mjs';
 import { decideTurn } from './turn_plan.mjs';
 import { plannedUpgradeSelection } from './turn_plan_state.mjs';
+import { decideCamp } from './camp_plan.mjs';
+import { plannedCampSelection } from './camp_plan_state.mjs';
 
 const integer = value => Number.isInteger(value) && value >= 0;
 const hasId = value => typeof value === 'string' && value.length > 0;
@@ -364,6 +366,12 @@ export async function makeModDecisionWithJev(gameState, options = {}) {
 }
 
 async function decidePrepared(gameState, options, prepared) {
+  const campSelection = plannedCampSelection(options.memory?.data.camp_upgrade_plan, gameState, prepared.candidates);
+  if (campSelection) return { ...campSelection, model: 'jev-camp-plan-selection', context_metrics: prepared.metrics };
+  if (gameState.screen === 'REST_SITE') {
+    const camp = await decideCamp(gameState, options, prepared, choosePrepared);
+    if (camp) return camp;
+  }
   if (options.turnPlanning !== false) {
     const selection = plannedUpgradeSelection(options.memory?.data.turn_plan, gameState, prepared.candidates);
     if (selection) return { ...selection, model: 'jev-turn-plan-selection', turn_plan: options.memory.data.turn_plan, context_metrics: prepared.metrics };

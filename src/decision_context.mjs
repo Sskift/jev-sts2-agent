@@ -7,6 +7,7 @@ import { previewDamageSum } from './combat_arithmetic.mjs';
 import { buildRuleReference } from './rule_reference.mjs';
 import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
 import { sameTurn, publicTurnPlan, turnGuard, advanceTurnPlan } from './turn_plan_state.mjs';
+import { campPlanApplicable, publicCampTarget } from './camp_plan_state.mjs';
 import { potionEffectFacts } from './potion_effects.mjs';
 import { positioningError } from './combat_positioning.mjs';
 import { publicRunStrategy } from './run_strategy_state.mjs';
@@ -301,15 +302,18 @@ export class DecisionMemory {
     this.last = clone(state);
     this.persist();
   }
-  begin(request, state, { turnPlan, turnStep } = {}) {
+  begin(request, state, { turnPlan, turnStep, campUpgradePlan } = {}) {
     if (this.data.pending) throw new ContextError('An earlier action has an unresolved outcome; inspect the saved memory before continuing.');
     if (turnPlan && !sameTurn(turnPlan, state)) throw new ContextError('Cannot attach a plan from another turn');
+    if (campUpgradePlan && (!campPlanApplicable(campUpgradePlan, state) || state.screen !== 'REST_SITE'
+      || request.cmd !== 'choose_rest_option' || request.id !== 'SMITH')) throw new ContextError('Cannot attach a stale or unrelated camp plan');
     const matching = state.combat?.hand?.filter(card => card.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.index - b.index);
     this.data.pending = { request: clone(request), floor: state.decision_context?.total_floor, combat_id: state.decision_context?.combat_id || null, round: state.combat?.turn_number, screen: state.screen,
       ...(state.combat ? { combat_frame_before: combatFrame(state) } : {}),
       ...(request.cmd === 'play_card' ? { played_card_at_request: clone(matching?.[request.nth ?? 0]) } : {}) };
     if (request.cmd === 'use_potion') this.data.pending.potion_at_request = clone(state.decision_context?.player?.potions.filter(p => p.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.slot - b.slot)[request.nth ?? 0]);
     if (request.cmd === 'reward_skip_card') this.data.pending.card_reward_key = cardRewardKey(state.rewards?.rewards?.filter(reward => reward.type.toLowerCase() === 'card')[request.nth ?? 0]);
+    if (campUpgradePlan) this.data.pending.camp_upgrade_plan = clone(campUpgradePlan);
     if (turnPlan) {
       this.data.turn_plan = clone(turnPlan);
     }
@@ -323,6 +327,10 @@ export class DecisionMemory {
   }
   finish(response, after) {
     advanceTurnPlan(this.data.turn_plan, this.data.pending, response, after);
+    // Promote only a confirmed Smith action. Failed/uncertain commands cannot
+    // authorize automatic selection; the existing pending guard handles them.
+    if (this.data.pending?.camp_upgrade_plan && response.ok) this.data.camp_upgrade_plan = clone(this.data.pending.camp_upgrade_plan);
+    else delete this.data.camp_upgrade_plan;
     const change = response.ok && this.data.pending?.combat_id === after.decision_context?.combat_id
       ? observedCombatChange(this.data.pending?.combat_frame_before, after) : null;
     const recorded = { ...this.data.pending, ok: response.ok, result: clone(response.data ?? response.error ?? null), after_screen: after.screen,
@@ -330,6 +338,7 @@ export class DecisionMemory {
     delete recorded.combat_frame_before;
     delete recorded.turn_guard;
     delete recorded.turn_card_cost;
+    delete recorded.camp_upgrade_plan;
     this.data.actions.push(recorded);
     this.data.pending = !response.ok && ['TIMEOUT', 'EVENT_TIMEOUT', 'PURCHASE_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? { ...this.data.pending, outcome_unknown: true, error: response.error } : null;
     this.persist();
@@ -468,6 +477,9 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
   const source = canonicalObservation(state), context = source.decision_context;
   const screenState = { ...source };
   for (const key of ['screen', 'combat', 'map', 'decision_context']) delete screenState[key];
+  if (state.screen === 'GRID_CARD_SELECT' && campPlanApplicable(memory.data.camp_upgrade_plan, state)) {
+    screenState.camp_planning = publicCampTarget(memory.data.camp_upgrade_plan);
+  }
   if (state.screen === 'REST_SITE' && screenState.rest_site && context?.deck_upgrade_previews) {
     // Preview-only values must not turn entering/leaving a campfire into a
     // permanent deck change. Instance IDs still join the grouped deck below.

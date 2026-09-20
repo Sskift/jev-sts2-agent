@@ -142,7 +142,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
             save(path.join(directory, 'context-run-strategy.json'), metrics);
           }
           else if (metrics.purpose === 'option_assessment') save(path.join(directory, 'jev-strategy-request.json'), payload);
-          else if (metrics.purpose?.startsWith('turn_')) {
+          else if (metrics.purpose?.startsWith('turn_') || metrics.purpose?.startsWith('camp_')) {
             const sequence = String(++planningCalls).padStart(4, '0');
             save(path.join(directory, `jev-${metrics.purpose}-${sequence}.json`), payload);
             save(path.join(directory, `context-${metrics.purpose}-${sequence}.json`), metrics);
@@ -172,7 +172,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
         save(path.join(directory, 'result.json'), { executed: false, reason: 'State changed during decision; observe again' });
         continue;
       }
-      memory.begin(decision.request, current, { turnPlan: decision.turn_plan, turnStep: decision.turn_step });
+      memory.begin(decision.request, current, { turnPlan: decision.turn_plan, turnStep: decision.turn_step, campUpgradePlan: decision.camp_upgrade_plan });
       let response;
       try { response = await client.request(decision.request); }
       catch (error) {

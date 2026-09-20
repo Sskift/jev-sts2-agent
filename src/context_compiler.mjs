@@ -28,6 +28,7 @@ const routes = [
   ['screen_state.preceding_observed_action', 'history.selection_trigger'],
   ['screen_state.skipped_card_rewards', 'history.skipped_card_rewards'],
   ['screen_state.selection_planning', 'intent.selection_planning'],
+  ['screen_state.camp_planning', 'intent.camp_planning'],
   ['run_strategy.capability_assessment', 'analysis.run_capability_assessment'],
   ['run_strategy.revisions', 'history.strategy_revisions'],
   ['run_strategy.revision_coverage', 'history.strategy_coverage'],
@@ -95,7 +96,7 @@ function decisionFrame(source, questions, metrics, observation) {
   const advisory = ['option_assessment', 'run_strategy_assessment'].includes(phase);
   return {
     phase, horizon: phase === 'run_strategy_assessment' ? 'remaining_run' : source.in_combat ? 'remaining_turn_with_full_run_objective' : 'current_choice_with_full_run_objective',
-    output_role: advisory ? 'advisory_assessment' : planning || phase === 'selection_assembly' ? 'unexecuted_plan_component' : 'legal_action_selection',
+    output_role: advisory ? 'advisory_assessment' : planning || ['selection_assembly', 'camp_upgrade_target'].includes(phase) ? 'unexecuted_plan_component' : 'legal_action_selection',
     observation_id: digestObservation(observation, source.text_dictionary), question_keys: Object.keys(questions),
     reference_paths: aliases,
     contract: {

@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-20",
+  "run_id": "run-1789900349",
+  "formal_result": {
+    "source": "run-artifacts/2026-09-20T11-00-04-270Z-80ddb435/step-0079/after-state.json",
+    "screen": "GAME_OVER", "is_victory": false, "floor": 29, "act_index": 1,
+    "encounter": "Spiny Toad", "score": 514, "hp": 0,
+    "memory_archived": true, "normal_menu_return_confirmed": true
+  },
+  "original_camp": {
+    "source": "run-artifacts/2026-09-20T11-00-04-270Z-80ddb435/step-0059",
+    "floor": 28, "hp": 29, "max_hp": 80, "rest_healing": 24,
+    "choice": "SMITH", "probabilities": { "rest_SMITH": 0.54, "rest_HEAL": 0.46 },
+    "subsequent_upgrade": "STRIKE_IRONCLAD",
+    "native_upgrade_previews_already_present": true
+  },
+  "read_only_replay": {
+    "source": "temp/run24-camp-replay/result.json",
+    "model_calls": 2, "conditional_target": "FLAME_BARRIER",
+    "before": { "cost": 2, "block": 12, "retaliation": 4 },
+    "after": { "cost": 2, "block": 16, "retaliation": 6 },
+    "choice": "HEAL", "probabilities": { "rest_SMITH": 0.49, "rest_HEAL": 0.51 },
+    "input_tokens": 25220, "output_tokens": 260,
+    "request_bytes": { "camp_upgrade_target": 47735, "camp_concrete_choice": 42317 },
+    "history": "Contemporaneous camp observation and strategy only; no future observations or final memory provided to the model.",
+    "game_commands_sent": 0,
+    "post_replay_matching_check": "Captured following grid matches Flame Barrier at nth 0, checked only after inference; no command executed."
+  },
+  "validation": { "command": "node --test test/camp_plan.test.mjs test/history_scope.test.mjs test/context_compiler.test.mjs test/mod_decision.test.mjs test/mod_loop.test.mjs", "passed": 29, "failed": 0 },
+  "scope": "Concrete conditional comparison and bounded interaction intention. Close model probabilities do not establish improved win rate or that resting would have won the failed run. Three-act formal victory remains incomplete."
+}
