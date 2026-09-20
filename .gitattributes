@@ -1,0 +1,2 @@
+# Keep versioned reference checksums identical on Windows and other platforms.
+data/spire-codex/**/*.json text eol=lf
