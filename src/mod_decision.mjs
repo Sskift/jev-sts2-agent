@@ -4,7 +4,7 @@ import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactContext, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
 import { combatForecast, firstHitHpLoss } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
-import { needsStrategyAssessment, prepareStrategyAssessment } from './strategy_assessment.mjs';
+import { needsStrategyAssessment, prepareStrategyAssessment, parseStrategyAssessment } from './strategy_assessment.mjs';
 
 const API_URL = 'https://api.typesafe.ai/v1/systemone';
 const integer = value => Number.isInteger(value) && value >= 0;
@@ -274,7 +274,7 @@ export function prepareModDecision(gameState, options = {}) {
   if (!candidates.size) return { action: 'wait', reason: `No complete supported action in ${gameState?.screen || 'unknown'}` };
   const context = buildDecisionContext(gameState, { candidates, memory: options.memory, selectionPlanning: stage?.state });
   if (skippedCardRewards.length) context.screen_state.skipped_card_rewards = { reward_nths: skippedCardRewards, note: 'Skip closes the card picker but the game keeps this reward available. The earlier skip choice is remembered: duplicate skip commands are omitted, while taking a card to reconsider and claiming other rewards remain available.' };
-  if (options.strategyAssessment) context.strategy_assessment = { source: 'Jev judgment of this observation, advisory rather than a verified fact', priority: options.strategyAssessment.priority, meaning: options.strategyAssessment.description };
+  if (options.strategyAssessment) context.strategy_assessment = { source: 'Independent Jev judgments of incremental value, advisory rather than verified facts', scale: options.strategyAssessment.scale, options: options.strategyAssessment.options };
   if (gameState.screen === 'MAP') for (const route of context.map?.routes || []) {
     const id = `map_${route.next_node.col}_${route.next_node.row}`, candidate = candidates.get(id);
     if (!candidate) continue;
@@ -287,7 +287,7 @@ export function prepareModDecision(gameState, options = {}) {
     state: context,
     questions: { next_action: {
       type: 'choice',
-      instructions: `${decisionInstructions(gameState)}${options.strategyAssessment ? ' Use strategy_assessment as an advisory view of the deck\'s largest current need. Compare the actual offered choices against that need and their costs; it does not require buying or taking a card. If nothing helps enough, skip or preserve resources. Reconsider the advice when a concrete option provides a better overall result.' : ''}${stage ? ' This is a multi-card planning stage: follow screen_state.selection_planning, choose the next component of the final set, and consider its synergy with already selected cards. A planning choice with request=null sends no game action. Every remaining card is available as a choice; the final complete set is submitted only after all choices.' : ''}`,
+      instructions: `${decisionInstructions(gameState)}${options.strategyAssessment ? ' Consider strategy_assessment as advisory assessments of each concrete option\'s incremental value. Compare all offered actions and actual effects; a strong improvement can be valuable even if the deck has several other needs. The scores do not force buying or taking any option, and any action remains selectable.' : ''}${stage ? ' This is a multi-card planning stage: follow screen_state.selection_planning, choose the next component of the final set, and consider its synergy with already selected cards. A planning choice with request=null sends no game action. Every remaining card is available as a choice; the final complete set is submitted only after all choices.' : ''}`,
       criteria: Object.fromEntries([...candidates].map(([id, candidate]) => {
         // Keep the immediate choice readable even when full histories and card
         // collections use tables. Rules remain in state; this is a direct label,
@@ -335,7 +335,7 @@ async function choosePrepared(gameState, options, prepared) {
   if (gameState.screen === 'REWARD' && gameState.rewards?.rewards.length === 1 && gameState.rewards.rewards[0].type === 'Card' && (prepared.skippedCardRewards?.includes(0) || (last?.ok && !last.card_reward_key && last.request.cmd === 'reward_skip_card' && last.floor === gameState.decision_context?.total_floor)) && candidates.has('proceed') && [...candidates.values()].every(candidate => ['proceed', 'reward_choose_card', 'reward_skip_card'].includes(candidate.request?.cmd))) {
     return { ...candidates.get('proceed'), candidate_id: 'proceed', model: 'complete-selected-skip', context_metrics: metrics };
   }
-  if (candidates.size === 1) {
+  if (!prepared.assessmentChoices && candidates.size === 1) {
     const [candidate_id, candidate] = candidates.entries().next().value;
     return { ...candidate, candidate_id, model: 'forced-single-action', context_metrics: metrics };
   }
@@ -355,7 +355,8 @@ async function choosePrepared(gameState, options, prepared) {
     throw new Error(`Jev API error ${response.status}${typeof kind === 'string' && /^[a-z_]{1,80}$/.test(kind) ? ` (${kind})` : ''}`);
   }
   const result = await response.json();
-  const answer = result.answers?.[prepared.questionId || 'next_action'];
+  if (prepared.assessmentChoices) return { ...parseStrategyAssessment(prepared, result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
+  const answer = result.answers?.next_action;
   if (answer?.type !== 'choice' || typeof answer.choice !== 'string' || !candidates.has(answer.choice)) throw new Error('Jev returned an invalid mod action choice');
   return { ...candidates.get(answer.choice), candidate_id: answer.choice, model: result.model, probabilities: answer.probabilities, confidence: answer.confidence, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
 }

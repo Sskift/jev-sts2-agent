@@ -75,7 +75,7 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 
 升级选择的 `upgrade_preview`、`upgrade_preview_name`、`upgrade_preview_cost` 来自独立卡牌副本的原生升级预览计算；副本不注册到实时卡牌集合，也不升级玩家的原牌。基础费用和升级费用分别保留，X 费为 -1。
 
-有实际拿牌或购买选择时，Jev 先用完整状态判断当前卡组最需要改善的方面，再用另一份完整请求选择游戏动作。`strategy_assessment` 保留它选出的建议及含义，明确不是已验证事实，也不强制拿牌、购买或删去其他候选。这样把构筑判断与眼前选项比较分开；两步都由 Jev 决定，任一步失败都不执行游戏动作。请求分别保存为 `jev-strategy-request.json` 与 `jev-request.json`，最终结果保留判断及两次调用的用量。
+有实际拿牌或购买选择时，Jev 先在同一完整状态上独立评估每个具体项目的增益，再用另一份完整请求选择游戏动作。第一步使用 [TypeSafe Score](https://docs.typesafe.ai/primitives/score)，按恶化、边际收益、有用改善、重大改善四级评价已有配合、重复数量、费用、稀释牌组的代价和可见路线。`strategy_assessment` 保留每个动作的评分、分布和可信度，明确是建议，不设自动购买阈值、不强制选择最高分，也不裁掉其他候选。每次仍由 Jev 作最终选择，任一步失败都不执行游戏动作。请求分别保存为 `jev-strategy-request.json` 与 `jev-request.json`，结果保留两次调用的用量；旧日志中的单一构筑优先项仍可按原 Schema 读取。
 
 敌方回合可能暂停等待选牌。模组此时返回 `selection_required`、`turn_completed: false`，随后正常选择并继续结算。旧模组若在已发出的 end_turn 后超时，Node 只在同一局、同一战斗/楼层/回合，明确处于敌方阶段且出现必须完成的选牌时，才根据新观察记录“已接受并等待选择”；不重发 end_turn，也不把敌方回合标为已完成。其他结果不明的动作继续保留待核对状态。
 

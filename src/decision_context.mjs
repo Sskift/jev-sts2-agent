@@ -16,6 +16,8 @@ export function validateDecisionPacket(rawPacket) {
   if (packet.in_combat !== Boolean(packet.combat)) throw new ContextError('in_combat contradicts combat data');
   const actionIds = packet.legal_actions.map(a => a.action_id);
   if (new Set(actionIds).size !== actionIds.length) throw new ContextError('Duplicate legal action IDs');
+  const assessedIds = packet.strategy_assessment?.options?.map(option => option.action_id) || [];
+  if (new Set(assessedIds).size !== assessedIds.length || assessedIds.some(id => !actionIds.includes(id))) throw new ContextError('Option assessment must refer to distinct legal actions');
   for (const action of packet.legal_actions) if (action.request === null && (!action.planning_choice || !packet.screen_state.selection_planning)) throw new ContextError('A non-dispatchable choice requires an explicit selection planning stage');
   const visit = item => {
     if (!item || typeof item !== 'object') return;

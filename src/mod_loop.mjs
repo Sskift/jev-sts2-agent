@@ -132,7 +132,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       let planningCalls = 0, planningDecisions = 0;
       const decision = await decide(state, { memory, prepared,
         onRequest: (payload, metrics) => {
-          if (payload.questions.deck_priority) save(path.join(directory, 'jev-strategy-request.json'), payload);
+          if (metrics.purpose === 'option_assessment') save(path.join(directory, 'jev-strategy-request.json'), payload);
           else { save(path.join(directory, 'jev-request.json'), payload); save(path.join(directory, 'context-metrics.json'), metrics); }
           if (prepared.selectionPlan) save(path.join(directory, `jev-planning-request-${String(++planningCalls).padStart(4, '0')}.json`), payload);
         },

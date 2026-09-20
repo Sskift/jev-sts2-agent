@@ -24,13 +24,37 @@
   "additionalProperties": false,
   "properties": {
     "strategy_assessment": {
-      "type": "object",
-      "required": ["source", "priority", "meaning"],
-      "properties": {
-        "source": { "$ref": "#/$defs/text" },
-        "priority": { "enum": ["reliable_defense", "efficient_damage", "multi_target_damage", "sustained_scaling", "draw_consistency", "energy_support", "immediate_recovery", "preserve_quality"] },
-        "meaning": { "$ref": "#/$defs/text" }
-      }
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["source", "priority", "meaning"],
+          "properties": {
+            "source": { "$ref": "#/$defs/text" },
+            "priority": { "enum": ["reliable_defense", "efficient_damage", "multi_target_damage", "sustained_scaling", "draw_consistency", "energy_support", "immediate_recovery", "preserve_quality"] },
+            "meaning": { "$ref": "#/$defs/text" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["source", "scale", "options"],
+          "properties": {
+            "source": { "$ref": "#/$defs/text" },
+            "scale": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/text" } },
+            "options": {
+              "type": "array", "minItems": 1,
+              "items": {
+                "type": "object", "required": ["action_id", "score"],
+                "properties": {
+                  "action_id": { "type": "string", "minLength": 1 },
+                  "score": { "type": "number", "minimum": 0, "maximum": 3 },
+                  "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "probabilities": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 } }
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "schema_version": {
       "const": "sts2.decision.v1"
