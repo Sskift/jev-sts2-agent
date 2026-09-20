@@ -141,5 +141,26 @@
         "engine_events_included": 0
       }
     }
-  ]
+  ],
+  "live_request_check": {
+    "source": "run-artifacts/2026-09-20T09-55-20-329Z-43cea2f3/step-0012/jev-turn_followthrough-0004.json",
+    "run_id": "run-1789896546",
+    "act_index": 1,
+    "floor": 20,
+    "phase": "turn_followthrough",
+    "policy": {
+      "mode": "current_turn_and_dependencies",
+      "floor": 20,
+      "current_round": 2,
+      "from_round": 2,
+      "preceding_enemy_round": 1,
+      "ordering_windows": [],
+      "reasons": [],
+      "engine_events_available": 32,
+      "engine_events_included": 10
+    },
+    "strategy_policy": "current_assessment_only_in_combat",
+    "local_observations": [],
+    "claim": "Actual main-loop request saved at the send boundary. This verifies selected context, not optimal play."
+  }
 }
