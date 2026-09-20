@@ -27,5 +27,8 @@
     "post_replay_matching_check": "Captured following grid matches Flame Barrier at nth 0, checked only after inference; no command executed."
   },
   "validation": { "command": "node --test test/camp_plan.test.mjs test/history_scope.test.mjs test/context_compiler.test.mjs test/mod_decision.test.mjs test/mod_loop.test.mjs", "passed": 29, "failed": 0 },
+  "live_reload": { "commit": "69d7d91", "run_id": "run-1789903049", "started_at_floor": 1,
+    "artifacts": "run-artifacts/2026-09-20T11-17-25-318Z-f7fc1220", "camp_flow_observed": false,
+    "feishu_revision": 79 },
   "scope": "Concrete conditional comparison and bounded interaction intention. Close model probabilities do not establish improved win rate or that resting would have won the failed run. Three-act formal victory remains incomplete."
 }
