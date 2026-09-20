@@ -13,6 +13,7 @@ import { positioningError } from './combat_positioning.mjs';
 import { publicRunStrategy } from './run_strategy_state.mjs';
 import { scopeDecisionHistory } from './history_scope.mjs';
 import { describeCombatEffects } from './effect_lifecycle.mjs';
+import { buildStrategyKnowledge, describeEnemyOutlook } from './strategy_knowledge.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -506,6 +507,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
   const combat = source.combat ? { ...source.combat } : null;
   if (combat) {
     combat.effect_timing = describeCombatEffects(source.combat);
+    combat.enemy_outlook = describeEnemyOutlook(source);
     delete combat.player; // Exactly equal to the authoritative player above.
     combat.draw_pile = { order: 'unknown', cards: groupCards(combat.draw_pile) };
     // Discard and exhaust are kept in their observed order, with full details.
@@ -595,6 +597,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     memory: memoryContext,
     rules: context?.glossary || [],
     rule_reference: buildRuleReference(source),
+    strategy_knowledge: buildStrategyKnowledge(source),
     information: { source: 'single mod main-thread snapshot plus decision-relevant local memory', unknown: ['unobserved draw order; retained card effects may establish partial knowledge', 'unrevealed question-mark contents and rewards', 'future enemy random choices', 'later acts', 'history outside the stated decision window or before available observations', ...(context?.extraction_errors || []).filter(e => /^history\.\d+\.description: NullReferenceException$/.test(e)).map(e => `Unavailable history display text (${e}); retained typed events and commands are available.`)], card_grouping: 'Each cards entry with count represents that many exactly equivalent card states; instance_ids distinguish copies. Never infer draw order from array order or IDs.', extraction_errors: (context?.extraction_errors || []).filter(e => !/^history\.\d+\.description: NullReferenceException$/.test(e)) },
     legal_actions: legalActions
   }, source, memory)));

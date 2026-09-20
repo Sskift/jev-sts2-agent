@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import { normalizeRuleId as normalize, visitRuleEntities } from './rule_entities.mjs';
+import { enemyPattern, enemyPatternSource } from './enemy_patterns.mjs';
 
 const directory = new URL('../data/spire-codex/v0.111.0/', import.meta.url);
 const manifest = JSON.parse(fs.readFileSync(new URL('manifest.json', directory), 'utf8'));
@@ -41,7 +42,8 @@ function project(category, row) {
     ...pick(row, ['vars', 'upgrade']) };
   if (category === 'events') return { ...identity, ...pick(row, ['type', 'preconditions', 'description', 'options', 'pages']),
     coverage: row.pages?.length ? 'Public possible pages, not the observed current page or guaranteed future outcome.' : 'Detailed pages unavailable in this reference; use live options.' };
-  if (category === 'monsters') return { ...identity, ...pick(row, ['type', 'moves', 'innate_powers', 'attack_pattern']),
+  if (category === 'monsters') return { ...identity, ...pick(row, ['type', 'moves', 'innate_powers']),
+    attack_pattern: enemyPattern(row.id) || row.attack_pattern,
     scope: 'Public base move repertoire/pattern, not the current hidden move or future random selection. Actual intent/damage/powers come from combat.enemies.' };
   if (category === 'powers') return { ...identity, ...pick(row, ['type', 'stack_type', 'allow_negative']),
     rule_template: clean(row.description_raw || row.description),
@@ -77,6 +79,7 @@ export function buildRuleReference(state) {
     for (const keyword of row.keywords_key || row.keywords || []) add('keywords', keyword);
     for (const power of row.powers_applied || []) add('powers', power.power_key || power.power);
     for (const power of row.innate_powers || []) add('powers', power.power_id);
+    for (const move of row.moves || []) for (const power of move.powers || []) add('powers', power.power_id);
     if (category === 'encounters') for (const monster of row.monsters || []) add('monsters', monster.id);
     for (const variable of Object.keys(row.vars || {})) if (variable !== 'Power' && variable.endsWith('Power')) add('powers', variable);
     // Exact tagged terms link mechanics and named generated items. Unknown or
@@ -92,6 +95,7 @@ export function buildRuleReference(state) {
     for (const { match, pattern } of mechanicTerms) if (pattern.test(ruleText)) add(...match);
   }
   return { source: manifest.source_url, game_version: manifest.game_version, fetched_at: manifest.fetched_at,
+    enemy_pattern_source: enemyPatternSource,
     scope: 'Static public reference for current entities and related rules. Live mod state, resolved card text, costs, upgrades, counters, intent, previews and legal_actions take precedence. References do not reveal this run\'s hidden rolls or add legal actions. Null/missing values are unknown. Wiki extraction may be incomplete; parsed draw/damage summaries are not used for calculations.',
     entries: Object.fromEntries(categories.map(category => [category, [...selected.values()].filter(([type]) => type === category).map(([, row]) => {
       const related = [...(links.get(`${category}/${row.id}`) || [])];

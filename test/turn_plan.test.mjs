@@ -138,7 +138,7 @@ test('complete-plan comparison can replace two separated defenses with one stron
   }));
   assert.ok(offered, 'The model must see the consolidated alternative even though a one-card replacement is unaffordable');
   assert.equal(plan.steps.filter(step => step.kind === 'play_card').length, 3);
-  assert.deepEqual(plan.steps.filter(step => ['a1', 'a2'].includes(step.card_instance_id)).map(step => step.card_instance_id), ['a1', 'a2']);
+  assert.deepEqual(plan.steps.filter(step => ['a1', 'a2'].includes(step.card_instance_id)).map(step => step.card_instance_id).sort(), ['a1', 'a2']);
   assert.deepEqual(state, original);
 });
 

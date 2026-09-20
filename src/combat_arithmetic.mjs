@@ -40,6 +40,10 @@ export function attackHitPreview(card) {
 
 export const previewHitCount = card => attackHitPreview(card).hits;
 
+export const uncomputedDepletionRules = enemy => (enemy.powers || []).filter(p => !['ILLUSION_POWER', 'MINION_POWER'].includes(p.id)
+  && (['ADAPTABLE_POWER', 'REATTACH_POWER'].includes(p.id)
+    || /reviv|resurrect|(?:when|upon|on)[^.]*\b(?:death|dies?|defeated)\b/i.test(p.description || '')));
+
 export function previewDamageSum(card, enemy) {
   const damage = card.target_previews?.find(preview => preview.target_id === enemy.combat_id)?.damage;
   const hits = previewHitCount(card);
@@ -96,6 +100,9 @@ export function combatForecast(combat, card = null, target = null) {
   }) : null;
   const depleted = new Set(areaHits?.filter(preview => preview.hp_depleted).map(preview => preview.target_id));
   if (targetDepleted) depleted.add(target.combat_id);
+  const depletionEffects = combat.enemies.filter(e => depleted.has(e.combat_id)).flatMap(enemy => uncomputedDepletionRules(enemy)
+    .map(power => ({ owner_combat_id: enemy.combat_id, source_id: power.id, description: power.description,
+      scope: 'HP depletion does not establish removal, canceled intent, or an ended combat. This death/revival hook is not simulated.' })));
   const positioning = projectPositioning(combat, card ? [{ kind: 'play_card', target: target?.combat_id }] : [], depleted);
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
   const incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
@@ -105,7 +112,7 @@ export function combatForecast(combat, card = null, target = null) {
   const allTargetsDepleted = living.length > 0 && living.every(enemy => depleted.has(enemy.combat_id));
   const endTurnDamage = allTargetsDepleted ? [] : knownTurnEndDamage(combat, remainingHand, depleted);
   const timedEffects = allTargetsDepleted ? [] : uncomputedTurnEndHealthEffects(combat, remainingHand, endTurnDamage);
-  const healthUnresolved = reactionUnresolved || timedEffects.length > 0;
+  const healthUnresolved = reactionUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;
   const endTurnHandDamage = endTurnDamage.filter(e => e.hand_index !== undefined).reduce((sum, e) => sum + e.amount, 0);
   const selfHpLoss = Math.max(0, card?.hp_loss || 0);
   const blockPreview = immediateBlockPreview(card);
@@ -154,7 +161,8 @@ export function combatForecast(combat, card = null, target = null) {
     end_turn_block_gains: endTurnBlockGains,
     ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
-    displayed_attacks_after_target_depletion: reactionUnresolved ? null : incoming,
+    displayed_attacks_after_target_depletion: reactionUnresolved || depletionEffects.length ? null : incoming,
+    ...(depletionEffects.length ? { uncomputed_depletion_effects: depletionEffects } : {}),
     ...(reactionUnresolved ? { uncomputed_reactions: reactions,
       block_baseline_without_reactions: block,
       reaction_coverage: 'HP, final Block and remaining incoming damage are unknown. Attack damage/removal and turn-end gain entries are conditional baselines only: reaction may prevent the card or later hits from finishing.' } : {}),

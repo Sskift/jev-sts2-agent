@@ -33,7 +33,7 @@
     "knowledge": {
       "type": "object", "additionalProperties": false, "required": ["reference", "native_glossary", "entity_rules"],
       "properties": {
-        "reference": {}, "native_glossary": {}, "resolved_potion_effects": {},
+        "reference": {}, "native_glossary": {}, "resolved_potion_effects": {}, "strategy": {},
         "entity_rules": { "type": "object", "additionalProperties": { "type": ["string", "null"] } },
         "catalog": { "type": "object", "additionalProperties": {
           "type": "object", "additionalProperties": false, "required": ["encoding", "keys", "records"],

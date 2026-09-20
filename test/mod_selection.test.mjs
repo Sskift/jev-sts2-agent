@@ -7,6 +7,7 @@ import path from 'node:path';
 import { buildModCandidates, makeModDecisionWithJev, prepareModDecision } from '../src/mod_decision.mjs';
 import { runModLoop } from '../src/mod_loop.mjs';
 import { withContext, fixtureCard } from './fixtures/context.mjs';
+import { expandRecordTables } from '../src/decision_context.mjs';
 
 function selection(size = 24, min = 4, max = min) {
   return withContext({ screen: 'GRID_CARD_SELECT', grid_card_select: {
@@ -19,6 +20,7 @@ function mockModel(choices, inspect = () => {}) {
   let call = 0;
   return async (_url, request) => {
     const payload = parseJevRequest(request.body);
+    payload.state = expandRecordTables(payload.state);
     inspect(payload, call);
     const choice = choices[call++];
     assert.ok(choice, 'Unexpected extra model call');

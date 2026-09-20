@@ -88,7 +88,7 @@ if (mode === 'collect') {
     snapshot(dir, option('--id') || 'development', cohort);
   }
 } else if (mode === 'freeze') {
-  const files = ['scripts/replay_harness.mjs', option('--split') || 'eval/harness-split.json', ...['src', 'schemas'].flatMap(dir => fs.readdirSync(dir).filter(f => /\.(mjs|json)$/.test(f)).map(f => path.join(dir, f)))];
+  const files = ['scripts/replay_harness.mjs', option('--split') || 'eval/harness-split.json', ...['src', 'schemas', 'data'].flatMap(dir => fs.readdirSync(dir, { recursive: true }).filter(f => /\.(mjs|json)$/.test(f)).map(f => path.join(dir, f)))].sort();
   const hashes = Object.fromEntries(files.map(f => [f.replaceAll('\\', '/'), hash(fs.readFileSync(f))]));
   const frozen = { at: new Date().toISOString(), baseline_commit: split.baseline_commit, candidate_sha256: hash(JSON.stringify(hashes)), files: hashes };
   if (fs.existsSync(path.join(output, 'freeze.json'))) throw new Error('Freeze already exists; retain the original assessment instead of overwriting it');
@@ -125,6 +125,7 @@ if (mode === 'collect') {
       write(path.join(dir, 'decision.json'), result);
       Object.assign(summary, { request: result.request, objective: result.turn_plan?.objective, model: result.planning_model || result.model,
         sequence: result.turn_plan?.steps.map(s => ({ kind: s.kind, name: s.name, card_id: s.card_id, target: s.target, slot: s.slot })),
+        candidate_coverage: result.turn_plan?.candidate_coverage, comparison_audit: result.turn_plan?.comparison_audit,
         usage: result.usage, calls, responses, elapsed_ms: Math.round(performance.now() - started) });
     } catch (error) { Object.assign(summary, { error: error.message, details: error.details, calls, responses }); }
     write(path.join(dir, 'summary.json'), summary); console.log(JSON.stringify(summary));

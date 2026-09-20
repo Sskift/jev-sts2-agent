@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-09-20",
+  "rules_version": "v0.111.0",
+  "authority": "Advisory, paraphrased strategy notes. These are hypotheses to evaluate against the current deck, encounter, route and available choices, not a prescribed build or card tier list. Native rules override all advice. Sources without an explicit patch are not numeric rule authorities.",
+  "sources": {
+    "jobs": { "author": "Jorbs", "url": "https://sts2.untapped.gg/en/articles/slay-the-spire-deckbuilding-strategy-solving-the-spire-with-jobs", "published": "2026-03-06", "version": "Pre-release general framework; STS1 examples are excluded." },
+    "pathing": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/guides/how-to-make-the-best-map-choices-in-slay-the-spire-2", "version": "Unspecified; general tradeoffs only." },
+    "ironclad": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/ironclad", "version": "Unspecified; card references checked against local v0.111.0." },
+    "silent": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/silent", "version": "Unspecified; card references checked against local v0.111.0." },
+    "silent_a10": { "author": "Harvey Randall", "url": "https://www.pcgamer.com/games/roguelike/slay-the-spire-2-best-silent-cards-build-ascension-10/", "version": "Earlier Early Access; qualitative prerequisites only." },
+    "regent": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/regent", "version": "Unspecified; card references checked against local v0.111.0." },
+    "necrobinder": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/necrobinder", "version": "Unspecified; the page's max-HP Doom claim is excluded as inconsistent with native rules." },
+    "defect": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/defect", "version": "Unspecified; numeric and orb-order claims are excluded." },
+    "orb_spam": { "author": "Baalorlord via Untapped.gg", "url": "https://sts2.untapped.gg/en/guides/defect-build-orb-spam", "version": "Earlier Early Access; qualitative prerequisites only." }
+  },
+  "general": [
+    { "id": "answer_upcoming_jobs", "source": "jobs", "advice": "Evaluate immediate damage, control of multiple enemies, defense, long-fight scaling and access to the right cards. A rare payoff can lose to an ordinary card that solves the next encounter. An established package does not excuse an unanswered threat; compatible packages can coexist." },
+    { "id": "preserve_access", "source": "jobs", "advice": "Draw, removal and manipulation help align useful cards with the turn that needs them. Count draw and energy opportunity costs when adding another damage or setup card. Judge a card's remaining job rather than its isolated strength." },
+    { "id": "route_resources", "source": "pathing", "phases": ["between_rooms"], "advice": "Use the revealed boss and reachable paths to evaluate preparation needs. Elite rewards compete with HP, potions and access to rest or upgrades. Preserve route flexibility where useful. A question-mark node does not guarantee a safe room, and a suggested elite count is not a rule." }
+  ],
+  "characters": {
+    "IRONCLAD": {
+      "source": "ironclad",
+      "overview": "Healing can support useful HP trades, but it does not prevent lethal damage. Early standalone damage need not commit the deck to that attack's eventual package.",
+      "packages": [
+        { "id": "vulnerable", "cards": ["BASH", "TREMBLE", "TAUNT", "BULLY", "DOMINATE", "CRUELTY"], "requires": "Repeatable Vulnerable application and attacks or debuff payoffs.", "tradeoff": "Apply before beneficiaries when useful; evaluate actual stacks, cost and immunity." },
+        { "id": "exhaust", "cards": ["BURNING_PACT", "SECOND_WIND", "FIEND_FIRE", "CORRUPTION", "FEEL_NO_PAIN", "DARK_EMBRACE"], "requires": "Exhaust outlets plus useful triggers or a better remaining deck.", "tradeoff": "Removing cards also removes future defense and damage; setup needs time." },
+        { "id": "block", "cards": ["BARRICADE", "BODY_SLAM", "UNMOVABLE"], "requires": "Sufficient Block generation and a way to convert or preserve it.", "tradeoff": "Retention setup without generation may be too slow." },
+        { "id": "hp_loss", "cards": ["RUPTURE", "INFERNO", "BLOODLETTING", "OFFERING", "HEMOKINESIS"], "requires": "A supported self-loss trigger and useful payoff.", "tradeoff": "Budget actual HP and setup cost; healing is not guaranteed in time." },
+        { "id": "strike_cycle", "cards": ["HELLRAISER", "POMMEL_STRIKE", "PERFECTED_STRIKE"], "requires": "Draw and compatible Strike effects.", "tradeoff": "A standalone early attack does not justify every later Strike reward." }
+      ]
+    },
+    "SILENT": {
+      "source": "silent",
+      "overview": "Damage, discard, Poison and Shiv tools can complement each other. Pick the pieces that fix current output or consistency rather than forcing a pure archetype.",
+      "packages": [
+        { "id": "discard", "terms": ["discard", "Sly"], "requires": "Reliable discard outlets and enough flow to meet the payoff cards.", "tradeoff": "A discard payoff without its outlet can be a dead draw; extra copies can exceed available discard." },
+        { "id": "shivs", "terms": ["Shiv"], "requires": "Generation, useful attack triggers and enough hand space.", "tradeoff": "Per-play or per-hit retaliation changes the cost of many small attacks." },
+        { "id": "poison", "terms": ["Poison"], "requires": "Application and defense until the relevant poison timing.", "tradeoff": "Slow damage must still solve the current enemy response and multi-enemy pressure." },
+        { "id": "weak", "terms": ["Weak"], "requires": "Application on enemies whose damage matters.", "tradeoff": "Debuff support complements rather than replaces damage and card flow." }
+      ]
+    },
+    "REGENT": {
+      "source": "regent",
+      "overview": "Track Stars separately from energy. A large stored reserve and sustainable generation are different resources; repeated spenders need future supply. Forge, Stars and draw control can be combined when their costs fit.",
+      "packages": [
+        { "id": "stars", "terms": ["Star", "Stars"], "requires": "Generation and worthwhile spenders over multiple deck cycles.", "tradeoff": "A good energy ratio can hide a Star shortage. Retain defense while investing in generation." },
+        { "id": "blade", "cards": ["SOVEREIGN_BLADE", "SUMMON_FORTH", "SEEKING_EDGE", "CONQUEROR"], "terms": ["Forge"], "requires": "Forging plus repeated access to the Blade.", "tradeoff": "Retain keeps an unplayed Blade; after playing it, retrieval or another draw is needed." },
+        { "id": "draw_control", "cards": ["KINGLY_PUNCH", "KINGLY_KICK", "COSMIC_INDIFFERENCE", "GLIMMER"], "requires": "A useful redraw payoff and ways to control access.", "tradeoff": "Deck manipulation uses resources before the payoff arrives." }
+      ]
+    },
+    "NECROBINDER": {
+      "source": "necrobinder",
+      "overview": "Consider the player's HP, Osty's current HP, damage timing and draw access together. A delayed kill needs an answer to attacks that occur before execution.",
+      "packages": [
+        { "id": "osty", "terms": ["Osty", "Summon"], "requires": "Summoning and attacks that use Osty effectively.", "tradeoff": "Spending Osty's HP as defense can change subsequent attack value; verify current native values." },
+        { "id": "doom", "terms": ["Doom"], "requires": "Enough application and defense until the actual execution condition.", "tradeoff": "Use the current rule's threshold and timing; Doom is not immediate attack damage." },
+        { "id": "souls", "terms": ["Soul", "Souls"], "requires": "Generation and useful cards or triggers reached through drawing.", "tradeoff": "Extra access needs energy or low-cost follow-through; generated cards need observation." },
+        { "id": "ethereal", "terms": ["Ethereal"], "requires": "Effects that benefit from playing or exhausting the relevant cards.", "tradeoff": "Compare keeping access with the timing of exhaustion and its triggers." }
+      ]
+    },
+    "DEFECT": {
+      "source": "defect",
+      "overview": "Orb plans and low-cost attack plans need different support. Evaluate current channeling rate, slots, orb order, passive timing and energy before choosing a scaling direction.",
+      "packages": [
+        { "id": "orbs", "source": "orb_spam", "terms": ["Channel", "Focus", "Evoke", "Orb"], "requires": "Channeling plus appropriate output scaling or evocation.", "tradeoff": "Extra slots only help when filled; they delay evocation. Frost can support defense, while other orb plans need another defense source. Focus does not improve Plasma." },
+        { "id": "cheap_attacks", "cards": ["CLAW", "ALL_FOR_ONE"], "requires": "Repeated access to useful low-cost attacks.", "tradeoff": "Cheap cards still consume draws and can incur reaction damage." },
+        { "id": "uproar", "cards": ["UPROAR"], "requires": "An attack pool that supports the intended chain.", "tradeoff": "Unwanted attacks can disrupt the chain; account for the cost of shaping the deck." },
+        { "id": "status", "cards": ["SMOKESTACK", "ITERATION", "TRASH_TO_TREASURE"], "requires": "Status generation with a supported payoff.", "tradeoff": "Without the payoff in time, statuses obstruct useful draws." }
+      ]
+    }
+  }
+}

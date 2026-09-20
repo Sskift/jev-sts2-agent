@@ -1,0 +1,5214 @@
+{
+  "schema_version": 1,
+  "game_version": "v0.111.0",
+  "extracted_at": "2026-09-20T15:50:27.268Z",
+  "source": "Local installed sts2.dll; static inspection only. No native code or live RNG is invoked.",
+  "assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
+  "semantics": {
+    "base_weight": "Relative random weight before repeat restrictions, cooldowns and conditions; not an unconditional probability.",
+    "max_consecutive": "Maximum consecutive selections, not a branch weight.",
+    "cooldown": "Disallow if this move occurred among the last N moves.",
+    "condition": "Conditional branches take the first true predicate. Predicates are unevaluated; never assume private flags or missing history."
+  },
+  "entries": {
+    "AEONGLASS": {
+      "source_type": "Aeonglass",
+      "source_sha256": "cbb8844cd5ae9c7bc1f5bf605362fa7d69d4c6f828cd094da9247d0f50e2912f",
+      "initial_state": "EBB_MOVE",
+      "states": [
+        {
+          "id": "EBB_MOVE",
+          "type": "move",
+          "move_id": "EBB",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "EYE_LASERS_MOVE"
+        },
+        {
+          "id": "EYE_LASERS_MOVE",
+          "type": "move",
+          "move_id": "EYE_LASERS",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "INCREASING_INTENSITY_MOVE"
+        },
+        {
+          "id": "INCREASING_INTENSITY_MOVE",
+          "type": "move",
+          "move_id": "INCREASING_INTENSITY",
+          "intents": [
+            "Status",
+            "Buff"
+          ],
+          "next": "EBB_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "ARCHITECT": {
+      "source_type": "Architect",
+      "source_sha256": "445e8e2ad082f176326fd5d77270e2452847ab51f3ef39469f65363613b2eca7",
+      "initial_state": "NOTHING",
+      "states": [
+        {
+          "id": "NOTHING",
+          "type": "move",
+          "move_id": "NOTHING",
+          "intents": [
+            "Hidden"
+          ],
+          "next": "NOTHING"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "ASSASSIN_RUBY_RAIDER": {
+      "source_type": "AssassinRubyRaider",
+      "source_sha256": "aae424408656ac19ea76d4735e904de3f368f4266f15197303881e78499c40de",
+      "initial_state": "KILLSHOT_MOVE",
+      "states": [
+        {
+          "id": "KILLSHOT_MOVE",
+          "type": "move",
+          "move_id": "KILLSHOT",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "KILLSHOT_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "AXE_RUBY_RAIDER": {
+      "source_type": "AxeRubyRaider",
+      "source_sha256": "8804496dfd12726b6fffa4d1f8d491bd66ee4008c60d639698e1beaff5d00df3",
+      "initial_state": "SWING_1",
+      "states": [
+        {
+          "id": "SWING_1",
+          "type": "move",
+          "move_id": "SWING_1",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "SWING_2"
+        },
+        {
+          "id": "SWING_2",
+          "type": "move",
+          "move_id": "SWING_2",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "BIG_SWING"
+        },
+        {
+          "id": "BIG_SWING",
+          "type": "move",
+          "move_id": "BIG_SWING",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SWING_1"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "AXEBOT": {
+      "source_type": "Axebot",
+      "source_sha256": "a774d716597b9af6e81f6760af855e2394e9f9bc8225ab9c532f723fdcf02f0b",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "BOOT_UP_MOVE",
+          "type": "move",
+          "move_id": "BOOT_UP",
+          "intents": [
+            "Defend",
+            "Buff"
+          ],
+          "next": "HAMMER_UPPERCUT_MOVE"
+        },
+        {
+          "id": "ONE_TWO_MOVE",
+          "type": "move",
+          "move_id": "ONE_TWO",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "HAMMER_UPPERCUT_MOVE"
+        },
+        {
+          "id": "HAMMER_UPPERCUT_MOVE",
+          "type": "move",
+          "move_id": "HAMMER_UPPERCUT",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "ONE_TWO_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted.",
+        "Conditional graph construction: listed states/edges are possible; registration guards are not evaluated."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BATTLE_FRIEND_V1": {
+      "source_type": "BattleFriendV1",
+      "source_sha256": "e9fef2b9d90f0ca610590c6d3276d1c8adb729cafb218c54b26c92447e8b6deb",
+      "initial_state": "NOTHING_MOVE",
+      "states": [
+        {
+          "id": "NOTHING_MOVE",
+          "type": "move",
+          "move_id": "NOTHING",
+          "intents": [],
+          "next": "NOTHING_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BATTLE_FRIEND_V2": {
+      "source_type": "BattleFriendV2",
+      "source_sha256": "9e845e8a79e432989183e75a62cd3ea792d4a5eeda6b3d6a947805d6b0512274",
+      "initial_state": "NOTHING_MOVE",
+      "states": [
+        {
+          "id": "NOTHING_MOVE",
+          "type": "move",
+          "move_id": "NOTHING",
+          "intents": [],
+          "next": "NOTHING_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BATTLE_FRIEND_V3": {
+      "source_type": "BattleFriendV3",
+      "source_sha256": "57ec76dc904616d987a6e40df1960284a5ca661fc0c2bba5af713f23351985a7",
+      "initial_state": "NOTHING_MOVE",
+      "states": [
+        {
+          "id": "NOTHING_MOVE",
+          "type": "move",
+          "move_id": "NOTHING",
+          "intents": [],
+          "next": "NOTHING_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BOWLBUG_EGG": {
+      "source_type": "BowlbugEgg",
+      "source_sha256": "b32253f8969232cf9a3d5a92ebe2aceb20ede9f135aa7ce0aac8aa4eb59356f5",
+      "initial_state": "BITE_MOVE",
+      "states": [
+        {
+          "id": "BITE_MOVE",
+          "type": "move",
+          "move_id": "BITE",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "BITE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BOWLBUG_NECTAR": {
+      "source_type": "BowlbugNectar",
+      "source_sha256": "d1a81a7b4e7a027f7e9193b9ac168a1af29981e0ae036e2e542531c11f68b06e",
+      "initial_state": "THRASH_MOVE",
+      "states": [
+        {
+          "id": "THRASH_MOVE",
+          "type": "move",
+          "move_id": "THRASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BUFF_MOVE"
+        },
+        {
+          "id": "BUFF_MOVE",
+          "type": "move",
+          "move_id": "BUFF",
+          "intents": [
+            "Buff"
+          ],
+          "next": "THRASH2_MOVE"
+        },
+        {
+          "id": "THRASH2_MOVE",
+          "type": "move",
+          "move_id": "THRASH2",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "THRASH2_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BOWLBUG_ROCK": {
+      "source_type": "BowlbugRock",
+      "source_sha256": "96b6e6bf3b7552cf1a27325ae46d8492d8e697d8541c9e4d759546e687444edc",
+      "initial_state": "HEADBUTT_MOVE",
+      "states": [
+        {
+          "id": "HEADBUTT_MOVE",
+          "type": "move",
+          "move_id": "HEADBUTT",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "POST_HEADBUTT"
+        },
+        {
+          "id": "DIZZY_MOVE",
+          "type": "move",
+          "move_id": "DIZZY",
+          "intents": [
+            "Stun"
+          ],
+          "next": "HEADBUTT_MOVE"
+        },
+        {
+          "id": "POST_HEADBUTT",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "DIZZY_MOVE",
+              "condition": "IsOffBalance"
+            },
+            {
+              "next": "HEADBUTT_MOVE",
+              "condition": "!IsOffBalance"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [
+        "Stun"
+      ],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BOWLBUG_SILK": {
+      "source_type": "BowlbugSilk",
+      "source_sha256": "66f7e96710399294376b70ceb7788ee74cb0aac2d8b8d722f7c7d30336963453",
+      "initial_state": "TOXIC_SPIT_MOVE",
+      "states": [
+        {
+          "id": "THRASH_MOVE",
+          "type": "move",
+          "move_id": "THRASH",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "TOXIC_SPIT_MOVE"
+        },
+        {
+          "id": "TOXIC_SPIT_MOVE",
+          "type": "move",
+          "move_id": "TOXIC_SPIT",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "THRASH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BRUTE_RUBY_RAIDER": {
+      "source_type": "BruteRubyRaider",
+      "source_sha256": "0ae0d3fdc28b9a588a0acdfc827985669eca42ed7156a4b25970854312bba581",
+      "initial_state": "BEAT_MOVE",
+      "states": [
+        {
+          "id": "BEAT_MOVE",
+          "type": "move",
+          "move_id": "BEAT",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "ROAR_MOVE"
+        },
+        {
+          "id": "ROAR_MOVE",
+          "type": "move",
+          "move_id": "ROAR",
+          "intents": [
+            "Buff"
+          ],
+          "next": "BEAT_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BYGONE_EFFIGY": {
+      "source_type": "BygoneEffigy",
+      "source_sha256": "f45fae6052ff8e565eda62c857c9b763a0dd7adb3d05dd4d1befc00fe31fce8b",
+      "initial_state": "SLEEP_MOVE",
+      "states": [
+        {
+          "id": "SLEEP_MOVE",
+          "type": "move",
+          "move_id": "SLEEP",
+          "intents": [
+            "Sleep"
+          ],
+          "next": "WAKE_MOVE"
+        },
+        {
+          "id": "WAKE_MOVE",
+          "type": "move",
+          "move_id": "WAKE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "SLASHES_MOVE"
+        },
+        {
+          "id": "SLEEP_MOVE_2",
+          "type": "move",
+          "move_id": "SLEEP_MOVE_2",
+          "intents": [
+            "Sleep"
+          ],
+          "next": "SLASHES_MOVE"
+        },
+        {
+          "id": "SLASHES_MOVE",
+          "type": "move",
+          "move_id": "SLASHES",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SLASHES_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BYRDONIS": {
+      "source_type": "Byrdonis",
+      "source_sha256": "8c17bb36caa591daef3d4e40db1f9ebb6cdf181086acf3c5e98b594febcb1809",
+      "initial_state": "SWOOP_MOVE",
+      "states": [
+        {
+          "id": "PECK_MOVE",
+          "type": "move",
+          "move_id": "PECK",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "SWOOP_MOVE"
+        },
+        {
+          "id": "SWOOP_MOVE",
+          "type": "move",
+          "move_id": "SWOOP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "PECK_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "BYRDPIP": {
+      "source_type": "Byrdpip",
+      "source_sha256": "e5b892538002769b463516c4f8da2bd6a45d8653c76d82bd0ec4dd31bf6d1d72",
+      "initial_state": "NOTHING_MOVE",
+      "states": [
+        {
+          "id": "NOTHING_MOVE",
+          "type": "move",
+          "move_id": "NOTHING",
+          "intents": [],
+          "next": "NOTHING_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "CALCIFIED_CULTIST": {
+      "source_type": "CalcifiedCultist",
+      "source_sha256": "11ceae64ef8ee33016737629b838152acb9cfacac3113a61f96e6b7fc9555669",
+      "initial_state": "INCANTATION_MOVE",
+      "states": [
+        {
+          "id": "INCANTATION_MOVE",
+          "type": "move",
+          "move_id": "INCANTATION",
+          "intents": [
+            "Buff"
+          ],
+          "next": "DARK_STRIKE_MOVE"
+        },
+        {
+          "id": "DARK_STRIKE_MOVE",
+          "type": "move",
+          "move_id": "DARK_STRIKE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "DARK_STRIKE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "CEREMONIAL_BEAST": {
+      "source_type": "CeremonialBeast",
+      "source_sha256": "51897f35a5aacdf9b64fcddcae0ebeb0f03afc76a3a38d2137b1bd4d3428276d",
+      "initial_state": "STAMP_MOVE",
+      "states": [
+        {
+          "id": "STAMP_MOVE",
+          "type": "move",
+          "move_id": "STAMP",
+          "intents": [
+            "Buff"
+          ],
+          "next": "PLOW_MOVE"
+        },
+        {
+          "id": "PLOW_MOVE",
+          "type": "move",
+          "move_id": "PLOW",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "PLOW_MOVE"
+        },
+        {
+          "id": "STUN_MOVE",
+          "type": "move",
+          "move_id": "STUN",
+          "intents": [
+            "Stun"
+          ],
+          "must_perform_once": true,
+          "next": "BEAST_CRY_MOVE"
+        },
+        {
+          "id": "BEAST_CRY_MOVE",
+          "type": "move",
+          "move_id": "BEAST_CRY",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "STOMP_MOVE"
+        },
+        {
+          "id": "STOMP_MOVE",
+          "type": "move",
+          "move_id": "STOMP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "CRUSH_MOVE"
+        },
+        {
+          "id": "CRUSH_MOVE",
+          "type": "move",
+          "move_id": "CRUSH",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "BEAST_CRY_MOVE"
+        }
+      ],
+      "external_transitions": [
+        "Stun"
+      ],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "CHOMPER": {
+      "source_type": "Chomper",
+      "source_sha256": "1c9d574926e0c19809bdc350ff977d86e46c27af00321250f67f8190d73e484f",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "CLAMP_MOVE",
+          "type": "move",
+          "move_id": "CLAMP",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "SCREECH_MOVE"
+        },
+        {
+          "id": "SCREECH_MOVE",
+          "type": "move",
+          "move_id": "SCREECH",
+          "intents": [
+            "Status"
+          ],
+          "next": "CLAMP_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "CORPSE_SLUG": {
+      "source_type": "CorpseSlug",
+      "source_sha256": "71d370f88c207ec8d20376cc8f2db586feecf83a26cee772e194e742d6a1eb8e",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "WHIP_SLAP_MOVE",
+          "type": "move",
+          "move_id": "WHIP_SLAP",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "GLOMP_MOVE"
+        },
+        {
+          "id": "GLOMP_MOVE",
+          "type": "move",
+          "move_id": "GLOMP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "GOOP_MOVE"
+        },
+        {
+          "id": "GOOP_MOVE",
+          "type": "move",
+          "move_id": "GOOP",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "WHIP_SLAP_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "CROSSBOW_RUBY_RAIDER": {
+      "source_type": "CrossbowRubyRaider",
+      "source_sha256": "192b1241b7df3eab6b8b12f11d2641a6d4ef157d39b96a13c415e9a7b7863705",
+      "initial_state": "RELOAD_MOVE",
+      "states": [
+        {
+          "id": "FIRE_MOVE",
+          "type": "move",
+          "move_id": "FIRE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RELOAD_MOVE"
+        },
+        {
+          "id": "RELOAD_MOVE",
+          "type": "move",
+          "move_id": "RELOAD",
+          "intents": [
+            "Defend"
+          ],
+          "next": "FIRE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "CRUSHER": {
+      "source_type": "Crusher",
+      "source_sha256": "e5442371a140b56f710f98ad29a9615a8ccd9abeb706556ff447027a5d6d48cf",
+      "initial_state": "THRASH_MOVE",
+      "states": [
+        {
+          "id": "THRASH_MOVE",
+          "type": "move",
+          "move_id": "THRASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "ENLARGING_STRIKE_MOVE"
+        },
+        {
+          "id": "ENLARGING_STRIKE_MOVE",
+          "type": "move",
+          "move_id": "ENLARGING_STRIKE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BUG_STING_MOVE"
+        },
+        {
+          "id": "BUG_STING_MOVE",
+          "type": "move",
+          "move_id": "BUG_STING",
+          "intents": [
+            "MultiAttack",
+            "Debuff"
+          ],
+          "next": "ADAPT_MOVE"
+        },
+        {
+          "id": "ADAPT_MOVE",
+          "type": "move",
+          "move_id": "ADAPT",
+          "intents": [
+            "Buff"
+          ],
+          "next": "GUARDED_STRIKE_MOVE"
+        },
+        {
+          "id": "GUARDED_STRIKE_MOVE",
+          "type": "move",
+          "move_id": "GUARDED_STRIKE",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "THRASH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "CUBEX_CONSTRUCT": {
+      "source_type": "CubexConstruct",
+      "source_sha256": "226794493c3cbffd9b4f2877eae4adec76a71362cba205e193fbee476bf80b61",
+      "initial_state": "CHARGE_UP_MOVE",
+      "states": [
+        {
+          "id": "CHARGE_UP_MOVE",
+          "type": "move",
+          "move_id": "CHARGE_UP",
+          "intents": [
+            "Buff"
+          ],
+          "next": "REPEATER_BLAST_MOVE"
+        },
+        {
+          "id": "REPEATER_BLAST_MOVE",
+          "type": "move",
+          "move_id": "REPEATER_BLAST",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "REPEATER_BLAST_MOVE_2"
+        },
+        {
+          "id": "REPEATER_BLAST_MOVE_2",
+          "type": "move",
+          "move_id": "REPEATER_BLAST_MOVE_2",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "EXPEL_MOVE"
+        },
+        {
+          "id": "EXPEL_MOVE",
+          "type": "move",
+          "move_id": "EXPEL",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "REPEATER_BLAST_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "DAMP_CULTIST": {
+      "source_type": "DampCultist",
+      "source_sha256": "e3c0544d13340a39759ca3dd828d6a063ae8a5982c5c93f5025ebeb81c256f08",
+      "initial_state": "INCANTATION_MOVE",
+      "states": [
+        {
+          "id": "INCANTATION_MOVE",
+          "type": "move",
+          "move_id": "INCANTATION",
+          "intents": [
+            "Buff"
+          ],
+          "next": "DARK_STRIKE_MOVE"
+        },
+        {
+          "id": "DARK_STRIKE_MOVE",
+          "type": "move",
+          "move_id": "DARK_STRIKE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "DARK_STRIKE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "DECIMILLIPEDE_SEGMENT": {
+      "source_type": "DecimillipedeSegment",
+      "source_sha256": "e99271a5278251619c9f1d3446d7aa1b3c1d0c1214766735201f9a505d808862",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "WRITHE_MOVE",
+          "type": "move",
+          "move_id": "WRITHE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "CONSTRICT_MOVE"
+        },
+        {
+          "id": "BULK_MOVE",
+          "type": "move",
+          "move_id": "BULK",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "WRITHE_MOVE"
+        },
+        {
+          "id": "CONSTRICT_MOVE",
+          "type": "move",
+          "move_id": "CONSTRICT",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "BULK_MOVE"
+        },
+        {
+          "id": "DEAD_MOVE",
+          "type": "move",
+          "move_id": "DEAD",
+          "intents": [],
+          "next": "REATTACH_MOVE"
+        },
+        {
+          "id": "REATTACH_MOVE",
+          "type": "move",
+          "move_id": "REATTACH",
+          "intents": [
+            "Heal"
+          ],
+          "must_perform_once": true,
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "WRITHE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "BULK_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "CONSTRICT_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "DEVOTED_SCULPTOR": {
+      "source_type": "DevotedSculptor",
+      "source_sha256": "d63ba44f7a1ecede3ffd1d81cf31d6b164e87687133c07789b44650f69738240",
+      "initial_state": "FORBIDDEN_INCANTATION_MOVE",
+      "states": [
+        {
+          "id": "FORBIDDEN_INCANTATION_MOVE",
+          "type": "move",
+          "move_id": "FORBIDDEN_INCANTATION",
+          "intents": [
+            "Buff"
+          ],
+          "next": "SAVAGE_MOVE"
+        },
+        {
+          "id": "SAVAGE_MOVE",
+          "type": "move",
+          "move_id": "SAVAGE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SAVAGE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "ENTOMANCER": {
+      "source_type": "Entomancer",
+      "source_sha256": "b3637106b1829e47b53c15093d2a76a34187f002899612d322e186f3192bf644",
+      "initial_state": "BEES_MOVE",
+      "states": [
+        {
+          "id": "PHEROMONE_SPIT_MOVE",
+          "type": "move",
+          "move_id": "PHEROMONE_SPIT",
+          "intents": [
+            "Buff"
+          ],
+          "next": "BEES_MOVE"
+        },
+        {
+          "id": "BEES_MOVE",
+          "type": "move",
+          "move_id": "BEES",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "SPEAR_MOVE"
+        },
+        {
+          "id": "SPEAR_MOVE",
+          "type": "move",
+          "move_id": "SPEAR",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "PHEROMONE_SPIT_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "EXOSKELETON": {
+      "source_type": "Exoskeleton",
+      "source_sha256": "269e0b39d6c1c0b4815258709e6245d667a4fa2c8fdc15b6bb253f08ea8b7690",
+      "initial_state": "INIT_MOVE",
+      "states": [
+        {
+          "id": "SKITTER_MOVE",
+          "type": "move",
+          "move_id": "SKITTER",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "MANDIBLES_MOVE",
+          "type": "move",
+          "move_id": "MANDIBLES",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "ENRAGE_MOVE"
+        },
+        {
+          "id": "ENRAGE_MOVE",
+          "type": "move",
+          "move_id": "ENRAGE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "SKITTER_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "MANDIBLES_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        },
+        {
+          "id": "INIT_MOVE",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "SKITTER_MOVE",
+              "condition": "base.Creature.SlotName == \"first\""
+            },
+            {
+              "next": "MANDIBLES_MOVE",
+              "condition": "base.Creature.SlotName == \"second\""
+            },
+            {
+              "next": "ENRAGE_MOVE",
+              "condition": "base.Creature.SlotName == \"third\""
+            },
+            {
+              "next": "RAND",
+              "condition": "base.Creature.SlotName == \"fourth\""
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "EYE_WITH_TEETH": {
+      "source_type": "EyeWithTeeth",
+      "source_sha256": "6eac6dd05b27ced2d481acb3761cadd92e6f64509d9baf1f52dab38f460214fd",
+      "initial_state": "DISTRACT_MOVE",
+      "states": [
+        {
+          "id": "DISTRACT_MOVE",
+          "type": "move",
+          "move_id": "DISTRACT",
+          "intents": [
+            "Status"
+          ],
+          "next": "DISTRACT_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FABRICATOR": {
+      "source_type": "Fabricator",
+      "source_sha256": "5202a51d278f19cdadbc676ac2da0b0ffeba03f17099ccccaccc9a2d937ea66e",
+      "initial_state": "fabricateBranch",
+      "states": [
+        {
+          "id": "FABRICATE_MOVE",
+          "type": "move",
+          "move_id": "FABRICATE",
+          "intents": [
+            "Summon"
+          ],
+          "next": "fabricateBranch"
+        },
+        {
+          "id": "FABRICATING_STRIKE_MOVE",
+          "type": "move",
+          "move_id": "FABRICATING_STRIKE",
+          "intents": [
+            "SingleAttack",
+            "Summon"
+          ],
+          "next": "fabricateBranch"
+        },
+        {
+          "id": "DISINTEGRATE_MOVE",
+          "type": "move",
+          "move_id": "DISINTEGRATE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "fabricateBranch"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "FABRICATE_MOVE",
+              "repeat": "CanRepeatForever",
+              "base_weight": 1
+            },
+            {
+              "next": "FABRICATING_STRIKE_MOVE",
+              "repeat": "CanRepeatForever",
+              "base_weight": 1
+            }
+          ]
+        },
+        {
+          "id": "fabricateBranch",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "RAND",
+              "condition": "CanFabricate"
+            },
+            {
+              "next": "DISINTEGRATE_MOVE",
+              "condition": "!CanFabricate"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FAKE_MERCHANT_MONSTER": {
+      "source_type": "FakeMerchantMonster",
+      "source_sha256": "9eb671cba61a7e97696c4745dec9199fdea9b74a8e7a93ce66335e280d209fb6",
+      "initial_state": "SWIPE_MOVE",
+      "states": [
+        {
+          "id": "SWIPE_MOVE",
+          "type": "move",
+          "move_id": "SWIPE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND_MOVE"
+        },
+        {
+          "id": "SPEW_COINS_MOVE",
+          "type": "move",
+          "move_id": "SPEW_COINS",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND_MOVE"
+        },
+        {
+          "id": "THROW_RELIC_MOVE",
+          "type": "move",
+          "move_id": "THROW_RELIC",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "RAND_ATTACK_MOVE"
+        },
+        {
+          "id": "ENRAGE_MOVE",
+          "type": "move",
+          "move_id": "ENRAGE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "RAND_MOVE"
+        },
+        {
+          "id": "RAND_MOVE",
+          "type": "random",
+          "branches": [
+            {
+              "next": "SWIPE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "SPEW_COINS_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "THROW_RELIC_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "ENRAGE_MOVE",
+              "cooldown": 3,
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        },
+        {
+          "id": "RAND_ATTACK_MOVE",
+          "type": "random",
+          "branches": [
+            {
+              "next": "SWIPE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "SPEW_COINS_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "THROW_RELIC_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FAT_GREMLIN": {
+      "source_type": "FatGremlin",
+      "source_sha256": "182a2b747b25c2146b1955accd471a87bf86d89fb4644783cc0be447965e3ab7",
+      "initial_state": "SPAWNED_MOVE",
+      "states": [
+        {
+          "id": "SPAWNED_MOVE",
+          "type": "move",
+          "move_id": "SPAWNED",
+          "intents": [
+            "Stun"
+          ],
+          "next": "FLEE_MOVE"
+        },
+        {
+          "id": "FLEE_MOVE",
+          "type": "move",
+          "move_id": "FLEE",
+          "intents": [
+            "Escape"
+          ],
+          "next": "FLEE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FLAIL_KNIGHT": {
+      "source_type": "FlailKnight",
+      "source_sha256": "2e2dc0a129a76ba6a1589d571860bb0ccf84a251b9856899f8af2faf1a2d71ea",
+      "initial_state": "RAM_MOVE",
+      "states": [
+        {
+          "id": "WAR_CHANT",
+          "type": "move",
+          "move_id": "WAR_CHANT",
+          "intents": [
+            "Buff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "FLAIL_MOVE",
+          "type": "move",
+          "move_id": "FLAIL",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAM_MOVE",
+          "type": "move",
+          "move_id": "RAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "WAR_CHANT",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "FLAIL_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            },
+            {
+              "next": "RAM_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FLYCONID": {
+      "source_type": "Flyconid",
+      "source_sha256": "0f87b450ac685bef520c62fa8755fc645723cda74bf77e9c41a9cabe32e3e739",
+      "initial_state": "INITIAL",
+      "states": [
+        {
+          "id": "VULNERABLE_SPORES_MOVE",
+          "type": "move",
+          "move_id": "VULNERABLE_SPORES",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "FRAIL_SPORES_MOVE",
+          "type": "move",
+          "move_id": "FRAIL_SPORES",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "SMASH_MOVE",
+          "type": "move",
+          "move_id": "SMASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "VULNERABLE_SPORES_MOVE",
+              "cooldown": 3,
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "FRAIL_SPORES_MOVE",
+              "cooldown": 2,
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "SMASH_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        },
+        {
+          "id": "INITIAL",
+          "type": "random",
+          "branches": [
+            {
+              "next": "FRAIL_SPORES_MOVE",
+              "cooldown": 2,
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "SMASH_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FOGMOG": {
+      "source_type": "Fogmog",
+      "source_sha256": "f6a2de4daecd3835a7ffde2e40a2959fb883aee84ecd4551b7c281f2e0392233",
+      "initial_state": "ILLUSION_MOVE",
+      "states": [
+        {
+          "id": "ILLUSION_MOVE",
+          "type": "move",
+          "move_id": "ILLUSION",
+          "intents": [
+            "Summon"
+          ],
+          "next": "SWIPE_MOVE"
+        },
+        {
+          "id": "SWIPE_MOVE",
+          "type": "move",
+          "move_id": "SWIPE",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "BRANCH"
+        },
+        {
+          "id": "SWIPE_RANDOM_MOVE",
+          "type": "move",
+          "move_id": "SWIPE_RANDOM",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "HEADBUTT_MOVE"
+        },
+        {
+          "id": "HEADBUTT_MOVE",
+          "type": "move",
+          "move_id": "HEADBUTT",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SWIPE_MOVE"
+        },
+        {
+          "id": "BRANCH",
+          "type": "random",
+          "branches": [
+            {
+              "next": "SWIPE_RANDOM_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 0.4
+            },
+            {
+              "next": "HEADBUTT_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 0.6
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FOSSIL_STALKER": {
+      "source_type": "FossilStalker",
+      "source_sha256": "ee2d4fa462406a1b36e8658129bdcec6c76902059142a3f7b2d903e50bd1f4bc",
+      "initial_state": "LATCH_MOVE",
+      "states": [
+        {
+          "id": "TACKLE_MOVE",
+          "type": "move",
+          "move_id": "TACKLE",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "LATCH_MOVE",
+          "type": "move",
+          "move_id": "LATCH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "LASH_MOVE",
+          "type": "move",
+          "move_id": "LASH",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "LATCH_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            },
+            {
+              "next": "TACKLE_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            },
+            {
+              "next": "LASH_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FROG_KNIGHT": {
+      "source_type": "FrogKnight",
+      "source_sha256": "b4116f8545e561976d2b761667ff8c5ad01eeddc3148ccfe9d8b9d1956c8baaf",
+      "initial_state": "TONGUE_LASH",
+      "states": [
+        {
+          "id": "FOR_THE_QUEEN",
+          "type": "move",
+          "move_id": "FOR_THE_QUEEN",
+          "intents": [
+            "Buff"
+          ],
+          "next": "HALF_HEALTH"
+        },
+        {
+          "id": "STRIKE_DOWN_EVIL",
+          "type": "move",
+          "move_id": "STRIKE_DOWN_EVIL",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "FOR_THE_QUEEN"
+        },
+        {
+          "id": "TONGUE_LASH",
+          "type": "move",
+          "move_id": "TONGUE_LASH",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "STRIKE_DOWN_EVIL"
+        },
+        {
+          "id": "BEETLE_CHARGE",
+          "type": "move",
+          "move_id": "BEETLE_CHARGE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "TONGUE_LASH"
+        },
+        {
+          "id": "HALF_HEALTH",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "TONGUE_LASH",
+              "condition": "HasBeetleCharged || base.Creature.CurrentHp >= base.Creature.MaxHp / 2"
+            },
+            {
+              "next": "BEETLE_CHARGE",
+              "condition": "!HasBeetleCharged && base.Creature.CurrentHp < base.Creature.MaxHp / 2"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "FUZZY_WURM_CRAWLER": {
+      "source_type": "FuzzyWurmCrawler",
+      "source_sha256": "9f1db400d7fd1cc90f36af74df4aff629291c384ac10b80bfaf5f058bdd11817",
+      "initial_state": "FIRST_ACID_GOOP",
+      "states": [
+        {
+          "id": "FIRST_ACID_GOOP",
+          "type": "move",
+          "move_id": "FIRST_ACID_GOOP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "INHALE"
+        },
+        {
+          "id": "ACID_GOOP",
+          "type": "move",
+          "move_id": "ACID_GOOP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "FIRST_ACID_GOOP"
+        },
+        {
+          "id": "INHALE",
+          "type": "move",
+          "move_id": "INHALE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "ACID_GOOP"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "GAS_BOMB": {
+      "source_type": "GasBomb",
+      "source_sha256": "bda3e0bd1e808e330bb8efe46d656fd8d4ad7553bb3d530956326fc2a1c186df",
+      "initial_state": "EXPLODE_MOVE",
+      "states": [
+        {
+          "id": "EXPLODE_MOVE",
+          "type": "move",
+          "move_id": "EXPLODE",
+          "intents": [
+            "DeathBlow"
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "GLOBE_HEAD": {
+      "source_type": "GlobeHead",
+      "source_sha256": "51c8c6bbd370a67a4fc09a65e567619b46a98fd1d0875af8e1ac22523a9c9858",
+      "initial_state": "SHOCKING_SLAP",
+      "states": [
+        {
+          "id": "THUNDER_STRIKE",
+          "type": "move",
+          "move_id": "THUNDER_STRIKE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "GALVANIC_BURST"
+        },
+        {
+          "id": "SHOCKING_SLAP",
+          "type": "move",
+          "move_id": "SHOCKING_SLAP",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "THUNDER_STRIKE"
+        },
+        {
+          "id": "GALVANIC_BURST",
+          "type": "move",
+          "move_id": "GALVANIC_BURST",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "SHOCKING_SLAP"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "GREMLIN_MERC": {
+      "source_type": "GremlinMerc",
+      "source_sha256": "88276341125deeae5819bc45639d28b1a441067b3db643d982faac3be5c88004",
+      "initial_state": "GIMME_MOVE",
+      "states": [
+        {
+          "id": "GIMME_MOVE",
+          "type": "move",
+          "move_id": "GIMME",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "DOUBLE_SMASH_MOVE"
+        },
+        {
+          "id": "DOUBLE_SMASH_MOVE",
+          "type": "move",
+          "move_id": "DOUBLE_SMASH",
+          "intents": [
+            "MultiAttack",
+            "Debuff"
+          ],
+          "next": "HEHE_MOVE"
+        },
+        {
+          "id": "HEHE_MOVE",
+          "type": "move",
+          "move_id": "HEHE",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "GIMME_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "GUARDBOT": {
+      "source_type": "Guardbot",
+      "source_sha256": "38432fd25643fc0f144bb22c653bb8216d83507d78d4a71a8af0a690c94d5ba8",
+      "initial_state": "GUARD_MOVE",
+      "states": [
+        {
+          "id": "GUARD_MOVE",
+          "type": "move",
+          "move_id": "GUARD",
+          "intents": [
+            "Defend"
+          ],
+          "next": "GUARD_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "HAUNTED_SHIP": {
+      "source_type": "HauntedShip",
+      "source_sha256": "b467dcbfcdfb827c4d429664ae140263e300d251461c6f9111cea0a083b2380f",
+      "initial_state": "HAUNT_MOVE",
+      "states": [
+        {
+          "id": "SWIPE_MOVE",
+          "type": "move",
+          "move_id": "SWIPE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "STOMP_MOVE"
+        },
+        {
+          "id": "STOMP_MOVE",
+          "type": "move",
+          "move_id": "STOMP",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "SWIPE_MOVE"
+        },
+        {
+          "id": "HAUNT_MOVE",
+          "type": "move",
+          "move_id": "HAUNT",
+          "intents": [
+            "Debuff",
+            "Status"
+          ],
+          "next": "SWIPE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "HUNTER_KILLER": {
+      "source_type": "HunterKiller",
+      "source_sha256": "36ae9cc5add3b007af845144625c87c112314460e58f489f50cb3776436fe5cb",
+      "initial_state": "TENDERIZING_GOOP_MOVE",
+      "states": [
+        {
+          "id": "TENDERIZING_GOOP_MOVE",
+          "type": "move",
+          "move_id": "TENDERIZING_GOOP",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "BITE_MOVE",
+          "type": "move",
+          "move_id": "BITE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "PUNCTURE_MOVE",
+          "type": "move",
+          "move_id": "PUNCTURE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "BITE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "PUNCTURE_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "INFESTED_PRISM": {
+      "source_type": "InfestedPrism",
+      "source_sha256": "27fe0cf4698bee9f9e5b9f3bdde5d50b5a572b468565ddc144cd74e8f1ba0af2",
+      "initial_state": "JAB_MOVE",
+      "states": [
+        {
+          "id": "JAB_MOVE",
+          "type": "move",
+          "move_id": "JAB",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RADIATE_MOVE"
+        },
+        {
+          "id": "RADIATE_MOVE",
+          "type": "move",
+          "move_id": "RADIATE",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "WHIRLWIND_MOVE"
+        },
+        {
+          "id": "WHIRLWIND_MOVE",
+          "type": "move",
+          "move_id": "WHIRLWIND",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "PULSATE_MOVE"
+        },
+        {
+          "id": "PULSATE_MOVE",
+          "type": "move",
+          "move_id": "PULSATE",
+          "intents": [
+            "SingleAttack",
+            "Buff",
+            "Defend"
+          ],
+          "next": "JAB_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "INKLET": {
+      "source_type": "Inklet",
+      "source_sha256": "06715d8d3d475501311f278c732eeef49acfb4e3fbb340a32fc527a9a2448c5e",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "JAB_MOVE",
+          "type": "move",
+          "move_id": "JAB",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "WHIRLWIND_MOVE",
+          "type": "move",
+          "move_id": "WHIRLWIND",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "JAB_MOVE"
+        },
+        {
+          "id": "PIERCING_GAZE_MOVE",
+          "type": "move",
+          "move_id": "PIERCING_GAZE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "JAB_MOVE"
+        },
+        {
+          "id": "INIT_RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "JAB_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            },
+            {
+              "next": "WHIRLWIND_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "PIERCING_GAZE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "WHIRLWIND_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "KIN_FOLLOWER": {
+      "source_type": "KinFollower",
+      "source_sha256": "248d5e386fde1332c884e07eafd3b249177909aaf534a27c334d1dc969db912c",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "QUICK_SLASH_MOVE",
+          "type": "move",
+          "move_id": "QUICK_SLASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BOOMERANG_MOVE"
+        },
+        {
+          "id": "BOOMERANG_MOVE",
+          "type": "move",
+          "move_id": "BOOMERANG",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "POWER_DANCE_MOVE"
+        },
+        {
+          "id": "POWER_DANCE_MOVE",
+          "type": "move",
+          "move_id": "POWER_DANCE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "QUICK_SLASH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "KIN_PRIEST": {
+      "source_type": "KinPriest",
+      "source_sha256": "2ac2a855697a465f29e394278d859b9e80b3d00790dbe0fdda72bba176b50be5",
+      "initial_state": "ORB_OF_FRAILTY_MOVE",
+      "states": [
+        {
+          "id": "ORB_OF_FRAILTY_MOVE",
+          "type": "move",
+          "move_id": "ORB_OF_FRAILTY",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "ORB_OF_WEAKNESS_MOVE"
+        },
+        {
+          "id": "ORB_OF_WEAKNESS_MOVE",
+          "type": "move",
+          "move_id": "ORB_OF_WEAKNESS",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "BEAM_MOVE"
+        },
+        {
+          "id": "BEAM_MOVE",
+          "type": "move",
+          "move_id": "BEAM",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RITUAL_MOVE"
+        },
+        {
+          "id": "RITUAL_MOVE",
+          "type": "move",
+          "move_id": "RITUAL",
+          "intents": [
+            "Buff"
+          ],
+          "next": "ORB_OF_FRAILTY_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "KNOWLEDGE_DEMON": {
+      "source_type": "KnowledgeDemon",
+      "source_sha256": "e2d2ca46807015cc483b388f4a122dc427ccf0b0e03764f58d3516fcd6d70dbe",
+      "initial_state": "CURSE_OF_KNOWLEDGE_MOVE",
+      "states": [
+        {
+          "id": "CURSE_OF_KNOWLEDGE_MOVE",
+          "type": "move",
+          "move_id": "CURSE_OF_KNOWLEDGE",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "SLAP_MOVE"
+        },
+        {
+          "id": "SLAP_MOVE",
+          "type": "move",
+          "move_id": "SLAP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "KNOWLEDGE_OVERWHELMING_MOVE"
+        },
+        {
+          "id": "KNOWLEDGE_OVERWHELMING_MOVE",
+          "type": "move",
+          "move_id": "KNOWLEDGE_OVERWHELMING",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "PONDER_MOVE"
+        },
+        {
+          "id": "PONDER_MOVE",
+          "type": "move",
+          "move_id": "PONDER",
+          "intents": [
+            "SingleAttack",
+            "Heal",
+            "Buff"
+          ],
+          "next": "CurseOfKnowledgeBranch"
+        },
+        {
+          "id": "CurseOfKnowledgeBranch",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "CURSE_OF_KNOWLEDGE_MOVE",
+              "condition": "_curseOfKnowledgeCounter < 3"
+            },
+            {
+              "next": "SLAP_MOVE",
+              "condition": "_curseOfKnowledgeCounter >= 3"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "LAGAVULIN_MATRIARCH": {
+      "source_type": "LagavulinMatriarch",
+      "source_sha256": "c0a89e56cc57b2b9da61ffeb1f266061465065932a063e025dd46f7942043e49",
+      "initial_state": "SLEEP_MOVE",
+      "states": [
+        {
+          "id": "SLEEP_MOVE",
+          "type": "move",
+          "move_id": "SLEEP",
+          "intents": [
+            "Sleep"
+          ],
+          "next": "SLEEP_BRANCH"
+        },
+        {
+          "id": "SLASH_MOVE",
+          "type": "move",
+          "move_id": "SLASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "DISEMBOWEL_MOVE"
+        },
+        {
+          "id": "SLASH2_MOVE",
+          "type": "move",
+          "move_id": "SLASH2",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "SOUL_SIPHON_MOVE"
+        },
+        {
+          "id": "DISEMBOWEL_MOVE",
+          "type": "move",
+          "move_id": "DISEMBOWEL",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "SLASH2_MOVE"
+        },
+        {
+          "id": "SOUL_SIPHON_MOVE",
+          "type": "move",
+          "move_id": "SOUL_SIPHON",
+          "intents": [
+            "Debuff",
+            "Buff"
+          ],
+          "next": "SLASH_MOVE"
+        },
+        {
+          "id": "SLEEP_BRANCH",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "SLEEP_MOVE",
+              "condition": "base.Creature.HasPower<AsleepPower>()"
+            },
+            {
+              "next": "SLASH_MOVE",
+              "condition": "!base.Creature.HasPower<AsleepPower>()"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "LEAF_SLIME_M": {
+      "source_type": "LeafSlimeM",
+      "source_sha256": "2cf105cd8353d7d1794f0b0b06851b98e112acf29f0769fa82852052602ce57f",
+      "initial_state": "STICKY_SHOT",
+      "states": [
+        {
+          "id": "CLUMP_SHOT",
+          "type": "move",
+          "move_id": "CLUMP_SHOT",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "STICKY_SHOT"
+        },
+        {
+          "id": "STICKY_SHOT",
+          "type": "move",
+          "move_id": "STICKY_SHOT",
+          "intents": [
+            "Status"
+          ],
+          "next": "CLUMP_SHOT"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "LEAF_SLIME_S": {
+      "source_type": "LeafSlimeS",
+      "source_sha256": "04eea1a8829a004233f08520fd9a9a9d167a00ed64f85d8333920011b411da17",
+      "initial_state": "RAND",
+      "states": [
+        {
+          "id": "TACKLE_MOVE",
+          "type": "move",
+          "move_id": "TACKLE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "GOOP_MOVE",
+          "type": "move",
+          "move_id": "GOOP",
+          "intents": [
+            "Status"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "TACKLE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "GOOP_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "LIVING_FOG": {
+      "source_type": "LivingFog",
+      "source_sha256": "f957b98818be1b6c71b4c621d6f1e47906f182726ec0e907809570e005895e4d",
+      "initial_state": "ADVANCED_GAS_MOVE",
+      "states": [
+        {
+          "id": "ADVANCED_GAS_MOVE",
+          "type": "move",
+          "move_id": "ADVANCED_GAS",
+          "intents": [
+            "SingleAttack",
+            "CardDebuff"
+          ],
+          "next": "BLOAT_MOVE"
+        },
+        {
+          "id": "BLOAT_MOVE",
+          "type": "move",
+          "move_id": "BLOAT",
+          "intents": [
+            "SingleAttack",
+            "Summon"
+          ],
+          "next": "SUPER_GAS_BLAST_MOVE"
+        },
+        {
+          "id": "SUPER_GAS_BLAST_MOVE",
+          "type": "move",
+          "move_id": "SUPER_GAS_BLAST",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BLOAT_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "LIVING_SHIELD": {
+      "source_type": "LivingShield",
+      "source_sha256": "c1c3346bb6efc2d07d017af37c615269dbb36afc893c6e49ba97437b8d44d5dc",
+      "initial_state": "SHIELD_SLAM_MOVE",
+      "states": [
+        {
+          "id": "SHIELD_SLAM_MOVE",
+          "type": "move",
+          "move_id": "SHIELD_SLAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SHIELD_SLAM_BRANCH"
+        },
+        {
+          "id": "SHIELD_SLAM_BRANCH",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "SHIELD_SLAM_MOVE",
+              "condition": "GetAllyCount() > 0"
+            },
+            {
+              "next": "SMASH_MOVE",
+              "condition": "GetAllyCount() == 0"
+            }
+          ]
+        },
+        {
+          "id": "SMASH_MOVE",
+          "type": "move",
+          "move_id": "SMASH",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "SMASH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "LOUSE_PROGENITOR": {
+      "source_type": "LouseProgenitor",
+      "source_sha256": "73ad43dbdb7527aa1d69d9404f44b88c67f86b044813d2b598508c8afd6970e5",
+      "initial_state": "WEB_CANNON_MOVE",
+      "states": [
+        {
+          "id": "WEB_CANNON_MOVE",
+          "type": "move",
+          "move_id": "WEB_CANNON",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "CURL_AND_GROW_MOVE"
+        },
+        {
+          "id": "POUNCE_MOVE",
+          "type": "move",
+          "move_id": "POUNCE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "WEB_CANNON_MOVE"
+        },
+        {
+          "id": "CURL_AND_GROW_MOVE",
+          "type": "move",
+          "move_id": "CURL_AND_GROW",
+          "intents": [
+            "Defend",
+            "Buff"
+          ],
+          "next": "POUNCE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "MAGI_KNIGHT": {
+      "source_type": "MagiKnight",
+      "source_sha256": "042ae66e38a561ad392d7573e41e9bbbbb6dc91f21da14f4948dee554203c562",
+      "initial_state": "POWER_SHIELD_MOVE",
+      "states": [
+        {
+          "id": "POWER_SHIELD_MOVE",
+          "type": "move",
+          "move_id": "POWER_SHIELD",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "DAMPEN_MOVE"
+        },
+        {
+          "id": "DAMPEN_MOVE",
+          "type": "move",
+          "move_id": "DAMPEN",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "RAM_MOVE"
+        },
+        {
+          "id": "PREP_MOVE",
+          "type": "move",
+          "move_id": "PREP",
+          "intents": [
+            "Defend"
+          ],
+          "next": "MAGIC_BOMB"
+        },
+        {
+          "id": "MAGIC_BOMB",
+          "type": "move",
+          "move_id": "MAGIC_BOMB",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAM_MOVE"
+        },
+        {
+          "id": "RAM_MOVE",
+          "type": "move",
+          "move_id": "RAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "PREP_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "MAWLER": {
+      "source_type": "Mawler",
+      "source_sha256": "a14bcca671d66ef269fc7b4ab9019b135dbe7a632dc19908d23979b42147a047",
+      "initial_state": "CLAW_MOVE",
+      "states": [
+        {
+          "id": "RIP_AND_TEAR_MOVE",
+          "type": "move",
+          "move_id": "RIP_AND_TEAR",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "ROAR_MOVE",
+          "type": "move",
+          "move_id": "ROAR",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "CLAW_MOVE",
+          "type": "move",
+          "move_id": "CLAW",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "RIP_AND_TEAR_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "ROAR_MOVE",
+              "repeat": "UseOnlyOnce",
+              "base_weight": 1
+            },
+            {
+              "next": "CLAW_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "MECHA_KNIGHT": {
+      "source_type": "MechaKnight",
+      "source_sha256": "19d9112c47b4171ba829edc3fb225383cdf46bb106ddd2a94f8bef6e43da7a88",
+      "initial_state": "CHARGE_MOVE",
+      "states": [
+        {
+          "id": "CHARGE_MOVE",
+          "type": "move",
+          "move_id": "CHARGE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "FLAMETHROWER_MOVE"
+        },
+        {
+          "id": "FLAMETHROWER_MOVE",
+          "type": "move",
+          "move_id": "FLAMETHROWER",
+          "intents": [
+            "SingleAttack",
+            "Status"
+          ],
+          "next": "WINDUP_MOVE"
+        },
+        {
+          "id": "WINDUP_MOVE",
+          "type": "move",
+          "move_id": "WINDUP",
+          "intents": [
+            "Defend",
+            "Buff"
+          ],
+          "next": "HEAVY_CLEAVE_MOVE"
+        },
+        {
+          "id": "HEAVY_CLEAVE_MOVE",
+          "type": "move",
+          "move_id": "HEAVY_CLEAVE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "FLAMETHROWER_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "MYTE": {
+      "source_type": "Myte",
+      "source_sha256": "c04dfe9777ed409d0b29d89b4c29d8b5aa02c42211dcc82a8a175df5e95115df",
+      "initial_state": "INIT_MOVE",
+      "states": [
+        {
+          "id": "TOXIC_MOVE",
+          "type": "move",
+          "move_id": "TOXIC",
+          "intents": [
+            "Status"
+          ],
+          "next": "BITE_MOVE"
+        },
+        {
+          "id": "BITE_MOVE",
+          "type": "move",
+          "move_id": "BITE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SUCK_MOVE"
+        },
+        {
+          "id": "SUCK_MOVE",
+          "type": "move",
+          "move_id": "SUCK",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "TOXIC_MOVE"
+        },
+        {
+          "id": "INIT_MOVE",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "TOXIC_MOVE",
+              "condition": "base.Creature.SlotName == \"first\""
+            },
+            {
+              "next": "SUCK_MOVE",
+              "condition": "base.Creature.SlotName == \"second\""
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "NIBBIT": {
+      "source_type": "Nibbit",
+      "source_sha256": "e7025fa592c946b4cd5a0ec00d55ed2c81b1d1cf78b4322d7374c1f2ea44526c",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "BUTT_MOVE",
+          "type": "move",
+          "move_id": "BUTT",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SLICE_MOVE"
+        },
+        {
+          "id": "SLICE_MOVE",
+          "type": "move",
+          "move_id": "SLICE",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "HISS_MOVE"
+        },
+        {
+          "id": "HISS_MOVE",
+          "type": "move",
+          "move_id": "HISS",
+          "intents": [
+            "Buff"
+          ],
+          "next": "BUTT_MOVE"
+        },
+        {
+          "id": "INIT_MOVE",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "BUTT_MOVE",
+              "condition": "((Nibbit)base.Creature.Monster).IsAlone"
+            },
+            {
+              "next": "HISS_MOVE",
+              "condition": "!((Nibbit)base.Creature.Monster).IsFront"
+            },
+            {
+              "next": "SLICE_MOVE",
+              "condition": "((Nibbit)base.Creature.Monster).IsFront"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted.",
+        "Conditional graph construction: listed states/edges are possible; registration guards are not evaluated."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "NOISEBOT": {
+      "source_type": "Noisebot",
+      "source_sha256": "fada1a695f2f89f8be80b0550d88cfd8a8f2e90989917a8c1ed14c63b8561d36",
+      "initial_state": "NOISE_MOVE",
+      "states": [
+        {
+          "id": "NOISE_MOVE",
+          "type": "move",
+          "move_id": "NOISE",
+          "intents": [
+            "Status"
+          ],
+          "next": "NOISE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "OSTY": {
+      "source_type": "Osty",
+      "source_sha256": "6d45d4c92850f416e7526fae3d5bb792ae6c0075df75eec8a1caaa1f57eb4b8d",
+      "initial_state": "NOTHING_MOVE",
+      "states": [
+        {
+          "id": "NOTHING_MOVE",
+          "type": "move",
+          "move_id": "NOTHING",
+          "intents": [],
+          "next": "NOTHING_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "OVICOPTER": {
+      "source_type": "Ovicopter",
+      "source_sha256": "224fecf99d00f9844ced8ef03a6c45e5fa77bc41f3c566730e052d468a54bec2",
+      "initial_state": "LAY_EGGS_MOVE",
+      "states": [
+        {
+          "id": "LAY_EGGS_MOVE",
+          "type": "move",
+          "move_id": "LAY_EGGS",
+          "intents": [
+            "Summon"
+          ],
+          "next": "SMASH_MOVE"
+        },
+        {
+          "id": "SMASH_MOVE",
+          "type": "move",
+          "move_id": "SMASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "TENDERIZER_MOVE"
+        },
+        {
+          "id": "TENDERIZER_MOVE",
+          "type": "move",
+          "move_id": "TENDERIZER",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "SUMMON_BRANCH_STATE"
+        },
+        {
+          "id": "NUTRITIONAL_PASTE_MOVE",
+          "type": "move",
+          "move_id": "NUTRITIONAL_PASTE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "SMASH_MOVE"
+        },
+        {
+          "id": "SUMMON_BRANCH_STATE",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "LAY_EGGS_MOVE",
+              "condition": "CanLay"
+            },
+            {
+              "next": "NUTRITIONAL_PASTE_MOVE",
+              "condition": "!CanLay"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "OWL_MAGISTRATE": {
+      "source_type": "OwlMagistrate",
+      "source_sha256": "2d9b8f195c5b6b50cd6ca5ab39687ea769b6767d7546fde0ad621662ad89bf6c",
+      "initial_state": "MAGISTRATE_SCRUTINY",
+      "states": [
+        {
+          "id": "MAGISTRATE_SCRUTINY",
+          "type": "move",
+          "move_id": "MAGISTRATE_SCRUTINY",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "PECK_ASSAULT"
+        },
+        {
+          "id": "PECK_ASSAULT",
+          "type": "move",
+          "move_id": "PECK_ASSAULT",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "JUDICIAL_FLIGHT"
+        },
+        {
+          "id": "JUDICIAL_FLIGHT",
+          "type": "move",
+          "move_id": "JUDICIAL_FLIGHT",
+          "intents": [
+            "Buff"
+          ],
+          "next": "VERDICT"
+        },
+        {
+          "id": "VERDICT",
+          "type": "move",
+          "move_id": "VERDICT",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "MAGISTRATE_SCRUTINY"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "PAELS_LEGION": {
+      "source_type": "PaelsLegion",
+      "source_sha256": "0752768bbc82cabd9dcafed81d4c0ac24d5e47402595eb14c0311d1e62a80767",
+      "initial_state": "NOTHING_MOVE",
+      "states": [
+        {
+          "id": "NOTHING_MOVE",
+          "type": "move",
+          "move_id": "NOTHING",
+          "intents": [],
+          "next": "NOTHING_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "PARAFRIGHT": {
+      "source_type": "Parafright",
+      "source_sha256": "d2dda412307d15d2a0336349976fd28c997eb0bd7acab39f325a433d3e773a32",
+      "initial_state": "SLAM_MOVE",
+      "states": [
+        {
+          "id": "SLAM_MOVE",
+          "type": "move",
+          "move_id": "SLAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SLAM_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "PHANTASMAL_GARDENER": {
+      "source_type": "PhantasmalGardener",
+      "source_sha256": "66a27c83295c91e9bc1af92041175fdf308362edffc05c85654580ecaf6342c0",
+      "initial_state": "INIT_MOVE",
+      "states": [
+        {
+          "id": "BITE_MOVE",
+          "type": "move",
+          "move_id": "BITE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "LASH_MOVE"
+        },
+        {
+          "id": "LASH_MOVE",
+          "type": "move",
+          "move_id": "LASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "FLAIL_MOVE"
+        },
+        {
+          "id": "FLAIL_MOVE",
+          "type": "move",
+          "move_id": "FLAIL",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "ENLARGE_MOVE"
+        },
+        {
+          "id": "ENLARGE_MOVE",
+          "type": "move",
+          "move_id": "ENLARGE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "BITE_MOVE"
+        },
+        {
+          "id": "INIT_MOVE",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "FLAIL_MOVE",
+              "condition": "base.Creature.SlotName == \"first\""
+            },
+            {
+              "next": "BITE_MOVE",
+              "condition": "base.Creature.SlotName == \"second\""
+            },
+            {
+              "next": "LASH_MOVE",
+              "condition": "base.Creature.SlotName == \"third\""
+            },
+            {
+              "next": "ENLARGE_MOVE",
+              "condition": "base.Creature.SlotName == \"fourth\""
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "PHROG_PARASITE": {
+      "source_type": "PhrogParasite",
+      "source_sha256": "85ed3bdca9818a43fd666d73cb1a4bdbf2cc92a82a8faafe45f2acec00672c18",
+      "initial_state": "INFECT_MOVE",
+      "states": [
+        {
+          "id": "INFECT_MOVE",
+          "type": "move",
+          "move_id": "INFECT",
+          "intents": [
+            "Status"
+          ],
+          "next": "LASH_MOVE"
+        },
+        {
+          "id": "LASH_MOVE",
+          "type": "move",
+          "move_id": "LASH",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "INFECT_MOVE"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "INFECT_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "LASH_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "PUNCH_CONSTRUCT": {
+      "source_type": "PunchConstruct",
+      "source_sha256": "59bbcb47de48b7554cc916e963d6dde49a7819457a17e4da5825e1e95f83b474",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "READY_MOVE",
+          "type": "move",
+          "move_id": "READY",
+          "intents": [
+            "Defend"
+          ],
+          "next": "FAST_PUNCH_MOVE"
+        },
+        {
+          "id": "STRONG_PUNCH_MOVE",
+          "type": "move",
+          "move_id": "STRONG_PUNCH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "READY_MOVE"
+        },
+        {
+          "id": "FAST_PUNCH_MOVE",
+          "type": "move",
+          "move_id": "FAST_PUNCH",
+          "intents": [
+            "MultiAttack",
+            "Debuff"
+          ],
+          "next": "STRONG_PUNCH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "QUEEN": {
+      "source_type": "Queen",
+      "source_sha256": "61819e3b441c3708641debf5cacc9cd7db1b78f49f755ee5eac02b7204b08b6d",
+      "initial_state": "PUPPET_STRINGS_MOVE",
+      "states": [
+        {
+          "id": "PUPPET_STRINGS_MOVE",
+          "type": "move",
+          "move_id": "PUPPET_STRINGS",
+          "intents": [
+            "CardDebuff"
+          ],
+          "next": "YOU_ARE_MINE_MOVE"
+        },
+        {
+          "id": "YOU_ARE_MINE_MOVE",
+          "type": "move",
+          "move_id": "YOU_ARE_MINE",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "YOURE_MINE_NOW_BRANCH"
+        },
+        {
+          "id": "YOURE_MINE_NOW_BRANCH",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "BURN_BRIGHT_FOR_ME_MOVE",
+              "condition": "!HasAmalgamDied"
+            },
+            {
+              "next": "OFF_WITH_YOUR_HEAD_MOVE",
+              "condition": "HasAmalgamDied"
+            }
+          ]
+        },
+        {
+          "id": "BURN_BRIGHT_FOR_ME_MOVE",
+          "type": "move",
+          "move_id": "BURN_BRIGHT_FOR_ME",
+          "intents": [
+            "Buff",
+            "Defend"
+          ],
+          "next": "BURN_BRIGHT_FOR_ME_BRANCH"
+        },
+        {
+          "id": "BURN_BRIGHT_FOR_ME_BRANCH",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "BURN_BRIGHT_FOR_ME_MOVE",
+              "condition": "!HasAmalgamDied"
+            },
+            {
+              "next": "OFF_WITH_YOUR_HEAD_MOVE",
+              "condition": "HasAmalgamDied"
+            }
+          ]
+        },
+        {
+          "id": "OFF_WITH_YOUR_HEAD_MOVE",
+          "type": "move",
+          "move_id": "OFF_WITH_YOUR_HEAD",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "EXECUTION_MOVE"
+        },
+        {
+          "id": "EXECUTION_MOVE",
+          "type": "move",
+          "move_id": "EXECUTION",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "ENRAGE_MOVE"
+        },
+        {
+          "id": "ENRAGE_MOVE",
+          "type": "move",
+          "move_id": "ENRAGE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "OFF_WITH_YOUR_HEAD_MOVE"
+        }
+      ],
+      "external_transitions": [
+        "SetMoveImmediate"
+      ],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "ROCKET": {
+      "source_type": "Rocket",
+      "source_sha256": "a8ae89efad0b40ebf7ef15bd5dd5541f1c8b88857c448a2f7eb1dd7c0c9d5d5d",
+      "initial_state": "TARGETING_RETICLE_MOVE",
+      "states": [
+        {
+          "id": "TARGETING_RETICLE_MOVE",
+          "type": "move",
+          "move_id": "TARGETING_RETICLE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "PRECISION_BEAM_MOVE"
+        },
+        {
+          "id": "PRECISION_BEAM_MOVE",
+          "type": "move",
+          "move_id": "PRECISION_BEAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "CHARGE_UP_MOVE"
+        },
+        {
+          "id": "CHARGE_UP_MOVE",
+          "type": "move",
+          "move_id": "CHARGE_UP",
+          "intents": [
+            "Buff"
+          ],
+          "next": "LASER_MOVE"
+        },
+        {
+          "id": "LASER_MOVE",
+          "type": "move",
+          "move_id": "LASER",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RECHARGE_MOVE"
+        },
+        {
+          "id": "RECHARGE_MOVE",
+          "type": "move",
+          "move_id": "RECHARGE",
+          "intents": [
+            "Sleep"
+          ],
+          "next": "TARGETING_RETICLE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SCROLL_OF_BITING": {
+      "source_type": "ScrollOfBiting",
+      "source_sha256": "575b9fc29c957fdccad5a6c8dc401ecc7dcb95a917169dd62427105739100555",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "CHOMP",
+          "type": "move",
+          "move_id": "CHOMP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "MORE_TEETH"
+        },
+        {
+          "id": "CHEW",
+          "type": "move",
+          "move_id": "CHEW",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "rand"
+        },
+        {
+          "id": "MORE_TEETH",
+          "type": "move",
+          "move_id": "MORE_TEETH",
+          "intents": [
+            "Buff"
+          ],
+          "next": "CHEW"
+        },
+        {
+          "id": "rand",
+          "type": "random",
+          "branches": [
+            {
+              "next": "CHOMP",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "CHEW",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SEAPUNK": {
+      "source_type": "Seapunk",
+      "source_sha256": "4099111d71c165515ec59464608479b4acad89f5c74de4a5874f5aed41068e39",
+      "initial_state": "SEA_KICK_MOVE",
+      "states": [
+        {
+          "id": "SEA_KICK_MOVE",
+          "type": "move",
+          "move_id": "SEA_KICK",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SPINNING_KICK_MOVE"
+        },
+        {
+          "id": "SPINNING_KICK_MOVE",
+          "type": "move",
+          "move_id": "SPINNING_KICK",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "BUBBLE_BURP_MOVE"
+        },
+        {
+          "id": "BUBBLE_BURP_MOVE",
+          "type": "move",
+          "move_id": "BUBBLE_BURP",
+          "intents": [
+            "Buff",
+            "Defend"
+          ],
+          "next": "SEA_KICK_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SEWER_CLAM": {
+      "source_type": "SewerClam",
+      "source_sha256": "acf437ca70d7d05e98c5060a2b750f410cda8e7dc5b4ad6cf61aa55b6b19a34d",
+      "initial_state": "JET_MOVE",
+      "states": [
+        {
+          "id": "PRESSURIZE_MOVE",
+          "type": "move",
+          "move_id": "PRESSURIZE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "JET_MOVE"
+        },
+        {
+          "id": "JET_MOVE",
+          "type": "move",
+          "move_id": "JET",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "PRESSURIZE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SHRINKER_BEETLE": {
+      "source_type": "ShrinkerBeetle",
+      "source_sha256": "577363a8b11242939e68c14e79a4e5765fc9f60521a22ce6ee33c5ba00138a17",
+      "initial_state": "SHRINKER_MOVE",
+      "states": [
+        {
+          "id": "SHRINKER_MOVE",
+          "type": "move",
+          "move_id": "SHRINKER",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "CHOMP_MOVE"
+        },
+        {
+          "id": "CHOMP_MOVE",
+          "type": "move",
+          "move_id": "CHOMP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "STOMP_MOVE"
+        },
+        {
+          "id": "STOMP_MOVE",
+          "type": "move",
+          "move_id": "STOMP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "CHOMP_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SKULKING_COLONY": {
+      "source_type": "SkulkingColony",
+      "source_sha256": "ff0499373a7a580b0f8a64aa587808f05217bd94b67c1a8a30698e1f9db516c8",
+      "initial_state": "ZOOM_MOVE",
+      "states": [
+        {
+          "id": "ZOOM_MOVE",
+          "type": "move",
+          "move_id": "ZOOM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "ZOOM_MOVE_2"
+        },
+        {
+          "id": "ZOOM_MOVE_2",
+          "type": "move",
+          "move_id": "ZOOM_MOVE_2",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "INERTIA_MOVE"
+        },
+        {
+          "id": "INERTIA_MOVE",
+          "type": "move",
+          "move_id": "INERTIA",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "PIERCING_STABS_MOVE"
+        },
+        {
+          "id": "PIERCING_STABS_MOVE",
+          "type": "move",
+          "move_id": "PIERCING_STABS",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "ZOOM_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SLIMED_BERSERKER": {
+      "source_type": "SlimedBerserker",
+      "source_sha256": "7b205538534e9a13b697109a739ed60e673318c30c9a1bf6fa0dc99a52e4155b",
+      "initial_state": "VOMIT_ICHOR_MOVE",
+      "states": [
+        {
+          "id": "VOMIT_ICHOR_MOVE",
+          "type": "move",
+          "move_id": "VOMIT_ICHOR",
+          "intents": [
+            "Status"
+          ],
+          "next": "FURIOUS_PUMMELING_MOVE"
+        },
+        {
+          "id": "LEECHING_HUG_MOVE",
+          "type": "move",
+          "move_id": "LEECHING_HUG",
+          "intents": [
+            "Debuff",
+            "Buff"
+          ],
+          "next": "SMOTHER_MOVE"
+        },
+        {
+          "id": "SMOTHER_MOVE",
+          "type": "move",
+          "move_id": "SMOTHER",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "VOMIT_ICHOR_MOVE"
+        },
+        {
+          "id": "FURIOUS_PUMMELING_MOVE",
+          "type": "move",
+          "move_id": "FURIOUS_PUMMELING",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "LEECHING_HUG_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SLITHERING_STRANGLER": {
+      "source_type": "SlitheringStrangler",
+      "source_sha256": "f219066b234ae5ed000d00088ca534c9350ace6d6a33ce8dc82567ac018c6c2c",
+      "initial_state": "CONSTRICT",
+      "states": [
+        {
+          "id": "CONSTRICT",
+          "type": "move",
+          "move_id": "CONSTRICT",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "rand"
+        },
+        {
+          "id": "THWACK",
+          "type": "move",
+          "move_id": "THWACK",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "CONSTRICT"
+        },
+        {
+          "id": "LASH",
+          "type": "move",
+          "move_id": "LASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "CONSTRICT"
+        },
+        {
+          "id": "rand",
+          "type": "random",
+          "branches": [
+            {
+              "next": "THWACK",
+              "repeat": "CanRepeatForever",
+              "base_weight": 1
+            },
+            {
+              "next": "LASH",
+              "repeat": "CanRepeatForever",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SLUDGE_SPINNER": {
+      "source_type": "SludgeSpinner",
+      "source_sha256": "524f503a1bf88cec8be3b65d5209943464ef5b403f7e099ee63957e82758a0b3",
+      "initial_state": "OIL_SPRAY_MOVE",
+      "states": [
+        {
+          "id": "OIL_SPRAY_MOVE",
+          "type": "move",
+          "move_id": "OIL_SPRAY",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "SLAM_MOVE",
+          "type": "move",
+          "move_id": "SLAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAGE_MOVE",
+          "type": "move",
+          "move_id": "RAGE",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "OIL_SPRAY_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "SLAM_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "RAGE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SLUMBERING_BEETLE": {
+      "source_type": "SlumberingBeetle",
+      "source_sha256": "c1835f20b8b2561f887befed3cfc32c8d61a2632e979c50f119b510ee75c66eb",
+      "initial_state": "SNORE_MOVE",
+      "states": [
+        {
+          "id": "SNORE_MOVE",
+          "type": "move",
+          "move_id": "SNORE",
+          "intents": [
+            "Sleep"
+          ],
+          "next": "SNORE_NEXT"
+        },
+        {
+          "id": "ROLL_OUT_MOVE",
+          "type": "move",
+          "move_id": "ROLL_OUT",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "ROLL_OUT_MOVE"
+        },
+        {
+          "id": "SNORE_NEXT",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "SNORE_MOVE",
+              "condition": "base.Creature.HasPower<SlumberPower>()"
+            },
+            {
+              "next": "ROLL_OUT_MOVE",
+              "condition": "!base.Creature.HasPower<SlumberPower>()"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SNAPPING_JAXFRUIT": {
+      "source_type": "SnappingJaxfruit",
+      "source_sha256": "3e7cacd9ee4c0c4e957e34392563e4ac8cbe626b87781c6a11e962b682349418",
+      "initial_state": "ENERGY_ORB_MOVE",
+      "states": [
+        {
+          "id": "ENERGY_ORB_MOVE",
+          "type": "move",
+          "move_id": "ENERGY_ORB",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "ENERGY_ORB_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SNEAKY_GREMLIN": {
+      "source_type": "SneakyGremlin",
+      "source_sha256": "599bb227e340c4268a1c801aa3824c21d0956b8c57e8d6e19b40a2c25f53847a",
+      "initial_state": "SPAWNED_MOVE",
+      "states": [
+        {
+          "id": "SPAWNED_MOVE",
+          "type": "move",
+          "move_id": "SPAWNED",
+          "intents": [
+            "Stun"
+          ],
+          "next": "TACKLE_MOVE"
+        },
+        {
+          "id": "TACKLE_MOVE",
+          "type": "move",
+          "move_id": "TACKLE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "TACKLE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SOUL_FYSH": {
+      "source_type": "SoulFysh",
+      "source_sha256": "5eda6b0d83623326b7f276e714c996508b17a87f31ba5b852b821f9c6ef88c9f",
+      "initial_state": "BECKON_MOVE",
+      "states": [
+        {
+          "id": "BECKON_MOVE",
+          "type": "move",
+          "move_id": "BECKON",
+          "intents": [
+            "Status"
+          ],
+          "next": "DE_GAS_MOVE"
+        },
+        {
+          "id": "DE_GAS_MOVE",
+          "type": "move",
+          "move_id": "DE_GAS",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "GAZE_MOVE"
+        },
+        {
+          "id": "GAZE_MOVE",
+          "type": "move",
+          "move_id": "GAZE",
+          "intents": [
+            "SingleAttack",
+            "Status"
+          ],
+          "next": "FADE_MOVE"
+        },
+        {
+          "id": "FADE_MOVE",
+          "type": "move",
+          "move_id": "FADE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "SCREAM_MOVE"
+        },
+        {
+          "id": "SCREAM_MOVE",
+          "type": "move",
+          "move_id": "SCREAM",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "BECKON_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SOUL_NEXUS": {
+      "source_type": "SoulNexus",
+      "source_sha256": "caf34c92f917855015e29fcb7b4f49e4001a094225ca1d3ba354e80289dbd288",
+      "initial_state": "SOUL_BURN_MOVE",
+      "states": [
+        {
+          "id": "SOUL_BURN_MOVE",
+          "type": "move",
+          "move_id": "SOUL_BURN",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "MAELSTROM_MOVE",
+          "type": "move",
+          "move_id": "MAELSTROM",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "DRAIN_LIFE_MOVE",
+          "type": "move",
+          "move_id": "DRAIN_LIFE",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "SOUL_BURN_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "MAELSTROM_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "DRAIN_LIFE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SPECTRAL_KNIGHT": {
+      "source_type": "SpectralKnight",
+      "source_sha256": "2c25ac8d7b55e55dd50644a9413119e6860a45067335787b987cc4ac44e48ecf",
+      "initial_state": "HEX",
+      "states": [
+        {
+          "id": "HEX",
+          "type": "move",
+          "move_id": "HEX",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "SOUL_SLASH"
+        },
+        {
+          "id": "SOUL_SLASH",
+          "type": "move",
+          "move_id": "SOUL_SLASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "SOUL_FLAME",
+          "type": "move",
+          "move_id": "SOUL_FLAME",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "SOUL_SLASH",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            },
+            {
+              "next": "SOUL_FLAME",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "SPINY_TOAD": {
+      "source_type": "SpinyToad",
+      "source_sha256": "8c6aea631985c85c03c5a29e0a0d137612dfd376d4f67b3ed98e11fd0d0411f5",
+      "initial_state": "PROTRUDING_SPIKES_MOVE",
+      "states": [
+        {
+          "id": "PROTRUDING_SPIKES_MOVE",
+          "type": "move",
+          "move_id": "PROTRUDING_SPIKES",
+          "intents": [
+            "Buff"
+          ],
+          "next": "SPIKE_EXPLOSION_MOVE"
+        },
+        {
+          "id": "SPIKE_EXPLOSION_MOVE",
+          "type": "move",
+          "move_id": "SPIKE_EXPLOSION",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "TONGUE_LASH_MOVE"
+        },
+        {
+          "id": "TONGUE_LASH_MOVE",
+          "type": "move",
+          "move_id": "TONGUE_LASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "PROTRUDING_SPIKES_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "STABBOT": {
+      "source_type": "Stabbot",
+      "source_sha256": "924692c26b07466e271c05b526193188fe112b9c4f3dfb1bed1319b086c71fbe",
+      "initial_state": "STAB_MOVE",
+      "states": [
+        {
+          "id": "STAB_MOVE",
+          "type": "move",
+          "move_id": "STAB",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "STAB_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TERROR_EEL": {
+      "source_type": "TerrorEel",
+      "source_sha256": "331b1b8d00cc2d559ab1874e9d16c5b0786cb4a4877619e38ca1baf9b15a3547",
+      "initial_state": "CRASH_MOVE",
+      "states": [
+        {
+          "id": "CRASH_MOVE",
+          "type": "move",
+          "move_id": "CRASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "THRASH_MOVE"
+        },
+        {
+          "id": "THRASH_MOVE",
+          "type": "move",
+          "move_id": "THRASH",
+          "intents": [
+            "MultiAttack",
+            "Buff"
+          ],
+          "next": "CRASH_MOVE"
+        },
+        {
+          "id": "STUN_MOVE",
+          "type": "move",
+          "move_id": "STUN",
+          "intents": [
+            "Stun"
+          ],
+          "next": "TERROR_MOVE"
+        },
+        {
+          "id": "TERROR_MOVE",
+          "type": "move",
+          "move_id": "TERROR",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "CRASH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TEST_SUBJECT": {
+      "source_type": "TestSubject",
+      "source_sha256": "21e5485927465cf62fe73a6b4893861250c8e6b6f7f9b03d1e20f768a57b661f",
+      "initial_state": "BITE_MOVE",
+      "states": [
+        {
+          "id": "RESPAWN_MOVE",
+          "type": "move",
+          "move_id": "RESPAWN",
+          "intents": [
+            "Heal",
+            "Buff"
+          ],
+          "must_perform_once": true,
+          "next": "REVIVE_BRANCH"
+        },
+        {
+          "id": "BITE_MOVE",
+          "type": "move",
+          "move_id": "BITE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SKULL_BASH_MOVE"
+        },
+        {
+          "id": "SKULL_BASH_MOVE",
+          "type": "move",
+          "move_id": "SKULL_BASH",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "BITE_MOVE"
+        },
+        {
+          "id": "MULTI_CLAW_MOVE",
+          "type": "move",
+          "move_id": "MULTI_CLAW",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "MULTI_CLAW_MOVE"
+        },
+        {
+          "id": "PHASE3_LACERATE_MOVE",
+          "type": "move",
+          "move_id": "PHASE3_LACERATE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "BIG_POUNCE"
+        },
+        {
+          "id": "BIG_POUNCE",
+          "type": "move",
+          "move_id": "BIG_POUNCE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BURNING_GROWL_MOVE"
+        },
+        {
+          "id": "BURNING_GROWL_MOVE",
+          "type": "move",
+          "move_id": "BURNING_GROWL",
+          "intents": [
+            "Status",
+            "Buff"
+          ],
+          "next": "PHASE3_LACERATE_MOVE"
+        },
+        {
+          "id": "REVIVE_BRANCH",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "MULTI_CLAW_MOVE",
+              "condition": "Respawns < 2"
+            },
+            {
+              "next": "PHASE3_LACERATE_MOVE",
+              "condition": "Respawns >= 2"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [
+        "SetMoveImmediate"
+      ],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "THE_ADVERSARY_MK_ONE": {
+      "source_type": "TheAdversaryMkOne",
+      "source_sha256": "0e28eac241bdc3b565e732aa7efce714293a26c0ca8e5406859340cbd9ceeb92",
+      "initial_state": "SMASH_MOVE",
+      "states": [
+        {
+          "id": "SMASH_MOVE",
+          "type": "move",
+          "move_id": "SMASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BEAM_MOVE"
+        },
+        {
+          "id": "BEAM_MOVE",
+          "type": "move",
+          "move_id": "BEAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BARRAGE_MOVE"
+        },
+        {
+          "id": "BARRAGE_MOVE",
+          "type": "move",
+          "move_id": "BARRAGE",
+          "intents": [
+            "MultiAttack",
+            "Buff"
+          ],
+          "next": "SMASH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "THE_ADVERSARY_MK_THREE": {
+      "source_type": "TheAdversaryMkThree",
+      "source_sha256": "a1208ffedcbeebfcadd70f72981dbe0b8b87ac4dcc7d38cf0ce5488b1ce9607a",
+      "initial_state": "CRASH_MOVE",
+      "states": [
+        {
+          "id": "CRASH_MOVE",
+          "type": "move",
+          "move_id": "CRASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "FLAME_BEAM_MOVE"
+        },
+        {
+          "id": "FLAME_BEAM_MOVE",
+          "type": "move",
+          "move_id": "FLAME_BEAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BARRAGE_MOVE"
+        },
+        {
+          "id": "BARRAGE_MOVE",
+          "type": "move",
+          "move_id": "BARRAGE",
+          "intents": [
+            "MultiAttack",
+            "Buff"
+          ],
+          "next": "CRASH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "THE_ADVERSARY_MK_TWO": {
+      "source_type": "TheAdversaryMkTwo",
+      "source_sha256": "b1b3efe6abe6cc143cea329df34a40aeb824a46fdb72f84d875600843cf983f3",
+      "initial_state": "BASH_MOVE",
+      "states": [
+        {
+          "id": "BASH_MOVE",
+          "type": "move",
+          "move_id": "BASH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "FLAME_BEAM_MOVE"
+        },
+        {
+          "id": "FLAME_BEAM_MOVE",
+          "type": "move",
+          "move_id": "FLAME_BEAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BARRAGE_MOVE"
+        },
+        {
+          "id": "BARRAGE_MOVE",
+          "type": "move",
+          "move_id": "BARRAGE",
+          "intents": [
+            "MultiAttack",
+            "Buff"
+          ],
+          "next": "BASH_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "THE_FORGOTTEN": {
+      "source_type": "TheForgotten",
+      "source_sha256": "9c4ca0f9dc3467e0c570ecec16d2ea6cdfbb14685d1a31572c871196494a38e2",
+      "initial_state": "MIASMA",
+      "states": [
+        {
+          "id": "MIASMA",
+          "type": "move",
+          "move_id": "MIASMA",
+          "intents": [
+            "Debuff",
+            "Defend",
+            "Buff"
+          ],
+          "next": "DREAD"
+        },
+        {
+          "id": "DREAD",
+          "type": "move",
+          "move_id": "DREAD",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "MIASMA"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "THE_INSATIABLE": {
+      "source_type": "TheInsatiable",
+      "source_sha256": "e6872ce2901d65ca9156ad73ffa433801add41e0de7c30dd47b7e90baa9e683b",
+      "initial_state": "LIQUIFY_GROUND_MOVE",
+      "states": [
+        {
+          "id": "LIQUIFY_GROUND_MOVE",
+          "type": "move",
+          "move_id": "LIQUIFY_GROUND",
+          "intents": [
+            "Buff",
+            "Status"
+          ],
+          "next": "THRASH_MOVE"
+        },
+        {
+          "id": "THRASH_MOVE",
+          "type": "move",
+          "move_id": "THRASH",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "LUNGING_BITE_MOVE"
+        },
+        {
+          "id": "THRASH_MOVE_2",
+          "type": "move",
+          "move_id": "THRASH_MOVE_2",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "THRASH_MOVE"
+        },
+        {
+          "id": "LUNGING_BITE_MOVE",
+          "type": "move",
+          "move_id": "LUNGING_BITE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SALIVATE_MOVE"
+        },
+        {
+          "id": "SALIVATE_MOVE",
+          "type": "move",
+          "move_id": "SALIVATE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "THRASH_MOVE_2"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "THE_LOST": {
+      "source_type": "TheLost",
+      "source_sha256": "4f508433df1b568af20b68a256b132cba368bf09f480a0d25cb98cc268bad556",
+      "initial_state": "DEBILITATING_SMOG",
+      "states": [
+        {
+          "id": "DEBILITATING_SMOG",
+          "type": "move",
+          "move_id": "DEBILITATING_SMOG",
+          "intents": [
+            "Debuff",
+            "Buff"
+          ],
+          "next": "EYE_LASERS"
+        },
+        {
+          "id": "EYE_LASERS",
+          "type": "move",
+          "move_id": "EYE_LASERS",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "DEBILITATING_SMOG"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "THE_OBSCURA": {
+      "source_type": "TheObscura",
+      "source_sha256": "85a7127f3d351524182ae7b06dae855adbd9a393832142ff687bf2e82310cf2b",
+      "initial_state": "ILLUSION_MOVE",
+      "states": [
+        {
+          "id": "ILLUSION_MOVE",
+          "type": "move",
+          "move_id": "ILLUSION",
+          "intents": [
+            "Summon"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "PIERCING_GAZE_MOVE",
+          "type": "move",
+          "move_id": "PIERCING_GAZE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "SAIL_MOVE",
+          "type": "move",
+          "move_id": "SAIL",
+          "intents": [
+            "Buff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "HARDENING_STRIKE_MOVE",
+          "type": "move",
+          "move_id": "HARDENING_STRIKE",
+          "intents": [
+            "SingleAttack",
+            "Defend"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "PIERCING_GAZE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "SAIL_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "HARDENING_STRIKE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "THIEVING_HOPPER": {
+      "source_type": "ThievingHopper",
+      "source_sha256": "5b5529dcd8534d0b08de0abc2fc5c33389094b33f8ddd5e448b8206fbf2deeee",
+      "initial_state": "THIEVERY_MOVE",
+      "states": [
+        {
+          "id": "THIEVERY_MOVE",
+          "type": "move",
+          "move_id": "THIEVERY",
+          "intents": [
+            "SingleAttack",
+            "CardDebuff"
+          ],
+          "next": "FLUTTER_MOVE"
+        },
+        {
+          "id": "NAB_MOVE",
+          "type": "move",
+          "move_id": "NAB",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "ESCAPE_MOVE"
+        },
+        {
+          "id": "HAT_TRICK_MOVE",
+          "type": "move",
+          "move_id": "HAT_TRICK",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "NAB_MOVE"
+        },
+        {
+          "id": "FLUTTER_MOVE",
+          "type": "move",
+          "move_id": "FLUTTER",
+          "intents": [
+            "Buff"
+          ],
+          "next": "HAT_TRICK_MOVE"
+        },
+        {
+          "id": "ESCAPE_MOVE",
+          "type": "move",
+          "move_id": "ESCAPE",
+          "intents": [
+            "Escape"
+          ],
+          "next": "ESCAPE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TOADPOLE": {
+      "source_type": "Toadpole",
+      "source_sha256": "abb76551ed00c7bc58115b64f92e4586926ca1dba768a62d23a6538184c02605",
+      "initial_state": "INIT_MOVE",
+      "states": [
+        {
+          "id": "SPIKE_SPIT_MOVE",
+          "type": "move",
+          "move_id": "SPIKE_SPIT",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "WHIRL_MOVE"
+        },
+        {
+          "id": "WHIRL_MOVE",
+          "type": "move",
+          "move_id": "WHIRL",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SPIKEN_MOVE"
+        },
+        {
+          "id": "SPIKEN_MOVE",
+          "type": "move",
+          "move_id": "SPIKEN",
+          "intents": [
+            "Buff"
+          ],
+          "next": "SPIKE_SPIT_MOVE"
+        },
+        {
+          "id": "INIT_MOVE",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "WHIRL_MOVE",
+              "condition": "!((Toadpole)base.Creature.Monster).IsFront"
+            },
+            {
+              "next": "SPIKEN_MOVE",
+              "condition": "((Toadpole)base.Creature.Monster).IsFront"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TORCH_HEAD_AMALGAM": {
+      "source_type": "TorchHeadAmalgam",
+      "source_sha256": "45e9faf02bb50d9289faf6c33d0b407e717dcdf41fe28ed766e8c7149f60327b",
+      "initial_state": "STRONG_TACKLE_MOVE",
+      "states": [
+        {
+          "id": "STRONG_TACKLE_MOVE",
+          "type": "move",
+          "move_id": "STRONG_TACKLE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "TACKLE_2_MOVE"
+        },
+        {
+          "id": "TACKLE_2_MOVE",
+          "type": "move",
+          "move_id": "TACKLE_2",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BEAM_MOVE"
+        },
+        {
+          "id": "BEAM_MOVE",
+          "type": "move",
+          "move_id": "BEAM",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "TACKLE_3_MOVE"
+        },
+        {
+          "id": "TACKLE_3_MOVE",
+          "type": "move",
+          "move_id": "TACKLE_3",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "TACKLE_4_MOVE"
+        },
+        {
+          "id": "TACKLE_4_MOVE",
+          "type": "move",
+          "move_id": "TACKLE_4",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BEAM_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TOUGH_EGG": {
+      "source_type": "ToughEgg",
+      "source_sha256": "88fc9269c8cd60a7281d5e195039a3fc9723eefff74c9a949683bd58fa206e9b",
+      "initial_state": "HATCH_MOVE",
+      "states": [
+        {
+          "id": "HATCH_MOVE",
+          "type": "move",
+          "move_id": "HATCH",
+          "intents": [
+            "Summon"
+          ],
+          "next": "NIBBLE_MOVE"
+        },
+        {
+          "id": "NIBBLE_MOVE",
+          "type": "move",
+          "move_id": "NIBBLE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "NIBBLE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TRACKER_RUBY_RAIDER": {
+      "source_type": "TrackerRubyRaider",
+      "source_sha256": "653e3a122b9598a46bb9a209327592c1122700454c8063a6df392a76ae3d2ecc",
+      "initial_state": "TRACK_MOVE",
+      "states": [
+        {
+          "id": "TRACK_MOVE",
+          "type": "move",
+          "move_id": "TRACK",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "HOUNDS_MOVE"
+        },
+        {
+          "id": "HOUNDS_MOVE",
+          "type": "move",
+          "move_id": "HOUNDS",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "HOUNDS_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TUNNELER": {
+      "source_type": "Tunneler",
+      "source_sha256": "950764ace084ed49b4d321726d1ef00c608fd71d9e79a28591721f4a30c3eb52",
+      "initial_state": "BITE_MOVE",
+      "states": [
+        {
+          "id": "BITE_MOVE",
+          "type": "move",
+          "move_id": "BITE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BURROW_MOVE"
+        },
+        {
+          "id": "BURROW_MOVE",
+          "type": "move",
+          "move_id": "BURROW",
+          "intents": [
+            "Buff",
+            "Defend"
+          ],
+          "next": "BELOW_MOVE"
+        },
+        {
+          "id": "BELOW_MOVE",
+          "type": "move",
+          "move_id": "BELOW",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "BELOW_MOVE"
+        },
+        {
+          "id": "DIZZY_MOVE",
+          "type": "move",
+          "move_id": "DIZZY",
+          "intents": [
+            "Stun"
+          ],
+          "next": "BITE_MOVE"
+        }
+      ],
+      "external_transitions": [
+        "Stun"
+      ],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TURRET_OPERATOR": {
+      "source_type": "TurretOperator",
+      "source_sha256": "8fae2219428c3457df59887a388bb7748327cb5f3ef1878798dde0a41f10afb8",
+      "initial_state": "UNLOAD_MOVE",
+      "states": [
+        {
+          "id": "UNLOAD_MOVE",
+          "type": "move",
+          "move_id": "UNLOAD",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "UNLOAD_MOVE_2"
+        },
+        {
+          "id": "UNLOAD_MOVE_2",
+          "type": "move",
+          "move_id": "UNLOAD_MOVE_2",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RELOAD_MOVE"
+        },
+        {
+          "id": "RELOAD_MOVE",
+          "type": "move",
+          "move_id": "RELOAD",
+          "intents": [
+            "Buff"
+          ],
+          "next": "UNLOAD_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TWIG_SLIME_M": {
+      "source_type": "TwigSlimeM",
+      "source_sha256": "4e03c4737070c87e558b672473ac62b86fcc001118feb2763a44309fe13cfcc8",
+      "initial_state": "STICKY_SHOT_MOVE",
+      "states": [
+        {
+          "id": "POKEY_POUNCE_MOVE",
+          "type": "move",
+          "move_id": "POKEY_POUNCE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "STICKY_SHOT_MOVE",
+          "type": "move",
+          "move_id": "STICKY_SHOT",
+          "intents": [
+            "Status"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "POKEY_POUNCE_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            },
+            {
+              "next": "STICKY_SHOT_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TWIG_SLIME_S": {
+      "source_type": "TwigSlimeS",
+      "source_sha256": "f79cc29f644fa3eddcb29aa0d399e6f1676b41312d459a770c3b447e98c4adf8",
+      "initial_state": "TACKLE_MOVE",
+      "states": [
+        {
+          "id": "TACKLE_MOVE",
+          "type": "move",
+          "move_id": "TACKLE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "TACKLE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "TWO_TAILED_RAT": {
+      "source_type": "TwoTailedRat",
+      "source_sha256": "de7155a9effd7b4979155e1e7f3856350448f4f1f056923cb05ad1584d3a751b",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "SCRATCH_MOVE",
+          "type": "move",
+          "move_id": "SCRATCH",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "DISEASE_BITE_MOVE",
+          "type": "move",
+          "move_id": "DISEASE_BITE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "SCREECH_MOVE",
+          "type": "move",
+          "move_id": "SCREECH",
+          "intents": [
+            "Debuff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "CALL_FOR_BACKUP_MOVE",
+          "type": "move",
+          "move_id": "CALL_FOR_BACKUP",
+          "intents": [
+            "Summon"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "SCRATCH_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": null,
+              "weight_condition": "(!CanSummon()) ? 1f : (1f / 12f)"
+            },
+            {
+              "next": "DISEASE_BITE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": null,
+              "weight_condition": "(!CanSummon()) ? 1f : (1f / 12f)"
+            },
+            {
+              "next": "SCREECH_MOVE",
+              "cooldown": 3,
+              "repeat": "CannotRepeat",
+              "base_weight": null,
+              "weight_condition": "(!CanSummon()) ? 1f : (1f / 12f)"
+            },
+            {
+              "next": "CALL_FOR_BACKUP_MOVE",
+              "repeat": "UseOnlyOnce",
+              "base_weight": null,
+              "weight_condition": "(!CanSummon()) ? 0f : 0.75f"
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted.",
+        "Conditional graph construction: listed states/edges are possible; registration guards are not evaluated."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "VANTOM": {
+      "source_type": "Vantom",
+      "source_sha256": "1b1356e273f61a4bc5490bee7e01eada414f6e558fbfb0b124333ed49c5c2d32",
+      "initial_state": "INK_BLOT_MOVE",
+      "states": [
+        {
+          "id": "INK_BLOT_MOVE",
+          "type": "move",
+          "move_id": "INK_BLOT",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "INKY_LANCE_MOVE"
+        },
+        {
+          "id": "INKY_LANCE_MOVE",
+          "type": "move",
+          "move_id": "INKY_LANCE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "DISMEMBER_MOVE"
+        },
+        {
+          "id": "DISMEMBER_MOVE",
+          "type": "move",
+          "move_id": "DISMEMBER",
+          "intents": [
+            "SingleAttack",
+            "Status"
+          ],
+          "next": "PREPARE_MOVE"
+        },
+        {
+          "id": "PREPARE_MOVE",
+          "type": "move",
+          "move_id": "PREPARE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "INK_BLOT_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "VINE_SHAMBLER": {
+      "source_type": "VineShambler",
+      "source_sha256": "b006746d5976fc5e8ee75d65264130cf299142dac3ac80885c6f2367b92acd9f",
+      "initial_state": "SWIPE_MOVE",
+      "states": [
+        {
+          "id": "GRASPING_VINES_MOVE",
+          "type": "move",
+          "move_id": "GRASPING_VINES",
+          "intents": [
+            "SingleAttack",
+            "CardDebuff"
+          ],
+          "next": "CHOMP_MOVE"
+        },
+        {
+          "id": "SWIPE_MOVE",
+          "type": "move",
+          "move_id": "SWIPE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "GRASPING_VINES_MOVE"
+        },
+        {
+          "id": "CHOMP_MOVE",
+          "type": "move",
+          "move_id": "CHOMP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "SWIPE_MOVE"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "WATERFALL_GIANT": {
+      "source_type": "WaterfallGiant",
+      "source_sha256": "4008d60bac03b4de511486017170587df5273e1f152d6d44c9d0459fc5598b46",
+      "initial_state": "PRESSURIZE_MOVE",
+      "states": [
+        {
+          "id": "PRESSURIZE_MOVE",
+          "type": "move",
+          "move_id": "PRESSURIZE",
+          "intents": [
+            "Buff"
+          ],
+          "next": "STOMP_MOVE"
+        },
+        {
+          "id": "STOMP_MOVE",
+          "type": "move",
+          "move_id": "STOMP",
+          "intents": [
+            "SingleAttack",
+            "Debuff",
+            "Buff"
+          ],
+          "next": "RAM_MOVE"
+        },
+        {
+          "id": "RAM_MOVE",
+          "type": "move",
+          "move_id": "RAM",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "SIPHON_MOVE"
+        },
+        {
+          "id": "SIPHON_MOVE",
+          "type": "move",
+          "move_id": "SIPHON",
+          "intents": [
+            "Heal",
+            "Buff"
+          ],
+          "next": "PRESSURE_GUN_MOVE"
+        },
+        {
+          "id": "PRESSURE_GUN_MOVE",
+          "type": "move",
+          "move_id": "PRESSURE_GUN",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "PRESSURE_UP_MOVE"
+        },
+        {
+          "id": "PRESSURE_UP_MOVE",
+          "type": "move",
+          "move_id": "PRESSURE_UP",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "STOMP_MOVE"
+        },
+        {
+          "id": "ABOUT_TO_BLOW_MOVE",
+          "type": "move",
+          "move_id": "ABOUT_TO_BLOW",
+          "intents": [
+            "Stun"
+          ],
+          "must_perform_once": true,
+          "next": "EXPLODE_MOVE"
+        },
+        {
+          "id": "EXPLODE_MOVE",
+          "type": "move",
+          "move_id": "EXPLODE",
+          "intents": [
+            "DeathBlow"
+          ],
+          "next": "EXPLODE_MOVE"
+        }
+      ],
+      "external_transitions": [
+        "SetMoveImmediate"
+      ],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "WRIGGLER": {
+      "source_type": "Wriggler",
+      "source_sha256": "69afc47ce4c7c3fad8160331155f5989ff3422a81a12eec2a26d55ae1474aa12",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "NASTY_BITE_MOVE",
+          "type": "move",
+          "move_id": "NASTY_BITE",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "WRIGGLE_MOVE"
+        },
+        {
+          "id": "WRIGGLE_MOVE",
+          "type": "move",
+          "move_id": "WRIGGLE",
+          "intents": [
+            "Buff",
+            "Status"
+          ],
+          "next": "NASTY_BITE_MOVE"
+        },
+        {
+          "id": "SPAWNED_MOVE",
+          "type": "move",
+          "move_id": "SPAWNED",
+          "intents": [
+            "Stun"
+          ],
+          "next": "INIT_MOVE"
+        },
+        {
+          "id": "INIT_MOVE",
+          "type": "conditional",
+          "branches": [
+            {
+              "next": "NASTY_BITE_MOVE",
+              "condition": "base.Creature.SlotName == \"wriggler1\""
+            },
+            {
+              "next": "WRIGGLE_MOVE",
+              "condition": "base.Creature.SlotName == \"wriggler2\""
+            },
+            {
+              "next": "NASTY_BITE_MOVE",
+              "condition": "base.Creature.SlotName == \"wriggler3\""
+            },
+            {
+              "next": "WRIGGLE_MOVE",
+              "condition": "base.Creature.SlotName == \"wriggler4\""
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "ZAPBOT": {
+      "source_type": "Zapbot",
+      "source_sha256": "239641661723b49584f599363c8105d888e6374fafd6e3dd994701d2485ac6c4",
+      "initial_state": "ZAP",
+      "states": [
+        {
+          "id": "ZAP",
+          "type": "move",
+          "move_id": "ZAP",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "ZAP"
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "DECIMILLIPEDE_SEGMENT_BACK": {
+      "source_type": "DecimillipedeSegmentBack",
+      "inherited_from": "DecimillipedeSegment",
+      "source_sha256": "e99271a5278251619c9f1d3446d7aa1b3c1d0c1214766735201f9a505d808862",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "WRITHE_MOVE",
+          "type": "move",
+          "move_id": "WRITHE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "CONSTRICT_MOVE"
+        },
+        {
+          "id": "BULK_MOVE",
+          "type": "move",
+          "move_id": "BULK",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "WRITHE_MOVE"
+        },
+        {
+          "id": "CONSTRICT_MOVE",
+          "type": "move",
+          "move_id": "CONSTRICT",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "BULK_MOVE"
+        },
+        {
+          "id": "DEAD_MOVE",
+          "type": "move",
+          "move_id": "DEAD",
+          "intents": [],
+          "next": "REATTACH_MOVE"
+        },
+        {
+          "id": "REATTACH_MOVE",
+          "type": "move",
+          "move_id": "REATTACH",
+          "intents": [
+            "Heal"
+          ],
+          "must_perform_once": true,
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "WRITHE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "BULK_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "CONSTRICT_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "DECIMILLIPEDE_SEGMENT_FRONT": {
+      "source_type": "DecimillipedeSegmentFront",
+      "inherited_from": "DecimillipedeSegment",
+      "source_sha256": "e99271a5278251619c9f1d3446d7aa1b3c1d0c1214766735201f9a505d808862",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "WRITHE_MOVE",
+          "type": "move",
+          "move_id": "WRITHE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "CONSTRICT_MOVE"
+        },
+        {
+          "id": "BULK_MOVE",
+          "type": "move",
+          "move_id": "BULK",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "WRITHE_MOVE"
+        },
+        {
+          "id": "CONSTRICT_MOVE",
+          "type": "move",
+          "move_id": "CONSTRICT",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "BULK_MOVE"
+        },
+        {
+          "id": "DEAD_MOVE",
+          "type": "move",
+          "move_id": "DEAD",
+          "intents": [],
+          "next": "REATTACH_MOVE"
+        },
+        {
+          "id": "REATTACH_MOVE",
+          "type": "move",
+          "move_id": "REATTACH",
+          "intents": [
+            "Heal"
+          ],
+          "must_perform_once": true,
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "WRITHE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "BULK_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "CONSTRICT_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "DECIMILLIPEDE_SEGMENT_MIDDLE": {
+      "source_type": "DecimillipedeSegmentMiddle",
+      "inherited_from": "DecimillipedeSegment",
+      "source_sha256": "e99271a5278251619c9f1d3446d7aa1b3c1d0c1214766735201f9a505d808862",
+      "initial_state": null,
+      "states": [
+        {
+          "id": "WRITHE_MOVE",
+          "type": "move",
+          "move_id": "WRITHE",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "CONSTRICT_MOVE"
+        },
+        {
+          "id": "BULK_MOVE",
+          "type": "move",
+          "move_id": "BULK",
+          "intents": [
+            "SingleAttack",
+            "Buff"
+          ],
+          "next": "WRITHE_MOVE"
+        },
+        {
+          "id": "CONSTRICT_MOVE",
+          "type": "move",
+          "move_id": "CONSTRICT",
+          "intents": [
+            "SingleAttack",
+            "Debuff"
+          ],
+          "next": "BULK_MOVE"
+        },
+        {
+          "id": "DEAD_MOVE",
+          "type": "move",
+          "move_id": "DEAD",
+          "intents": [],
+          "next": "REATTACH_MOVE"
+        },
+        {
+          "id": "REATTACH_MOVE",
+          "type": "move",
+          "move_id": "REATTACH",
+          "intents": [
+            "Heal"
+          ],
+          "must_perform_once": true,
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "WRITHE_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "BULK_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "CONSTRICT_MOVE",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [
+        "Initial state depends on unextracted conditions; not predicted."
+      ],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    },
+    "MYSTERIOUS_KNIGHT": {
+      "source_type": "MysteriousKnight",
+      "inherited_from": "FlailKnight",
+      "source_sha256": "2e2dc0a129a76ba6a1589d571860bb0ccf84a251b9856899f8af2faf1a2d71ea",
+      "initial_state": "RAM_MOVE",
+      "states": [
+        {
+          "id": "WAR_CHANT",
+          "type": "move",
+          "move_id": "WAR_CHANT",
+          "intents": [
+            "Buff"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "FLAIL_MOVE",
+          "type": "move",
+          "move_id": "FLAIL",
+          "intents": [
+            "MultiAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAM_MOVE",
+          "type": "move",
+          "move_id": "RAM",
+          "intents": [
+            "SingleAttack"
+          ],
+          "next": "RAND"
+        },
+        {
+          "id": "RAND",
+          "type": "random",
+          "branches": [
+            {
+              "next": "WAR_CHANT",
+              "repeat": "CannotRepeat",
+              "base_weight": 1
+            },
+            {
+              "next": "FLAIL_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            },
+            {
+              "next": "RAM_MOVE",
+              "repeat": "CanRepeatXTimes",
+              "max_consecutive": 2,
+              "base_weight": 1
+            }
+          ]
+        }
+      ],
+      "external_transitions": [],
+      "gaps": [],
+      "scope": "Static normal transitions. Conditions and repeat limits are constraints, not sampled outcomes. Damage, stun, phase changes, deaths, summons and powers can interrupt this graph; their live rules take precedence."
+    }
+  }
+}

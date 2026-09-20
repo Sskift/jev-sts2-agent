@@ -1,10 +1,11 @@
-import { attackHpLoss, combatForecast, intentDamage } from './combat_arithmetic.mjs';
+import { attackHpLoss, combatForecast, intentDamage, uncomputedDepletionRules } from './combat_arithmetic.mjs';
 import { projectPositioning } from './combat_positioning.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { describeCardFlow } from './card_flow_projection.mjs';
 import { projectDebuffDependencies } from './turn_debuff_projection.mjs';
 import { describeEffectLifecycle } from './effect_lifecycle.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
+import { encounterProgress } from './strategy_knowledge.mjs';
 
 export function sequenceEnergyBudget(state, steps) {
   const sequence = inspectSequence(state, steps);
@@ -27,14 +28,19 @@ export function describeTurnProjection(state, steps) {
   const debuffs = projectDebuffDependencies(state, steps, sequence.entries);
   const lifecycle = describeEffectLifecycle(state, steps);
   const affected = new Set([...(debuffs?.affected_target_ids || []), ...sequence.unknown_targets]);
+  const depletionEffects = projection.remaining_enemies.flatMap(enemy => {
+    const before = state.combat.enemies.find(e => e.combat_id === enemy.combat_id);
+    return enemy.hp <= 0 && before.hp > 0 ? uncomputedDepletionRules(before).map(power => ({ owner_combat_id: enemy.combat_id, source_id: power.id, description: power.description })) : [];
+  });
+  for (const effect of depletionEffects) affected.add(effect.owner_combat_id);
   const hp = affected.size ? null : projection.hp_if_ending_after_prefix;
   return {
-    calculation_status: projection.unresolved_effects.length || debuffs ? 'incomplete' : 'preview_arithmetic',
+    calculation_status: projection.unresolved_effects.length || debuffs || depletionEffects.length ? 'incomplete' : 'preview_arithmetic',
     fully_simulated: false,
     known_effects_only: {
       block: projection.block, hp_if_ending: hp,
       hp_loss_if_ending: hp === null ? null : state.combat.player.hp - hp,
-      block_including_end_turn_gains: projection.block_including_end_turn_gains,
+      block_including_end_turn_gains: depletionEffects.length ? null : projection.block_including_end_turn_gains,
       end_turn_block_gains: projection.end_turn_block_gains,
       end_turn_damage_events: projection.end_turn_damage_events,
       incoming_attack: affected.size ? null : projection.incoming_attack_after_prefix,
@@ -50,9 +56,12 @@ export function describeTurnProjection(state, steps) {
     ...(debuffs ? { debuff_dependencies: debuffs } : {}),
     ...(lifecycle ? { effect_lifecycle: lifecycle } : {}),
     sequence_dependencies: sequence.analysis,
+    ...(depletionEffects.length ? { uncomputed_depletion_effects: depletionEffects } : {}),
+    encounter_progress: encounterProgress(state.combat, projection.remaining_enemies, [...affected]),
     ...(projection.loss_deadlines.length ? { loss_deadlines: projection.loss_deadlines } : {}),
     ...(projection.uncomputed_turn_end_effects.length ? { uncomputed_turn_end_effects: projection.uncomputed_turn_end_effects } : {}),
-    omitted_effects: [...projection.unresolved_effects, ...(affected.size ? ['New debuffs invalidate unchanged-preview point estimates; use debuff_dependencies for scoped ordered damage and current-intent ranges.'] : [])],
+    omitted_effects: [...projection.unresolved_effects, ...(affected.size ? ['Changed modifiers or uncomputed depletion hooks invalidate affected preview estimates; use the listed dependencies and rules.'] : []),
+      ...(depletionEffects.length ? ['Death/revival hooks are not simulated. Depleting this HP bar does not establish a removed enemy, canceled intent, or ended combat.'] : [])],
     interpretation: 'Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.',
     scope: projection.scope
   };

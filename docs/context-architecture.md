@@ -2,7 +2,9 @@
 
 The objective remains one autonomous standard run through all three acts and the formal victory screen. The implemented architecture addresses how the system represents a decision. It does not claim improved win rate before live evidence exists.
 
-The sequence-dependency change has been evaluated against saved observations; see the [current sequence report](sequence-evaluation.md), [plan](plan.md) and [previous timing comparison](harness-evaluation.md). It is ready for an observed live validation run, without a new win-rate claim.
+The sequence-dependency change has been evaluated against saved observations. The current phase remains offline: see the [knowledge/planning regression](knowledge-evaluation.md), [sequence report](sequence-evaluation.md) and [plan](plan.md). No new live win-rate evidence exists.
+
+`knowledge.strategy` now contains sourced, conditional advice for the current character, selected by relevant owned mechanics during combat. `knowledge.catalog.monsters` uses the version-pinned native transition graphs alongside Codex move facts. `analysis.enemy_outlook` links visible intent shapes to conditional next moves without internal move IDs or RNG. Plan `encounter_progress` distinguishes damage, depletion, revival and permanent removal; uncomputed death hooks invalidate affected survival estimates. These additions do not change the source precedence or lossless round-trip contract.
 
 ## Current problem
 
@@ -25,7 +27,7 @@ A rule being present is not sufficient. The model must be able to connect the ru
 |---|---|---|
 | `decision` | Current phase, horizon, output mode, observation identity, question keys and path aliases | Compiler metadata; not game facts |
 | `observation` | Run/player/deck/piles/map/interaction and legal commands | Validated current snapshot |
-| `knowledge` | Versioned rule catalogue, generic entity links, glossary and resolved mechanic facts | Rules; live observations override base values |
+| `knowledge` | Versioned rule catalogue, generic entity links, glossary, resolved mechanic facts and sourced strategy notes | Rules and explicitly advisory notes; live observations override base values |
 | `history` | Confirmed combat events, local run memory and recent changes | Past observations, with coverage limits |
 | `intent` | Overall objective, persistent turn plan and the unexecuted proposed sequence | Intentions, never observations |
 | `analysis` | Route statistics, partial arithmetic, action estimates, conditional projections and model assessments | Explicitly conditional or advisory |

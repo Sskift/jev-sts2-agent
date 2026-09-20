@@ -1,0 +1,12 @@
+{
+  "baseline_commit": "5c0bd47992a411fe98d084f461d7f1fb1fc2b8c4",
+  "purpose": "Offline regression of public knowledge, independent turn candidates and finalist consistency. No new games and no claim of fresh holdout performance.",
+  "cases": [
+    { "id": "holdout-19-turn-4", "reason": "Previously observed partial damage to a reviving minion with no kill and no leader progress.", "baseline_repetitions": 2, "candidate_repetitions": 2 },
+    { "id": "holdout-24-turn-2", "reason": "Tender per-card changes and an unresolved next-attack-cost effect.", "candidate_repetitions": 1 },
+    { "id": "holdout-26-turn-2", "reason": "Vantom future cycle, Slippery and draw observation boundary.", "candidate_repetitions": 1 }
+  ],
+  "disclosure": "These exact snapshots were already inspected and used during prior iterations. Their original filenames/cohort metadata are preserved, but all results here are regressions, not independent test-set evidence. Old raw requests and responses remain unchanged. Changes after a freeze require a new output directory.",
+  "criteria": ["Native fact completeness and no hidden move/RNG leakage", "Legal resource reservations and observation boundaries", "Permanent versus reviving-target progress", "Candidate coverage, finalist order disagreement and uncalibrated confidence", "Actual requests, input tokens and latency"],
+  "live_game_commands": false
+}

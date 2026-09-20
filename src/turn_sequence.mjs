@@ -86,6 +86,7 @@ export function inspectSequence(state, steps) {
       else dexterity += effect.amount;
       detail.applies_after_action = { power_id: effect.power_id, amount: effect.amount, expires: effect.expires_at };
     }
+    if (potion && nextCardKind(potion.description)) nextEffects.push(potion);
     if (card) {
       const consumed = nextEffects.filter(effect => nextCardKind(effect.description) === 'Any' || nextCardKind(effect.description) === card.type);
       const repeats = consumed.some(effect => /\b(?:extra time|additional time|played twice|played .* times)\b/i.test(effect.description));

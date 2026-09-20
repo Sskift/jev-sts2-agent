@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { projectTurnPrefix, describeTurnProjection } from '../src/turn_projection.mjs';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
+import { combatForecast } from '../src/combat_arithmetic.mjs';
 
 function state() {
   const s = completeCombat(); s.combat.player.energy = 3;
@@ -12,6 +13,19 @@ function state() {
 }
 const strike = { kind: 'play_card', name: 'Strike', card_instance_id: 'STRIKE_IRONCLAD', target: 42 };
 const defend = { kind: 'play_card', name: 'Defend', card_instance_id: 'DEFEND_IRONCLAD' };
+
+test('uncomputed revival invalidates post-depletion enemy and survival estimates at both forecast boundaries', () => {
+  const s = state(); s.combat.enemies[0].hp = 6;
+  s.combat.enemies[0].powers = [{ id: 'ADAPTABLE_POWER', amount: 1, description: 'When this would be defeated, it revives stronger.' }];
+  const single = combatForecast(s.combat, s.combat.hand[0], s.combat.enemies[0]);
+  assert.equal(single.hp_remaining_if_end_turn, null); assert.equal(single.fatal_if_end_turn, null);
+  const whole = describeTurnProjection(s, [strike]);
+  assert.equal(whole.known_effects_only.hp_if_ending, null); assert.equal(whole.known_effects_only.incoming_attack, null);
+  assert.equal(whole.known_effects_only.enemies[0].hp, null);
+  assert.equal(whole.encounter_progress[0].permanent_removal_established, null);
+  assert.equal(whole.uncomputed_depletion_effects[0].source_id, 'ADAPTABLE_POWER');
+  assert.equal(s.combat.enemies[0].hp, 6);
+});
 
 test('uncomputed potion benefits stay distinct from equal numeric baselines', () => {
   const s = state();

@@ -36,7 +36,7 @@ test('two preceding attacks reserve the verified discounted Stomp cost without c
   assert.equal(reserveSequence(state, [steps[2], steps[0]]), null);
 });
 
-test('whole-plan alternatives preserve the intended next-card consumer', async () => {
+test('whole-plan alternatives keep their declared next-card binding consistent with the offered order', async () => {
   const state = completeCombat(); state.combat.player.energy = 3;
   state.combat.hand.push(fixtureCard('ANGER', { index: 1, name: 'Anger', target_type: 'AnyEnemy', can_play: true, cost: 0, description: 'Deal 6 damage.', target_previews: [{ target_id: 42, damage: 6 }] }));
   state.combat.player.hand_count = 2;
@@ -55,7 +55,8 @@ test('whole-plan alternatives preserve the intended next-card consumer', async (
     comparisons++;
     for (const { label } of Object.values(choices)) {
       const names = label.ordered_sequence.map(step => step.action);
-      if (names.includes('Duplicator')) assert.equal(names[names.indexOf('Duplicator') + 1], 'Strike');
+      const trigger = label.ordered_sequence.find(s => s.action === 'Duplicator');
+      if (trigger?.intended_followthrough) assert.equal(names[names.indexOf('Duplicator') + 1], trigger.intended_followthrough);
     }
     return Object.values(choices)[0].value;
   });
@@ -105,7 +106,7 @@ test('whole-plan substitutions can replace an expensive kill and use released en
   assert.equal(plan.budget.remaining_after_printed_costs, 0);
 });
 
-test('a new incumbent reconsiders earlier alternatives on the second refinement pass', async () => {
+test('independent alternatives compare different defenses without needing a second greedy refinement pass', async () => {
   const state = completeCombat(); state.combat.player.energy = 3;
   state.combat.enemies[0].hp = 14;
   state.combat.hand = [
@@ -118,14 +119,13 @@ test('a new incumbent reconsiders earlier alternatives on the second refinement 
   state.combat.player.hand_count = 5; state.decision_context.player = structuredClone(state.combat.player);
   const prepared = prepareModDecision(state), end = planStep(state, prepared.candidates.get('end_turn'), 'finish_turn');
   const plan = { steps: [planStep(state, prepared.candidates.get('card_0_target_42')), planStep(state, prepared.candidates.get('card_2_target_42')), end], retained_cards: [], end_policy: 'end_after_steps_unless_conditions_change', budget: { remaining_after_printed_costs: 0 } };
-  let secondPassSawAlternative = false;
+  const offered = new Set();
   await refineTurnPlan(state, plan, prepared, async (_stage, _instructions, choices) => {
-    const secondPass = plan.steps.some(step => step.name === 'Defend');
-    const wanted = secondPass ? ['Strike A', 'Evil Eye', 'Strike B'] : ['Strike A', 'Defend', 'Strike B'];
-    const match = Object.values(choices).find(choice => JSON.stringify(choice.label.ordered_sequence.map(step => step.action)) === JSON.stringify(wanted));
-    if (secondPass && match) secondPassSawAlternative = true;
+    const names = choice => choice.label.ordered_sequence.map(step => step.action).sort().join(',');
+    for (const choice of Object.values(choices)) offered.add(names(choice));
+    const match = Object.values(choices).find(choice => names(choice) === 'Evil Eye,Strike A,Strike B');
     return match?.value ?? Object.values(choices)[0].value;
   });
-  assert.equal(secondPassSawAlternative, true, 'A candidate seen against the old expensive plan must remain available against the new plan');
-  assert.deepEqual(plan.steps.map(step => step.name).filter(Boolean), ['Strike A', 'Evil Eye', 'Strike B']);
+  assert.ok(offered.has('Defend,Strike A,Strike B') && offered.has('Evil Eye,Strike A,Strike B'));
+  assert.deepEqual(plan.steps.map(step => step.name).filter(Boolean).sort(), ['Evil Eye', 'Strike A', 'Strike B']);
 });
