@@ -2,6 +2,8 @@
 
 The objective remains one autonomous standard run through all three acts and the formal victory screen. The implemented architecture addresses how the system represents a decision. It does not claim improved win rate before live evidence exists.
 
+Live play is currently paused. The current change is evaluated only against saved observations; see the [offline comparison](harness-evaluation.md).
+
 ## Current problem
 
 The internal v1 packet contains the required observations and reference material, but mixes several kinds of information. Derived route statistics live beside map observations; partial combat arithmetic appears inside current combat and action descriptions; an intended sequence and its partial projection share a container. Planning phases construct their own extra state. Lossless packing preserves data but does not establish a consistent reading order or a clear source of truth.
@@ -32,6 +34,10 @@ A rule being present is not sufficient. The model must be able to connect the ru
 Question-specific choices remain in the native `questions` API field. A shared path-alias contract translates the internal planner's references into these domains. The compiler preserves the original canonical contract for execution and replay; the transport layout cannot change game commands.
 
 ## Boundaries and subsequent work
+
+`analysis.combat_effects` now carries a compact timing ledger: source, owner, current stacks, whether it is already active or requires playing/using, trigger, expiration and coverage. It joins versioned rules by ID while retaining native resolved text. Verified timing adapters distinguish player-end expiry from opposing-side-end expiry. Unsupported rules retain explicit unknown timing rather than acquiring an invented duration.
+
+Sequence analysis separately lists end-turn damage, remaining consumers of expiring bonuses and uncomputed reactions/health effects. Known Constrict damage requires a unique visible rule-named applier; ambiguous sources stay uncomputed. Arithmetic affected by uncomputed health effects cannot claim a final HP value. These are conditional facts, not policy choices or a complete simulator. All Jev requests and full API responses are recorded, including probability distributions when the provider returns them.
 
 The first implementation centralizes every existing request and preserves all its semantic content. It does not add more model calls, replace Jev's choices with heuristics, or claim a complete simulator. Rule links are based on category and stable IDs, not a list of favored cards. Coverage describes which data and rules were included, not whether all game mechanics have been modeled.
 

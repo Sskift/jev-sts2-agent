@@ -1,6 +1,7 @@
 import { projectPositioning } from './combat_positioning.mjs';
 import { uncomputedAttackReactions } from './combat_reactions.mjs';
 import { attackCardFlowEffects, describeCardFlow } from './card_flow_projection.mjs';
+import { knownTurnEndDamage, uncomputedTurnEndHealthEffects } from './effect_lifecycle.mjs';
 
 // Arithmetic over player-visible facts only. These are single-action estimates,
 // not a combat simulator: draws, general triggered effects and future choices stay unknown.
@@ -101,7 +102,10 @@ export function combatForecast(combat, card = null, target = null) {
   const remainingHand = (combat.hand || []).filter(other => other.index !== card?.index && !exhausted?.some(removed => removed.index === other.index));
   const living = combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0);
   const allTargetsDepleted = living.length > 0 && living.every(enemy => depleted.has(enemy.combat_id));
-  const endTurnHandDamage = allTargetsDepleted ? 0 : remainingHand.filter(other => other.id === 'TOXIC').reduce((sum, other) => sum + Math.max(0, other.damage || 0), 0);
+  const endTurnDamage = allTargetsDepleted ? [] : knownTurnEndDamage(combat, remainingHand, depleted);
+  const timedEffects = allTargetsDepleted ? [] : uncomputedTurnEndHealthEffects(combat, remainingHand, endTurnDamage);
+  const healthUnresolved = reactionUnresolved || timedEffects.length > 0;
+  const endTurnHandDamage = endTurnDamage.filter(e => e.hand_index !== undefined).reduce((sum, e) => sum + e.amount, 0);
   const selfHpLoss = Math.max(0, card?.hp_loss || 0);
   const blockPreview = immediateBlockPreview(card);
   const immediateBlock = (blockPreview.amount ?? 0) * (exhausted ? exhausted.length : 1);
@@ -123,7 +127,7 @@ export function combatForecast(combat, card = null, target = null) {
     }
   }
   const blockIncludingEndTurnGains = block + endTurnBlockGains.reduce((sum, gain) => sum + gain.amount, 0);
-  const loss = selfHpLoss + Math.max(0, incoming + endTurnHandDamage - blockIncludingEndTurnGains);
+  const loss = selfHpLoss + Math.max(0, incoming + endTurnDamage.reduce((sum, e) => sum + e.amount, 0) - blockIncludingEndTurnGains);
   const followup = card && target && hit ? followupAttackBudget(combat, card, target, hit) : null;
   // Sandpit is a visible, deterministic instant-death countdown. Ordinary
   // Block/HP cannot prevent it; Frantic Escape visibly adds one turn.
@@ -139,8 +143,9 @@ export function combatForecast(combat, card = null, target = null) {
     ...(areaHits ? { attack_hp_loss_by_target: areaHits } : {}),
     ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss, hp_remaining_after_declared_loss: combat.player.hp - selfHpLoss, fatal_from_declared_hp_loss: selfHpLoss >= combat.player.hp } : {}),
     ...(endTurnHandDamage ? { end_turn_hand_damage: endTurnHandDamage } : {}),
+    ...(endTurnDamage.length ? { end_turn_damage_events: endTurnDamage } : {}),
     block_after_card: reactionUnresolved ? null : block,
-    block_including_end_turn_gains: reactionUnresolved ? null : blockIncludingEndTurnGains,
+    block_including_end_turn_gains: healthUnresolved ? null : blockIncludingEndTurnGains,
     end_turn_block_gains: endTurnBlockGains,
     ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
@@ -148,10 +153,11 @@ export function combatForecast(combat, card = null, target = null) {
     ...(reactionUnresolved ? { uncomputed_reactions: reactions,
       block_baseline_without_reactions: block,
       reaction_coverage: 'HP, final Block and remaining incoming damage are unknown. Attack damage/removal and turn-end gain entries are conditional baselines only: reaction may prevent the card or later hits from finishing.' } : {}),
+    ...(timedEffects.length ? { uncomputed_turn_end_effects: timedEffects } : {}),
     ...(positioning ? { positioning, incoming_attack_preview_valid: !facingUnresolved } : {}),
-    hp_loss_if_end_turn: reactionUnresolved ? null : instantDeath ? combat.player.hp : facingUnresolved ? null : loss,
-    hp_remaining_if_end_turn: reactionUnresolved ? null : instantDeath ? 0 : facingUnresolved ? null : combat.player.hp - loss,
-    fatal_if_end_turn: reactionUnresolved ? null : instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null || facingUnresolved ? null : loss >= combat.player.hp,
+    hp_loss_if_end_turn: healthUnresolved ? null : instantDeath ? combat.player.hp : facingUnresolved ? null : loss,
+    hp_remaining_if_end_turn: healthUnresolved ? null : instantDeath ? 0 : facingUnresolved ? null : combat.player.hp - loss,
+    fatal_if_end_turn: healthUnresolved ? null : instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null || facingUnresolved ? null : loss >= combat.player.hp,
     ...(exhausted ? { exhausted_hand_cards: exhausted.map(c => ({ index: c.index, id: c.id, type: c.type })), immediate_block_gain: immediateBlock } : {}),
     ...(deathTimers.length ? { death_timers: deathTimers, instant_death_if_end_turn: instantDeath } : {}),
     ...(followup?.hand_indices.length ? { followup_attacks: followup } : {}),

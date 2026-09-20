@@ -11,7 +11,7 @@ export function handUpgradeMode(description = '') {
 export function nextCardKind(description = '') {
   // Do not bind a later-turn trigger to this turn's planned sequence.
   if (/\bnext turn\b|\bat the (?:start|end) of\b/i.test(description)) return null;
-  const match = description.match(/\b(?:your|the) next (card|Attack|Skill|Power)\b/i);
+  const match = description.match(/\b(?:your|the) next (?:\d+ )?(card|Attack|Skill|Power)s?\b/i);
   return match ? { card: 'Any', attack: 'Attack', skill: 'Skill', power: 'Power' }[match[1].toLowerCase()] : null;
 }
 

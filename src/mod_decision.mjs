@@ -330,6 +330,7 @@ export function prepareModDecision(gameState, options = {}) {
             end_now_hp: estimate.hp_remaining_if_end_turn,
             ...(estimate.card_flow ? { card_flow: estimate.card_flow } : {}),
             ...(estimate.uncomputed_reactions ? { uncomputed_reactions: estimate.uncomputed_reactions, reaction_coverage: estimate.reaction_coverage } : {}),
+            ...(estimate.uncomputed_turn_end_effects ? { uncomputed_turn_end_effects: estimate.uncomputed_turn_end_effects } : {}),
             ...(estimate.positioning ? { positioning: estimate.positioning } : {}),
             ...(estimate.active_rage_block_gain ? { rage_block_included: estimate.active_rage_block_gain } : {}),
             ...(estimate.followup_attacks?.hand_indices.length ? { conditional_followups: estimate.followup_attacks } : {}),

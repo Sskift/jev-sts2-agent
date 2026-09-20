@@ -21,4 +21,4 @@
 
 早先 ENOTFOUND 是旧网关配置问题，当前已解决。剩余工作是验证真实游戏视觉，补窗口裁剪/坐标变换与出牌后的变化确认，再进行一场战斗和房间推进。CLI mod 的本机兼容性、多阶段选牌、特殊资源、药水与高阶策略未验证。
 
-方案与一手资料见 [feishu_plan.md](../feishu_plan.md)，飞书文档见 [Agent Loop 架构与实施计划](https://icnainlav1b8.feishu.cn/docx/Ijr1dLJpio6JvNxfcAfcnvXKnUR)。
+当前方案见仓库内的[工作计划](plan.md)；本文保留早期实测记录，不代表当前实现或运行状态。

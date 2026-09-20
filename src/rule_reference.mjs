@@ -22,6 +22,10 @@ const mechanicTerms = [...names.values()].filter(matches => matches.length === 1
   return { match, pattern: new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i') };
 });
 
+// Share the verified snapshot index; callers must not use example Wiki numbers
+// as current amounts or mutate the stored record.
+export const lookupRule = (category, id) => records[category]?.get(normalize(id)) ?? null;
+
 const clean = value => typeof value === 'string' ? value.replace(/\[\/?(?:gold|blue|red|green|orange|purple|grey|gray|pink|sine|jitter|b|i)\]/g, '')
   : Array.isArray(value) ? value.map(clean)
     : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).filter(([, item]) => item !== null).map(([key, item]) => [key, clean(item)])) : value;

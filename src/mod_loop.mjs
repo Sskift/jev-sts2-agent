@@ -149,7 +149,9 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
           }
           else { save(path.join(directory, 'jev-request.json'), payload); save(path.join(directory, 'context-metrics.json'), metrics); }
           if (prepared.selectionPlan) save(path.join(directory, `jev-planning-request-${String(++planningCalls).padStart(4, '0')}.json`), payload);
+          return modelCalls;
         },
+        onResponse: (result, metrics, id) => save(path.join(directory, `jev-response-${String(id).padStart(4, '0')}.json`), { purpose: metrics.purpose, ...result }),
         onPlanningDecision: result => save(path.join(directory, `jev-planning-decision-${String(++planningDecisions).padStart(4, '0')}.json`), result),
         onRunStrategy: result => save(path.join(directory, 'run-strategy-decision.json'), result)
       });

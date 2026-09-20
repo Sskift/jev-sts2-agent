@@ -1,7 +1,7 @@
 {
   "name": "sts2-agent-loop",
   "version": "0.1.0",
-  "description": "Slay the Spire 2 agent loop using structured mod state and TypeSafe Jev, with optional vision and window tools",
+  "description": "Slay the Spire 2 agent loop using structured mod state, versioned rules and Jev turn planning",
   "main": "src/mod_loop.mjs",
   "type": "module",
   "scripts": {
@@ -12,19 +12,13 @@
     "context:benchmark": "node scripts/context_benchmark.mjs",
     "start:mod": "node --use-system-ca src/mod_loop.mjs",
     "test": "node --test test/*.test.mjs",
-    "sim": "node src/agent_loop.mjs --sim",
-    "test:jev": "node --use-system-ca test_jev.mjs",
-    "test:opus": "node --use-system-ca scripts/opus_smoke.mjs",
-    "check:opus-config": "node --use-system-ca src/vision_opus.mjs",
-    "start": "node --use-system-ca src/mod_loop.mjs",
-    "start:vision": "node --use-system-ca src/agent_loop.mjs"
+    "replay": "node --use-system-ca scripts/replay_harness.mjs",
+    "start": "node --use-system-ca src/mod_loop.mjs"
   },
   "keywords": [
     "slay-the-spire-2",
     "typesafe",
     "jev",
-    "claude-opus-5",
-    "computer-use",
     "agent-loop"
   ],
   "author": "skift",

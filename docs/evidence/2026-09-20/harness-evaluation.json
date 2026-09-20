@@ -1,0 +1,1544 @@
+{
+  "date": "2026-09-20",
+  "no_game_commands": true,
+  "baseline_commit": "b4ac38f8c4441ed825bfa6a35d782f84827ff776",
+  "split": "../../../eval/harness-split.json",
+  "freeze": {
+    "at": "2026-09-20T13:58:42.049Z",
+    "candidate_sha256": "36c6c3adc721660cb993b963bacd4e73d6b20f4de7d3b5b723947f8a8d020686",
+    "manifest": "run-artifacts/harness-evaluation/freeze.json"
+  },
+  "supplement": {
+    "at": "2026-09-20T14:03:03.195Z",
+    "kind": "supplement_after_primary_schema_failure",
+    "selection": "Latest encounter of held-out run 21 with first actionable turns 1 and 3 that pass current schema; no model choices used; original failed cases retained.",
+    "candidate_sha256": "36c6c3adc721660cb993b963bacd4e73d6b20f4de7d3b5b723947f8a8d020686",
+    "rejected": [
+      {
+        "combatId": "69a45533d6524a0cb8b0ffd549c46ecc",
+        "reason": "Surrounded requires an observed player facing from context.17 or newer"
+      }
+    ],
+    "selected": [
+      {
+        "source": "run-artifacts/2026-09-20T08-30-17-941Z-c2b655f0/step-0034",
+        "floor": 29,
+        "turn": 1,
+        "encounter": "HUNTER_KILLER_NORMAL"
+      },
+      {
+        "source": "run-artifacts/2026-09-20T08-30-17-941Z-c2b655f0/step-0044",
+        "floor": 29,
+        "turn": 3,
+        "encounter": "HUNTER_KILLER_NORMAL"
+      }
+    ]
+  },
+  "aggregate": {
+    "primary": {
+      "baseline-compatible": {
+        "attempts": 12,
+        "decisions": 8,
+        "failed": 4,
+        "calls": 182,
+        "input_tokens": 3053370,
+        "output_tokens": 22301,
+        "elapsed_ms": 104641
+      },
+      "candidate-final": {
+        "attempts": 12,
+        "decisions": 8,
+        "failed": 4,
+        "calls": 186,
+        "input_tokens": 3305983,
+        "output_tokens": 20892,
+        "elapsed_ms": 108612
+      }
+    },
+    "supplement": {
+      "baseline-compatible": {
+        "attempts": 4,
+        "decisions": 4,
+        "failed": 0,
+        "calls": 157,
+        "input_tokens": 3207056,
+        "output_tokens": 19877,
+        "elapsed_ms": 98893
+      },
+      "candidate-final": {
+        "attempts": 4,
+        "decisions": 4,
+        "failed": 0,
+        "calls": 176,
+        "input_tokens": 3662217,
+        "output_tokens": 20649,
+        "elapsed_ms": 112172
+      }
+    }
+  },
+  "limitations": [
+    "Primary holdout selected before model results; supplementary run-21 encounter selected after raw-schema incompatibility, not by model performance.",
+    "Historical runs informed earlier development; this is not a previously unseen benchmark.",
+    "Two repeats per evaluation case, one per development case; model sampling is not controlled.",
+    "These are unexecuted initial plans. Upgrade/draw/transform observations can force later replanning. No live outcome or win-rate claim.",
+    "Raw requests and complete provider responses remain local under the listed artifact directories. Confidence is a returned model judgment, not calibrated win probability."
+  ],
+  "cases": [
+    {
+      "id": "dev23-deadline",
+      "group": "development",
+      "run_id": "run-1789896546",
+      "source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0/step-0182",
+      "input_sha256": "1f22179e1fcaf9010f098fea2fc77213048b311b567e62eb20ba9aaaa9adfd97",
+      "floor": 33,
+      "turn": 5,
+      "encounter": "THE_INSATIABLE_BOSS",
+      "observation": {
+        "hp": 53,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [
+          {
+            "id": "STRENGTH_POWER",
+            "amount": 2
+          },
+          {
+            "id": "CLARITY_POWER",
+            "amount": 2
+          }
+        ],
+        "enemies": [
+          {
+            "id": "THE_INSATIABLE",
+            "combat_id": 1,
+            "hp": 177,
+            "powers": [
+              {
+                "id": "SANDPIT_POWER",
+                "amount": 1
+              },
+              {
+                "id": "VULNERABLE_POWER",
+                "amount": 3
+              },
+              {
+                "id": "STRENGTH_POWER",
+                "amount": 2
+              }
+            ],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 10,
+                "hits": 2
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "One Frantic Escape becomes two, followed by Bully and Colorless Potion. This gains one more visible deadline extension, but the generated choice remains unknown; not a proven optimal plan.",
+      "results": [
+        {
+          "label": "baseline",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 26,
+          "usage": {
+            "input_tokens": 546176,
+            "output_tokens": 5618
+          },
+          "elapsed_ms": 16192,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.42
+          },
+          "sequence": [
+            "Frantic Escape [hand 1]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 35,
+          "usage": {
+            "input_tokens": 751014,
+            "output_tokens": 6783
+          },
+          "elapsed_ms": 22400,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.46
+          },
+          "sequence": [
+            "Frantic Escape [hand 1]",
+            "Frantic Escape [hand 5]",
+            "Bully [hand 4] -> enemy/player 1",
+            "Colorless Potion [potion 0] -> enemy/player 0",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dev24-reaction",
+      "group": "development",
+      "run_id": "run-1789900349",
+      "source": "run-artifacts/2026-09-20T11-00-04-270Z-80ddb435/step-0071",
+      "input_sha256": "a024bd2d94f6d009931af1c415ccbaaaf8d3c49106168313a509877bd62516bd",
+      "floor": 29,
+      "turn": 2,
+      "encounter": "SPINY_TOAD_NORMAL",
+      "observation": {
+        "hp": 29,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [
+          {
+            "id": "PLATING_POWER",
+            "amount": 5
+          }
+        ],
+        "enemies": [
+          {
+            "id": "SPINY_TOAD",
+            "combat_id": 1,
+            "hp": 110,
+            "powers": [
+              {
+                "id": "VULNERABLE_POWER",
+                "amount": 1
+              },
+              {
+                "id": "THORNS_POWER",
+                "amount": 5
+              }
+            ],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 23,
+                "hits": 1
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "After the shared schema compatibility repair, both choose Armaments then end. No observed decision gain on this reaction case. Original formatting failures are retained.",
+      "results": [
+        {
+          "label": "baseline",
+          "repeat": 1,
+          "status": "failed",
+          "error": "Decision JSON does not match the versioned protocol",
+          "calls": 5,
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.6
+          }
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 36,
+          "usage": {
+            "input_tokens": 769894,
+            "output_tokens": 7007
+          },
+          "elapsed_ms": 21531,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.58
+          },
+          "sequence": [
+            "Armaments [hand 4]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate",
+          "repeat": 1,
+          "status": "failed",
+          "error": "Decision JSON does not match the versioned protocol",
+          "calls": 5,
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.58
+          }
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 35,
+          "usage": {
+            "input_tokens": 763731,
+            "output_tokens": 6440
+          },
+          "elapsed_ms": 20668,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.54
+          },
+          "sequence": [
+            "Armaments [hand 4]",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dev25-pile-cost",
+      "group": "development",
+      "run_id": "run-1789903049",
+      "source": "run-artifacts/2026-09-20T11-29-07-739Z-3dd5fd8a/step-0328",
+      "input_sha256": "ed34a04627c397ebd8afea45f7838ecb0d23c857b249bbd8fb1cdd85afeb469e",
+      "floor": 31,
+      "turn": 6,
+      "encounter": "ENTOMANCER_ELITE",
+      "observation": {
+        "hp": 32,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [],
+        "enemies": [
+          {
+            "id": "ENTOMANCER",
+            "combat_id": 1,
+            "hp": 83,
+            "powers": [
+              {
+                "id": "PERSONAL_HIVE_POWER",
+                "amount": 2
+              },
+              {
+                "id": "STRENGTH_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Buff"
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Both choose Armaments, Headbutt, Bully, end. No observed decision gain.",
+      "results": [
+        {
+          "label": "baseline",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 17,
+          "usage": {
+            "input_tokens": 335407,
+            "output_tokens": 1365
+          },
+          "elapsed_ms": 10027,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.44
+          },
+          "sequence": [
+            "Armaments [hand 2]",
+            "Headbutt [hand 1] -> enemy/player 1",
+            "Bully [hand 0] -> enemy/player 1",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 17,
+          "usage": {
+            "input_tokens": 346796,
+            "output_tokens": 1365
+          },
+          "elapsed_ms": 10517,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.46
+          },
+          "sequence": [
+            "Armaments [hand 2]",
+            "Headbutt [hand 1] -> enemy/player 1",
+            "Bully [hand 0] -> enemy/player 1",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dev27-expiry",
+      "group": "development",
+      "run_id": "run-1789907946",
+      "source": "run-artifacts/2026-09-20T12-48-51-760Z-a7e03155/step-0027",
+      "input_sha256": "99977d9c65477b0f87fcf3abe8979dc7fa5091fb6fb22dbb52d2d6cfdd76e15a",
+      "floor": 11,
+      "turn": 2,
+      "encounter": "SLITHERING_STRANGLER_NORMAL",
+      "observation": {
+        "hp": 51,
+        "energy": 2,
+        "block": 0,
+        "player_powers": [
+          {
+            "id": "CONSTRICT_POWER",
+            "amount": 3
+          }
+        ],
+        "enemies": [
+          {
+            "id": "SLITHERING_STRANGLER",
+            "combat_id": 2,
+            "hp": 46,
+            "powers": [
+              {
+                "id": "VULNERABLE_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 7,
+                "hits": 1
+              },
+              {
+                "type": "Defend"
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Defend plus unconsumed One-Two Punch becomes Defend only. The new arithmetic also includes current Constrict damage.",
+      "results": [
+        {
+          "label": "baseline",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 6,
+          "usage": {
+            "input_tokens": 80135,
+            "output_tokens": 404
+          },
+          "elapsed_ms": 3387,
+          "objective": "remove_threat",
+          "first_judgment": {
+            "phase": "turn_review",
+            "choice": "revise_remaining",
+            "confidence": 0.8
+          },
+          "sequence": [
+            "Defend [hand 0]",
+            "One-Two Punch [hand 1]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 9,
+          "usage": {
+            "input_tokens": 131790,
+            "output_tokens": 725
+          },
+          "elapsed_ms": 4706,
+          "objective": "remove_threat",
+          "first_judgment": {
+            "phase": "turn_review",
+            "choice": "revise_remaining",
+            "confidence": 0.83
+          },
+          "sequence": [
+            "Defend [hand 0]",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "holdout-20-turn-1",
+      "group": "primary",
+      "run_id": "run-1789888890",
+      "source": "run-artifacts/2026-09-20T07-35-26-422Z-019c0c0e/step-0067",
+      "input_sha256": "6ccf5685d0ef6c23e9f900a40eefbbdba2845678a6421f4aed6e361a58c598f4",
+      "floor": 13,
+      "turn": 1,
+      "encounter": "PHROG_PARASITE_ELITE",
+      "observation": {
+        "hp": 48,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [],
+        "enemies": [
+          {
+            "id": "PHROG_PARASITE",
+            "combat_id": 1,
+            "hp": 64,
+            "powers": [
+              {
+                "id": "INFESTED_POWER",
+                "amount": 4
+              }
+            ],
+            "intents": [
+              {
+                "type": "StatusCard"
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Each version wastes Speed Potion in one of two repeats against an enemy with only a StatusCard intent. The other repeat selects three Strikes. No stable improvement.",
+      "results": [
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 17,
+          "usage": {
+            "input_tokens": 244599,
+            "output_tokens": 1615
+          },
+          "elapsed_ms": 9808,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.21
+          },
+          "sequence": [
+            "Speed Potion [potion 0] -> enemy/player 0",
+            "Armaments [hand 4]",
+            "Defend [hand 0]",
+            "Strike [hand 1] -> enemy/player 1",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 26,
+          "usage": {
+            "input_tokens": 410522,
+            "output_tokens": 3084
+          },
+          "elapsed_ms": 14429,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.2
+          },
+          "sequence": [
+            "Strike [hand 3] -> enemy/player 1",
+            "Strike [hand 1] -> enemy/player 1",
+            "Strike [hand 2] -> enemy/player 1",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 28,
+          "usage": {
+            "input_tokens": 456934,
+            "output_tokens": 3090
+          },
+          "elapsed_ms": 16916,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.16
+          },
+          "sequence": [
+            "Strike [hand 3] -> enemy/player 1",
+            "Strike [hand 1] -> enemy/player 1",
+            "Strike [hand 2] -> enemy/player 1",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 25,
+          "usage": {
+            "input_tokens": 409639,
+            "output_tokens": 2662
+          },
+          "elapsed_ms": 13739,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.16
+          },
+          "sequence": [
+            "Speed Potion [potion 0] -> enemy/player 0",
+            "Defend [hand 0]",
+            "Armaments [hand 4]",
+            "Strike [hand 1] -> enemy/player 1",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "holdout-20-turn-3",
+      "group": "primary",
+      "run_id": "run-1789888890",
+      "source": "run-artifacts/2026-09-20T07-35-26-422Z-019c0c0e/step-0075",
+      "input_sha256": "0aef3adf22c28850bd3e0155e4fc329a60d04ee53ddde1bee13925c2a8909221",
+      "floor": 13,
+      "turn": 3,
+      "encounter": "PHROG_PARASITE_ELITE",
+      "observation": {
+        "hp": 48,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [],
+        "enemies": [
+          {
+            "id": "PHROG_PARASITE",
+            "combat_id": 1,
+            "hp": 46,
+            "powers": [
+              {
+                "id": "INFESTED_POWER",
+                "amount": 4
+              }
+            ],
+            "intents": [
+              {
+                "type": "StatusCard"
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Both repeats in both versions use Rage, two Strikes and Defend; only order/goal differs. Same visible damage and no enemy attack; no established gain.",
+      "results": [
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 28,
+          "usage": {
+            "input_tokens": 468597,
+            "output_tokens": 3435
+          },
+          "elapsed_ms": 15936,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.26
+          },
+          "sequence": [
+            "Rage+ [hand 2]",
+            "Defend [hand 1]",
+            "Strike [hand 3] -> enemy/player 1",
+            "Strike [hand 4] -> enemy/player 1",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 28,
+          "usage": {
+            "input_tokens": 468692,
+            "output_tokens": 3435
+          },
+          "elapsed_ms": 15660,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.34
+          },
+          "sequence": [
+            "Rage+ [hand 2]",
+            "Defend [hand 1]",
+            "Strike [hand 3] -> enemy/player 1",
+            "Strike [hand 4] -> enemy/player 1",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 28,
+          "usage": {
+            "input_tokens": 511403,
+            "output_tokens": 3435
+          },
+          "elapsed_ms": 15797,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.29
+          },
+          "sequence": [
+            "Rage+ [hand 2]",
+            "Strike [hand 3] -> enemy/player 1",
+            "Strike [hand 4] -> enemy/player 1",
+            "Defend [hand 0]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 29,
+          "usage": {
+            "input_tokens": 502212,
+            "output_tokens": 2965
+          },
+          "elapsed_ms": 15979,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.25
+          },
+          "sequence": [
+            "Rage+ [hand 2]",
+            "Strike [hand 4] -> enemy/player 1",
+            "Defend [hand 1]",
+            "Strike [hand 3] -> enemy/player 1",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "holdout-21-supplement-turn-1",
+      "group": "supplement",
+      "run_id": "run-1789890786",
+      "source": "run-artifacts/2026-09-20T08-30-17-941Z-c2b655f0/step-0034",
+      "input_sha256": "d77aed1714ed6ba2f5a0cbec44faa3cefdc25c4b745b1f8c49f989e45783d638",
+      "floor": 29,
+      "turn": 1,
+      "encounter": "HUNTER_KILLER_NORMAL",
+      "observation": {
+        "hp": 73,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [],
+        "enemies": [
+          {
+            "id": "HUNTER_KILLER",
+            "combat_id": 1,
+            "hp": 121,
+            "powers": [],
+            "intents": [
+              {
+                "type": "Debuff"
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Candidate uses Strength Potion after Iron Wave in both repeats, versus one baseline repeat. This misses a known damage modifier on an earlier attack. Candidate saves other potions, so record both ordering regression and resource tradeoff.",
+      "results": [
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 53,
+          "usage": {
+            "input_tokens": 1105088,
+            "output_tokens": 6508
+          },
+          "elapsed_ms": 33724,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.32
+          },
+          "sequence": [
+            "Dexterity Potion [potion 0] -> enemy/player 0",
+            "Strength Potion [potion 2] -> enemy/player 0",
+            "Armaments+ [hand 1]",
+            "Strike [hand 4] -> enemy/player 1",
+            "Iron Wave [hand 3] -> enemy/player 1",
+            "Colorless Potion [potion 1] -> enemy/player 0",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 56,
+          "usage": {
+            "input_tokens": 1150841,
+            "output_tokens": 6812
+          },
+          "elapsed_ms": 34123,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.3
+          },
+          "sequence": [
+            "Armaments+ [hand 1]",
+            "Iron Wave [hand 3] -> enemy/player 1",
+            "Strength Potion [potion 2] -> enemy/player 0",
+            "Strike [hand 4] -> enemy/player 1",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 58,
+          "usage": {
+            "input_tokens": 1232900,
+            "output_tokens": 6818
+          },
+          "elapsed_ms": 37790,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.27
+          },
+          "sequence": [
+            "Armaments+ [hand 1]",
+            "Iron Wave [hand 3] -> enemy/player 1",
+            "Strength Potion [potion 2] -> enemy/player 0",
+            "Strike [hand 4] -> enemy/player 1",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 58,
+          "usage": {
+            "input_tokens": 1232400,
+            "output_tokens": 6818
+          },
+          "elapsed_ms": 36394,
+          "objective": "damage",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "damage",
+            "confidence": 0.27
+          },
+          "sequence": [
+            "Armaments+ [hand 1]",
+            "Iron Wave [hand 3] -> enemy/player 1",
+            "Strength Potion [potion 2] -> enemy/player 0",
+            "Strike [hand 4] -> enemy/player 1",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "holdout-21-supplement-turn-3",
+      "group": "supplement",
+      "run_id": "run-1789890786",
+      "source": "run-artifacts/2026-09-20T08-30-17-941Z-c2b655f0/step-0044",
+      "input_sha256": "1e5e7842fda19d693c2c993e687fdec2dd9774c21a2d04356d04ba7314fc1933",
+      "floor": 29,
+      "turn": 3,
+      "encounter": "HUNTER_KILLER_NORMAL",
+      "observation": {
+        "hp": 73,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [
+          {
+            "id": "TENDER_POWER",
+            "amount": 0
+          },
+          {
+            "id": "STRENGTH_POWER",
+            "amount": 2
+          },
+          {
+            "id": "DEXTERITY_POWER",
+            "amount": 2
+          }
+        ],
+        "enemies": [
+          {
+            "id": "HUNTER_KILLER",
+            "combat_id": 1,
+            "hp": 90,
+            "powers": [],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 17,
+                "hits": 1
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Candidate repeats differ. One declares Primal Force then an original Strike that will be transformed; the other upgrades before Defend and Strike. Baseline also varies. The declared continuation lacks effect dependency handling; no demonstrated stable gain.",
+      "results": [
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 22,
+          "usage": {
+            "input_tokens": 428764,
+            "output_tokens": 2873
+          },
+          "elapsed_ms": 13850,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.67
+          },
+          "sequence": [
+            "Defend [hand 2]",
+            "Bully [hand 1] -> enemy/player 1",
+            "Armaments [hand 0]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 26,
+          "usage": {
+            "input_tokens": 522363,
+            "output_tokens": 3684
+          },
+          "elapsed_ms": 17196,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.67
+          },
+          "sequence": [
+            "Bully [hand 1] -> enemy/player 1",
+            "Defend [hand 2]",
+            "Primal Force [hand 3]",
+            "Armaments [hand 0]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 35,
+          "usage": {
+            "input_tokens": 706081,
+            "output_tokens": 4131
+          },
+          "elapsed_ms": 22572,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.67
+          },
+          "sequence": [
+            "Primal Force [hand 3]",
+            "Strike [hand 4] -> enemy/player 1",
+            "Armaments [hand 0]",
+            "Defend [hand 2]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 25,
+          "usage": {
+            "input_tokens": 490836,
+            "output_tokens": 2882
+          },
+          "elapsed_ms": 15416,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.71
+          },
+          "sequence": [
+            "Armaments [hand 0]",
+            "Defend [hand 2]",
+            "Strike [hand 4] -> enemy/player 1",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "holdout-21-turn-1",
+      "group": "primary",
+      "run_id": "run-1789890786",
+      "source": "run-artifacts/2026-09-20T08-30-17-941Z-c2b655f0/step-0080",
+      "input_sha256": "d15c4bb5521920d2c6c7f99d3351df91350497f36be37c70bdba5be2c82f3e28",
+      "floor": 33,
+      "turn": 1,
+      "encounter": "KAISER_CRAB_BOSS",
+      "observation": {
+        "hp": 75,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [
+          {
+            "id": "SURROUNDED_POWER",
+            "amount": 1
+          }
+        ],
+        "enemies": [
+          {
+            "id": "CRUSHER",
+            "combat_id": 1,
+            "hp": 209,
+            "powers": [
+              {
+                "id": "BACK_ATTACK_LEFT_POWER",
+                "amount": 1
+              },
+              {
+                "id": "CRAB_RAGE_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 18,
+                "hits": 1
+              }
+            ]
+          },
+          {
+            "id": "ROCKET",
+            "combat_id": 2,
+            "hp": 199,
+            "powers": [
+              {
+                "id": "BACK_ATTACK_RIGHT_POWER",
+                "amount": 1
+              },
+              {
+                "id": "CRAB_RAGE_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 3,
+                "hits": 1
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Both versions reject the missing player facing before any model call. Preserve as primary evaluation failure; do not infer an unobserved direction.",
+      "results": [
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "failed",
+          "error": "Surrounded requires an observed player facing from context.17 or newer",
+          "calls": 0
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 2,
+          "status": "failed",
+          "error": "Surrounded requires an observed player facing from context.17 or newer",
+          "calls": 0
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "failed",
+          "error": "Surrounded requires an observed player facing from context.17 or newer",
+          "calls": 0
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 2,
+          "status": "failed",
+          "error": "Surrounded requires an observed player facing from context.17 or newer",
+          "calls": 0
+        }
+      ]
+    },
+    {
+      "id": "holdout-21-turn-3",
+      "group": "primary",
+      "run_id": "run-1789890786",
+      "source": "run-artifacts/2026-09-20T08-41-29-862Z-1ede4537/step-0002",
+      "input_sha256": "9e6f4471fc8aa4fa2a0b079cafdf96e9fe96a76fdb6fd877ae2cba5aa73cfd12",
+      "floor": 33,
+      "turn": 3,
+      "encounter": "KAISER_CRAB_BOSS",
+      "observation": {
+        "hp": 70,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [
+          {
+            "id": "SURROUNDED_POWER",
+            "amount": 1
+          }
+        ],
+        "enemies": [
+          {
+            "id": "CRUSHER",
+            "combat_id": 1,
+            "hp": 202,
+            "powers": [
+              {
+                "id": "BACK_ATTACK_LEFT_POWER",
+                "amount": 1
+              },
+              {
+                "id": "CRAB_RAGE_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 9,
+                "hits": 2
+              },
+              {
+                "type": "Debuff"
+              }
+            ]
+          },
+          {
+            "id": "ROCKET",
+            "combat_id": 2,
+            "hp": 180,
+            "powers": [
+              {
+                "id": "BACK_ATTACK_RIGHT_POWER",
+                "amount": 1
+              },
+              {
+                "id": "CRAB_RAGE_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Buff"
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Both versions reject the missing player facing before any model call. Preserve as primary evaluation failure; do not infer an unobserved direction.",
+      "results": [
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "failed",
+          "error": "Surrounded requires an observed player facing from context.17 or newer",
+          "calls": 0
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 2,
+          "status": "failed",
+          "error": "Surrounded requires an observed player facing from context.17 or newer",
+          "calls": 0
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "failed",
+          "error": "Surrounded requires an observed player facing from context.17 or newer",
+          "calls": 0
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 2,
+          "status": "failed",
+          "error": "Surrounded requires an observed player facing from context.17 or newer",
+          "calls": 0
+        }
+      ]
+    },
+    {
+      "id": "holdout-22-turn-1",
+      "group": "primary",
+      "run_id": "run-1789894658",
+      "source": "run-artifacts/2026-09-20T08-57-34-556Z-1a35b3d6/step-0218",
+      "input_sha256": "c2c0f03da7a863ffc505e36416cc38327953e446ad77deed50cdc26114927baf",
+      "floor": 17,
+      "turn": 1,
+      "encounter": "THE_KIN_BOSS",
+      "observation": {
+        "hp": 74,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [],
+        "enemies": [
+          {
+            "id": "KIN_FOLLOWER",
+            "combat_id": 1,
+            "hp": 58,
+            "powers": [
+              {
+                "id": "MINION_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Buff"
+              }
+            ]
+          },
+          {
+            "id": "KIN_FOLLOWER",
+            "combat_id": 2,
+            "hp": 59,
+            "powers": [
+              {
+                "id": "MINION_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 5,
+                "hits": 1
+              }
+            ]
+          },
+          {
+            "id": "KIN_PRIEST",
+            "combat_id": 3,
+            "hp": 190,
+            "powers": [],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 8,
+                "hits": 1
+              },
+              {
+                "type": "Debuff"
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "All four plans spend 3 energy on Defend and Perfected Strike, then declare a zero-energy Whirlwind. No improvement; its preview damage cannot be treated as a real follow-up hit.",
+      "results": [
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 15,
+          "usage": {
+            "input_tokens": 243182,
+            "output_tokens": 1760
+          },
+          "elapsed_ms": 8691,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.33
+          },
+          "sequence": [
+            "Defend [hand 0]",
+            "Perfected Strike [hand 1] -> enemy/player 1",
+            "Whirlwind+ [hand 2]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 21,
+          "usage": {
+            "input_tokens": 349233,
+            "output_tokens": 2383
+          },
+          "elapsed_ms": 11180,
+          "objective": "remove_threat",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "remove_threat",
+            "confidence": 0.32
+          },
+          "sequence": [
+            "Defend [hand 0]",
+            "Perfected Strike [hand 1] -> enemy/player 1",
+            "Whirlwind+ [hand 2]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 16,
+          "usage": {
+            "input_tokens": 287583,
+            "output_tokens": 1763
+          },
+          "elapsed_ms": 9279,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.36
+          },
+          "sequence": [
+            "Defend [hand 0]",
+            "Perfected Strike [hand 1] -> enemy/player 1",
+            "Whirlwind+ [hand 2]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 16,
+          "usage": {
+            "input_tokens": 287670,
+            "output_tokens": 1763
+          },
+          "elapsed_ms": 8526,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.34
+          },
+          "sequence": [
+            "Defend [hand 0]",
+            "Perfected Strike [hand 1] -> enemy/player 1",
+            "Whirlwind+ [hand 2]",
+            "end_turn"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "holdout-22-turn-3",
+      "group": "primary",
+      "run_id": "run-1789894658",
+      "source": "run-artifacts/2026-09-20T09-16-25-722Z-ec23effd/step-0008",
+      "input_sha256": "1f9b5db1cd8528701cfca4a3e703cd40d3b274b2b9a02fbbc019679cfad4478a",
+      "floor": 17,
+      "turn": 3,
+      "encounter": "THE_KIN_BOSS",
+      "observation": {
+        "hp": 53,
+        "energy": 3,
+        "block": 0,
+        "player_powers": [
+          {
+            "id": "WEAK_POWER",
+            "amount": 1
+          }
+        ],
+        "enemies": [
+          {
+            "id": "KIN_FOLLOWER",
+            "combat_id": 1,
+            "hp": 26,
+            "powers": [
+              {
+                "id": "MINION_POWER",
+                "amount": 1
+              },
+              {
+                "id": "STRENGTH_POWER",
+                "amount": 2
+              }
+            ],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 4,
+                "hits": 2
+              }
+            ]
+          },
+          {
+            "id": "KIN_FOLLOWER",
+            "combat_id": 2,
+            "hp": 59,
+            "powers": [
+              {
+                "id": "MINION_POWER",
+                "amount": 1
+              }
+            ],
+            "intents": [
+              {
+                "type": "Buff"
+              }
+            ]
+          },
+          {
+            "id": "KIN_PRIEST",
+            "combat_id": 3,
+            "hp": 190,
+            "powers": [],
+            "intents": [
+              {
+                "type": "Attack",
+                "damage": 3,
+                "hits": 3
+              }
+            ]
+          }
+        ]
+      },
+      "assessment": "Armaments before Defend appears in both candidate repeats versus one baseline repeat. This locally preserves the visible +3 Block upgrade, but one repeat in each version still ends with energy and an attack available. Targets and continuation differ; no full-plan superiority claim.",
+      "results": [
+        {
+          "label": "baseline-compatible",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 22,
+          "usage": {
+            "input_tokens": 410555,
+            "output_tokens": 3158
+          },
+          "elapsed_ms": 13816,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.39
+          },
+          "sequence": [
+            "Armaments+ [hand 4]",
+            "Defend [hand 1]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "baseline-compatible",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 25,
+          "usage": {
+            "input_tokens": 457990,
+            "output_tokens": 3431
+          },
+          "elapsed_ms": 15121,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.4
+          },
+          "sequence": [
+            "Defend [hand 1]",
+            "Armaments+ [hand 4]",
+            "Strike [hand 0] -> enemy/player 3",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 1,
+          "status": "decision_returned",
+          "calls": 26,
+          "usage": {
+            "input_tokens": 513257,
+            "output_tokens": 3170
+          },
+          "elapsed_ms": 17349,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.41
+          },
+          "sequence": [
+            "Armaments+ [hand 4]",
+            "Defend [hand 1]",
+            "end_turn"
+          ]
+        },
+        {
+          "label": "candidate-final",
+          "repeat": 2,
+          "status": "decision_returned",
+          "calls": 18,
+          "usage": {
+            "input_tokens": 337285,
+            "output_tokens": 2044
+          },
+          "elapsed_ms": 11027,
+          "objective": "protect_hp",
+          "first_judgment": {
+            "phase": "turn_objective",
+            "choice": "protect_hp",
+            "confidence": 0.49
+          },
+          "sequence": [
+            "Armaments+ [hand 4]",
+            "Defend [hand 1]",
+            "Strike [hand 0] -> enemy/player 1",
+            "end_turn"
+          ]
+        }
+      ]
+    }
+  ],
+  "local_results": "run-artifacts/harness-evaluation/results/<case.id>/<result.label>/<result.repeat>/",
+  "model": "typesafe/jev-1.13-20260917"
+}

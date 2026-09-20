@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "created_at": "2026-09-20",
+  "baseline_commit": "b4ac38f8c4441ed825bfa6a35d782f84827ff776",
+  "baseline_compatibility_patch": "The original baseline and first candidate both failed on the development Thorns case: uncomputed_reactions.affected_outputs accepted strings but rejected lossless text_ref encoding. For the final comparison, both schemas accept the same text type. No baseline facts, prompts, candidates or policy are changed. Original failed replays are retained.",
+  "development_runs": ["run-1789896546", "run-1789900349", "run-1789903049", "run-1789906322", "run-1789907946"],
+  "holdout_runs": ["run-1789888890", "run-1789890786", "run-1789894658"],
+  "holdout_selection": "For each held-out run, use the first actionable snapshot of player turns 1 and 3 in its final encounter. Select snapshots by metadata, without looking at model choices. Freeze candidate source before opening holdout results.",
+  "comparison": "Replay the identical observed state and confirmed pre-cutoff memory with baseline and candidate, using the same Jev model. Two repetitions per held-out case. No game commands, no later draws, no outcome inserted into model state. Preserve all results, including regressions and unchanged decisions.",
+  "assessment": "Check legal sequence, trigger consumers before expiry, current loss conditions, resource timing and reaction exposure. Report mechanism-specific improvements and tradeoffs, not a fabricated full-plan optimality score or win rate.",
+  "limitations": "These runs predate this split and some failures informed earlier versions. This is a prospective holdout for this change, not an untouched benchmark. A different decision is not automatically a better one. Replays do not execute unknown draws or establish victory."
+}

@@ -12,6 +12,7 @@ import { potionEffectFacts } from './potion_effects.mjs';
 import { positioningError } from './combat_positioning.mjs';
 import { publicRunStrategy } from './run_strategy_state.mjs';
 import { scopeDecisionHistory } from './history_scope.mjs';
+import { describeCombatEffects } from './effect_lifecycle.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -504,6 +505,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
   if (selectionPlanning) screenState.selection_planning = clone(selectionPlanning);
   const combat = source.combat ? { ...source.combat } : null;
   if (combat) {
+    combat.effect_timing = describeCombatEffects(source.combat);
     delete combat.player; // Exactly equal to the authoritative player above.
     combat.draw_pile = { order: 'unknown', cards: groupCards(combat.draw_pile) };
     // Discard and exhaust are kept in their observed order, with full details.

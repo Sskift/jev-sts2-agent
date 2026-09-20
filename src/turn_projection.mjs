@@ -3,6 +3,7 @@ import { projectPositioning } from './combat_positioning.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { describeCardFlow } from './card_flow_projection.mjs';
 import { projectDebuffDependencies } from './turn_debuff_projection.mjs';
+import { describeEffectLifecycle } from './effect_lifecycle.mjs';
 
 export function sequenceEnergyBudget(state, steps) {
   let energy = state.combat.player.energy, attacks = 0;
@@ -30,6 +31,7 @@ export function reserveSequence(state, steps) {
 export function describeTurnProjection(state, steps) {
   const projection = projectTurnPrefix(state, steps);
   const debuffs = projectDebuffDependencies(state, steps);
+  const lifecycle = describeEffectLifecycle(state, steps);
   const affected = new Set(debuffs?.affected_target_ids || []);
   const hp = affected.size ? null : projection.hp_if_ending_after_prefix;
   return {
@@ -40,6 +42,7 @@ export function describeTurnProjection(state, steps) {
       hp_loss_if_ending: hp === null ? null : state.combat.player.hp - hp,
       block_including_end_turn_gains: projection.block_including_end_turn_gains,
       end_turn_block_gains: projection.end_turn_block_gains,
+      end_turn_damage_events: projection.end_turn_damage_events,
       incoming_attack: affected.size ? null : projection.incoming_attack_after_prefix,
       enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
         const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
@@ -51,6 +54,8 @@ export function describeTurnProjection(state, steps) {
     ...(projection.uncomputed_reactions.length ? { uncomputed_reactions: projection.uncomputed_reactions } : {}),
     ...(projection.card_flow ? { card_flow: projection.card_flow } : {}),
     ...(debuffs ? { debuff_dependencies: debuffs } : {}),
+    ...(lifecycle ? { effect_lifecycle: lifecycle } : {}),
+    ...(projection.uncomputed_turn_end_effects.length ? { uncomputed_turn_end_effects: projection.uncomputed_turn_end_effects } : {}),
     omitted_effects: [...projection.unresolved_effects, ...(affected.size ? ['New debuffs invalidate unchanged-preview point estimates; use debuff_dependencies for scoped ordered damage and current-intent ranges.'] : [])],
     interpretation: 'Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.',
     scope: projection.scope
@@ -95,6 +100,7 @@ export function projectTurnPrefix(state, steps) {
     if (!/^(?:Deal [\d.]+ damage\.?|Gain [\d.]+ Block\.?)$/i.test(card.description.trim()) && card.id !== 'RAGE') unresolved.push(`${card.name}: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed`);
   }
   const end = combatForecast(combat);
+  if (end.uncomputed_turn_end_effects?.length) unresolved.push('Current turn-end health/damage rules are not calculated; final HP and turn-end Block remain unknown. See uncomputed_turn_end_effects for the current sources and conditions.');
   const depleted = new Set(combat.enemies.filter(enemy => !enemy.is_alive || enemy.hp <= 0).map(enemy => enemy.combat_id));
   const positioning = projectPositioning(state.combat, steps, depleted);
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
@@ -114,6 +120,8 @@ export function projectTurnPrefix(state, steps) {
     hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved || reactions.length ? null : end.hp_remaining_if_end_turn,
     incoming_attack_after_prefix: facingUnresolved || reactions.length ? null : end.displayed_attacks_after_target_depletion,
     uncomputed_reactions: reactions,
+    uncomputed_turn_end_effects: end.uncomputed_turn_end_effects || [],
+    end_turn_damage_events: end.end_turn_damage_events || [],
     card_flow: describeCardFlow(state.combat, cardFlowEffects),
     ...(positioning ? { positioning } : {}),
     unresolved_effects: [...new Set(unresolved)]

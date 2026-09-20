@@ -15,6 +15,7 @@ const routes = [
   ['combat.history', 'history.combat.events'],
   ['combat.history_coverage', 'history.combat.coverage'],
   ['combat.visible_arithmetic', 'analysis.current_combat'],
+  ['combat.effect_timing', 'analysis.combat_effects'],
   ['deck.statistics', 'analysis.deck_statistics'],
   ['map.routes', 'analysis.routes'],
   ['map.route_semantics', 'analysis.route_semantics'],

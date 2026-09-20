@@ -412,6 +412,7 @@
             "history_coverage"
           ],
           "properties": {
+            "effect_timing": { "$ref": "#/$defs/combatEffects" },
             "hand": {
               "oneOf": [
                 {
@@ -735,6 +736,8 @@
               "type": "object", "required": ["source_id", "amount", "timing"],
               "properties": { "source_id": { "type": "string" }, "amount": { "type": "number", "minimum": 0 }, "timing": { "type": "string" } }
             } },
+            "end_turn_damage_events": { "type": "array", "items": { "type": "object", "required": ["source_id", "amount", "timing", "damage_kind", "condition"],
+              "properties": { "source_id": { "type": "string" }, "amount": { "type": "number", "minimum": 0 }, "timing": { "$ref": "#/$defs/text" }, "damage_kind": { "$ref": "#/$defs/text" }, "condition": { "$ref": "#/$defs/text" } } } },
             "enemies": { "type": "array", "items": {
               "type": "object", "additionalProperties": false, "required": ["combat_id", "hp", "block", "hp_removed", "block_removed"],
               "properties": {
@@ -745,6 +748,11 @@
           }
         },
         "positioning": { "$ref": "#/$defs/positioningProjection" },
+        "uncomputed_turn_end_effects": { "type": "array", "items": { "type": "object", "required": ["category", "source_id", "description", "timing", "condition_evaluated", "affected_outputs", "scope"],
+          "properties": { "category": { "enum": ["power", "relic", "hand_card"] }, "source_id": { "type": "string" }, "description": { "$ref": "#/$defs/text" }, "scope": { "$ref": "#/$defs/text" }, "condition_evaluated": { "const": false },
+            "timing": { "$ref": "#/$defs/text" }, "affected_outputs": { "type": "array", "items": { "$ref": "#/$defs/text" } } } } },
+        "effect_lifecycle": { "type": "object", "required": ["is_observed_effect", "next_card_triggers", "scope"],
+          "properties": { "is_observed_effect": { "const": false }, "next_card_triggers": { "type": "array" }, "scope": { "$ref": "#/$defs/text" } } },
         "debuff_dependencies": { "type": "object", "required": ["is_observed_effect", "adapters", "affected_target_ids", "transitions", "ordered_damage", "enemies", "scope"],
           "properties": { "is_observed_effect": { "const": false }, "adapters": { "type": "array", "items": { "type": "string" } },
             "affected_target_ids": { "type": "array", "items": { "type": "integer" } }, "transitions": { "type": "array" }, "ordered_damage": { "type": "array" }, "scope": { "$ref": "#/$defs/text" },
@@ -761,13 +769,35 @@
         "uncomputed_reactions": { "type": "array", "items": { "type": "object", "required": ["source_id", "owner_combat_id", "sequence", "timing", "damage_per_trigger", "preview_hits", "affected_outputs"],
           "properties": { "source_id": { "type": "string" }, "owner_combat_id": { "type": "integer" }, "sequence": { "type": "integer", "minimum": 0 },
             "timing": { "$ref": "#/$defs/text" }, "damage_per_trigger": { "type": "number", "minimum": 0 }, "preview_hits": { "type": ["integer", "null"], "minimum": 0 },
-            "affected_outputs": { "type": "array", "items": { "type": "string" } } } } },
+            "affected_outputs": { "type": "array", "items": { "$ref": "#/$defs/text" } } } } },
         "omitted_effects": { "type": "array", "items": { "$ref": "#/$defs/text" } },
         "interpretation": { "$ref": "#/$defs/text" }, "scope": { "$ref": "#/$defs/text" }
       }
     },
     "conditionalCount": { "type": "object", "additionalProperties": false, "required": ["min", "max"],
       "properties": { "min": { "type": ["integer", "null"], "minimum": 0 }, "max": { "type": ["integer", "null"], "minimum": 0 } } },
+    "combatEffects": {
+      "type": "object", "additionalProperties": false, "required": ["game_version", "effects", "scope", "phase_order"],
+      "properties": {
+        "game_version": { "const": "v0.111.0" }, "scope": { "$ref": "#/$defs/text" },
+        "phase_order": { "type": "array", "items": { "$ref": "#/$defs/text" } },
+        "effects": { "type": "array", "items": {
+          "type": "object", "additionalProperties": false,
+          "required": ["source_id", "category", "owner", "active", "live_rule", "wiki_rule_id", "activation", "trigger", "expires", "timing_coverage"],
+          "properties": {
+            "source_id": { "type": "string" }, "category": { "enum": ["powers", "cards", "potions", "relics"] },
+            "owner": { "oneOf": [{ "type": "integer" }, { "const": "player" }] }, "active": { "type": "boolean" },
+            "card_instance_id": { "type": "string" }, "potion_slot": { "type": "integer", "minimum": 0 }, "current_amount": { "type": "number" },
+            "live_rule": { "$ref": "#/$defs/text" }, "wiki_rule_id": { "type": ["string", "null"] },
+            "activation": { "enum": ["already_present", "after_play", "after_use"] },
+            "trigger": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/text" }] },
+            "expires": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/text" }] },
+            "consequence": { "$ref": "#/$defs/text" }, "timing_detail": { "$ref": "#/$defs/text" }, "timing_coverage": { "$ref": "#/$defs/text" },
+            "followup": { "$ref": "#/$defs/text" }, "amount_after_use": { "type": "number" }, "retroactive": { "const": false }
+          }
+        } }
+      }
+    },
     "potionEffect": {
       "type": "object", "additionalProperties": false,
       "required": ["potion_id", "slot", "power_id", "amount", "duration", "expires_at", "can_be_changed_or_removed", "affected_quantity", "application_unit", "applied_before_multipliers", "affects_prior_actions", "direct_damage", "direct_block", "requires_followup_actions", "unpowered_effects_excluded", "source"],

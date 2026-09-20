@@ -23,5 +23,6 @@ export function decisionInstructions(state) {
 // The strategic criteria are shared by turn planning and modal decisions. The
 // atomic action-selection contract is excluded from planning questions.
 export function turnStrategyInstructions(state) {
-  return decisionInstructions(state).slice(common.length).replace('Plan a useful sequence, then choose its next step.', 'Compare the combined value of the whole remaining turn and preserve useful ordering dependencies.');
+  return decisionInstructions(state).slice(common.length).replace('Plan a useful sequence, then choose its next step.', 'Compare the combined value of the whole remaining turn and preserve useful ordering dependencies.')
+    + ' Read analysis.combat_effects for current effect owners, activation, trigger timing and expiry. Planned setup is not yet active; temporary benefits require consumers before expiry. Compare the complete enemy response, triggered damage, next known loss deadline and surviving resource needs, not just displayed attacks. A projection\'s uncomputed effect is not zero; do not treat its HP/Block baseline as a complete survival result.';
 }
