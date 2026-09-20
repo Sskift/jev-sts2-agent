@@ -455,6 +455,29 @@ test('a mod-side action timeout remains unresolved in persistent memory', t => {
   }
 });
 
+test('keyed historical card states round-trip through record maps without losing values or identities', () => {
+  const context = packet(completeCombat());
+  const expected = Array.from({ length: 24 }, (_, index) => ({
+    id: 'STRIKE_IRONCLAD', name: 'Strike', cost: 1, damage: 6 + index,
+    description: 'Deal the current preview damage to one enemy.',
+    details: { instance_id: `copy-${index}`, upgrade_level: 0 },
+    target_previews: [{ target_id: 42, damage: 6 + index }]
+  }));
+  context.memory.actions = expected.map((card, index) => ({ request: { cmd: 'play_card', id: card.id, nth: 0, target: 42 }, floor: 2, sequence: index, ok: true, played_card_at_request: card }));
+  const packed = compactContext(context);
+  assert.equal(packed.memory.card_states.encoding, 'record_map_v1');
+  validateDecisionPacket(packed);
+  const restoreText = item => item?.text_ref ? packed.text_dictionary[item.text_ref] : Array.isArray(item) ? item.map(restoreText) : item && typeof item === 'object' ? Object.fromEntries(Object.entries(item).map(([key, value]) => [key, restoreText(value)])) : item;
+  const restored = restoreText(expandRecordTables(packed));
+  for (const [index, action] of restored.memory.actions.entries()) {
+    const ref = action.played_card_at_request, card = structuredClone(restored.memory.card_states[ref.card_state_ref]);
+    card.details.instance_id = ref.instance_id;
+    assert.deepEqual(card, expected[index]);
+  }
+  assert.throws(() => expandRecordTables({ encoding: 'record_map_v1', keys: ['c1', 'c1'], records: [{}, {}] }), /Malformed decision record map/);
+  assert.throws(() => expandRecordTables({ encoding: 'record_map_v1', keys: ['c1'], records: [] }), /Malformed decision record map/);
+});
+
 test('legacy map DTO cannot disclose an unrevealed extra boss through a future edge', () => {
   const state = withContext({ screen: 'MAP', map: { travelable_coords: [{ col: 0, row: 1 }], nodes: [
     { col: 0, row: 1, type: 'BOSS', state: 'TRAVELABLE', children: [{ col: 0, row: 2 }] },

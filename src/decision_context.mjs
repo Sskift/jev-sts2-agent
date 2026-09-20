@@ -619,6 +619,12 @@ function compactRecords(records, nested = true) {
 export function expandRecordTables(item) {
   if (!item || typeof item !== 'object') return item;
   if (Array.isArray(item)) return item.map(expandRecordTables);
+  if (item.encoding === 'record_map_v1') {
+    const records = expandRecordTables(item.records);
+    if (!Array.isArray(item.keys) || !Array.isArray(records) || item.keys.length !== records.length
+      || new Set(item.keys).size !== item.keys.length || item.keys.some(key => typeof key !== 'string' || ['__proto__', 'constructor', 'prototype'].includes(key))) throw new ContextError('Malformed decision record map');
+    return Object.fromEntries(item.keys.map((key, index) => [key, records[index]]));
+  }
   if (['record_table_v1', 'record_table_v2', 'record_table_v3'].includes(item.encoding)) {
     if (!Array.isArray(item.layouts) || !Array.isArray(item.rows)) throw new ContextError('Malformed decision history table');
     return item.rows.map(row => {
@@ -663,13 +669,17 @@ export function compactContext(context) {
     }
     action.played_card_at_request = { card_state_ref: known.get(signature), instance_id: instance };
   }
-  if (known.size) copy.memory.card_states = cardStates;
+  if (known.size) {
+    const packed = { encoding: 'record_map_v1', keys: Object.keys(cardStates), records: compactRecords(Object.values(cardStates)) };
+    copy.memory.card_states = JSON.stringify(packed).length < JSON.stringify(cardStates).length ? packed : cardStates;
+  }
   if (copy.combat?.history?.length) copy.combat.history = compactRecords(copy.combat.history);
   for (const key of ['actions', 'observations', 'relic_updates']) if (copy.memory[key]?.length) copy.memory[key] = compactRecords(copy.memory[key]);
   for (const container of [copy.deck, copy.combat?.draw_pile]) if (container?.cards?.length) container.cards = compactRecords(container.cards);
   for (const key of ['hand', 'discard_pile', 'exhaust_pile', 'play_pile', 'enemies']) if (copy.combat?.[key]?.length) copy.combat[key] = compactRecords(copy.combat[key]);
   if (copy.legal_actions?.length) copy.legal_actions = compactRecords(copy.legal_actions);
   if (copy.decision_brief?.recent_confirmed_actions?.length) copy.decision_brief.recent_confirmed_actions = compactRecords(copy.decision_brief.recent_confirmed_actions);
+  for (const key of ['ordered_steps', 'completed_actions', 'retained_cards']) if (copy.turn_plan?.[key]?.length) copy.turn_plan[key] = compactRecords(copy.turn_plan[key]);
   if (copy.rule_reference?.entries) for (const [category, rows] of Object.entries(copy.rule_reference.entries)) copy.rule_reference.entries[category] = compactRecords(rows);
   return copy;
 }
