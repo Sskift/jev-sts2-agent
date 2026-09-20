@@ -1,0 +1,107 @@
+{
+  "at": "2026-09-20T19:04:47.028Z",
+  "run_id": "run-1789929587",
+  "cohort": "development",
+  "source_step": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0226",
+  "source_state_sha256": "25cdd9e601828d793264ec399e2769e46a1d18b677d30de2aea72d27f135accc",
+  "baseline_runtime_commit": "86fda8756c85b8fe5dc6e660585516c00f69477a",
+  "candidate_sha256": "e2abd28bf1e5a0b34ad9c7b88bd4bc5096caba018bd301a39d7853e8ef74ebfa",
+  "input_sha256": "9737568176d0862acc909b503374f57b81b9c5c52de8fbc70e1bba6f7a68ded0",
+  "trigger": {
+    "player_hp": 55,
+    "energy": 2,
+    "current_attack": 9,
+    "current_block": 0,
+    "automatic_end_block_if_zero": 6,
+    "defend_block": 5,
+    "original_plan": [
+      "Defend",
+      "Pommel Strike targeting 2"
+    ],
+    "original_summary_absorption": {
+      "pommel_only": 0,
+      "defend_then_pommel": 5
+    },
+    "full_rules_already_present": true
+  },
+  "change": "Remove the duplicate immediate-Block absorption summary. Keep complete conditional projections, automatic turn-end gains, continuation resources and unknown checkpoints. No strategy override or new heuristic.",
+  "verification": {
+    "existing_checks_passed": 14,
+    "replay_requests": 17,
+    "removed_field_absent_in_all_requests": true
+  },
+  "replay": {
+    "provider": "openrouter",
+    "actual_models": [
+      "typesafe/jev-1.13-20260917"
+    ],
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Defend",
+        "card_id": "DEFEND_IRONCLAD"
+      },
+      {
+        "kind": "play_card",
+        "name": "Pommel Strike",
+        "card_id": "POMMEL_STRIKE",
+        "target": 2
+      }
+    ],
+    "usage": {
+      "input_tokens": 364060,
+      "output_tokens": 1278
+    },
+    "cost_usd": 0.015290519999999998,
+    "calls": 17,
+    "elapsed_ms": 9877,
+    "original_pair": {
+      "candidates": [
+        "variant_4",
+        "variant_10"
+      ],
+      "preference_support": {
+        "variant_4": 0.37,
+        "variant_10": 0.63
+      },
+      "selection_basis": "balanced_overall_value",
+      "value_distribution": {
+        "plan_a": 0.37,
+        "plan_b": 0.63,
+        "no_clear_difference": 0
+      },
+      "survival_distribution": null,
+      "order_disagreement": false,
+      "selected_by_order": [
+        "variant_10",
+        "variant_10"
+      ]
+    },
+    "candidate_pair": {
+      "candidates": [
+        "variant_4",
+        "variant_10"
+      ],
+      "preference_support": {
+        "variant_4": 0.455,
+        "variant_10": 0.545
+      },
+      "selection_basis": "balanced_overall_value",
+      "value_distribution": {
+        "plan_a": 0.45499999999999996,
+        "plan_b": 0.5449999999999999,
+        "no_clear_difference": 0
+      },
+      "survival_distribution": null,
+      "order_disagreement": false,
+      "selected_by_order": [
+        "variant_10",
+        "variant_10"
+      ]
+    },
+    "source_summary": "run-artifacts/run30-block-summary-review/results/run30-kin-turn3/remove-mixed-timing-summary/1/summary.json",
+    "source_summary_sha256": "ed76596dc81931f0d6798ceacab8dcb49dab10c6b81632f392253e9432d0163d"
+  },
+  "conclusion": "The full-plan choice did not change: Defend then Pommel Strike. The misleading duplicate accounting is removed, but this replay does not establish better decisions or win rate. No game command or counterfactual combat was executed.",
+  "runtime": "The live run continues on 86fda87. This source change has not been loaded into the running controller."
+}

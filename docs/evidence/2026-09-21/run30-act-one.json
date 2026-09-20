@@ -1,0 +1,123 @@
+{
+  "at": "2026-09-20T19:04:46.998Z",
+  "run_number": 30,
+  "run_id": "run-1789929587",
+  "runtime_commit": "86fda8756c85b8fe5dc6e660585516c00f69477a",
+  "provider": "openrouter",
+  "requested_model": "typesafe/jev-1.13",
+  "boss": {
+    "start_player_hp": 61,
+    "start_enemy_hp": [
+      {
+        "name": "Kin Follower",
+        "hp": 59
+      },
+      {
+        "name": "Kin Follower",
+        "hp": 58
+      },
+      {
+        "name": "Kin Priest",
+        "hp": 190
+      }
+    ],
+    "final_turn": 10,
+    "final_request": {
+      "cmd": "play_card",
+      "id": "STRIKE_IRONCLAD",
+      "nth": 0,
+      "target": 3
+    },
+    "player_hp_at_reward": 39
+  },
+  "evidence": [
+    {
+      "file": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0215/before-state.json",
+      "sha256": "b74c87a72c8c745891de88c9d869546e6abd786fad872c0506b29a107810c0c5",
+      "screen": "COMBAT",
+      "run_id": "run-1789929587",
+      "act": 0,
+      "floor": 17,
+      "hp": 61,
+      "max_hp": 85,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0256/before-state.json",
+      "sha256": "4bbfd687ac384804e79d10ca7e99c98ce20140fd0119083de2ab0710b7a77091",
+      "screen": "COMBAT",
+      "run_id": "run-1789929587",
+      "act": 0,
+      "floor": 17,
+      "hp": 33,
+      "max_hp": 85,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0256/after-state.json",
+      "sha256": "e1b05df678f29a02f61cc77be4113fdf94b020120b687b9c2dbc02cfe467bba2",
+      "screen": "UNKNOWN",
+      "run_id": "run-1789929587",
+      "act": 0,
+      "floor": 17,
+      "hp": 39,
+      "max_hp": 85,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0261/before-state.json",
+      "sha256": "696f09bce5566e3d2975d5adda26531951cb5f766e1b7871d17c0cc3a52e3ef3",
+      "screen": "REWARD",
+      "run_id": "run-1789929587",
+      "act": 0,
+      "floor": 17,
+      "hp": 39,
+      "max_hp": 85,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0264/before-state.json",
+      "sha256": "593566e55ec1f77acb4f324b4edfabe101d945a1656e6768d07d4e6c62951df5",
+      "screen": "MAP",
+      "run_id": "run-1789929587",
+      "act": 1,
+      "floor": 17,
+      "hp": 39,
+      "max_hp": 85,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0264/after-state.json",
+      "sha256": "2815120e9475f31c5acfda888298a4d4d4f228d3d30959e1da86ed480ba60f50",
+      "screen": "EVENT",
+      "run_id": "run-1789929587",
+      "act": 1,
+      "floor": 18,
+      "hp": 85,
+      "max_hp": 85,
+      "game_mode": "Standard",
+      "ascension": 0
+    },
+    {
+      "file": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0268/after-state.json",
+      "sha256": "5c3de779a964a908d33b6aa7e9705a3477649f75ec96be74008a851e17bdf15f",
+      "screen": "COMBAT",
+      "run_id": "run-1789929587",
+      "act": 1,
+      "floor": 19,
+      "hp": 85,
+      "max_hp": 85,
+      "game_mode": "Standard",
+      "ascension": 0
+    }
+  ],
+  "limitations": [
+    "The immediate post-kill observation was an animation UNKNOWN screen; subsequent native reward and same-run Act 2 observations establish the transition.",
+    "This is an Act 1 victory, not formal three-act victory. The running process remains on its original runtime commit."
+  ]
+}
