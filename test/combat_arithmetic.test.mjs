@@ -95,6 +95,17 @@ test('an all-enemy attack uses each target preview and preserves surviving or un
   assert.equal(combatForecast(combat, { ...area, target_type: 'RandomEnemy' }).hp_remaining_if_end_turn, -3, 'A random-target attack cannot claim to hit every enemy');
 });
 
+test('a playable zero-energy X attack must not falsely remove a lethal attacker', () => {
+  const enemy = { combat_id: 1, hp: 5, block: 0, is_alive: true, intents: [{ damage: 20 }] };
+  const whirlwind = { cost: -1, target_type: 'AllEnemies', can_play: true, target_previews: [{ target_id: 1, damage: 7 }] };
+  const combat = { player: { hp: 10, energy: 0, block: 0 }, hand: [whirlwind], enemies: [enemy] };
+  const estimate = combatForecast(combat, whirlwind);
+  assert.equal(firstHitHpLoss(whirlwind, enemy), null);
+  assert.deepEqual(estimate.first_hit_hp_loss_by_target, [{ target_id: 1, hp_loss: null, hp_depleted: false }]);
+  assert.equal(estimate.fatal_if_end_turn, true);
+  assert.equal(whirlwind.target_previews[0].damage, 7, 'The real per-hit preview remains available to Jev');
+});
+
 test('declared self HP loss can kill before an otherwise fully blocked enemy turn', () => {
   const target = { combat_id: 2, hp: 61, block: 0, is_alive: true, intents: [{ damage: 6 }] };
   const combat = { player: { hp: 1, energy: 1, block: 20 }, hand: [], enemies: [target] };

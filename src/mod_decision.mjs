@@ -85,7 +85,7 @@ export function buildModCandidates(state) {
       for (const { card, nth } of indexedCopies(combat.hand || [], 'id')) {
         if (card.can_play !== true || !hasId(card.target_type)) continue;
         const request = { cmd: 'play_card', id: card.id, nth };
-        const description = `Play ${card.name}, hand ${card.index}, cost ${card.cost}.`;
+        const description = `Play ${card.name}, hand ${card.index}, cost ${card.cost < 0 ? `X (current energy ${combat.player.energy})` : card.cost}.`;
         if (card.target_type === 'AnyEnemy') {
           for (const enemy of enemies) if (!Array.isArray(card.valid_target_ids) || card.valid_target_ids.includes(enemy.combat_id)) {
             const preview = card.target_previews?.find(p => p.target_id === enemy.combat_id);
@@ -228,6 +228,7 @@ export function buildModCandidates(state) {
       const estimate = combatForecast(state.combat, card, target);
       action.combat_estimate = estimate;
       action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn}${estimate.fatal_if_end_turn ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
+      if (card?.cost < 0) action.description += ' X-cost: per-hit damage does not guarantee a hit. The estimate does not assume any attack repetitions; use current energy, card rules and modifiers.';
       if (estimate.declared_self_hp_loss) action.description += ` Printed self HP loss ${estimate.declared_self_hp_loss}; HP after that loss ${estimate.hp_remaining_after_declared_loss}${estimate.fatal_from_declared_hp_loss ? ' (LETHAL SELF-LOSS before waiting for enemies)' : ''}. Check any loss-prevention effects.`;
       if (estimate.end_turn_hand_damage) action.description += ` Remaining Toxic cards deal ${estimate.end_turn_hand_damage} extra blockable damage at end of turn.`;
       if (estimate.attack_trigger_potential) {
@@ -294,7 +295,7 @@ export function prepareModDecision(gameState, options = {}) {
         const card = gameState.screen === 'COMBAT' && candidate.request?.cmd === 'play_card'
           ? gameState.combat.hand.find(card => card.index === candidate.card_hand_index) : null;
         const target = card && gameState.combat.enemies.find(enemy => enemy.combat_id === candidate.target_combat_id);
-        const effect = card ? `${card.name}, cost ${card.cost}: ${card.description}${target ? ` Target ${target.name} (${target.hp} HP, ${target.block} Block).` : ''}` : candidate.description;
+        const effect = card ? `${card.name}, cost ${card.cost < 0 ? `X (current energy ${gameState.combat.player.energy})` : card.cost}: ${card.description}${target ? ` Target ${target.name} (${target.hp} HP, ${target.block} Block).` : ''}` : candidate.description;
         return [id, { action_id: id, command: candidate.request?.cmd || 'plan_selection', effect }];
       }))
     } }

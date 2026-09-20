@@ -3,6 +3,10 @@
 export const intentDamage = enemy => (enemy.intents || []).reduce((sum, intent) => sum + (Number.isFinite(intent.damage) ? intent.damage * (intent.hits || 1) : 0), 0);
 
 export function firstHitHpLoss(card, enemy) {
+  // A per-hit preview does not establish that an X-cost card will hit at all.
+  // Zero-energy Whirlwind is playable but can deal no damage; payment modifiers
+  // also mean current energy alone cannot establish the number of hits.
+  if (card.cost < 0) return null;
   const damage = card.target_previews?.find(p => p.target_id === enemy.combat_id)?.damage;
   if (!Number.isFinite(damage)) return null;
   let hpLoss = Math.max(0, damage - enemy.block);
