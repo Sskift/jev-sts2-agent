@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-09-20T20:41:57.225Z",
+  "run_number": 32,
+  "run_id": "run-1789936871",
+  "runtime_commit": "989dce983c1742345f5439c5b609f8d14c2aa23c",
+  "provider": "openrouter",
+  "requested_model": "typesafe/jev-1.13",
+  "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-2026-09-20T20-41-07.165Z",
+  "previous_run": {
+    "run_id": "run-1789934018",
+    "result": "defeat",
+    "review": "docs/run31-review.md",
+    "review_and_fixes_committed_before_start": true
+  },
+  "initial_menu": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-2026-09-20T20-41-07.165Z\\initial-menu.json",
+    "sha256": "881f06b76ff49b85e0e8d9e7f4e282ec64d9b01b5f7ab729df0a555631bde546",
+    "screen": "MENU",
+    "has_run_save": false
+  },
+  "first_floor": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-2026-09-20T20-41-07.165Z\\step-0004\\before-state.json",
+    "sha256": "cbd95fb0b06427ab195b7105b68c7bdede3848f81b0c18a943d604a3595f4fe3",
+    "screen": "EVENT",
+    "act_index": 0,
+    "total_floor": 1,
+    "game_mode": "Standard",
+    "ascension": 0,
+    "character": "IRONCLAD",
+    "hp": 80
+  },
+  "actual_models": [
+    "typesafe/jev-1.13-20260917"
+  ],
+  "goal_complete": false
+}
