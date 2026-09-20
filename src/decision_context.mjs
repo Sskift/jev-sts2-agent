@@ -373,6 +373,11 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
   const source = canonicalObservation(state), context = source.decision_context;
   const screenState = { ...source };
   for (const key of ['screen', 'combat', 'map', 'decision_context']) delete screenState[key];
+  if (state.screen === 'REST_SITE' && screenState.rest_site && context?.deck_upgrade_previews) {
+    // Preview-only values must not turn entering/leaving a campfire into a
+    // permanent deck change. Instance IDs still join the grouped deck below.
+    screenState.rest_site.deck_upgrade_previews = context.deck_upgrade_previews;
+  }
   if (selectionPlanning) screenState.selection_planning = clone(selectionPlanning);
   const combat = source.combat ? { ...source.combat } : null;
   if (combat) {

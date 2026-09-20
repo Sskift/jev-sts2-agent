@@ -141,6 +141,25 @@ test('selection overlays retain their purpose plus underlying combat and complet
   assert.equal(value.legal_actions[0].request.cmd, 'hand_select_card');
 });
 
+test('rest upgrade previews match deck instances without recording hypothetical upgrades as deck changes', () => {
+  const instance = 'abcdef0123456789abcdef0123456789';
+  const state = withContext({ screen: 'REST_SITE', rest_site: { options: [
+    { option_id: 'HEAL', name: 'Rest', description: 'Heal 24 HP.', is_enabled: true },
+    { option_id: 'SMITH', name: 'Smith', description: 'Upgrade 1 card.', is_enabled: true }
+  ] } }, { master_deck: [fixtureCard('STRIKE_IRONCLAD', { details: { instance_id: instance, upgrade_level: 0 } })],
+    deck_upgrade_previews: [{ deck_index: 0, instance_id: instance, card_id: 'STRIKE_IRONCLAD', name: 'Strike+', description: 'Deal 9 damage.', cost: 1 }] });
+  const memory = new DecisionMemory(); memory.observe(state);
+  const value = packet(state, memory), preview = value.screen_state.rest_site.deck_upgrade_previews[0];
+  assert.equal(preview.instance_id, value.deck.cards[0].instance_ids[0]);
+  assert.equal(preview.description, 'Deal 9 damage.');
+  assert.equal(value.deck.cards[0].card.description, 'Deal 6 damage.');
+  assert.equal(value.deck.cards[0].card.is_upgraded, false);
+  assert.deepEqual(expandRecordTables(compactContext(value)).screen_state.rest_site.deck_upgrade_previews, value.screen_state.rest_site.deck_upgrade_previews);
+  const after = structuredClone(state); after.screen = 'MAP'; delete after.rest_site; delete after.decision_context.deck_upgrade_previews;
+  memory.observe(after);
+  assert.equal(memory.data.observations.length, 0);
+});
+
 test('old mod, missing card rules, missing powers, extraction failures and mismatched counts fail before any API call', async () => {
   for (const alter of [
     s => { delete s.decision_context; },

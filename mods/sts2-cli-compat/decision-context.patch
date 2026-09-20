@@ -680,6 +680,28 @@ index 3a446ca..25a1ed9 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/Models/State/CardUpgradePreviewDto.cs b/STS2.Cli.Mod/Models/State/CardUpgradePreviewDto.cs
+new file mode 100644
+index 0000000..442fcbd
+--- /dev/null
++++ b/STS2.Cli.Mod/Models/State/CardUpgradePreviewDto.cs
+@@ -0,0 +1,16 @@
++namespace STS2.Cli.Mod.Models.State;
++
++/// <summary>
++///     Displayed name, rules, and costs of the next upgrade on an independent card preview.
++/// </summary>
++public class CardUpgradePreviewDto
++{
++    public required string Name { get; set; }
++    public required string Description { get; set; }
++
++    /// <summary>Displayed energy cost, or -1 for X energy.</summary>
++    public int Cost { get; set; }
++
++    /// <summary>Displayed star cost, -1 for X stars, or null when there is no star cost.</summary>
++    public int? StarCost { get; set; }
++}
 diff --git a/STS2.Cli.Mod/Models/State/GameStateDto.cs b/STS2.Cli.Mod/Models/State/GameStateDto.cs
 index 6492648..008e8d1 100644
 --- a/STS2.Cli.Mod/Models/State/GameStateDto.cs
@@ -967,6 +989,69 @@ index de41515..67c3887 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/State/Builders/CardUpgradePreviewBuilder.cs b/STS2.Cli.Mod/State/Builders/CardUpgradePreviewBuilder.cs
+new file mode 100644
+index 0000000..e9f3e71
+--- /dev/null
++++ b/STS2.Cli.Mod/State/Builders/CardUpgradePreviewBuilder.cs
+@@ -0,0 +1,57 @@
++using MegaCrit.Sts2.Core.Entities.Cards;
++using MegaCrit.Sts2.Core.Models;
++using STS2.Cli.Mod.Models.State;
++using STS2.Cli.Mod.Utils;
++using static STS2.Cli.Mod.Utils.TextUtils;
++
++namespace STS2.Cli.Mod.State.Builders;
++
++/// <summary>
++///     Builds the player's inspectable upgrade preview without modifying or registering a live card.
++/// </summary>
++public static class CardUpgradePreviewBuilder
++{
++    private static readonly ModLogger Logger = new("CardUpgradePreviewBuilder");
++
++    /// <summary>
++    ///     Upgrades a detached copy using the native preview path. Returns null for cards that
++    ///     cannot upgrade or whose preview could not be extracted. Call on the Godot main thread.
++    /// </summary>
++    public static CardUpgradePreviewDto? Build(CardModel card)
++    {
++        try
++        {
++            if (!card.IsUpgradable) return null;
++
++            // Match NUpgradePreview/NCard on a detached model. CardScope.CloneCard
++            // registers a new card in live state, so it is unsuitable for a state read.
++            var preview = (CardModel)card.MutableClone();
++            preview.UpgradeInternal();
++            preview.UpgradePreviewType = card.Pile?.IsCombatPile == true
++                ? CardUpgradePreviewType.Combat
++                : CardUpgradePreviewType.Deck;
++            preview.DynamicVars.ClearPreview();
++            preview.UpdateDynamicVarPreview(CardPreviewMode.Upgrade, null, preview.DynamicVars);
++            if (preview.Enchantment is { } enchantment)
++            {
++                enchantment.DynamicVars.ClearPreview();
++                preview.UpdateDynamicVarPreview(CardPreviewMode.Upgrade, null, enchantment.DynamicVars);
++            }
++
++            return new CardUpgradePreviewDto
++            {
++                Name = StripGameTags(preview.Title),
++                Description = StripGameTags(preview.GetDescriptionForUpgradePreview()),
++                Cost = preview.EnergyCost.CostsX ? -1 : preview.EnergyCost.GetWithModifiers(CostModifiers.All),
++                StarCost = preview.CanonicalStarCost < 0 ? null
++                    : preview.HasStarCostX ? -1 : preview.GetStarCostWithModifiers()
++            };
++        }
++        catch (Exception ex)
++        {
++            DecisionContextBuilder.Report($"card {card.Id.Entry} upgrade preview: {ex.GetType().Name}");
++            Logger.Warning($"Failed to build upgrade preview for '{card.Id.Entry}': {ex.Message}");
++            return null;
++        }
++    }
++}
 diff --git a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
 index 9547402..01e4c8a 100644
 --- a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
@@ -1029,7 +1114,7 @@ index efe90a3..fcc3fd6 100644
 \ No newline at end of file
 +}
 diff --git a/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
-index aa3cb26..636ad36 100644
+index aa3cb26..905c03b 100644
 --- a/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/GridCardSelectStateBuilder.cs
 @@ -1,5 +1,7 @@
@@ -1070,7 +1155,7 @@ index aa3cb26..636ad36 100644
                  MinSelect = prefs?.MinSelect ?? 1,
                  MaxSelect = prefs?.MaxSelect ?? 1,
                  Cancelable = prefs?.Cancelable ?? false,
-@@ -110,12 +115,70 @@ public static class GridCardSelectStateBuilder
+@@ -110,12 +115,44 @@ public static class GridCardSelectStateBuilder
          }
      }
  
@@ -1079,37 +1164,11 @@ index aa3cb26..636ad36 100644
 +
 +    private static void AddUpgradePreview(CardModel card, SelectableCardDto dto)
 +    {
-+        if (!card.IsUpgradable) return;
-+
-+        try
-+        {
-+            // Match NUpgradePreview/NCard on a detached model. CardScope.CloneCard
-+            // registers a new card in live state, so it is unsuitable for a state read.
-+            var preview = (CardModel)card.MutableClone();
-+            preview.UpgradeInternal();
-+            preview.UpgradePreviewType = card.Pile?.IsCombatPile == true
-+                ? CardUpgradePreviewType.Combat
-+                : CardUpgradePreviewType.Deck;
-+            preview.DynamicVars.ClearPreview();
-+            preview.UpdateDynamicVarPreview(CardPreviewMode.Upgrade, null, preview.DynamicVars);
-+            if (preview.Enchantment is { } enchantment)
-+            {
-+                enchantment.DynamicVars.ClearPreview();
-+                preview.UpdateDynamicVarPreview(CardPreviewMode.Upgrade, null, enchantment.DynamicVars);
-+            }
-+
-+            var description = StripGameTags(preview.GetDescriptionForUpgradePreview());
-+            var name = StripGameTags(preview.Title);
-+            var cost = DisplayedEnergyCost(preview);
-+            dto.UpgradePreview = description;
-+            dto.UpgradePreviewName = name;
-+            dto.UpgradePreviewCost = cost;
-+        }
-+        catch (Exception ex)
-+        {
-+            DecisionContextBuilder.Report($"card {card.Id.Entry} upgrade preview: {ex.GetType().Name}");
-+            Logger.Warning($"Failed to build upgrade preview for '{card.Id.Entry}': {ex.Message}");
-+        }
++        var preview = CardUpgradePreviewBuilder.Build(card);
++        if (preview == null) return;
++        dto.UpgradePreview = preview.Description;
++        dto.UpgradePreviewName = preview.Name;
++        dto.UpgradePreviewCost = preview.Cost;
 +    }
 +
 +    private static object? BuildEnchantment(NCardGridSelectionScreen screen)
@@ -1142,7 +1201,7 @@ index aa3cb26..636ad36 100644
      }
  
      /// <summary>
-@@ -154,6 +217,7 @@ public static class GridCardSelectStateBuilder
+@@ -154,6 +191,7 @@ public static class GridCardSelectStateBuilder
          {
              var overlayStack = NOverlayStack.Instance;
              if (overlayStack == null) return null;
@@ -1150,7 +1209,7 @@ index aa3cb26..636ad36 100644
  
              var children = overlayStack.GetChildren();
              for (var i = children.Count - 1; i >= 0; i--)
-@@ -168,4 +232,4 @@ public static class GridCardSelectStateBuilder
+@@ -168,4 +206,4 @@ public static class GridCardSelectStateBuilder
              return null;
          }
      }

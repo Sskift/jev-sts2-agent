@@ -158,6 +158,29 @@ public static class DecisionContextBuilder
         return result;
     }
 
+    private static object[]? DeckUpgradePreviews(IEnumerable<CardModel> cards, string screen)
+    {
+        // Rest decisions need the inspectable upgrade before committing to Smith.
+        // Keep optional screen data out of master_deck and do no deck cloning in combat.
+        if (screen != "REST_SITE" || CombatManager.Instance.IsInProgress) return null;
+
+        var result = new List<object>();
+        var index = 0;
+        foreach (var card in cards)
+        {
+            var preview = CardUpgradePreviewBuilder.Build(card);
+            if (preview != null)
+                result.Add(new
+                {
+                    deck_index = index, instance_id = IdentityOf(card), card_id = card.Id.Entry,
+                    name = preview.Name, description = preview.Description,
+                    cost = preview.Cost, star_cost = preview.StarCost
+                });
+            index++;
+        }
+        return result.ToArray();
+    }
+
     private static string PointType(MapPointType type) => type switch
     {
         MapPointType.RestSite => "REST_SITE",
@@ -266,6 +289,7 @@ public static class DecisionContextBuilder
         var combat = CombatManager.Instance.IsInProgress ? CombatManager.Instance.DebugOnlyGetState() : null;
         var playerDto = screen.Combat?.Player ?? Read("player", () => PlayerStateBuilder.Build(player));
         var deck = Cards(player.Deck.Cards, PileType.Deck);
+        var deckUpgradePreviews = DeckUpgradePreviews(player.Deck.Cards, screen.Screen);
         var map = Read("map", () => Map(run));
         var history = combat != null ? Read("combat_history", History) : null;
         var playPile = combat != null && pcs != null ? Cards(pcs.PlayPile.Cards, PileType.Play) : null;
@@ -302,6 +326,7 @@ public static class DecisionContextBuilder
             act_index = run.CurrentActIndex, act_floor = run.ActFloor, total_floor = run.TotalFloor,
             ascension = run.AscensionLevel, game_mode = run.GameMode.ToString(), modifiers,
             player = playerDto, potion_capacity = player.PotionSlots.Count, master_deck = deck,
+            deck_upgrade_previews = deckUpgradePreviews,
             map, combat_history = history, play_pile = playPile, glossary,
             history_coverage = combat != null ? "Game combat history since this combat was loaded; earlier loaded-save events may be unavailable." : "No active combat.",
             extraction_errors = Issues.Distinct().ToArray()

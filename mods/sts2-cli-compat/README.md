@@ -8,7 +8,7 @@ Read [UPSTREAM-NOTICE.md](UPSTREAM-NOTICE.md) for attribution and the unresolved
 
 ## Decision context extension (2026-09-20)
 
-The build applies `decision-context.patch` after the original compatibility patch, and copies our `context/DecisionContextBuilder.cs` into the temporary source. It produces **0.111.0-context.10**, assembly version **0.111.0.11**. The original draft PR above only contains the v0.111 API compatibility changes; the decision-context extension is maintained in this repository.
+The build applies `decision-context.patch` after the original compatibility patch, and copies our `context/DecisionContextBuilder.cs` into the temporary source. It produces **0.111.0-context.11**, assembly version **0.111.0.12**. The original draft PR above only contains the v0.111 API compatibility changes; the decision-context extension is maintained in this repository.
 
 The extension collects player, permanent deck, current-act map, card enhancements, rules and combat history in the same main-thread snapshot as the screen. It preserves combat beneath overlays, reports extraction gaps, exports card/potion usability and targets, and formats power/card rules with current values. Target damage previews use the game's normal preview hooks and support both fixed `Damage` and `CalculatedDamage` variables, including Perfected Strike and Body Slam. All-enemy attacks also expose previews for the native HittableEnemies recipient set; random targets remain unknown. No hidden draw order, RNG, future encounter table or seed is exported. Run identity uses the saved start time; combat/card identities are opaque random identifiers.
 
@@ -58,7 +58,7 @@ git -C path/to/disposable-clone apply --check path/to/jev-sts2-agent/mods/sts2-c
 
 Successful outputs:
 
-- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.10`, assembly version `0.111.0.10`.
+- `STS2.Cli.Mod.dll` and `STS2.Cli.Mod.json`, manifest version `0.111.0-context.11`, assembly version `0.111.0.12`.
 - `compile.log` and `compile.rsp`, containing the build output and exact compiler inputs.
 - `build-evidence.json`, recording the upstream commit, both patch hashes, context builder and game assembly hashes, compiler location, source/reference counts, exit code, binary hash, and `deploymentPerformed: false`.
 
