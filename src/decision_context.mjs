@@ -64,6 +64,21 @@ export function validateDecisionPacket(rawPacket) {
     if (remaining !== reservation.remaining_after_printed_costs || (reservation.is_observed && reservation.steps.length)) throw new ContextError('Energy reservation contradicts its sequence or observation status');
   }
   const actionIds = packet.legal_actions.map(a => a.action_id);
+  const actions = packet.turn_planning?.action_reservation;
+  if (actions) {
+    const proposed = packet.turn_planning.proposed_steps || [];
+    if (actions.transitions.length !== proposed.length) throw new ContextError('Action reservation omits proposed steps');
+    let starts = 0;
+    for (const [index, step] of actions.transitions.entries()) {
+      const violated = step.kind === 'play_card' ? actions.constraints.filter(rule =>
+        rule.affected_card_instance_ids.includes(step.card_instance_id) && starts > rule.maximum_prior_card_starts).map(rule => rule.rule_id) : [];
+      if (step.sequence !== index || step.kind !== proposed[index].kind || step.card_instance_id !== proposed[index].card_instance_id
+        || step.card_starts_before !== starts || step.card_starts_after !== starts + Number(step.kind === 'play_card')
+        || step.allowed !== (violated.length === 0) || !isDeepStrictEqual(step.violated_rules, violated)) throw new ContextError('Inconsistent action reservation');
+      starts = step.card_starts_after;
+    }
+    if (actions.valid !== actions.transitions.every(step => step.allowed)) throw new ContextError('Action reservation contradicts its validity');
+  }
   if (new Set(actionIds).size !== actionIds.length) throw new ContextError('Duplicate legal action IDs');
   const assessedIds = packet.strategy_assessment?.options?.map(option => option.action_id) || [];
   if (new Set(assessedIds).size !== assessedIds.length || assessedIds.some(id => !actionIds.includes(id))) throw new ContextError('Option assessment must refer to distinct legal actions');

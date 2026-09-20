@@ -85,6 +85,14 @@
     },
     "turn_planning": { "type": "object", "required": ["phase_scope", "energy_reservation"], "properties": {
       "phase_scope": { "$ref": "#/$defs/text" },
+      "action_reservation": { "type": "object", "required": ["is_observed", "valid", "constraints", "transitions", "scope"],
+        "properties": { "is_observed": { "const": false }, "valid": { "type": "boolean" },
+          "constraints": { "type": "array", "items": { "type": "object", "required": ["rule_id", "affected_card_instance_ids", "maximum_prior_card_starts"],
+            "properties": { "rule_id": { "type": "string" }, "affected_card_instance_ids": { "type": "array", "items": { "type": "string" } }, "maximum_prior_card_starts": { "type": "integer", "minimum": 0 } } } },
+          "transitions": { "type": "array", "items": { "type": "object", "required": ["sequence", "kind", "card_instance_id", "card_starts_before", "card_starts_after", "allowed", "violated_rules"],
+            "properties": { "sequence": { "type": "integer", "minimum": 0 }, "kind": { "enum": ["play_card", "use_potion", "end_turn"] },
+              "card_instance_id": { "type": ["string", "null"] }, "card_starts_before": { "type": "integer", "minimum": 0 }, "card_starts_after": { "type": "integer", "minimum": 0 },
+              "allowed": { "type": "boolean" }, "violated_rules": { "type": "array", "items": { "type": "string" } } } } }, "scope": { "$ref": "#/$defs/text" } } },
       "survival_constraints": { "type": "array", "items": { "type": "object", "required": ["kind"],
         "properties": { "kind": { "enum": ["potential_lethal_health_loss", "observed_loss_countdown", "explicit_loss_rule"] } } } },
       "comparisons": { "type": "array", "minItems": 1, "maxItems": 32, "items": {

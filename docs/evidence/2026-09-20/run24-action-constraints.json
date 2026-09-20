@@ -1,0 +1,162 @@
+{
+  "run_id": "run-1789900349",
+  "source": "run-artifacts/2026-09-20T10-43-21-626Z-5c0b1377/step-0114",
+  "rule_verification": {
+    "installed_type": "MegaCrit.Sts2.Core.Models.Powers.RingingPower",
+    "method": "ShouldPlay",
+    "semantics": "Affected Ringing cards require no earlier owned card start this turn. Cards with other afflictions are exempt. No decompiled game source is committed."
+  },
+  "old_plan": [
+    {
+      "kind": "play_card",
+      "name": "Armaments",
+      "role": "preparation",
+      "beneficiary": "Defend"
+    },
+    {
+      "kind": "play_card",
+      "name": "Defend",
+      "role": "payoff"
+    },
+    {
+      "kind": "end_turn",
+      "role": "finish_turn"
+    }
+  ],
+  "old_plan_constraint_check": {
+    "is_observed": false,
+    "valid": false,
+    "constraints": [
+      {
+        "rule_id": "RINGING_POWER",
+        "affected_card_instance_ids": [
+          "83dc807a254649318b3739ea2d03ee0b",
+          "7cd48f69c0914726ad1e4d359c393a57",
+          "711c57a64cad429d97b2a98c790649dd",
+          "53236f91b18f492fa147c627a026a199",
+          "e3e3f88c76654e4da9e50b1af318f22c"
+        ],
+        "maximum_prior_card_starts": 0,
+        "scope": "A currently legal Ringing-afflicted card must be the first card in the proposed remaining sequence. Any earlier card consumes that opportunity. Unafflicted cards are not restricted by this rule; current native legality also applies."
+      }
+    ],
+    "transitions": [
+      {
+        "sequence": 0,
+        "kind": "play_card",
+        "card_instance_id": "53236f91b18f492fa147c627a026a199",
+        "card_starts_before": 0,
+        "card_starts_after": 1,
+        "allowed": true,
+        "violated_rules": []
+      },
+      {
+        "sequence": 1,
+        "kind": "play_card",
+        "card_instance_id": "e3e3f88c76654e4da9e50b1af318f22c",
+        "card_starts_before": 1,
+        "card_starts_after": 2,
+        "allowed": false,
+        "violated_rules": [
+          "RINGING_POWER"
+        ]
+      },
+      {
+        "sequence": 2,
+        "kind": "end_turn",
+        "card_instance_id": null,
+        "card_starts_before": 2,
+        "card_starts_after": 2,
+        "allowed": true,
+        "violated_rules": []
+      }
+    ],
+    "scope": "Known action-order constraints under current rules, independent of energy. Counts proposed manual card starts, not modal choices or potion use. Unobserved automatic plays or removed effects require a new observation; this is not a complete legality simulation."
+  },
+  "observed_blocking_source": "run-artifacts/2026-09-20T10-43-21-626Z-5c0b1377/step-0117/before-state.json",
+  "replay": {
+    "game_actions_sent": 0,
+    "future_observations_used": false,
+    "first_action": {
+      "cmd": "play_card",
+      "id": "ARMAMENTS",
+      "nth": 0
+    },
+    "steps": [
+      {
+        "kind": "play_card",
+        "name": "Armaments",
+        "role": "payoff"
+      },
+      {
+        "kind": "end_turn",
+        "role": "finish_turn"
+      }
+    ],
+    "constraint_check": {
+      "is_observed": false,
+      "valid": true,
+      "constraints": [
+        {
+          "rule_id": "RINGING_POWER",
+          "affected_card_instance_ids": [
+            "83dc807a254649318b3739ea2d03ee0b",
+            "7cd48f69c0914726ad1e4d359c393a57",
+            "711c57a64cad429d97b2a98c790649dd",
+            "53236f91b18f492fa147c627a026a199",
+            "e3e3f88c76654e4da9e50b1af318f22c"
+          ],
+          "maximum_prior_card_starts": 0,
+          "scope": "A currently legal Ringing-afflicted card must be the first card in the proposed remaining sequence. Any earlier card consumes that opportunity. Unafflicted cards are not restricted by this rule; current native legality also applies."
+        }
+      ],
+      "transitions": [
+        {
+          "sequence": 0,
+          "kind": "play_card",
+          "card_instance_id": "53236f91b18f492fa147c627a026a199",
+          "card_starts_before": 0,
+          "card_starts_after": 1,
+          "allowed": true,
+          "violated_rules": []
+        },
+        {
+          "sequence": 1,
+          "kind": "end_turn",
+          "card_instance_id": null,
+          "card_starts_before": 1,
+          "card_starts_after": 1,
+          "allowed": true,
+          "violated_rules": []
+        }
+      ],
+      "scope": "Known action-order constraints under current rules, independent of energy. Counts proposed manual card starts, not modal choices or potion use. Unobserved automatic plays or removed effects require a new observation; this is not a complete legality simulation."
+    },
+    "requests": 8,
+    "usage": {
+      "input_tokens": 122668,
+      "output_tokens": 484
+    },
+    "source": "temp/run24-action-limit-replay/result.json"
+  },
+  "live_run_progress": {
+    "first_act_victory": "run-artifacts/2026-09-20T10-43-21-626Z-5c0b1377/step-0133/after-state.json",
+    "act_two_transition": "run-artifacts/2026-09-20T10-43-21-626Z-5c0b1377/step-0148/after-state.json",
+    "run_progress": {
+      "runId": "run-1789900349",
+      "startedAtFloor": 1,
+      "acts": [
+        0,
+        1
+      ],
+      "floor": 23,
+      "hp": 65
+    },
+    "pending": null
+  },
+  "limitations": [
+    "Only the verified Ringing rule currently has an action-constraint adapter.",
+    "The replay still chooses Armaments. It proves the impossible follow-through was removed, not that the chosen single card is best.",
+    "No original battle was reset or replayed in game. Final three-act victory remains incomplete."
+  ]
+}

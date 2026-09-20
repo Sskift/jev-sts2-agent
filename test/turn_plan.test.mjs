@@ -10,6 +10,7 @@ import { planStep, inspectTurnPlan, turnFingerprint, resolvePlanStep, plannedUpg
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 import { refineTurnPlan } from '../src/turn_plan_refinement.mjs';
 import { resolvePlanComparisons, visibleSurvivalConstraints, planComparisonQuestions } from '../src/turn_plan_comparison.mjs';
+import { reserveActionSequence } from '../src/turn_action_constraints.mjs';
 
 const card = (id, instance, index, extra = {}) => fixtureCard(id, {
   index, can_play: true, target_type: 'AnyEnemy', target_previews: [{ target_id: 42, damage: 6 }],
@@ -48,6 +49,45 @@ function fakeJev(answers, seen = []) {
   };
 }
 const noModel = () => { throw new Error('A valid turn plan must execute without another independent card choice'); };
+
+test('card-start restrictions depend on the affected instance, not a blanket per-turn ban', () => {
+  const state = stateWith([card('DEFEND_IRONCLAD', 'ringing', 0), card('STRIKE_IRONCLAD', 'other', 1)]);
+  state.combat.player.powers.push({ id: 'RINGING_POWER', amount: 1 });
+  state.combat.hand[0].details.affliction = { id: 'RINGING' };
+  state.combat.hand[1].details.affliction = { id: 'OTHER_AFFLICTION' };
+  const ringing = { kind: 'play_card', card_instance_id: 'ringing' }, other = { kind: 'play_card', card_instance_id: 'other' };
+  assert.equal(reserveActionSequence(state, [ringing, other]).valid, true);
+  assert.equal(reserveActionSequence(state, [other, ringing]).valid, false);
+  assert.equal(reserveActionSequence(state, [{ kind: 'use_potion' }, ringing]).valid, true);
+  assert.equal(reserveActionSequence(state, [ringing, ringing]).valid, false);
+  state.combat.player.powers = [];
+  assert.deepEqual(reserveActionSequence(state, [other, ringing]).constraints, []);
+});
+
+test('planning and refinement cannot promise a second affected card after an upgrade preparation', async () => {
+  const state = stateWith([
+    card('ARMAMENTS', 'a'.repeat(32), 0, { name: 'Armaments', type: 'Skill', target_type: 'Self', description: 'Gain 5 Block. Upgrade a card in your Hand. Ringing.', block: 5 }),
+    card('DEFEND_IRONCLAD', 'd'.repeat(32), 1, { name: 'Defend', type: 'Skill', target_type: 'Self', description: 'Gain 5 Block. Ringing.', block: 5 })
+  ]);
+  state.combat.player.powers.push({ id: 'RINGING_POWER', amount: 1, description: 'You can only play 1 card this turn.' });
+  for (const card of state.combat.hand) card.details.affliction = { id: 'RINGING' };
+  sync(state);
+  const memory = new DecisionMemory(); memory.observe(state);
+  const seen = [];
+  const result = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl: fakeJev(['protect_hp', 'card_1'], seen) });
+  assert.deepEqual(result.turn_plan.steps.map(step => step.kind), ['play_card', 'end_turn']);
+  for (const request of seen) {
+    const full = expandRecordTables(request.state);
+    assert.ok(full.turn_planning.action_reservation.valid);
+    for (const pair of full.turn_planning.comparisons || []) for (const option of Object.values(pair)) {
+      assert.ok(option.ordered_sequence.length <= 1, 'No illegal two-card alternative reaches Jev');
+    }
+    if (full.turn_planning.action_reservation.transitions.length) {
+      const broken = structuredClone(full); broken.turn_planning.action_reservation.transitions[0].card_starts_after++;
+      assert.throws(() => validateDecisionPacket(broken), /action reservation/);
+    }
+  }
+});
 
 test('complete-plan alternatives can remove redundant Block and show energy available when drawing', async () => {
   const state = stateWith([

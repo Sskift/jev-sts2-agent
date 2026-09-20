@@ -1,5 +1,6 @@
 import { attackHpLoss, combatForecast, intentDamage } from './combat_arithmetic.mjs';
 import { projectPositioning } from './combat_positioning.mjs';
+import { reserveActionSequence } from './turn_action_constraints.mjs';
 
 export function sequenceEnergyBudget(state, steps) {
   let energy = state.combat.player.energy, attacks = 0;
@@ -18,7 +19,7 @@ export function sequenceEnergyBudget(state, steps) {
 
 export function reserveSequence(state, steps) {
   const budget = sequenceEnergyBudget(state, steps);
-  return budget?.affordable ? { energy_left: budget.energy_left, costs: budget.costs } : null;
+  return budget?.affordable && reserveActionSequence(state, steps).valid ? { energy_left: budget.energy_left, costs: budget.costs } : null;
 }
 
 // Keep omitted effects next to an explicitly scoped baseline. A plan containing

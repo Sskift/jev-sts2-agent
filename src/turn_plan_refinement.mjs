@@ -2,6 +2,7 @@ import { planStep, cardInstance } from './turn_plan_state.mjs';
 import { describeTurnProjection, reserveSequence } from './turn_projection.mjs';
 import { potionEffectFacts } from './potion_effects.mjs';
 import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from './turn_effects.mjs';
+import { reserveActionSequence } from './turn_action_constraints.mjs';
 
 const signature = steps => JSON.stringify(steps.map(step => [step.kind, step.card_instance_id, step.potion_id, step.slot, step.target]));
 const bindFollowthrough = (step, following) => {
@@ -23,6 +24,7 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
   if (plan.end_policy !== 'end_after_steps_unless_conditions_change') return;
   const label = steps => {
     const budget = reserveSequence(state, steps);
+    const actions = reserveActionSequence(state, steps);
     let energyAfterPrintedCosts = state.combat.player.energy;
     return {
       ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map((step, index) => {
@@ -39,6 +41,7 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
       then: 'End turn, unless a new observation requires a revision.',
       energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
       conditional_preview: describeTurnProjection(state, steps),
+      ...(actions.constraints.length ? { action_reservation: actions } : {}),
       limitation: 'Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers.'
     };
   };
