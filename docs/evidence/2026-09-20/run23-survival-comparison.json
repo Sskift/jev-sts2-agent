@@ -302,5 +302,20 @@
     "Independent survival judgments can be wrong; probabilities are archived rather than treated as proof.",
     "The full replay changed the first action to a potion; its random selection and continuation were not executed or invented.",
     "No paired live run, win-rate claim, or completed three-act victory."
-  ]
+  ],
+  "live_followup": {
+    "run_id": "run-1789900349",
+    "loaded_commit": "2135891",
+    "started_at_floor": 1,
+    "source": "run-artifacts/2026-09-20T10-32-26-082Z-389690fd/step-0011/jev-turn_refine_pairs-0006.json",
+    "pairs_in_sample_request": 7,
+    "questions_in_sample_request": 14,
+    "complete_step_comparisons": 18,
+    "survival_priority": 1,
+    "overall_value_priority": 17,
+    "first_combat_complete": true,
+    "after_first_combat_hp": 80,
+    "full_run_complete": false,
+    "feishu_revision": 71
+  }
 }
