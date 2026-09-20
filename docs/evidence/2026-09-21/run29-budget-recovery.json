@@ -1,0 +1,52 @@
+{
+  "recorded_at": "2026-09-20T18:12:21.010Z",
+  "run_id": "run-1789925824",
+  "runtime_before": "9b590b225206ff76e9271af27546415f71a24212",
+  "fault": {
+    "artifact": "C:\\Users\\skift\\jevmake\\run-artifacts\\run29-2026-09-20T17-37-00.808Z/step-0389/before-state.json",
+    "sha256": "9f63b596517486e3d9db06ba7102cc11d652e319ef970e2977c19aeb51c354ec",
+    "last_confirmed_step": 388,
+    "stopped_before_dispatch": true,
+    "outcome_unknown": false,
+    "error": "Cannot read properties of null (reading 'energy_left')",
+    "root_cause": "After Armaments leaves 2 energy, preparation offered Defend before the 2-cost Juggernaut. The seed then spent 4 of 3 energy; refinement dereferenced the rejected reservation."
+  },
+  "regression": {
+    "kind": "captured planning choices; no model or game action",
+    "rejected_route": {
+      "index": 6,
+      "stage": "preparation",
+      "old_choice": "card_5",
+      "allowed_choices": [
+        "card_1",
+        "potion_0_target_0",
+        "none"
+      ]
+    },
+    "checks": {
+      "passed": 45,
+      "failed": 0,
+      "log": "temp/run29-budget-checks.log"
+    }
+  },
+  "pre_resume": {
+    "run_id": "run-1789925824",
+    "act": 1,
+    "floor": 22,
+    "screen": "COMBAT",
+    "turn": 4,
+    "hp": 54,
+    "energy": 3,
+    "enemy_hp": 72,
+    "pending": null
+  },
+  "changes": [
+    "Reserve the full preparation-payoff segment when its effects are known.",
+    "Keep preparation with a required native observation as a segment without promising the payoff.",
+    "Validate each appended step and the seed entering refinement."
+  ],
+  "resume": {
+    "status": "not_yet_started",
+    "same_game_required": true
+  }
+}

@@ -7,6 +7,7 @@ import { inspectSequence } from './turn_sequence.mjs';
 import { independentTurnCandidates, compareFinalists, planSignature, planAllocation, shortlistPlans } from './turn_candidates.mjs';
 import { describeContinuation } from './card_flow_projection.mjs';
 import { intentDamage } from './combat_arithmetic.mjs';
+import { ContextError } from './decision_context.mjs';
 
 const signature = planSignature;
 const bindFollowthrough = (step, following) => {
@@ -78,6 +79,8 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
     if (!finish) return;
     plan.steps.push(planStep(state, finish, 'finish_turn'));
   }
+  const initialBudget = reserveSequence(state, plan.steps);
+  if (!initialBudget) throw new ContextError('Turn-plan refinement requires an affordable, valid ordered seed');
   const labels = new Map();
   const label = steps => {
     const key = signature(steps);
@@ -119,7 +122,7 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
   // order is correct. Compare substitutions (including target changes), and
   // offer concrete continuations using released energy. Never reuse one
   // physical card or consume a card reserved for an automatic effect.
-  const releasedEnergyPlans = [], originalEnergy = reserveSequence(state, plan.steps).energy_left;
+  const releasedEnergyPlans = [], originalEnergy = initialBudget.energy_left;
   for (let index = 0; index < prefix.length; index++) {
     for (const candidate of prepared.candidates.values()) {
       if (!['play_card', 'use_potion'].includes(candidate.request.cmd)) continue;

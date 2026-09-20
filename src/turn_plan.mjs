@@ -245,8 +245,10 @@ export async function decideTurn(state, options, prepared, choose) {
         step.role = 'preparation';
       }
     }
-    step.reserved_energy = printedCost(state, candidate, Math.max(0, energy), plan.steps);
-    energy -= step.reserved_energy;
+    const reservation = reserveSequence(state, [...plan.steps, step]);
+    if (!reservation) throw new ContextError('Turn planning attempted an unaffordable or invalid ordered step');
+    step.reserved_energy = reservation.costs.at(-1);
+    energy = reservation.energy_left;
     plan.steps.push(step);
     used.add(identity(candidate));
   }
@@ -265,8 +267,21 @@ export async function decideTurn(state, options, prepared, choose) {
     const candidate = prepared.candidates.get(payoff);
     if (candidate.request.cmd === 'end_turn') { await append(candidate, 'finish_turn'); plan.end_policy = 'end_after_steps_unless_conditions_change'; break; }
     for (let dependency = 0; dependency < limit; dependency++) {
-      const prepChoices = available().filter(([, other]) => other.request.cmd !== 'end_turn' && identity(other) !== identity(candidate)
-        && reserveActionSequence(state, [...plan.steps, planStep(state, other), planStep(state, candidate)]).valid);
+      const preparationStepFor = other => {
+        const step = planStep(state, other);
+        if (handUpgradeMode(step.rules_at_planning) && candidate.request.cmd === 'play_card') {
+          step.beneficiary_instance_id = cardInstance(state.combat.hand.find(card => card.index === candidate.card_hand_index));
+        }
+        return step;
+      };
+      const prepChoices = available().filter(([, other]) => {
+        if (other.request.cmd === 'end_turn' || identity(other) === identity(candidate)) return false;
+        const prefix = [...plan.steps, preparationStepFor(other)];
+        // Unknown results end this segment. Otherwise reserve BOTH actions:
+        // individually affordable preparation must not crowd out its payoff.
+        return reserveSequence(state, prefix) && (inspectSequence(state, prefix).checkpoint
+          || reserveSequence(state, [...prefix, planStep(state, candidate)]));
+      });
       if (!prepChoices.length) break;
       const payoffLabel = label(candidate, true);
       const selected = await ask('preparation', 'Choose the best proposed ordered route to the selected payoff as part of this turn. Compare the TOTAL benefit of each route against its cost and opportunity cost. A preparation may supply no direct damage but improve the following payoff. Use the concrete steps including required card selection and the inspectable upgrade when the chosen effect upgrades that card. A preview is conditional, not already applied. Damage or Block alone is not preparation unless it enables the payoff through an actual rule. These are proposed plans, not observed actions.',
@@ -277,8 +292,7 @@ export async function decideTurn(state, options, prepared, choose) {
           const otherCard = other.request.cmd === 'play_card' ? state.combat.hand.find(card => card.index === other.card_hand_index) : null;
           const otherPotion = other.request.cmd === 'use_potion' ? state.combat.player.potions.find(potion => potion.id === other.request.id) : null;
           const upgradeMode = candidate.request.cmd === 'play_card' ? handUpgradeMode(otherCard?.description || otherPotion?.description) : null;
-          const preparationStep = planStep(state, other);
-          if (upgradeMode && candidate.request.cmd === 'play_card') preparationStep.beneficiary_instance_id = cardInstance(state.combat.hand.find(card => card.index === candidate.card_hand_index));
+          const preparationStep = preparationStepFor(other);
           const dependency = inspectSequence(state, [...plan.steps, preparationStep, planStep(state, candidate)]);
           const after = dependency.transitions[plan.steps.length].energy_after;
           const pair = dependency.checkpoint ? null : dependency.costs.at(-1);
@@ -314,7 +328,6 @@ export async function decideTurn(state, options, prepared, choose) {
     }
     await append(candidate, 'payoff');
     if (inspectSequence(state, plan.steps).checkpoint) break;
-    if (energy < 0) { plan.end_policy = 'verify_resources_after_preparation'; break; }
   }
   if (!plan.steps.length) throw new ContextError('Turn planner produced no executable prefix');
   plan.budget = { initial_energy: state.combat.player.energy, remaining_after_printed_costs: energy,

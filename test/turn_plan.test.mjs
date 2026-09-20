@@ -184,6 +184,36 @@ test('constructs an objective, ordered preparation and payoff before dispatch, w
   assert.equal(result.usage.input_tokens, seen.length * 100);
 });
 
+test('preparation reserves its payoff cost but preserves actions that need a new observation', async () => {
+  for (const selected of ['none', 'card_2']) {
+    const state = stateWith([
+      card('JUGGERNAUT', 'power', 0, { name: 'Juggernaut+', cost: 2, type: 'Power', target_type: 'Self', description: 'Whenever you gain Block, deal 8 damage to a random enemy.' }),
+      card('DEFEND_IRONCLAD', 'defend', 1, { name: 'Defend', cost: 1, type: 'Skill', target_type: 'Self', description: 'Gain 5 Block.', block: 5 }),
+      card('SHRUG_IT_OFF', 'draw', 2, { name: 'Shrug It Off', cost: 1, type: 'Skill', target_type: 'Self', description: 'Gain 8 Block. Draw 1 card.', block: 8 })
+    ], 2);
+    const memory = new DecisionMemory(); memory.observe(state);
+    const seen = [];
+    const result = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', refineTurnPlan: false,
+      fetchImpl: fakeJev(['develop', 'card_0', selected], seen) });
+    const preparation = seen.find(body => body.questions.next_action.instructions.includes('Choose the best proposed ordered route'));
+    assert.ok(preparation);
+    assert.ok(!Object.hasOwn(preparation.questions.next_action.criteria, 'card_1'), 'One-cost Defend cannot precede a two-cost payoff with only two energy');
+    assert.ok(Object.hasOwn(preparation.questions.next_action.criteria, 'card_2'), 'Draw is still available as an observation segment');
+    assert.deepEqual(result.turn_plan.steps.map(step => step.card_id), selected === 'none' ? ['JUGGERNAUT'] : ['SHRUG_IT_OFF']);
+    assert.equal(result.turn_plan.budget.remaining_after_printed_costs, selected === 'none' ? 0 : 1);
+    assert.equal(memory.data.pending, null);
+  }
+});
+
+test('refinement rejects an unaffordable seed before comparing candidates', async () => {
+  const state = stateWith([
+    card('DEFEND_IRONCLAD', 'defend', 0, { cost: 1, type: 'Skill', target_type: 'Self', description: 'Gain 5 Block.', block: 5 }),
+    card('JUGGERNAUT', 'power', 1, { cost: 2, type: 'Power', target_type: 'Self', description: 'Whenever you gain Block, deal 8 damage to a random enemy.' })
+  ], 2);
+  const plan = savedPlan(state, ['card_0', 'card_1', 'end_turn']);
+  await assert.rejects(refineTurnPlan(state, plan, prepareModDecision(state), noModel, noModel), /affordable, valid ordered seed/);
+});
+
 test('stable plan survives persistence and resolves duplicate copies against the current hand without new Jev calls', async t => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'turn-plan-')); t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const state = stateWith([card('STRIKE_IRONCLAD', 'first', 0), card('STRIKE_IRONCLAD', 'second', 1), card('STRIKE_IRONCLAD', 'third', 2)]);
