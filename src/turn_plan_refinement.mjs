@@ -152,7 +152,8 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
     const instruction = 'Compare two mutually exclusive COMPLETE ordered plans starting from the actual current combat state. Choose the plan that better serves turn_planning.objective and winning the run. Both sequences have not happened. Evaluate the exact enemy targets, energy, rules, kills and remaining threats. A plan with the same kills and damage can preserve more HP through stronger Block. Check preparation before its beneficiaries and useful follow-through for setup. Ignore which plan was proposed earlier. Conditional arithmetic is incomplete; account for unconfirmed rules without assuming hidden outcomes.';
     const comparisonState = { phase_scope: 'Compare mutually exclusive complete plans from the ACTUAL current state. These proposed steps have NOT happened. Every option replaces the entire unexecuted proposed prefix; do not execute both the old prefix and an option.',
       proposed_steps: [], conditional_projection: [],
-      energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy, scope: 'No option has executed. Each option contains its own complete energy reservation and conditional outcome.' } };
+      energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
+        is_observed: false, includes_future_energy_gains: false, steps: [], scope: 'No option has executed. Each option contains its own complete energy reservation and conditional outcome.' } };
     let remaining = [...alternatives].map(([value, steps]) => ({ value, label: label(steps) }));
     while (remaining.length > 1) {
       const pairs = [];

@@ -46,9 +46,12 @@
     },
     "turn_planning": { "type": "object", "required": ["phase_scope", "energy_reservation"], "properties": {
       "phase_scope": { "$ref": "#/$defs/text" },
-      "energy_reservation": { "type": "object", "required": ["observed_energy", "remaining_after_printed_costs", "scope"], "properties": {
+      "energy_reservation": { "type": "object", "additionalProperties": false, "required": ["observed_energy", "remaining_after_printed_costs", "scope", "is_observed", "includes_future_energy_gains", "steps"], "properties": {
         "observed_energy": { "type": "integer", "minimum": 0 },
         "remaining_after_printed_costs": { "type": "integer" },
+        "is_observed": { "type": "boolean" },
+        "includes_future_energy_gains": { "const": false },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/energyTransition" } },
         "scope": { "$ref": "#/$defs/text" }
       } }
     } },
@@ -282,6 +285,10 @@
             "act_index",
             "nodes"
           ],
+          "dependentRequired": {
+            "legal_next_nodes": ["routes", "route_semantics"],
+            "routes": ["legal_next_nodes", "route_semantics"]
+          },
           "properties": {
             "act_index": {
               "type": "integer"
@@ -322,7 +329,8 @@
               }
             },
             "routes": {
-              "type": "array"
+              "type": "array",
+              "items": { "$ref": "#/$defs/mapRoute" }
             },
             "route_semantics": {
               "$ref": "#/$defs/text"
@@ -619,6 +627,56 @@
     }
   },
   "$defs": {
+    "energyTransition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sequence", "kind", "hand_index", "energy_before", "reserved_cost", "energy_after", "affordable"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "kind": { "enum": ["play_card", "use_potion", "end_turn"] },
+        "hand_index": { "type": ["integer", "null"], "minimum": 0 },
+        "energy_before": { "type": "integer" },
+        "reserved_cost": { "type": "integer", "minimum": 0 },
+        "energy_after": { "type": "integer" },
+        "affordable": { "type": "boolean" }
+      }
+    },
+    "nodeCountRange": {
+      "type": "object", "additionalProperties": false, "required": ["min", "max"],
+      "properties": { "min": { "type": "integer", "minimum": 0 }, "max": { "type": "integer", "minimum": 0 } }
+    },
+    "mapRoute": {
+      "type": "object", "additionalProperties": false,
+      "required": ["next_node", "reachable_node_count", "nearest_steps_after_chosen_node", "reaches_boss", "counts", "minimum_elite_route_example", "known_elite_required_to_reach_boss"],
+      "properties": {
+        "next_node": { "$ref": "#/$defs/coord" },
+        "reachable_node_count": { "type": "integer", "minimum": 1 },
+        "nearest_steps_after_chosen_node": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "reaches_boss": { "type": "boolean" },
+        "counts": {
+          "type": "object", "additionalProperties": false,
+          "required": ["MONSTER", "ELITE", "REST_SITE", "SHOP", "TREASURE", "UNKNOWN", "BOSS"],
+          "properties": {
+            "MONSTER": { "$ref": "#/$defs/nodeCountRange" }, "ELITE": { "$ref": "#/$defs/nodeCountRange" },
+            "REST_SITE": { "$ref": "#/$defs/nodeCountRange" }, "SHOP": { "$ref": "#/$defs/nodeCountRange" },
+            "TREASURE": { "$ref": "#/$defs/nodeCountRange" }, "UNKNOWN": { "$ref": "#/$defs/nodeCountRange" },
+            "BOSS": { "$ref": "#/$defs/nodeCountRange" }
+          }
+        },
+        "minimum_elite_route_example": {
+          "oneOf": [{ "type": "null" }, {
+            "type": "object", "additionalProperties": false, "required": ["known_elites", "nodes"],
+            "properties": {
+              "known_elites": { "type": "integer", "minimum": 0 },
+              "nodes": { "type": "array", "minItems": 1, "items": {
+                "type": "object", "additionalProperties": false, "required": ["col", "row", "type"],
+                "properties": { "col": { "type": "integer" }, "row": { "type": "integer" }, "type": { "type": "string" } }
+              } }
+            }
+          }]
+        },
+        "known_elite_required_to_reach_boss": { "type": ["boolean", "null"], "description": "Whether every visible graph route to the first boss contains an ELITE node. Null means no known route reaches that boss. UNKNOWN encounters remain unresolved; future movement effects are not predicted." }
+      }
+    },
     "text": {
       "oneOf": [
         {

@@ -91,12 +91,25 @@ test('map decisions have current player, permanent deck, rules, downstream graph
   assert.equal(value.map.routes[1].counts.ELITE.min, 1);
   assert.equal(value.map.routes[1].counts.REST_SITE.max, 0);
   assert.equal(value.map.routes[0].reaches_boss, true);
+  assert.equal(value.map.routes[0].known_elite_required_to_reach_boss, false);
+  assert.equal(value.map.routes[1].known_elite_required_to_reach_boss, true);
   assert.equal(value.map.nodes.length, 5);
   assert.deepEqual(value.legal_actions[1].request, { cmd: 'choose_map_node', args: [1, 1] });
   assert.equal(value.in_combat, false);
   const prepared = prepareModDecision(state);
   assert.equal(prepared.payload.state.deck.statistics.non_basic_attacks, 0);
   assert.match(prepared.payload.questions.next_action.criteria.map_1_1.effect, /nearest known elite 0 steps, rest none reachable/);
+  for (const corrupt of [
+    p => { p.map.routes[0].minimum_elite_route_example.nodes[1].col = 8; },
+    p => { p.map.routes[1].known_elite_required_to_reach_boss = false; },
+    p => { p.map.routes[1].counts.ELITE.min = 0; },
+    p => { p.map.routes.pop(); }
+  ]) {
+    const broken = structuredClone(value); corrupt(broken);
+    assert.throws(() => validateDecisionPacket(compactContext(broken)), /Route facts contradict/);
+  }
+  const incomplete = structuredClone(value); delete incomplete.map.routes[0].known_elite_required_to_reach_boss;
+  assert.throws(() => validateDecisionPacket(incomplete), /versioned protocol/);
 });
 
 test('map context keeps every future branch and the visited route while omitting expired forks', () => {
@@ -301,6 +314,8 @@ test('route calculations preserve branch uncertainty and reject broken topology'
   const deadEnd = structuredClone(map); deadEnd.nodes[2].children = [];
   assert.equal(routeFacts(deadEnd, [{ col: 0, row: 0 }])[0].minimum_elite_route_example.known_elites, 1, 'An unfinished branch cannot be an elite-free route to the boss');
   assert.equal(routeFacts(deadEnd, [{ col: 1, row: 1 }])[0].minimum_elite_route_example, null);
+  assert.equal(routeFacts(deadEnd, [{ col: 1, row: 1 }])[0].known_elite_required_to_reach_boss, null);
+  assert.equal(routeFacts(deadEnd, [{ col: 0, row: 0 }])[0].known_elite_required_to_reach_boss, true);
   map.nodes[1].children = [{ col: 9, row: 9 }];
   assert.throws(() => routeFacts(map, [{ col: 0, row: 0 }]), /missing node/);
   map.nodes[1].children = [{ col: 0, row: 0 }];

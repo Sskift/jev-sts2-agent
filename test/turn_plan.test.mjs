@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { DecisionMemory, expandRecordTables } from '../src/decision_context.mjs';
+import { DecisionMemory, expandRecordTables, validateDecisionPacket } from '../src/decision_context.mjs';
 import { makeModDecisionWithJev, prepareModDecision, buildModCandidates } from '../src/mod_decision.mjs';
 import { planStep, inspectTurnPlan, turnFingerprint, resolvePlanStep, plannedUpgradeSelection } from '../src/turn_plan_state.mjs';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
@@ -114,6 +114,7 @@ test('constructs an objective, ordered preparation and payoff before dispatch, w
   assert.equal(result.turn_plan.budget.remaining_after_printed_costs, 0);
   assert.equal(memory.data.turn_plan, undefined, 'Planning is not a persisted game commitment until the freshness check and begin');
   assert.equal(memory.data.pending, null);
+  let sawPreparationBudget = false;
   for (const body of seen) {
     const full = expandRecordTables(body.state);
     assert.equal(full.combat.hand.length, 2);
@@ -122,7 +123,21 @@ test('constructs an objective, ordered preparation and payoff before dispatch, w
     assert.ok(full.map.nodes.length && full.deck.cards.length && full.rule_reference);
     assert.ok(full.legal_actions.some(action => action.request.cmd === 'end_turn'));
     assert.match(full.turn_planning.phase_scope, /NOT happened/);
+    const reservation = full.turn_planning.energy_reservation;
+    assert.equal(reservation.is_observed, false);
+    assert.equal(reservation.includes_future_energy_gains, false);
+    assert.equal(reservation.steps.length, full.turn_planning.proposed_steps.length);
+    if (reservation.steps.length) {
+      sawPreparationBudget = true;
+      assert.deepEqual(reservation.steps[0], { sequence: 0, kind: 'play_card', hand_index: 0,
+        energy_before: 3, reserved_cost: 1, energy_after: 2, affordable: true });
+      const broken = structuredClone(full); broken.turn_planning.energy_reservation.steps[0].energy_after = 3;
+      assert.throws(() => validateDecisionPacket(broken), /Inconsistent energy transition/);
+      const missing = structuredClone(full); delete missing.turn_planning.energy_reservation.steps;
+      assert.throws(() => validateDecisionPacket(missing), /versioned protocol/);
+    }
   }
+  assert.ok(sawPreparationBudget, 'Budget transitions must be sent before final plan comparison');
   assert.equal(result.usage.input_tokens, seen.length * 100);
 });
 

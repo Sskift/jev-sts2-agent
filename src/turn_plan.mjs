@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { validateDecisionPacket, ContextError, compactPlanningRequest } from './decision_context.mjs';
 import { sameTurn, planStep, resolvePlanStep, inspectTurnPlan, turnFingerprint, cardInstance } from './turn_plan_state.mjs';
-import { projectTurnPrefix, reserveSequence } from './turn_projection.mjs';
+import { projectTurnPrefix, sequenceEnergyBudget } from './turn_projection.mjs';
 import { turnStrategyInstructions } from './decision_instructions.mjs';
 import { refineTurnPlan } from './turn_plan_refinement.mjs';
 import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
@@ -61,17 +61,22 @@ export async function decideTurn(state, options, prepared, choose) {
     const card = candidate.request.cmd === 'play_card' ? state.combat.hand.find(card => card.index === candidate.card_hand_index) : null;
     return { ...effect, ...(card ? { card_type: card.type, tags: card.tags || [] } : {}), ...(card?.upgrade_preview ? { inspectable_upgrade: card.upgrade_preview } : {}), ...(prefix ? {} : limited_calculation ? { current_single_action_calculation: limited_calculation } : {}) };
   };
-  const planningState = extra => ({
-    phase_scope: 'Plan the remaining player turn before sending any of these commands. The surrounding game snapshot is unchanged; proposed_steps have NOT happened.',
-    objective: plan?.objective,
-    proposed_steps: plan?.steps.map(step => ({ kind: step.kind, role: step.role, name: step.name, rules: step.rules_at_planning, cost: step.cost_at_planning, target: step.target })),
-    retained_cards: plan?.retained_cards.map(step => ({ name: step.name, rules: step.rules_at_planning, hand_index: state.combat.hand.find(card => cardInstance(card) === step.card_instance_id)?.index })),
-    observed_turn_situation: 'Use player for current HP, Block, energy and powers; combat.hand for every current card and upgrade preview; combat.enemies for current targets, HP, Block, powers and intents. These complete records are shared by every question and may use record tables.',
-    conditional_projection: projectTurnPrefix(state, plan?.steps || []),
-    energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: plan?.budget ? reserveSequence(state, plan.steps)?.energy_left ?? energy : energy,
-      scope: 'Current printed costs, plus the verified Stomp discount of 1 for each earlier planned Attack; X spends the remainder. Draws, new energy, other discounts, triggers and automatic plays are unconfirmed; execution must reobserve them.' },
-    ...extra
-  });
+  const planningState = extra => {
+    const budget = sequenceEnergyBudget(state, plan?.steps || []);
+    if (!budget) throw new ContextError('Proposed sequence refers to a card absent from the observed hand');
+    return {
+      phase_scope: 'Plan the remaining player turn before sending any of these commands. The surrounding game snapshot is unchanged; proposed_steps have NOT happened.',
+      objective: plan?.objective,
+      proposed_steps: plan?.steps.map(step => ({ kind: step.kind, role: step.role, name: step.name, rules: step.rules_at_planning, cost: step.cost_at_planning, target: step.target })),
+      retained_cards: plan?.retained_cards.map(step => ({ name: step.name, rules: step.rules_at_planning, hand_index: state.combat.hand.find(card => cardInstance(card) === step.card_instance_id)?.index })),
+      observed_turn_situation: 'Use player for current HP, Block, energy and powers; combat.hand for every current card and upgrade preview; combat.enemies for current targets, HP, Block, powers and intents. These complete records are shared by every question and may use record tables.',
+      conditional_projection: projectTurnPrefix(state, plan?.steps || []),
+      energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: budget.energy_left,
+        is_observed: false, includes_future_energy_gains: false, steps: budget.transitions,
+        scope: 'Current printed costs, plus the verified Stomp discount of 1 for each earlier planned Attack; X spends the remainder. Draws, new energy, other discounts, triggers and automatic plays are unconfirmed; execution must reobserve them.' },
+      ...extra
+    };
+  };
   async function ask(stage, instructions, choices, extra = {}) {
     const candidates = new Map(Object.entries(choices).map(([id, value]) => [id, { action: 'plan_turn', request: null, planning_value: value.value, description: typeof value.label === 'string' ? value.label : JSON.stringify(value.label) }]));
     if (!candidates.size || candidates.size > 255) throw new ContextError('Invalid turn-planning candidate count');
@@ -137,7 +142,8 @@ export async function decideTurn(state, options, prepared, choose) {
       const payload = compactPlanningRequest({ ...prepared.payload, state: { ...prepared.payload.state,
         turn_planning: planningState({ phase_scope: 'The planned prefix has been executed and confirmed. Review the ACTUAL current state before ending the player turn.', objective: selectedPlan.objective,
           proposed_steps: [], conditional_projection: projectTurnPrefix(state, []),
-          energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy, scope: 'Actual remaining resources before the end-turn handoff.' } }) },
+          energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
+            is_observed: true, includes_future_energy_gains: false, steps: [], scope: 'Actual remaining resources before the end-turn handoff.' } }) },
         questions: { next_action: { ...prepared.payload.questions.next_action,
           instructions: `The prior planned prefix is complete. Before ending this player turn, check the actual remaining hand, energy, potions and threats. Preserve turn_planning.objective. If a useful continuation exists, select its next action and retain the objective; otherwise choose end_turn. A free draw can reveal playable cards even after planned attacks. ${wholeTurnValue} ${prepared.payload.questions.next_action.instructions}` } } });
       validateDecisionPacket(payload.state);

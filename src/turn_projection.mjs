@@ -1,17 +1,23 @@
 import { attackHpLoss, combatForecast, intentDamage } from './combat_arithmetic.mjs';
 
-export function reserveSequence(state, steps) {
+export function sequenceEnergyBudget(state, steps) {
   let energy = state.combat.player.energy, attacks = 0;
-  const costs = [];
-  for (const step of steps) {
+  const costs = [], transitions = [];
+  for (const [sequence, step] of steps.entries()) {
     const card = step.kind === 'play_card' ? state.combat.hand.find(card => card.details?.instance_id === step.card_instance_id) : null;
     if (step.kind === 'play_card' && !card) return null;
-    const cost = card ? card.cost < 0 ? energy : card.id === 'STOMP' ? Math.max(0, card.cost - attacks) : card.cost : 0;
-    if (cost > energy) return null;
+    const cost = card ? card.cost < 0 ? Math.max(0, energy) : card.id === 'STOMP' ? Math.max(0, card.cost - attacks) : card.cost : 0;
+    transitions.push({ sequence, kind: step.kind, hand_index: card?.index ?? null,
+      energy_before: energy, reserved_cost: cost, energy_after: energy - cost, affordable: cost <= energy });
     costs.push(cost); energy -= cost;
     if (card?.type === 'Attack') attacks++;
   }
-  return { energy_left: energy, costs };
+  return { energy_left: energy, costs, transitions, affordable: transitions.every(step => step.affordable) };
+}
+
+export function reserveSequence(state, steps) {
+  const budget = sequenceEnergyBudget(state, steps);
+  return budget?.affordable ? { energy_left: budget.energy_left, costs: budget.costs } : null;
 }
 
 // This is a conditional sum of visible previews, not a game simulator. Keeping

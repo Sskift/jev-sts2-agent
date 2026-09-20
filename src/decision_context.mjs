@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { previewDamageSum } from './combat_arithmetic.mjs';
 import { buildRuleReference } from './rule_reference.mjs';
@@ -18,6 +19,25 @@ export function validateDecisionPacket(rawPacket) {
   const packet = expandRecordTables(rawPacket);
   if (!protocolCheck(packet)) throw new ContextError('Decision JSON does not match the versioned protocol', { errors: clone(protocolCheck.errors) });
   if (packet.in_combat !== Boolean(packet.combat)) throw new ContextError('in_combat contradicts combat data');
+  if (packet.map?.routes) {
+    const expected = routeFacts(packet.map, packet.map.legal_next_nodes);
+    if (!isDeepStrictEqual(packet.map.routes, expected)) throw new ContextError('Route facts contradict the visible map or legal next nodes');
+  }
+  const reservation = packet.turn_planning?.energy_reservation;
+  if (reservation) {
+    let remaining = reservation.observed_energy;
+    if (remaining !== packet.player?.energy) throw new ContextError('Planned energy does not start from observed player energy');
+    const proposed = packet.turn_planning.proposed_steps || [];
+    if (proposed.length !== reservation.steps.length) throw new ContextError('Energy reservation omits proposed steps');
+    for (const [index, step] of reservation.steps.entries()) {
+      if (step.sequence !== index || step.energy_before !== remaining || step.energy_after !== remaining - step.reserved_cost
+        || step.affordable !== (step.reserved_cost <= remaining)) throw new ContextError('Inconsistent energy transition in proposed sequence');
+      if (step.kind !== proposed[index].kind || (step.kind === 'play_card'
+        ? !packet.combat?.hand.some(card => card.index === step.hand_index) : step.hand_index !== null)) throw new ContextError('Energy transition does not refer to the proposed action and observed hand');
+      remaining = step.energy_after;
+    }
+    if (remaining !== reservation.remaining_after_printed_costs || (reservation.is_observed && reservation.steps.length)) throw new ContextError('Energy reservation contradicts its sequence or observation status');
+  }
   const actionIds = packet.legal_actions.map(a => a.action_id);
   if (new Set(actionIds).size !== actionIds.length) throw new ContextError('Duplicate legal action IDs');
   const assessedIds = packet.strategy_assessment?.options?.map(option => option.action_id) || [];
@@ -156,7 +176,8 @@ export function routeFacts(map, choices) {
       nearest[node.type] ??= distance;
       if (node.type !== 'BOSS') for (const child of node.children || []) queue.push([keyOf(child), distance + 1]);
     }
-    return { next_node: choice, reachable_node_count: visited.size, nearest_steps_after_chosen_node: nearest, ...result };
+    return { next_node: choice, reachable_node_count: visited.size, nearest_steps_after_chosen_node: nearest, ...result,
+      known_elite_required_to_reach_boss: result.minimum_elite_route_example ? result.minimum_elite_route_example.known_elites > 0 : null };
   });
 }
 

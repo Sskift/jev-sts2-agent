@@ -16,6 +16,10 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 
 协议版本：`sts2.decision.v1`。正式定义是 [JSON Schema](../schemas/decision-context.v1.schema.json)，完整可检查请求为[合成示例](examples/decision-context.v1.json)。示例的 `offline-*` 局面来自测试夹具，不是真实游戏观测。
 
+协议同时约束原始事实和派生关系。`map.routes[]` 不再只是未定义内容的数组：每项必须有对应下一节点、距离、数量范围、Boss 可达性、最少已知精英的完整路径，以及 `known_elite_required_to_reach_boss`。最后一项为 `true` / `false` / `null`，分别表示沿已知图到 Boss 必经精英、存在避开已知精英的路径、没有已知路径到 Boss；不预测问号房或未来移动效果。发送前从同一请求的原始图重算并核对这些字段，缺项、虚构连线、遗漏路线或相互矛盾的结论都会拒绝发送。
+
+各规划阶段的 `turn_planning.energy_reservation.steps[]` 统一记录步骤序号、动作种类、当前手牌索引、`energy_before`、`reserved_cost`、`energy_after` 与 `affordable`。预算以实测能量为起点，只计当前费用、已核实的 Stomp 折扣及 X 费支出；`includes_future_energy_gains:false` 明确没有把未来获得能量算进去。`is_observed:false` 区分拟定预算和真实状态；结束回合前的实际检查为 `true` 且没有假设步骤。代码校验起点、每步连续性、计划/手牌关联与最终余额，避免只在最后比较时才说明中间资源。未知抽牌与其他效果仍需实际执行后重新观察，预算不代表完整模拟。
+
 | 字段 | 内容 |
 |---|---|
 | `objective` | 完成同一局三幕和最终 Boss；正式胜利结算为执行终点 |
@@ -107,7 +111,7 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 
 `npm run context:benchmark` 是纯离线合成基准。已保存[本机记录](evidence/2026-09-20/context-benchmark.json)：30 张永久牌、55 地图节点、100 条游戏事件、12 条 Agent 动作的案例经无损整理从 40,638 降至 27,531 字节；准备阶段中位约 1.91 ms、P95 约 3.17 ms。另一个 55 节点双分支地图案例约 9.2 KB。RSS 记录包含整个 Node/Ajv 进程，不含游戏；这些数字不是实机采集耗时、Jev 网络延迟或策略胜率。
 
-当前模组 `0.111.0-context.13` 已部署并用于整局测试。构建产物在 `mods/sts2-cli-compat/out-context/`。`npm run context:preview` 可只读检查当前完整 JSON，不调用 Jev、不发送游戏动作，也不修改记忆。`npm start` 默认连续运行至正式结算、明确错误或步数上限。
+当前模组 `0.111.0-context.16` 已部署并用于整局测试。构建产物在 `mods/sts2-cli-compat/out-context/`。`npm run context:preview` 可只读检查当前完整 JSON，不调用 Jev、不发送游戏动作，也不修改记忆。`npm start` 默认连续运行至正式结算、明确错误或步数上限。
 
 真实长战斗也出现过 65,104 字节即被服务端拒绝的情况，说明字节门槛不能当作 token 保证。历史表布局现在还会按相同字段集合和事件类型共享实际恒定值，保持原有 record_table_v2 格式并通过逐项还原测试；该局面整理到 60,336 字节、31,165 输入 tokens 后成功续玩。
 
