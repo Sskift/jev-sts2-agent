@@ -51,6 +51,26 @@ test('damage before prevention is distinct from sequential HP loss and consumed 
   assert.deepEqual(s, before);
 });
 
+test('Strength changes use Shrink before rounding, including indefinite duration and combined multipliers', () => {
+  const s = combat();
+  const hit = play('STRIKE_IRONCLAD', 42);
+  s.combat.player.powers = [{ id: 'SHRINK_POWER', amount: -1 }];
+  s.combat.player.potions = [{ id: 'STRENGTH_POTION', slot: 0, description: 'Gain 2 Strength.' }];
+  s.combat.hand[0].target_previews[0].damage = 4;
+  const range = steps => inspectSequence(s, steps).analysis.steps.at(-1).damage_per_target[0].per_hit_before_block_and_hp_loss_caps;
+  assert.deepEqual(range([hit]), { min: 4, max: 4 }, 'An unchanged native preview is not multiplied again');
+  assert.deepEqual(range([potion('STRENGTH_POTION'), hit]), { min: 5, max: 6 });
+  s.combat.player.potions[0].description = 'Gain 10 Strength.';
+  assert.deepEqual(range([potion('STRENGTH_POTION'), hit]), { min: 11, max: 11 });
+  s.combat.player.powers.push({ id: 'WEAK_POWER', amount: 1 });
+  s.combat.enemies[0].powers = [{ id: 'VULNERABLE_POWER', amount: 1 }];
+  assert.deepEqual(range([potion('STRENGTH_POTION'), hit]), { min: 11, max: 12 });
+  s.combat.player.potions = [];
+  s.combat.player.powers = [{ id: 'SHRINK_POWER', amount: -1 }, { id: 'TENDER_POWER', amount: 0 }];
+  assert.deepEqual(range([play('DEFEND_IRONCLAD'), hit]), { min: 2, max: 3 });
+  assert.equal(s.combat.hand[0].target_previews[0].damage, 4);
+});
+
 test('inspection uses the intended hand upgrade and rejects a target already played', () => {
   const s = combat();
   s.combat.hand.push(fixtureCard('ARMAMENTS', { index: 2, type: 'Skill', description: 'Gain 5 Block. Upgrade a card in your Hand.', block: 5 }));

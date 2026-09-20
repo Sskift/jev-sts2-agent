@@ -1,0 +1,128 @@
+{
+  "at": "2026-09-20T20:02:22.112Z",
+  "scope": "Version-pinned native source and scoped arithmetic regression; no model call, no game command or simulated victory.",
+  "native_sources": {
+    "ShrinkPower.cs": {
+      "file": "temp/knowledge-research/ShrinkPower.cs",
+      "sha256": "3bcc3e35ca2922c6a15cb9731a381fc1376cbe72ec177b4d9b46d85913cd08c4"
+    },
+    "StrengthPower.cs": {
+      "file": "temp/knowledge-research/StrengthPower.cs",
+      "sha256": "edb5368557130525327d8a3d09465582946081023e2346268bbe80d722fd1188"
+    }
+  },
+  "observed_snapshot": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-2026-09-20T19-53-34.016Z\\step-0038\\before-state.json",
+    "sha256": "cdc0a104ba1c4df1624faa120275f394bd4483c442ac2f3b2de589aaeb8f9df3",
+    "run": "run-1789934018",
+    "floor": 3,
+    "turn": 2,
+    "power": {
+      "id": "SHRINK_POWER",
+      "name": "Shrink",
+      "amount": -1,
+      "type": "Debuff",
+      "stack_type": "Single",
+      "description": "While Shrinker Beetle is alive, your Attacks deal 30% less damage."
+    },
+    "attacks": [
+      {
+        "id": "STRIKE_IRONCLAD",
+        "damage": 4,
+        "target_previews": [
+          {
+            "target_id": 1,
+            "description": "Deal 4 damage.",
+            "damage": 6
+          }
+        ]
+      },
+      {
+        "id": "STRIKE_IRONCLAD",
+        "damage": 4,
+        "target_previews": [
+          {
+            "target_id": 1,
+            "description": "Deal 4 damage.",
+            "damage": 6
+          }
+        ]
+      },
+      {
+        "id": "NEOWS_FURY",
+        "damage": 7,
+        "target_previews": [
+          {
+            "target_id": 1,
+            "description": "Deal 7 damage. Put up to 2 cards from your Discard Pile into your Hand. Exhaust.",
+            "damage": 10
+          }
+        ]
+      }
+    ]
+  },
+  "facts": [
+    "Strength adds before multiplicative damage hooks. Shrink multiplies powered attacks by 7/10, including negative indefinite duration.",
+    "Shrink can disappear when its applier dies. The delta calculation is conditional on active modifiers remaining in force; it does not simulate that death hook."
+  ],
+  "change": "Compose rational factors for Weak, Vulnerable, Shrink and Frail, preserving the interval hidden by native integer previews. Do not multiply unchanged starting previews again.",
+  "arithmetic_regressions": [
+    {
+      "native_preview": 4,
+      "strength_delta": 2,
+      "modifiers": [
+        "Shrink"
+      ],
+      "before": {
+        "min": 6,
+        "max": 6
+      },
+      "after": {
+        "min": 5,
+        "max": 6
+      }
+    },
+    {
+      "native_preview": 4,
+      "strength_delta": 10,
+      "modifiers": [
+        "Shrink"
+      ],
+      "after": {
+        "min": 11,
+        "max": 11
+      }
+    },
+    {
+      "native_preview": 4,
+      "strength_delta": 10,
+      "modifiers": [
+        "Shrink",
+        "Weak",
+        "Vulnerable"
+      ],
+      "after": {
+        "min": 11,
+        "max": 12
+      }
+    },
+    {
+      "native_preview": 4,
+      "strength_delta": -1,
+      "modifiers": [
+        "Shrink",
+        "Vulnerable"
+      ],
+      "after": {
+        "min": 2,
+        "max": 3
+      }
+    }
+  ],
+  "validation": {
+    "command": "node --test test/turn_sequence.test.mjs test/turn_projection.test.mjs test/turn_debuff_projection.test.mjs",
+    "passed": 26,
+    "failed": 0
+  },
+  "runtime_loaded": false
+}

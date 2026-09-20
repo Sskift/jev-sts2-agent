@@ -38,14 +38,15 @@ function upgradedCard(card) {
   return result;
 }
 
-// A delta enters before ordinary Weak/Vulnerable/Frail multipliers. Native
+// A delta enters before ordinary Weak/Vulnerable/Shrink/Frail multipliers. Native
 // integer previews hide a fractional remainder; only an exact range may be
-// reused as a point estimate. Nonstandard modifiers remain unresolved.
-function shifted(value, delta, multiplier, supported) {
+// reused as a point estimate. Rational factors avoid floating-point underflow
+// at integer boundaries (Shrink is 7/10). Active modifiers must still hold.
+function shifted(value, delta, numerator, denominator, supported) {
   if (!Number.isFinite(value) || !supported) return { min: null, max: null };
   if (value === 0 && delta > 0) return { min: null, max: null }; // A clamped preview hides how far below zero the original value was.
-  const change = delta * multiplier;
-  return { min: Math.max(0, Math.floor(value + change)), max: Math.max(0, Math.ceil(value + 1 + change) - 1) };
+  const lower = value * denominator + delta * numerator;
+  return { min: Math.max(0, Math.floor(lower / denominator)), max: Math.max(0, Math.ceil((lower + denominator) / denominator) - 1) };
 }
 const exact = range => range.min === range.max ? range.min : null;
 
@@ -105,7 +106,10 @@ export function inspectSequence(state, steps) {
         detail.x_hits = known ? Math.max(0, before) : null;
       }
       if (card.type === 'Attack') {
-        const multiplier = amount(observed.player, 'WEAK_POWER') > 0 ? 0.75 : 1;
+        const weak = amount(observed.player, 'WEAK_POWER') > 0;
+        // Shrink -1 is indefinite, not inactive; its verified native hook
+        // multiplies powered attack damage by 0.7 independently of stacks.
+        const shrink = observed.player.powers?.some(p => p.id === 'SHRINK_POWER');
         const mutableBasis = sequence > 0 && /(?:your (?:current )?(?:Block|HP)|cards? in (?:your )?(?:Hand|Discard|Exhaust)|(?:Attacks?|Skills?|cards?) played (?:this turn|this combat))/i.test(card.description);
         const unusualScaling = strength !== 0 && /\bStrength\b/i.test(card.description) && card.id !== 'SETUP_STRIKE';
         const hits = previewHitCount(card);
@@ -119,7 +123,8 @@ export function inspectSequence(state, steps) {
           const custom = unknownStrength || mutableBasis || unusualScaling || repeats || (vulnerable && (amount(enemy, 'DEBILITATE_POWER') || amount(observed.player, 'CRUELTY_POWER')
             || observed.player.relics?.some(r => r.id === 'PAPER_PHROG')));
           const range = strength === 0 && !unknownStrength && !mutableBasis && !repeats ? { min: preview.damage ?? null, max: preview.damage ?? null }
-            : shifted(preview.damage, strength, multiplier * (vulnerable ? 1.5 : 1), !custom && card.id !== 'OMNISLICE');
+            : shifted(preview.damage, strength, (weak ? 3 : 1) * (vulnerable ? 3 : 1) * (shrink ? 7 : 1),
+              (weak ? 4 : 1) * (vulnerable ? 2 : 1) * (shrink ? 10 : 1), !custom && card.id !== 'OMNISLICE');
           preview.damage = exact(range) ?? undefined;
           if (preview.damage === undefined) unknownTargets.add(preview.target_id);
           return { target_id: preview.target_id, per_hit_before_block_and_hp_loss_caps: range, total_before_block_and_hp_loss_caps: hits === 0 ? { min: 0, max: 0 }
@@ -129,7 +134,8 @@ export function inspectSequence(state, steps) {
       }
       if (Number.isFinite(card.block) && card.type !== 'Power') {
         const range = dexterity === 0 && !unknownDexterity && !repeats ? { min: card.block, max: card.block }
-          : shifted(card.block, dexterity, amount(observed.player, 'FRAIL_POWER') > 0 ? 0.75 : 1, !unknownDexterity && !repeats);
+          : shifted(card.block, dexterity, amount(observed.player, 'FRAIL_POWER') > 0 ? 3 : 1,
+            amount(observed.player, 'FRAIL_POWER') > 0 ? 4 : 1, !unknownDexterity && !repeats);
         detail.block_per_gain = range;
         const block = exact(range);
         if (block === null) { unknownBlock = true; card.block = undefined; }
@@ -172,5 +178,5 @@ export function inspectSequence(state, steps) {
   return { entries, remaining_hand: [...hand.values()], energy_left: energy, costs: transitions.map(t => t.reserved_cost), transitions, checkpoint, violations,
     unknown_targets: [...unknownTargets], unknown_block: unknownBlock,
     analysis: { is_observed: false, steps: trace, checkpoint, violations,
-      scope: 'Conditional ordered costs, inspectable hand upgrades, resolved stat potion deltas, Setup Strike, Tender after each card, and identity-X Whirlwind payment. Next-card consumers, draws and other uncomputed state changes require observation. Native starting previews are not reapplied as unchanged future facts; unresolved ranges remain unknown. No actions beyond a checkpoint are promised.' } };
+      scope: 'Conditional ordered costs, inspectable hand upgrades, resolved stat potion deltas, Setup Strike, Tender after each card, and identity-X Whirlwind payment. Stat deltas use ordinary Weak, Vulnerable, Shrink and Frail multipliers while those modifiers remain active; source death and other multiplier changes are not simulated. Next-card consumers, draws and other uncomputed state changes require observation. Native starting previews are not reapplied as unchanged future facts; unresolved ranges remain unknown. No actions beyond a checkpoint are promised.' } };
 }

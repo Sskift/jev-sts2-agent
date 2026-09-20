@@ -136,3 +136,5 @@ Vercel Evaluation、OpenRouter Decisions 和 TypeSafe 原生 API 共享同一模
 `debuff_dependencies` 是分析字段；不会修改 `observation` 或既有历史。已知上限、自定义倍率、未解析次数及消耗资源后过期的 X 费命中次数保持未知。原有 `known_effects_only` 中受新状态影响的点估计留空，避免同时向模型提供互相矛盾的敌人生命或来袭伤害。范围仍以其他预览条件和已声明命中成立为前提，未覆盖的药水、升级、反应及未来敌方招式不能视为零效果。
 
 步骤中的伤害范围明确标为 `before_block_and_hp_loss_caps`，与 `after_block_and_hp_loss_caps` 中逐步扣血／扣格挡及实际使用的限制分开。两者是不同计算阶段，不能将牌面 6 点伤害与 Slippery 限制后的 1 点 HP 损失视为冲突或择一忽略。后者共用现有有序伤害账目，未知修正与死亡触发仍使相关结果留空。
+
+力量增减先于普通 Weak、Vulnerable 和 Shrink 倍率；敏捷增减先于 Frail。相应增量用有理数计算，再保留原生整数预览隐藏的小数范围，避免把 Shrink 的 -1 无限持续误判为未生效，也避免小数浮点误差跨越整数边界。原样使用的实时预览不会再次乘倍率。这仍以这些倍率保持生效为前提，不能用来模拟 Shrink 施加者死亡后的移除或其他未覆盖的倍率变化。[原生来源与回归](evidence/2026-09-21/run31-shrink-delta.json)。
