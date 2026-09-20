@@ -174,3 +174,44 @@ test('ordered delays move the loss deadline and retain the locations of future r
   assert.equal(twice.loss_deadlines[0].known_delay_cards.in_remaining_hand.length, 0);
   assert.equal(once.loss_deadlines[0].known_delay_cards.in_current_draw_pile, 0);
 });
+test('direct stat powers support ordered follow-through from resolved values and preserve unknown power checkpoints', () => {
+  const s = completeCombat();
+  s.combat.player.energy = 3;
+  s.combat.enemies[0].hp = 100;
+  s.combat.hand[0].target_previews = [{ target_id: 42, damage: 6 }];
+  const power = fixtureCard('INFLAME', { index: 1, name: 'Inflame+', type: 'Power', target_type: 'Self',
+    description: 'Gain 3 Strength.', details: { instance_id: 'buff' } });
+  s.combat.hand.push(power);
+  const buff = { kind: 'play_card', card_instance_id: 'buff' }, hit = { kind: 'play_card', card_instance_id: 'STRIKE_IRONCLAD', target: 42 };
+  const original = structuredClone(s);
+  const early = inspectSequence(s, [buff, hit]), late = inspectSequence(s, [hit, buff]);
+  assert.equal(early.checkpoint, null);
+  assert.deepEqual(early.analysis.steps[1].damage_per_target[0].per_hit_before_block_and_hp_loss_caps, { min: 9, max: 9 });
+  assert.deepEqual(late.analysis.steps[0].damage_per_target[0].per_hit_before_block_and_hp_loss_caps, { min: 6, max: 6 });
+  assert.equal(describeTurnProjection(s, [buff, hit]).known_effects_only.enemies[0].hp_removed, 9);
+  assert.deepEqual(s, original);
+  s.combat.player.powers = [{ id: 'WEAK_POWER', amount: 1 }];
+  s.combat.enemies[0].powers = [{ id: 'VULNERABLE_POWER', amount: 1 }];
+  const rounded = describeTurnProjection(s, [buff, hit]);
+  assert.deepEqual(rounded.known_effects_only.enemies[0].conditional_bounds.hp_removed, { min: 9, max: 10 });
+  assert.equal(rounded.known_effects_only.hp_if_ending, 28, 'A certainly surviving target retains its independent known attack');
+  assert.deepEqual(rounded.known_effects_only.enemies[0].power_changes, [], 'A damage range does not invent unknown debuff changes');
+  s.combat.enemies[0].hp = 8;
+  assert.equal(describeTurnProjection(s, [buff, hit]).known_effects_only.hp_if_ending, 40, 'Both damage bounds deplete this target');
+  s.combat.enemies[0].hp = 10;
+  assert.equal(describeTurnProjection(s, [buff, hit]).known_effects_only.hp_if_ending, null, 'Possible depletion still leaves the response unknown');
+  s.combat.enemies[0].hp = 100;
+  s.combat.enemies[0].powers = [{ id: 'INTANGIBLE_POWER', amount: 1 }];
+  s.combat.hand[0].target_previews[0].damage = 1;
+  assert.deepEqual(inspectSequence(s, [buff, hit]).analysis.steps[1].damage_per_target[0].per_hit_before_block_and_hp_loss_caps,
+    { min: null, max: null }, 'An Intangible-capped preview cannot reveal the uncapped value before Strength changes');
+  s.combat.hand[0].target_previews[0].damage = 6;
+  s.combat.player.powers = []; s.combat.enemies[0].powers = [];
+  power.description = 'Gain 3 Strength. Draw 1 card.';
+  assert.equal(inspectSequence(s, [buff, hit]).checkpoint.after_sequence, 0);
+  power.description = 'Gain 3 Strength.'; power.id = 'UNVERIFIED_POWER';
+  assert.equal(inspectSequence(s, [buff, hit]).checkpoint.after_sequence, 0);
+  power.id = 'FOOTWORK'; power.description = 'Gain 2 Dexterity.';
+  Object.assign(s.combat.hand[0], { id: 'DEFEND_IRONCLAD', name: 'Defend', type: 'Skill', description: 'Gain 5 Block.', block: 5 });
+  assert.equal(describeTurnProjection(s, [buff, hit]).known_effects_only.block, 7);
+});

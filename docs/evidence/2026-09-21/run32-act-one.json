@@ -1,0 +1,70 @@
+{
+  "recorded_at": "2026-09-20T21:20:35.339Z",
+  "run_id": "run-1789936871",
+  "runtime_commit": "db902d13878d1216188e5c904bf0b59e21f5f494",
+  "started_at_floor": 1,
+  "boss": {
+    "id": "THE_KIN_BOSS",
+    "floor": 17,
+    "turn": 6,
+    "final_action": {
+      "file": "C:/Users/skift/jevmake/run-artifacts/run32-resume-2026-09-20T20-54-30.343Z/step-0075/decision.json",
+      "sha256": "cfb5ec1003ef60ba5dee383c3f90fa638ada75d91a73f3a46700b847d7adef44"
+    },
+    "before_final_action": {
+      "file": "C:/Users/skift/jevmake/run-artifacts/run32-resume-2026-09-20T20-54-30.343Z/step-0075/before-state.json",
+      "sha256": "a99d7637a26d360a7086a0d1298a23b7a41a82c37c35b12ce99c3e176f0a5b40"
+    },
+    "priest_hp_before_final_action": 11,
+    "reward": {
+      "file": "C:/Users/skift/jevmake/run-artifacts/run32-resume-2026-09-20T20-54-30.343Z/step-0080/before-state.json",
+      "sha256": "f344bb7c98f9d6732c749c8c600a4a05e1e042274f9fe1d28b39f3f989ffe1c7"
+    },
+    "reward_screen": "REWARD",
+    "hp_after": 59
+  },
+  "second_act": {
+    "source": {
+      "file": "C:/Users/skift/jevmake/run-artifacts/run32-resume-2026-09-20T20-54-30.343Z/step-0084/before-state.json",
+      "sha256": "b2194399059115152c085a43ce61bac0e37c1f455632c94b0e11356390b6b92b"
+    },
+    "act_index": 1,
+    "floor": 18,
+    "hp": 80
+  },
+  "camp": {
+    "source": {
+      "file": "C:/Users/skift/jevmake/run-artifacts/run32-resume-2026-09-20T20-54-30.343Z/step-0043/decision.json",
+      "sha256": "166a62bbb5efadf853eef70c186e719102ccd634edcbb09a177f91a27ee12e30"
+    },
+    "choice": "SMITH",
+    "upgrade": "HOWL_FROM_BEYOND",
+    "hp": 54,
+    "boss_entry": {
+      "file": "C:/Users/skift/jevmake/run-artifacts/run32-resume-2026-09-20T20-54-30.343Z/step-0046/after-state.json",
+      "sha256": "7ff1d61f0a3803a76ea847f54f13da4264d9f553c4a296528accb51a693e88ba"
+    },
+    "entry_hp": 79,
+    "healing_source": "PANTOGRAPH",
+    "live_rule": "At the start of each Boss combat, heal 25 HP."
+  },
+  "current_provider_stop": {
+    "result": {
+      "file": "temp/run32-resume-result.json",
+      "sha256": "0263fd7a82b50b7fb056e54da62d507ee98bbaeeba428c90dea50002f2a2ac66"
+    },
+    "native": {
+      "file": "temp/run32-before-credit-resume.json",
+      "sha256": "e338867378ec42190896b95ed6423c2314c321c568b0a1d9e9e787bf49392726"
+    },
+    "floor": 19,
+    "act_index": 1,
+    "turn": 4,
+    "hp": 62,
+    "pending": null,
+    "error": "HTTP 402: insufficient OpenRouter account credits",
+    "game_run_ended": false,
+    "outcome_unknown": false
+  },
+  "goal_complete": false
+}

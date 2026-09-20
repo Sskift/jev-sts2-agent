@@ -6,6 +6,14 @@ const instance = card => card?.details?.instance_id;
 const amount = (entity, id) => (entity.powers || []).find(p => p.id === id)?.amount || 0;
 const gain = (text, unit) => Number(text?.match(new RegExp(`(?:^|\\.\\s*)Gain (\\d+) ${unit}\\.(?:\\s|$)`))?.[1]);
 
+// Native v0.111.0 OnPlay directly applies these stats to the owner. Restrict
+// the adapter to the resolved one-clause rule; other powers remain unknown.
+function directStatPower(card) {
+  const stat = card?.type === 'Power' && ({ INFLAME: 'Strength', FOOTWORK: 'Dexterity' })[card.id];
+  const match = stat && card.description?.trim().match(new RegExp(`^Gain (\\d+) ${stat}\\.$`));
+  return match ? { power_id: `${stat.toUpperCase()}_POWER`, amount: Number(match[1]), expires: 'combat_end' } : null;
+}
+
 // These changes require a new native observation. A generated/transformed card
 // is never represented by its old instance and an invented future cost.
 export function observationReason(state, step, resolvedEntity) {
@@ -18,7 +26,7 @@ export function observationReason(state, step, resolvedEntity) {
     || /\bnext\b[^.]*\bcosts?\b[^.]*\bEnergy\b/i.test(s)
     || /^Exhaust (?:a|1|\d+) cards?\b/i.test(s));
   if (changing) return changing;
-  if (entity.type === 'Power') return 'Observe the installed power and its native cost, stat and trigger changes before continuing.';
+  if (entity.type === 'Power' && !directStatPower(entity)) return 'Observe the installed power and its native cost, stat and trigger changes before continuing.';
   if (handUpgradeMode(entity.description) === 'one' && !step.beneficiary_instance_id) return 'Observe the selected upgrade before specifying its continuation.';
   return null;
 }
@@ -120,7 +128,9 @@ export function inspectSequence(state, steps) {
         detail.damage_per_target = (card.target_previews || []).map(preview => {
           const enemy = observed.enemies.find(e => e.combat_id === preview.target_id);
           const vulnerable = enemy && amount(enemy, 'VULNERABLE_POWER') > 0;
-          const custom = unknownStrength || mutableBasis || unusualScaling || repeats || (vulnerable && (amount(enemy, 'DEBILITATE_POWER') || amount(observed.player, 'CRUELTY_POWER')
+          const custom = unknownStrength || mutableBasis || unusualScaling || repeats
+            || (strength !== 0 && enemy && amount(enemy, 'INTANGIBLE_POWER') > 0)
+            || (vulnerable && (amount(enemy, 'DEBILITATE_POWER') || amount(observed.player, 'CRUELTY_POWER')
             || observed.player.relics?.some(r => r.id === 'PAPER_PHROG')));
           const range = strength === 0 && !unknownStrength && !mutableBasis && !repeats ? { min: preview.damage ?? null, max: preview.damage ?? null }
             : shifted(preview.damage, strength, (weak ? 3 : 1) * (vulnerable ? 3 : 1) * (shrink ? 7 : 1),
@@ -156,7 +166,12 @@ export function inspectSequence(state, steps) {
         strength--; dexterity--; detail.after_play_stat_change = { strength: -1, dexterity: -1, source_id: 'TENDER_POWER' };
       }
       const setupStrength = card.id === 'SETUP_STRIKE' ? Number(card.description.match(/\bGain (\d+) Strength this turn\./)?.[1]) : NaN;
-      if (Number.isFinite(setupStrength)) {
+      const statPower = directStatPower(card);
+      if (statPower) {
+        if (statPower.power_id === 'STRENGTH_POWER') strength += statPower.amount;
+        else dexterity += statPower.amount;
+        detail.applies_after_action = statPower;
+      } else if (Number.isFinite(setupStrength)) {
         strength += setupStrength;
         detail.applies_after_action = { power_id: 'STRENGTH_POWER', amount: setupStrength, expires: 'owner_turn_end' };
       } else if (/\b(?:gain|lose)\b[^.]*\b(?:Strength|Dexterity)\b/i.test(card.description)) {
@@ -178,5 +193,5 @@ export function inspectSequence(state, steps) {
   return { entries, remaining_hand: [...hand.values()], energy_left: energy, costs: transitions.map(t => t.reserved_cost), transitions, checkpoint, violations,
     unknown_targets: [...unknownTargets], unknown_block: unknownBlock,
     analysis: { is_observed: false, steps: trace, checkpoint, violations,
-      scope: 'Conditional ordered costs, inspectable hand upgrades, resolved stat potion deltas, Setup Strike, Tender after each card, and identity-X Whirlwind payment. Stat deltas use ordinary Weak, Vulnerable, Shrink and Frail multipliers while those modifiers remain active; source death and other multiplier changes are not simulated. Next-card consumers, draws and other uncomputed state changes require observation. Native starting previews are not reapplied as unchanged future facts; unresolved ranges remain unknown. No actions beyond a checkpoint are promised.' } };
+      scope: 'Conditional ordered costs, inspectable hand upgrades, resolved stat potion deltas, direct Inflame/Footwork gains, Setup Strike, Tender after each card, and identity-X Whirlwind payment. Stat deltas use ordinary Weak, Vulnerable, Shrink and Frail multipliers while those modifiers remain active; source death and other multiplier changes are not simulated. Next-card consumers, draws and other uncomputed state changes require observation. Native starting previews are not reapplied as unchanged future facts; unresolved ranges remain unknown. No actions beyond a checkpoint are promised.' } };
 }

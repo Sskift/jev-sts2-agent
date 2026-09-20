@@ -24,17 +24,22 @@ export function reserveSequence(state, steps) {
 // equals that of an otherwise identical plan without it.
 export function describeTurnProjection(state, steps) {
   const sequence = inspectSequence(state, steps);
-  const debuffs = projectDebuffDependencies(state, steps, sequence.entries);
+  const debuffs = projectDebuffDependencies(state, steps, sequence.entries, sequence.analysis);
   const resolved = (debuffs?.enemies || []).filter(result => {
     const before = state.combat.enemies.find(e => e.combat_id === result.combat_id);
-    return !sequence.unknown_targets.includes(result.combat_id)
-      && [result.hp_remaining, result.block_remaining, result.current_attack_after_debuffs, ...result.power_changes.map(p => p.after_declared_actions)]
+    return [result.hp_remaining, result.block_remaining, result.current_attack_after_debuffs, ...result.power_changes.map(p => p.after_declared_actions)]
         .every(range => Number.isFinite(range.min) && range.min === range.max)
       && (result.hp_remaining.max === 0 || result.current_attack_after_debuffs.min === intentDamage(before));
   });
-  const projection = projectTurnPrefix(state, steps, sequence, { enemies: resolved, applications: debuffs?.transitions || [] });
+  const knownResponses = new Set((debuffs?.enemies || []).filter(result => {
+    const before = state.combat.enemies.find(e => e.combat_id === result.combat_id);
+    return result.hp_remaining.min > 0 && result.current_attack_after_debuffs.min === intentDamage(before)
+      && result.current_attack_after_debuffs.max === intentDamage(before) || resolved.some(e => e.combat_id === result.combat_id);
+  }).map(result => result.combat_id));
+  const projection = projectTurnPrefix(state, steps, { ...sequence, unknown_targets: sequence.unknown_targets.filter(id => !knownResponses.has(id)) },
+    { enemies: resolved, applications: debuffs?.transitions || [] });
   const lifecycle = describeEffectLifecycle(state, steps);
-  const affected = new Set([...(debuffs?.affected_target_ids || []).filter(id => !resolved.some(e => e.combat_id === id)), ...sequence.unknown_targets]);
+  const affected = new Set([...(debuffs?.affected_target_ids || []), ...sequence.unknown_targets].filter(id => !resolved.some(e => e.combat_id === id)));
   const depletionEffects = projection.remaining_enemies.flatMap(enemy => {
     const before = state.combat.enemies.find(e => e.combat_id === enemy.combat_id);
     return enemy.hp <= 0 && before.hp > 0 ? uncomputedDepletionRules(before).map(power => ({ owner_combat_id: enemy.combat_id, source_id: power.id, description: power.description })) : [];
@@ -46,7 +51,7 @@ export function describeTurnProjection(state, steps) {
   const responseUnresolved = [...affected].some(id => {
     const result = debuffs?.enemies.find(e => e.combat_id === id);
     const before = state.combat.enemies.find(e => e.combat_id === id);
-    return sequence.unknown_targets.includes(id) || !result || !(result.hp_remaining.min > 0)
+    return !result || !(result.hp_remaining.min > 0)
       || result.current_attack_after_debuffs.min !== intentDamage(before)
       || result.current_attack_after_debuffs.max !== intentDamage(before);
   });
@@ -70,7 +75,7 @@ export function describeTurnProjection(state, steps) {
         if (affected.has(combat_id)) {
           const range = dependency?.hp_remaining;
           const bounded = Number.isFinite(range?.min) && Number.isFinite(range?.max)
-            && !sequence.unknown_targets.includes(combat_id) && !depletionEffects.some(e => e.owner_combat_id === combat_id);
+            && !depletionEffects.some(e => e.owner_combat_id === combat_id);
           return { combat_id, hp: null, block: null, hp_removed: null, block_removed: null, power_changes: powerChanges,
             ...(bounded ? { conditional_bounds: { hp: range, hp_removed: { min: before.hp - range.max, max: before.hp - range.min }, block: dependency.block_remaining } } : {}) };
         }
@@ -157,6 +162,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     const covered = supportedApplication || card.id === 'RAGE' && Number.isFinite(card.rage_block_per_attack)
       || card.id === 'ARMAMENTS' && dependency?.upgrades_before_later_actions?.every(id => state.combat.hand.find(c => c.details?.instance_id === id)?.upgrade_preview)
       || card.id === 'SETUP_STRIKE' && dependency?.applies_after_action
+      || ['INFLAME', 'FOOTWORK'].includes(card.id) && dependency?.applies_after_action
       || card.id === 'WHIRLWIND' && Number.isFinite(dependency?.damage_instances)
       || card.id === 'FRANTIC_ESCAPE' && sandpitOwners.length === 1;
     if (!covered && !/^(?:Deal [\d.]+ damage\.?|Gain [\d.]+ Block\.?)$/i.test(card.description.trim())) unresolved.push(`${card.name}: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed`);

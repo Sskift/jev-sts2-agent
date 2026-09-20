@@ -1,0 +1,609 @@
+{
+  "recorded_at": "2026-09-20T21:20:35.575Z",
+  "run_id": "run-1789936871",
+  "source": {
+    "file": "C:/Users/skift/jevmake/run-artifacts/run32-resume-2026-09-20T20-54-30.343Z/step-0062/before-state.json",
+    "sha256": "b643230a0872ecbfdfe52be6b38bd863a3f3aae14c107a068a35dd6aad2e21b1"
+  },
+  "native_sources": [
+    {
+      "file": "temp/knowledge-research/Inflame.cs",
+      "sha256": "f20f9a058d6e831e3182181a90b66baf3a0deb4636ddd7c77aa37fc1a940f5d2"
+    },
+    {
+      "file": "temp/knowledge-research/Footwork.cs",
+      "sha256": "e177ddbd1bfc19719b89acadfc2b37fd09521bc3755e84d4e0de3cfe7eaeaa0e"
+    }
+  ],
+  "final_sources": [
+    {
+      "file": "src/turn_sequence.mjs",
+      "sha256": "54a23b7b4f1e3ee21dfd7a0833294985f12a13ce9998a8e4604391ea86076b13"
+    },
+    {
+      "file": "src/turn_projection.mjs",
+      "sha256": "20bbcd697f8eefde245a5b7aa9131709709a29cf2eeca68b5232536fb08ab7f5"
+    },
+    {
+      "file": "src/turn_debuff_projection.mjs",
+      "sha256": "881942b93358fb4de59c1022b485961bcceabd415c2e0ecafe904ea25c0724be"
+    }
+  ],
+  "comparisons": [
+    {
+      "order": [
+        "INFLAME",
+        "STRIKE_IRONCLAD",
+        "DEFEND_IRONCLAD"
+      ],
+      "target": 3,
+      "projection": {
+        "calculation_status": "incomplete",
+        "fully_simulated": false,
+        "known_effects_only": {
+          "block": 5,
+          "hp_if_ending": 62,
+          "hp_loss_if_ending": 0,
+          "block_including_end_turn_gains": 12,
+          "end_turn_block_gains": [
+            {
+              "source_id": "PLATING_POWER",
+              "amount": 7,
+              "timing": "turn_end_early"
+            }
+          ],
+          "end_turn_damage_events": [],
+          "incoming_attack": 12,
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp": 58,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            },
+            {
+              "combat_id": 2,
+              "hp": 59,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            },
+            {
+              "combat_id": 3,
+              "hp": null,
+              "block": null,
+              "hp_removed": null,
+              "block_removed": null,
+              "power_changes": [],
+              "conditional_bounds": {
+                "hp": {
+                  "min": 114,
+                  "max": 115
+                },
+                "hp_removed": {
+                  "min": 12,
+                  "max": 13
+                },
+                "block": {
+                  "min": 0,
+                  "max": 0
+                }
+              }
+            }
+          ]
+        },
+        "debuff_dependencies": {
+          "is_observed_effect": false,
+          "adapters": [
+            "ORDERED_DAMAGE_RANGES"
+          ],
+          "affected_target_ids": [
+            3
+          ],
+          "transitions": [],
+          "ordered_damage": [
+            {
+              "sequence": 1,
+              "card_id": "STRIKE_IRONCLAD",
+              "target_id": 3,
+              "per_hit": {
+                "min": 12,
+                "max": 13
+              },
+              "preview_hits": 1,
+              "includes_new_vulnerable": false,
+              "after_block_and_hp_loss_caps": {
+                "hp_removed": {
+                  "min": 12,
+                  "max": 13
+                },
+                "block_removed": {
+                  "min": 0,
+                  "max": 0
+                },
+                "applied_hp_loss_limits": []
+              }
+            }
+          ],
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp_remaining": {
+                "min": 58,
+                "max": 58
+              },
+              "block_remaining": {
+                "min": 0,
+                "max": 0
+              },
+              "power_changes": [],
+              "depleted_if_all_declared_hits_resolve": false,
+              "current_attack_after_debuffs": {
+                "min": 6,
+                "max": 6
+              }
+            },
+            {
+              "combat_id": 2,
+              "hp_remaining": {
+                "min": 59,
+                "max": 59
+              },
+              "block_remaining": {
+                "min": 0,
+                "max": 0
+              },
+              "power_changes": [],
+              "depleted_if_all_declared_hits_resolve": false,
+              "current_attack_after_debuffs": {
+                "min": 0,
+                "max": 0
+              }
+            },
+            {
+              "combat_id": 3,
+              "hp_remaining": {
+                "min": 114,
+                "max": 115
+              },
+              "block_remaining": {
+                "min": 0,
+                "max": 0
+              },
+              "power_changes": [],
+              "depleted_if_all_declared_hits_resolve": false,
+              "current_attack_after_debuffs": {
+                "min": 6,
+                "max": 6
+              }
+            }
+          ],
+          "scope": "Conditional ordered damage and current-intent bounds for verified native v0.111.0 applications and ordered target previews. Attack-source debuffs apply after damage; Taunt grants Block then Vulnerable; Artifact consumes applications in order. Slippery/Buffer HP-loss counters advance after unblocked hits, including across cards. Area recipients come from native previews. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so new 1.5x/0.75x modifiers yield ranges. Intangible-capped previews, overlapping prevention hooks, custom multipliers and unreadable applications stay unknown. Assumes other hooks remain unchanged and every declared hit resolves; uncomputed potions, automatic plays, reactions, random targets and future moves are not simulated. Counter changes describe the end of the declared segment before enemy-turn duration ticks, not an observation."
+        },
+        "sequence_dependencies": {
+          "is_observed": false,
+          "steps": [
+            {
+              "sequence": 0,
+              "source_id": "INFLAME",
+              "energy_before": 3,
+              "energy_after": 2,
+              "strength_change_before_action": 0,
+              "dexterity_change_before_action": 0,
+              "applies_after_action": {
+                "power_id": "STRENGTH_POWER",
+                "amount": 2,
+                "expires": "combat_end"
+              }
+            },
+            {
+              "sequence": 1,
+              "source_id": "STRIKE_IRONCLAD",
+              "energy_before": 2,
+              "energy_after": 1,
+              "strength_change_before_action": 2,
+              "dexterity_change_before_action": 0,
+              "damage_instances": 1,
+              "damage_per_target": [
+                {
+                  "target_id": 1,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 12,
+                    "max": 13
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 12,
+                    "max": 13
+                  }
+                },
+                {
+                  "target_id": 2,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 12,
+                    "max": 13
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 12,
+                    "max": 13
+                  }
+                },
+                {
+                  "target_id": 3,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 12,
+                    "max": 13
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 12,
+                    "max": 13
+                  }
+                }
+              ],
+              "after_block_and_hp_loss_caps": [
+                {
+                  "target_id": 3,
+                  "hits_counted": null,
+                  "hp_removed": null,
+                  "block_removed": null,
+                  "applied_hp_loss_limits": [],
+                  "scope": "Conditional arithmetic for the counted hits, after current target Block and supported HP-loss caps. Other triggers, changed modifiers and death effects may invalidate it. These are not the pre-prevention damage numbers.",
+                  "limitation": "Unresolved modifiers or depletion hooks invalidate this point estimate; see dependency ranges."
+                }
+              ]
+            },
+            {
+              "sequence": 2,
+              "source_id": "DEFEND_IRONCLAD",
+              "energy_before": 1,
+              "energy_after": 0,
+              "strength_change_before_action": 2,
+              "dexterity_change_before_action": 0,
+              "block_per_gain": {
+                "min": 5,
+                "max": 5
+              }
+            }
+          ],
+          "checkpoint": null,
+          "violations": [],
+          "scope": "Conditional ordered costs, inspectable hand upgrades, resolved stat potion deltas, direct Inflame/Footwork gains, Setup Strike, Tender after each card, and identity-X Whirlwind payment. Stat deltas use ordinary Weak, Vulnerable, Shrink and Frail multipliers while those modifiers remain active; source death and other multiplier changes are not simulated. Next-card consumers, draws and other uncomputed state changes require observation. Native starting previews are not reapplied as unchanged future facts; unresolved ranges remain unknown. No actions beyond a checkpoint are promised."
+        },
+        "encounter_progress": [
+          {
+            "combat_id": 1,
+            "role": "minion",
+            "hp_removed_if_declared_actions_resolve": 0,
+            "hp_depleted": false,
+            "depletion_rules": [
+              {
+                "id": "MINION_POWER",
+                "rules": "Minions abandon combat without their leader."
+              }
+            ],
+            "permanent_removal_established": null,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          },
+          {
+            "combat_id": 2,
+            "role": "minion",
+            "hp_removed_if_declared_actions_resolve": 0,
+            "hp_depleted": false,
+            "depletion_rules": [
+              {
+                "id": "MINION_POWER",
+                "rules": "Minions abandon combat without their leader."
+              }
+            ],
+            "permanent_removal_established": null,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          },
+          {
+            "combat_id": 3,
+            "role": "not_identified_as_minion",
+            "hp_removed_if_declared_actions_resolve": null,
+            "hp_depleted": null,
+            "depletion_rules": [],
+            "permanent_removal_established": null,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          }
+        ],
+        "omitted_effects": [
+          "Changed modifiers or uncomputed depletion hooks invalidate affected preview estimates; use the listed dependencies and rules."
+        ],
+        "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+        "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+      },
+      "compiled_bytes": 63950
+    },
+    {
+      "order": [
+        "DEFEND_IRONCLAD",
+        "STRIKE_IRONCLAD",
+        "INFLAME"
+      ],
+      "target": 3,
+      "projection": {
+        "calculation_status": "preview_arithmetic",
+        "fully_simulated": false,
+        "known_effects_only": {
+          "block": 5,
+          "hp_if_ending": 62,
+          "hp_loss_if_ending": 0,
+          "block_including_end_turn_gains": 12,
+          "end_turn_block_gains": [
+            {
+              "source_id": "PLATING_POWER",
+              "amount": 7,
+              "timing": "turn_end_early"
+            }
+          ],
+          "end_turn_damage_events": [],
+          "incoming_attack": 12,
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp": 58,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            },
+            {
+              "combat_id": 2,
+              "hp": 59,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            },
+            {
+              "combat_id": 3,
+              "hp": 117,
+              "block": 0,
+              "hp_removed": 10,
+              "block_removed": 0,
+              "power_changes": []
+            }
+          ]
+        },
+        "sequence_dependencies": {
+          "is_observed": false,
+          "steps": [
+            {
+              "sequence": 0,
+              "source_id": "DEFEND_IRONCLAD",
+              "energy_before": 3,
+              "energy_after": 2,
+              "strength_change_before_action": 0,
+              "dexterity_change_before_action": 0,
+              "block_per_gain": {
+                "min": 5,
+                "max": 5
+              }
+            },
+            {
+              "sequence": 1,
+              "source_id": "STRIKE_IRONCLAD",
+              "energy_before": 2,
+              "energy_after": 1,
+              "strength_change_before_action": 0,
+              "dexterity_change_before_action": 0,
+              "damage_instances": 1,
+              "damage_per_target": [
+                {
+                  "target_id": 1,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 10,
+                    "max": 10
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 10,
+                    "max": 10
+                  }
+                },
+                {
+                  "target_id": 2,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 10,
+                    "max": 10
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 10,
+                    "max": 10
+                  }
+                },
+                {
+                  "target_id": 3,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 10,
+                    "max": 10
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 10,
+                    "max": 10
+                  }
+                }
+              ],
+              "after_block_and_hp_loss_caps": [
+                {
+                  "target_id": 3,
+                  "hits_counted": 1,
+                  "hp_removed": 10,
+                  "block_removed": 0,
+                  "applied_hp_loss_limits": [],
+                  "scope": "Conditional arithmetic for the counted hits, after current target Block and supported HP-loss caps. Other triggers, changed modifiers and death effects may invalidate it. These are not the pre-prevention damage numbers."
+                }
+              ]
+            },
+            {
+              "sequence": 2,
+              "source_id": "INFLAME",
+              "energy_before": 1,
+              "energy_after": 0,
+              "strength_change_before_action": 0,
+              "dexterity_change_before_action": 0,
+              "applies_after_action": {
+                "power_id": "STRENGTH_POWER",
+                "amount": 2,
+                "expires": "combat_end"
+              }
+            }
+          ],
+          "checkpoint": null,
+          "violations": [],
+          "scope": "Conditional ordered costs, inspectable hand upgrades, resolved stat potion deltas, direct Inflame/Footwork gains, Setup Strike, Tender after each card, and identity-X Whirlwind payment. Stat deltas use ordinary Weak, Vulnerable, Shrink and Frail multipliers while those modifiers remain active; source death and other multiplier changes are not simulated. Next-card consumers, draws and other uncomputed state changes require observation. Native starting previews are not reapplied as unchanged future facts; unresolved ranges remain unknown. No actions beyond a checkpoint are promised."
+        },
+        "encounter_progress": [
+          {
+            "combat_id": 1,
+            "role": "minion",
+            "hp_removed_if_declared_actions_resolve": 0,
+            "hp_depleted": false,
+            "depletion_rules": [
+              {
+                "id": "MINION_POWER",
+                "rules": "Minions abandon combat without their leader."
+              }
+            ],
+            "permanent_removal_established": null,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          },
+          {
+            "combat_id": 2,
+            "role": "minion",
+            "hp_removed_if_declared_actions_resolve": 0,
+            "hp_depleted": false,
+            "depletion_rules": [
+              {
+                "id": "MINION_POWER",
+                "rules": "Minions abandon combat without their leader."
+              }
+            ],
+            "permanent_removal_established": null,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          },
+          {
+            "combat_id": 3,
+            "role": "not_identified_as_minion",
+            "hp_removed_if_declared_actions_resolve": 10,
+            "hp_depleted": false,
+            "depletion_rules": [],
+            "permanent_removal_established": false,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          }
+        ],
+        "omitted_effects": [],
+        "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+        "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+      },
+      "compiled_bytes": 61656
+    }
+  ],
+  "replays": [
+    {
+      "root": "run-artifacts/run32-stat-review/results/boss-stat-order/direct-stat-powers/1",
+      "freeze": "e78d3f1c28022ce74da89fbb65f522692fc4bfa02d6acb22b02a4dd341d9779c",
+      "summary": {
+        "id": "boss-stat-order",
+        "cohort": "development",
+        "label": "direct-stat-powers",
+        "repeat": 1,
+        "input_sha256": "718edd305c3c12a3707df26036b6a7821199860171c2b098f6e52e9501446dd0",
+        "code_root": "C:\\Users\\skift\\jevmake",
+        "request": {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 1
+        },
+        "objective": {
+          "id": "protect_hp",
+          "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+        },
+        "model": "typesafe/jev-1.13-20260917",
+        "sequence": [
+          {
+            "kind": "play_card",
+            "name": "Strike",
+            "card_id": "STRIKE_IRONCLAD",
+            "target": 1
+          },
+          {
+            "kind": "play_card",
+            "name": "Inflame",
+            "card_id": "INFLAME"
+          },
+          {
+            "kind": "play_card",
+            "name": "Defend",
+            "card_id": "DEFEND_IRONCLAD"
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "candidate_coverage": {
+          "inspected_prefixes": 125,
+          "enumerated_plans": 40,
+          "selected_plans": 40,
+          "first_action_variants": 7,
+          "search_truncated": false,
+          "candidate_selection_truncated": false,
+          "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+          "eligible_plans": 40,
+          "assessed_plans": 40,
+          "distinct_allocations": 18,
+          "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+          "compared_plans": 4
+        },
+        "usage": {
+          "input_tokens": 455383,
+          "output_tokens": 1209
+        },
+        "calls": 20,
+        "responses": 20,
+        "elapsed_ms": 16182
+      },
+      "usage": {
+        "successful_calls": 20,
+        "input_tokens": 455383,
+        "output_tokens": 1209,
+        "cost_usd": 0.019126085999999997
+      }
+    },
+    {
+      "root": "run-artifacts/run32-stat-ranges-review/results/boss-stat-order/direct-stat-and-ranges/1",
+      "freeze": "38cfacc80861816e50ecfa026baa9a1a2570f87be7df8f38cf1b09fbfc5c955a",
+      "summary": {
+        "id": "boss-stat-order",
+        "cohort": "development",
+        "label": "direct-stat-and-ranges",
+        "repeat": 1,
+        "input_sha256": "718edd305c3c12a3707df26036b6a7821199860171c2b098f6e52e9501446dd0",
+        "code_root": "C:\\Users\\skift\\jevmake",
+        "error": "Jev API error 402 via openrouter",
+        "calls": 1,
+        "responses": 1
+      },
+      "usage": {
+        "successful_calls": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cost_usd": 0
+      }
+    }
+  ],
+  "validation": {
+    "tests": 27,
+    "failed": 0,
+    "log": "temp/run32-stat-power-checks.log",
+    "production_contexts_compiled": 2
+  },
+  "interpretation": "The first intermediate replay still attacked before Inflame and changed the target to a follower. Inspecting it found that damage ranges were not propagated into the endpoint. Final arithmetic now preserves 12..13 HP damage versus 10 for attacking first, with the same 62 end HP in this saved case. The subsequent model request was rejected with 402 before a judgment; no final-version decision improvement is established.",
+  "scope": "Already inspected development snapshot. Declared native stat gains only; other modifiers/reactions remain scoped or unknown. Exact current effects are re-observed after every game action and changes still trigger replanning. No sequence was executed in the game.",
+  "runtime_loaded": false,
+  "model_verification_pending_account_credits": true
+}

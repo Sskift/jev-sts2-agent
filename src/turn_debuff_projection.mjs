@@ -39,12 +39,19 @@ function scaledPreview(value, numerator, denominator, bound) {
 
 /** Separate conditional dependency analysis; never writes powers into a real
  * observation. It covers new Weak/Vulnerable from the declared adapters, not
- * arbitrary card effects, future enemy choices, or a complete combat engine. */
-export function projectDebuffDependencies(state, steps, orderedEntries = null) {
+ * arbitrary card effects, future enemy choices, or a complete combat engine.
+ * Also carries the ordered stat calculation's damage bounds through the same
+ * hit-cap/counter branches, without turning ranges back into point previews. */
+export function projectDebuffDependencies(state, steps, orderedEntries = null, orderedAnalysis = null) {
   const observed = state.combat;
   const source = step => step.kind === 'use_potion' ? observed.player.potions?.find(p => p.slot === step.slot && p.id === step.potion_id)
     : observed.hand.find(card => card.details?.instance_id === step.card_instance_id);
-  if (!steps.some(step => applications[source(step)?.id])) return null;
+  const orderedRanges = new Map((orderedAnalysis?.steps || []).map(s => [s.sequence, s.damage_per_target || []]));
+  const hasOrderedRanges = [...orderedRanges.values()].some(rows => rows.some(row => {
+    const range = row.per_hit_before_block_and_hp_loss_caps;
+    return Number.isFinite(range.min) && Number.isFinite(range.max) && range.min !== range.max;
+  }));
+  if (!hasOrderedRanges && !steps.some(step => applications[source(step)?.id])) return null;
   const affected = new Set(), transitions = [], damage = [];
   const invalid = new Set(), invalidIncoming = new Set();
   const branches = ['min', 'max'].map(bound => ({ bound, enemies: structuredClone(observed.enemies) }));
@@ -83,6 +90,11 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null) {
         const newlyVulnerable = !power(original, 'VULNERABLE_POWER') && power(enemy, 'VULNERABLE_POWER');
         let preview = card.target_previews?.find(p => p.target_id === id)?.damage;
         if (card.type === 'Attack') {
+          const range = orderedRanges.get(sequence)?.find(row => row.target_id === id)?.per_hit_before_block_and_hp_loss_caps;
+          if (range) {
+            preview = range[bound];
+            if (range.min !== range.max) affected.add(id);
+          }
           if (['INTANGIBLE_POWER', 'SLIPPERY_POWER', 'BUFFER_POWER'].filter(id => power(enemy, id)).length > 1) preview = null;
           if (newlyVulnerable && card.id !== 'OMNISLICE') {
             boosted = true; affected.add(id);
@@ -136,7 +148,7 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null) {
         } });
     }
   }
-  if (!transitions.length) return null;
+  if (!transitions.length && !hasOrderedRanges) return null;
   const enemies = observed.enemies.map(original => {
     const variants = branches.map(b => b.enemies.find(e => e.combat_id === original.combat_id));
     const newlyWeak = !power(original, 'WEAK_POWER') && variants.some(e => power(e, 'WEAK_POWER'));
@@ -156,6 +168,6 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null) {
       depleted_if_all_declared_hits_resolve: hp.max === null ? null : hp.max === 0,
       current_attack_after_debuffs: attacks.includes(null) ? { min: null, max: null } : { min: Math.min(...attacks), max: Math.max(...attacks) } };
   });
-  return { is_observed_effect: false, adapters: [...new Set(transitions.map(t => t.source_id))], affected_target_ids: [...affected], transitions, ordered_damage: damage, enemies,
+  return { is_observed_effect: false, adapters: [...new Set([...transitions.map(t => t.source_id), ...(hasOrderedRanges ? ['ORDERED_DAMAGE_RANGES'] : [])])], affected_target_ids: [...affected], transitions, ordered_damage: damage, enemies,
     scope: 'Conditional ordered damage and current-intent bounds for verified native v0.111.0 applications and ordered target previews. Attack-source debuffs apply after damage; Taunt grants Block then Vulnerable; Artifact consumes applications in order. Slippery/Buffer HP-loss counters advance after unblocked hits, including across cards. Area recipients come from native previews. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so new 1.5x/0.75x modifiers yield ranges. Intangible-capped previews, overlapping prevention hooks, custom multipliers and unreadable applications stay unknown. Assumes other hooks remain unchanged and every declared hit resolves; uncomputed potions, automatic plays, reactions, random targets and future moves are not simulated. Counter changes describe the end of the declared segment before enemy-turn duration ticks, not an observation.' };
 }
