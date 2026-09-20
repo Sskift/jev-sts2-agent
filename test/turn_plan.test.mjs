@@ -177,3 +177,17 @@ test('failed or invented planning answers commit no plan and dispatch no game co
     assert.equal(memory.data.actions.length, 0);
   }
 });
+
+test('end-turn handoff checks actual remaining options and extends the same objective when a free draw was overlooked', async () => {
+  const state = stateWith([card('FINESSE', 'draw', 0, { name: 'Finesse', type: 'Skill', target_type: 'Self', cost: 0, description: 'Gain 4 Block. Draw 1 card.' })], 1);
+  const memory = new DecisionMemory(); memory.observe(state); memory.data.turn_plan = savedPlan(state, ['end_turn']);
+  const seen = [], decision = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl: fakeJev(['card_0'], seen) });
+  assert.equal(seen.length, 1);
+  assert.match(seen[0].state.turn_planning.phase_scope, /ACTUAL/);
+  assert.equal(decision.request.id, 'FINESSE');
+  assert.equal(decision.turn_plan.objective.id, 'damage');
+  assert.equal(decision.turn_plan.revision, 1);
+  assert.equal(decision.turn_plan.end_policy, 'observe_continuation_then_review');
+  assert.equal(decision.turn_plan.steps.length, 1);
+  assert.equal(memory.data.turn_plan.revision, 0, 'No new plan is committed before freshness validation');
+});

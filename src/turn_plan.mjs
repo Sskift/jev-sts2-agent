@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { validateDecisionPacket, ContextError } from './decision_context.mjs';
 import { sameTurn, planStep, resolvePlanStep, inspectTurnPlan, turnFingerprint, cardInstance } from './turn_plan_state.mjs';
-import { projectTurnPrefix } from './turn_projection.mjs';
+import { projectTurnPrefix, reserveSequence } from './turn_projection.mjs';
 import { turnStrategyInstructions } from './decision_instructions.mjs';
 import { refineTurnPlan } from './turn_plan_refinement.mjs';
 import { handUpgradeMode } from './turn_effects.mjs';
@@ -71,7 +71,7 @@ export async function decideTurn(state, options, prepared, choose) {
       hand: state.combat.hand.map(card => ({ index: card.index, name: card.name, cost: card.cost, rules: card.description, ...(card.upgrade_preview ? { upgrade_preview: card.upgrade_preview } : {}) }))
     },
     conditional_projection: projectTurnPrefix(state, plan?.steps || []),
-    energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: energy,
+    energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: plan?.budget ? reserveSequence(state, plan.steps)?.energy_left ?? energy : energy,
       scope: 'Current printed costs, plus the verified Stomp discount of 1 for each earlier planned Attack; X spends the remainder. Draws, new energy, other discounts, triggers and automatic plays are unconfirmed; execution must reobserve them.' },
     ...extra
   });
@@ -90,8 +90,36 @@ export async function decideTurn(state, options, prepared, choose) {
     trace.push(record); options.onPlanningDecision?.(record);
     return decision.planning_value;
   }
-  function dispatch(candidate, selectedPlan, cursor) {
+  async function dispatch(candidate, selectedPlan, cursor) {
     if (!candidate) throw new ContextError('No legal first command in the completed turn plan');
+    if (candidate.request.cmd === 'end_turn' && prepared.candidates.size > 1) {
+      // Phase handoff deserves an actual-state check: a conditional prefix may
+      // underestimate a free draw or leave useful resources. This is once at
+      // the proposed end, not a new independent choice after every card.
+      const payload = { ...prepared.payload, state: { ...prepared.payload.state,
+        turn_planning: planningState({ phase_scope: 'The planned prefix has been executed and confirmed. Review the ACTUAL current state before ending the player turn.', objective: selectedPlan.objective,
+          proposed_steps: [], conditional_projection: projectTurnPrefix(state, []),
+          energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy, scope: 'Actual remaining resources before the end-turn handoff.' } }) },
+        questions: { next_action: { ...prepared.payload.questions.next_action,
+          instructions: `The prior planned prefix is complete. Before ending this player turn, check the actual remaining hand, energy, potions and threats. Preserve turn_planning.objective. If a useful continuation exists, select its next action and retain the objective; otherwise choose end_turn. A free draw can reveal playable cards even after planned attacks. ${prepared.payload.questions.next_action.instructions}` } } };
+      validateDecisionPacket(payload.state);
+      const body = JSON.stringify(payload), bytes = Buffer.byteLength(body);
+      if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete end-turn checkpoint exceeds the request budget; no action sent');
+      const checked = await choose(state, options, { ...prepared, payload, body, metrics: { ...prepared.metrics, request_bytes: bytes, purpose: 'turn_end_check' } });
+      usage.input_tokens += checked.usage?.input_tokens || 0; usage.output_tokens += checked.usage?.output_tokens || 0;
+      const record = { stage: 'end_check', selected: checked.candidate_id, probabilities: checked.probabilities, confidence: checked.confidence, model: checked.model, usage: checked.usage };
+      trace.push(record); options.onPlanningDecision?.(record);
+      if (checked.request.cmd !== 'end_turn') {
+        const remainingEnergy = state.combat.player.energy - printedCost(state, checked, state.combat.player.energy);
+        selectedPlan = { ...structuredClone(selectedPlan), id: randomUUID(), revision: selectedPlan.revision + 1,
+          steps: [planStep(state, checked)], cursor: 0, retained_cards: [], status: 'active', review_reasons: [],
+          expected_fingerprint: turnFingerprint(state), end_policy: 'observe_continuation_then_review',
+          budget: { initial_energy: state.combat.player.energy, remaining_after_printed_costs: remainingEnergy >= 0 ? remainingEnergy : null, scope: 'Confirmed current-state continuation; reobserve before extending further.' } };
+        delete selectedPlan.continuation_intent;
+        delete selectedPlan.refinement_limit;
+        cursor = 0; candidate = checked;
+      }
+    }
     return { ...candidate, model: 'jev-turn-plan', planning_model: trace.find(item => item.model !== 'forced-single-action')?.model || selectedPlan.model,
       turn_plan: selectedPlan, turn_step: cursor, planning_trace: trace, usage, context_metrics: prepared.metrics };
   }
