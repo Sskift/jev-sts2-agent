@@ -2,6 +2,8 @@
 
 更新：2026-09-20。目标是同一局标准游戏经过三幕、击败最终 Boss、进入正式胜利结算；当前尚未达到该目标。
 
+第二十局继续至第 13 层。第 12 层 Inklet 战暴露了先打多余 Defend、最后 Shrug It Off 抽牌时能量为零的问题。完整方案现逐步列剩余预留能量，新增删除单个动作的比较，并保护自动出牌所保留卡牌的前置动作。第 50 步只读生产回放保留该时刻已存在的计划、此前记忆与完整原始状态，改为先 Shrug It Off，抽牌后保留 1 能量；记录在 `temp/draw-checkpoint-replay/result.json`，19 项相关检查通过。没有把后续抽到的实际卡提前提供给模型。
+
 第二十局后续已完成第 7 层战斗：最低降至 8 生命，在敌人非攻击回合按 Rage → Setup Strike → Bash 推进，次回合 Headbutt 击杀，战后 14 生命。第 8 层营火选择恢复至 38，第 9 层事件恢复至 47 并移除 Vicious，继续同一局。证据为 `run-artifacts/2026-09-20T07-35-26-422Z-019c0c0e/step-0007/after-state.json` 及第 16–20 步；不能仅凭脱险将收益归因于提示改动。
 
 第二十局第 7 层 Shrinker Beetle + Fuzzy Wurm Crawler 战拖长，角色受到 Shrink、另一敌人逐步增长力量。发现整套方案比较没有继承目标/主要动作阶段的完整战术说明，现统一传入同一 `turnStrategyInstructions`。第 67 步原状态与此前记忆的只读回放由 Defend → Headbutt → Defend 改为 Setup Strike → Headbutt → Defend；27 次规划调用成功，12 项回合检查通过。记录在 `temp/shrinker-full-strategy/result.json`。同局第 111 步已确认 Defend 后重载 Node，仍为第 7 层、12 生命；未重置战斗，不能挽回此前损失。

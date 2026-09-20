@@ -22,11 +22,14 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
   if (plan.end_policy !== 'end_after_steps_unless_conditions_change') return;
   const label = steps => {
     const budget = reserveSequence(state, steps), projection = projectTurnPrefix(state, steps);
+    let energyAfterPrintedCosts = state.combat.player.energy;
     return {
-      ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map(step => {
+      ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map((step, index) => {
+        energyAfterPrintedCosts -= budget.costs[index];
         const beneficiary = state.combat.hand.find(card => cardInstance(card) === step.beneficiary_instance_id);
         const card = state.combat.hand.find(card => cardInstance(card) === step.card_instance_id);
         return { action: step.name, ...(card ? { hand_index: card.index, printed_cost: card.cost } : {}), ...(step.target !== undefined ? { target: step.target } : {}), rules: step.rules_at_planning,
+          energy_after_reserved_costs: energyAfterPrintedCosts,
           ...(beneficiary ? { intended_followthrough: beneficiary.name,
             ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
       }),
@@ -51,12 +54,20 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
     const add = steps => {
       const key = signature(steps);
       if (seen.has(key) || !reserveSequence(state, steps) || !preservesPlanDependencies(steps)) return;
+      if ((plan.retained_cards || []).some(card => card.prerequisite
+        && !steps.some(step => (step.card_id || step.potion_id) === card.prerequisite))) return;
       const cards = [...steps, ...(plan.retained_cards || [])].map(step => step.card_instance_id).filter(Boolean);
       const potions = steps.filter(step => step.kind === 'use_potion').map(step => step.slot);
       if (new Set(cards).size !== cards.length || new Set(potions).size !== potions.length) return;
       seen.add(key); alternatives.set(`variant_${alternatives.size}`, steps);
       return true;
     };
+    // A useful plan can contain a redundant action. Offer its removal as a
+    // complete alternative, leaving the saved resources available after draw.
+    // Dependency and retained automatic-play checks still apply in add().
+    for (let index = 0; index < prefix.length; index++) {
+      add([...prefix.filter((_, position) => position !== index), end]);
+    }
     // Adjacent swaps explicitly test local timing, e.g. Vulnerable before an
     // attack. One insertion tests whether stopping leaves a useful card unused.
     for (let index = 0; index + 1 < prefix.length; index++) {

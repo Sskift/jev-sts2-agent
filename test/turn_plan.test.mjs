@@ -48,6 +48,32 @@ function fakeJev(answers, seen = []) {
 }
 const noModel = () => { throw new Error('A valid turn plan must execute without another independent card choice'); };
 
+test('complete-plan alternatives can remove redundant Block and show energy available when drawing', async () => {
+  const state = stateWith([
+    card('DEFEND_IRONCLAD', 'd1', 0, { name: 'Defend', cost: 1, type: 'Skill', target_type: 'Self', description: 'Gain 5 Block.', block: 5 }),
+    card('SHRUG_IT_OFF', 'draw', 1, { name: 'Shrug It Off', cost: 1, type: 'Skill', target_type: 'Self', description: 'Gain 8 Block. Draw 1 card.', block: 8 })
+  ], 2);
+  state.combat.player.block = 6; sync(state);
+  const plan = savedPlan(state, ['card_0', 'card_1', 'end_turn']);
+  plan.end_policy = 'end_after_steps_unless_conditions_change'; plan.budget = {};
+  let sawDrawWithNoEnergy = false, sawDrawWithEnergy = false, sawRemovedDefense = false;
+  await refineTurnPlan(state, plan, prepareModDecision(state), noModel, async pairs => pairs.map(pair => {
+    for (const option of pair) {
+      const sequence = option.label.ordered_sequence, draw = sequence.find(s => s.action === 'Shrug It Off');
+      if (draw) {
+        sawDrawWithNoEnergy ||= draw.energy_after_reserved_costs === 0;
+        sawDrawWithEnergy ||= draw.energy_after_reserved_costs === 1;
+        sawRemovedDefense ||= sequence.length === 1;
+      }
+    }
+    return (pair.find(option => option.label.ordered_sequence.length === 1
+      && option.label.ordered_sequence[0].action === 'Shrug It Off') || pair[0]).value;
+  }));
+  assert.ok(sawDrawWithNoEnergy && sawDrawWithEnergy && sawRemovedDefense);
+  assert.deepEqual(plan.steps.map(s => s.card_instance_id).filter(Boolean), ['draw']);
+  assert.equal(plan.budget.remaining_after_printed_costs, 1);
+});
+
 test('complete-plan comparison can replace two separated defenses with one stronger card while preserving free attacks', async () => {
   const state = stateWith([
     card('EXPECT_A_FIGHT', 'strong', 0, { name: 'Expect a Fight', cost: 3, type: 'Skill', target_type: 'Self', description: 'Gain 25 Block. Gains 5 additional Block for each Strength you have.', block: 25 }),
