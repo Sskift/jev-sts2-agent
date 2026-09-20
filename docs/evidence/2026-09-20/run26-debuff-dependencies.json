@@ -1,0 +1,393 @@
+{
+  "date": "2026-09-20",
+  "run_id": "run-1789906322",
+  "loaded_run_code": "f8f6c44",
+  "directory": "run-artifacts/2026-09-20T12-11-59-152Z-f7a98087",
+  "actual_result": {
+    "floor": 17,
+    "encounter": "VANTOM",
+    "is_victory": false,
+    "score": 171,
+    "player_hp": 0,
+    "boss_hp": 85,
+    "final_state": "run-artifacts/2026-09-20T12-11-59-152Z-f7a98087/step-0299/after-state.json",
+    "final_memory": "run-artifacts/2026-09-20T12-11-59-152Z-f7a98087/final-memory.json",
+    "normal_return_to_menu_confirmed": true
+  },
+  "live_previous_features": {
+    "end_turn_extension": [
+      {
+        "step": "step-0153",
+        "request": {
+          "cmd": "play_card",
+          "id": "BATTLE_TRANCE",
+          "nth": 0
+        },
+        "nomination": "card_0",
+        "comparison": [
+          {
+            "selected": "continue",
+            "options": {
+              "plan_a": "continue",
+              "plan_b": "end"
+            },
+            "selection_basis": "overall_value",
+            "survival_assessment": null,
+            "value_assessment": {
+              "type": "choice",
+              "choice": "plan_a",
+              "probabilities": {
+                "plan_a": 0.65,
+                "plan_b": 0.35
+              },
+              "confidence": 0.3
+            },
+            "probabilities": {
+              "plan_a": 0.65,
+              "plan_b": 0.35
+            },
+            "confidence": 0.3
+          }
+        ]
+      }
+    ],
+    "scoped_history": [
+      {
+        "step": 118,
+        "available": 26,
+        "included": 8
+      },
+      {
+        "step": 130,
+        "available": 94,
+        "included": 11
+      },
+      {
+        "step": 296,
+        "available": 261,
+        "included": 10
+      }
+    ]
+  },
+  "sequence_case": {
+    "before": "run-artifacts/2026-09-20T12-11-59-152Z-f7a98087/step-0223/before-state.json",
+    "enemy_id": 2,
+    "enemy_hp": 22,
+    "incoming_attack": 10,
+    "original_actions": [
+      "Bash+",
+      "Strike"
+    ],
+    "actual_following_strike_preview": 9,
+    "actual_target_remaining_hp": 3,
+    "original_recalculated": {
+      "calculation_status": "incomplete",
+      "fully_simulated": false,
+      "known_effects_only": {
+        "block": 0,
+        "hp_if_ending": null,
+        "hp_loss_if_ending": null,
+        "block_including_end_turn_gains": 0,
+        "end_turn_block_gains": [],
+        "incoming_attack": null,
+        "enemies": [
+          {
+            "combat_id": 1,
+            "hp": 21,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0
+          },
+          {
+            "combat_id": 2,
+            "hp": null,
+            "block": null,
+            "hp_removed": null,
+            "block_removed": null
+          },
+          {
+            "combat_id": 3,
+            "hp": 24,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0
+          }
+        ]
+      },
+      "debuff_dependencies": {
+        "is_observed_effect": false,
+        "adapters": [
+          "BASH",
+          "UPPERCUT"
+        ],
+        "affected_target_ids": [
+          2
+        ],
+        "transitions": [
+          {
+            "sequence": 0,
+            "card_id": "BASH",
+            "target_id": 2,
+            "power_id": "VULNERABLE_POWER",
+            "amount": 3,
+            "timing": "after_card_damage",
+            "outcome": "applied"
+          }
+        ],
+        "ordered_damage": [
+          {
+            "sequence": 0,
+            "card_id": "BASH",
+            "target_id": 2,
+            "per_hit": {
+              "min": 10,
+              "max": 10
+            },
+            "preview_hits": 1,
+            "includes_new_vulnerable": false
+          },
+          {
+            "sequence": 1,
+            "card_id": "STRIKE_IRONCLAD",
+            "target_id": 2,
+            "per_hit": {
+              "min": 9,
+              "max": 10
+            },
+            "preview_hits": 1,
+            "includes_new_vulnerable": true
+          }
+        ],
+        "enemies": [
+          {
+            "combat_id": 1,
+            "hp_remaining": {
+              "min": 21,
+              "max": 21
+            },
+            "depleted_if_all_declared_hits_resolve": false,
+            "current_attack_after_debuffs": {
+              "min": 5,
+              "max": 5
+            }
+          },
+          {
+            "combat_id": 2,
+            "hp_remaining": {
+              "min": 2,
+              "max": 3
+            },
+            "depleted_if_all_declared_hits_resolve": false,
+            "current_attack_after_debuffs": {
+              "min": 10,
+              "max": 10
+            }
+          },
+          {
+            "combat_id": 3,
+            "hp_remaining": {
+              "min": 24,
+              "max": 24
+            },
+            "depleted_if_all_declared_hits_resolve": false,
+            "current_attack_after_debuffs": {
+              "min": 0,
+              "max": 0
+            }
+          }
+        ],
+        "scope": "Conditional ordered damage and current-intent bounds for native v0.111.0 Bash/Uppercut followed by known target previews. Weak/Vulnerable apply after damage; Artifact consumes applications in order. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so new 1.5x/0.75x modifiers yield ranges. Known damage caps, custom multipliers or unreadable applications stay unknown. Assumes other preview inputs/hooks remain unchanged and every declared hit resolves; no upgrades, potions, changing card values, unknown repetitions, reactions, random targets or future enemy moves are simulated. These ranges replace stale point estimates for affected enemies, not actual observations."
+      },
+      "omitted_effects": [
+        "Bash+: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed",
+        "New debuffs invalidate unchanged-preview point estimates; use debuff_dependencies for scoped ordered damage and current-intent ranges."
+      ],
+      "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+      "scope": "Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, Second Wind hand exhaustion, and active Plating/Orichalcum once at turn end. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices."
+    },
+    "proposed_alternative": {
+      "calculation_status": "incomplete",
+      "fully_simulated": false,
+      "known_effects_only": {
+        "block": 0,
+        "hp_if_ending": null,
+        "hp_loss_if_ending": null,
+        "block_including_end_turn_gains": 0,
+        "end_turn_block_gains": [],
+        "incoming_attack": null,
+        "enemies": [
+          {
+            "combat_id": 1,
+            "hp": 21,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0
+          },
+          {
+            "combat_id": 2,
+            "hp": null,
+            "block": null,
+            "hp_removed": null,
+            "block_removed": null
+          },
+          {
+            "combat_id": 3,
+            "hp": 24,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0
+          }
+        ]
+      },
+      "debuff_dependencies": {
+        "is_observed_effect": false,
+        "adapters": [
+          "BASH",
+          "UPPERCUT"
+        ],
+        "affected_target_ids": [
+          2
+        ],
+        "transitions": [
+          {
+            "sequence": 0,
+            "card_id": "UPPERCUT",
+            "target_id": 2,
+            "power_id": "WEAK_POWER",
+            "amount": 1,
+            "timing": "after_card_damage",
+            "outcome": "applied"
+          },
+          {
+            "sequence": 0,
+            "card_id": "UPPERCUT",
+            "target_id": 2,
+            "power_id": "VULNERABLE_POWER",
+            "amount": 1,
+            "timing": "after_card_damage",
+            "outcome": "applied"
+          }
+        ],
+        "ordered_damage": [
+          {
+            "sequence": 0,
+            "card_id": "UPPERCUT",
+            "target_id": 2,
+            "per_hit": {
+              "min": 13,
+              "max": 13
+            },
+            "preview_hits": 1,
+            "includes_new_vulnerable": false
+          },
+          {
+            "sequence": 1,
+            "card_id": "STRIKE_IRONCLAD",
+            "target_id": 2,
+            "per_hit": {
+              "min": 9,
+              "max": 10
+            },
+            "preview_hits": 1,
+            "includes_new_vulnerable": true
+          }
+        ],
+        "enemies": [
+          {
+            "combat_id": 1,
+            "hp_remaining": {
+              "min": 21,
+              "max": 21
+            },
+            "depleted_if_all_declared_hits_resolve": false,
+            "current_attack_after_debuffs": {
+              "min": 5,
+              "max": 5
+            }
+          },
+          {
+            "combat_id": 2,
+            "hp_remaining": {
+              "min": 0,
+              "max": 0
+            },
+            "depleted_if_all_declared_hits_resolve": true,
+            "current_attack_after_debuffs": {
+              "min": 0,
+              "max": 0
+            }
+          },
+          {
+            "combat_id": 3,
+            "hp_remaining": {
+              "min": 24,
+              "max": 24
+            },
+            "depleted_if_all_declared_hits_resolve": false,
+            "current_attack_after_debuffs": {
+              "min": 0,
+              "max": 0
+            }
+          }
+        ],
+        "scope": "Conditional ordered damage and current-intent bounds for native v0.111.0 Bash/Uppercut followed by known target previews. Weak/Vulnerable apply after damage; Artifact consumes applications in order. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so new 1.5x/0.75x modifiers yield ranges. Known damage caps, custom multipliers or unreadable applications stay unknown. Assumes other preview inputs/hooks remain unchanged and every declared hit resolves; no upgrades, potions, changing card values, unknown repetitions, reactions, random targets or future enemy moves are simulated. These ranges replace stale point estimates for affected enemies, not actual observations."
+      },
+      "omitted_effects": [
+        "Uppercut: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed",
+        "New debuffs invalidate unchanged-preview point estimates; use debuff_dependencies for scoped ordered damage and current-intent ranges."
+      ],
+      "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+      "scope": "Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, Second Wind hand exhaustion, and active Plating/Orichalcum once at turn end. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices."
+    }
+  },
+  "replay": {
+    "model": "typesafe/jev-1.13-20260917",
+    "steps": [
+      {
+        "kind": "play_card",
+        "card_id": "UPPERCUT",
+        "target": 2
+      },
+      {
+        "kind": "play_card",
+        "card_id": "STRIKE_IRONCLAD",
+        "target": 2
+      },
+      {
+        "kind": "end_turn"
+      }
+    ],
+    "request": {
+      "cmd": "play_card",
+      "id": "UPPERCUT",
+      "nth": 0,
+      "target": 2
+    },
+    "calls": 13,
+    "usage": {
+      "input_tokens": 244826,
+      "output_tokens": 1613
+    },
+    "game_commands_sent": 0,
+    "scope": "Reconstructed only confirmed actions and contemporaneous strategy before step 223. No later observations, final memory, hidden state or future draw order supplied. The alternative was selected in replay, not executed in the historical battle."
+  },
+  "implementation": {
+    "sources": [
+      "Native v0.111.0 Bash.OnPlay",
+      "Uppercut.OnPlay",
+      "VulnerablePower.ModifyDamageMultiplicative",
+      "WeakPower.ModifyDamageMultiplicative",
+      "ArtifactPower",
+      "Hook.ModifyDamageInternal",
+      "AttackIntent.GetSingleDamage"
+    ],
+    "ordering": "Damage, then listed debuffs; new statuses affect following actions/current enemy intent. Artifact consumes applications in order.",
+    "precision": "Current DTO integer damage n loses a fractional remainder in [n,n+1). New default 1.5x/0.75x modifiers use both rounded bounds; existing modifiers are not applied again.",
+    "limitation": "Limited conditional analysis, not a full simulator. Known caps/custom multipliers, unreadable applications, unknown repetitions and X counts after a prefix stay unknown. Other preview-changing hooks, potions, upgrades, reactions and future enemy moves are outside this analysis."
+  },
+  "checks": {
+    "passed": 35,
+    "failed": 0
+  },
+  "goal_complete": false
+}

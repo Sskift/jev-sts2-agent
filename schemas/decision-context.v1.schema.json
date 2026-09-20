@@ -738,13 +738,18 @@
             "enemies": { "type": "array", "items": {
               "type": "object", "additionalProperties": false, "required": ["combat_id", "hp", "block", "hp_removed", "block_removed"],
               "properties": {
-                "combat_id": { "type": "integer" }, "hp": { "type": "number" }, "block": { "type": "number" },
-                "hp_removed": { "type": "number" }, "block_removed": { "type": "number" }
+                "combat_id": { "type": "integer" }, "hp": { "type": ["number", "null"] }, "block": { "type": ["number", "null"] },
+                "hp_removed": { "type": ["number", "null"] }, "block_removed": { "type": ["number", "null"] }
               }
             } }
           }
         },
         "positioning": { "$ref": "#/$defs/positioningProjection" },
+        "debuff_dependencies": { "type": "object", "required": ["is_observed_effect", "adapters", "affected_target_ids", "transitions", "ordered_damage", "enemies", "scope"],
+          "properties": { "is_observed_effect": { "const": false }, "adapters": { "type": "array", "items": { "type": "string" } },
+            "affected_target_ids": { "type": "array", "items": { "type": "integer" } }, "transitions": { "type": "array" }, "ordered_damage": { "type": "array" }, "scope": { "$ref": "#/$defs/text" },
+            "enemies": { "type": "array", "items": { "type": "object", "required": ["combat_id", "hp_remaining", "depleted_if_all_declared_hits_resolve", "current_attack_after_debuffs"],
+              "properties": { "combat_id": { "type": "integer" }, "hp_remaining": { "$ref": "#/$defs/conditionalCount" }, "depleted_if_all_declared_hits_resolve": { "type": ["boolean", "null"] }, "current_attack_after_debuffs": { "$ref": "#/$defs/conditionalCount" } } } } } },
         "card_flow": { "type": "object", "required": ["is_observed_effect", "observed_draw_pile", "generated_into_draw_pile", "effects", "scope"],
           "properties": { "is_observed_effect": { "const": false }, "observed_draw_pile": { "type": "object" },
             "generated_into_draw_pile": { "$ref": "#/$defs/conditionalCount" }, "scope": { "$ref": "#/$defs/text" },

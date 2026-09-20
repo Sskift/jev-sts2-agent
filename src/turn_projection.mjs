@@ -2,6 +2,7 @@ import { attackHpLoss, combatForecast, intentDamage } from './combat_arithmetic.
 import { projectPositioning } from './combat_positioning.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { describeCardFlow } from './card_flow_projection.mjs';
+import { projectDebuffDependencies } from './turn_debuff_projection.mjs';
 
 export function sequenceEnergyBudget(state, steps) {
   let energy = state.combat.player.energy, attacks = 0;
@@ -28,24 +29,29 @@ export function reserveSequence(state, steps) {
 // equals that of an otherwise identical plan without it.
 export function describeTurnProjection(state, steps) {
   const projection = projectTurnPrefix(state, steps);
+  const debuffs = projectDebuffDependencies(state, steps);
+  const affected = new Set(debuffs?.affected_target_ids || []);
+  const hp = affected.size ? null : projection.hp_if_ending_after_prefix;
   return {
-    calculation_status: projection.unresolved_effects.length ? 'incomplete' : 'preview_arithmetic',
+    calculation_status: projection.unresolved_effects.length || debuffs ? 'incomplete' : 'preview_arithmetic',
     fully_simulated: false,
     known_effects_only: {
-      block: projection.block, hp_if_ending: projection.hp_if_ending_after_prefix,
-      hp_loss_if_ending: projection.hp_if_ending_after_prefix === null ? null : state.combat.player.hp - projection.hp_if_ending_after_prefix,
+      block: projection.block, hp_if_ending: hp,
+      hp_loss_if_ending: hp === null ? null : state.combat.player.hp - hp,
       block_including_end_turn_gains: projection.block_including_end_turn_gains,
       end_turn_block_gains: projection.end_turn_block_gains,
-      incoming_attack: projection.incoming_attack_after_prefix,
+      incoming_attack: affected.size ? null : projection.incoming_attack_after_prefix,
       enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
         const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
+        if (affected.has(combat_id)) return { combat_id, hp: null, block: null, hp_removed: null, block_removed: null };
         return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block };
       })
     },
     ...(projection.positioning ? { positioning: projection.positioning } : {}),
     ...(projection.uncomputed_reactions.length ? { uncomputed_reactions: projection.uncomputed_reactions } : {}),
     ...(projection.card_flow ? { card_flow: projection.card_flow } : {}),
-    omitted_effects: projection.unresolved_effects,
+    ...(debuffs ? { debuff_dependencies: debuffs } : {}),
+    omitted_effects: [...projection.unresolved_effects, ...(affected.size ? ['New debuffs invalidate unchanged-preview point estimates; use debuff_dependencies for scoped ordered damage and current-intent ranges.'] : [])],
     interpretation: 'Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.',
     scope: projection.scope
   };
