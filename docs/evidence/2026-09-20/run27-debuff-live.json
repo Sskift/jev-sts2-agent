@@ -1,0 +1,80 @@
+{
+  "run_id": "run-1789907946",
+  "loaded_code": "2f455c3",
+  "first_live_dependency": {
+    "step": "step-0016",
+    "request": "run-artifacts/2026-09-20T12-39-01-510Z-f0188a1d/step-0016/jev-turn_payoff-0004.json",
+    "schema": "sts2.context.v2",
+    "dependency": {
+      "is_observed_effect": false,
+      "adapters": [
+        "BASH",
+        "UPPERCUT"
+      ],
+      "affected_target_ids": [],
+      "transitions": [
+        {
+          "sequence": 0,
+          "card_id": "BASH",
+          "target_id": 3,
+          "power_id": "VULNERABLE_POWER",
+          "amount": 2,
+          "timing": "after_card_damage",
+          "outcome": "target_depleted"
+        }
+      ],
+      "ordered_damage": [
+        {
+          "sequence": 0,
+          "card_id": "BASH",
+          "target_id": 3,
+          "per_hit": {
+            "min": 8,
+            "max": 8
+          },
+          "preview_hits": 1,
+          "includes_new_vulnerable": false
+        }
+      ],
+      "enemies": [
+        {
+          "combat_id": 2,
+          "hp_remaining": {
+            "min": 33,
+            "max": 33
+          },
+          "depleted_if_all_declared_hits_resolve": false,
+          "current_attack_after_debuffs": {
+            "min": 8,
+            "max": 8
+          }
+        },
+        {
+          "combat_id": 3,
+          "hp_remaining": {
+            "min": 0,
+            "max": 0
+          },
+          "depleted_if_all_declared_hits_resolve": true,
+          "current_attack_after_debuffs": {
+            "min": 0,
+            "max": 0
+          }
+        }
+      ],
+      "scope": "Conditional ordered damage and current-intent bounds for native v0.111.0 Bash/Uppercut followed by known target previews. Weak/Vulnerable apply after damage; Artifact consumes applications in order. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so new 1.5x/0.75x modifiers yield ranges. Known damage caps, custom multipliers or unreadable applications stay unknown. Assumes other preview inputs/hooks remain unchanged and every declared hit resolves; no upgrades, potions, changing card values, unknown repetitions, reactions, random targets or future enemy moves are simulated. These ranges replace stale point estimates for affected enemies, not actual observations."
+    },
+    "history": {
+      "mode": "current_turn_and_dependencies",
+      "floor": 2,
+      "current_round": 2,
+      "from_round": 2,
+      "preceding_enemy_round": 1,
+      "ordering_windows": [],
+      "reasons": [],
+      "engine_events_available": 31,
+      "engine_events_included": 11
+    }
+  },
+  "completed_goal": false
+}
