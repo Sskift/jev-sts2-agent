@@ -111,6 +111,6 @@ Run 23 actual map, reward, combat and modal-selection requests contain the same 
 
 ## 状态变化与后续预览的依赖
 
-`turn_debuff_projection.mjs` 将已核实的状态施加顺序与后续伤害预览联系起来。首批来源为原生 Bash、Uppercut：先伤害，再按顺序施加状态；Artifact 消耗施加次数。新的易伤改变后续攻击，新的虚弱改变当前敌方攻击意图，已有倍率不重复计算。由于 DTO 舍弃预览的小数部分，分析输出伤害与剩余生命范围，不以整数预览直接相乘伪装成精确结果。
+`turn_debuff_projection.mjs` 将已核实的状态施加顺序与后续伤害预览联系起来。已核对原生 Bash、Uppercut、Thunderclap 与 Shockwave：攻击先造成伤害，再按顺序施加状态；Shockwave 直接施加状态。Artifact 消耗施加次数，群体技能只作用于原生目标预览列出的可命中对象。新的易伤改变后续攻击，新的虚弱改变当前敌方攻击意图，已有倍率不重复计算。由于 DTO 舍弃预览的小数部分，分析输出伤害与剩余生命范围，不以整数预览直接相乘伪装成精确结果。
 
 `debuff_dependencies` 是分析字段；不会修改 `observation` 或既有历史。已知上限、自定义倍率、未解析次数及消耗资源后过期的 X 费命中次数保持未知。原有 `known_effects_only` 中受新状态影响的点估计留空，避免同时向模型提供互相矛盾的敌人生命或来袭伤害。范围仍以其他预览条件和已声明命中成立为前提，未覆盖的药水、升级、反应及未来敌方招式不能视为零效果。

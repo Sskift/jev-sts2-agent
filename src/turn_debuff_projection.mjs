@@ -2,7 +2,13 @@ import { attackHpLoss, previewHitCount, intentDamage } from './combat_arithmetic
 
 // These adapters follow verified native v0.111.0 OnPlay ordering. Amounts
 // come from resolved live text, never from a base/upgrade Wiki guess.
-const applications = { BASH: ['Vulnerable'], UPPERCUT: ['Weak', 'Vulnerable'] };
+const applications = { BASH: ['Vulnerable'], UPPERCUT: ['Weak', 'Vulnerable'], THUNDERCLAP: ['Vulnerable'], SHOCKWAVE: ['Weak', 'Vulnerable'] };
+function applicationAmount(card, kind) {
+  const rule = card.id === 'THUNDERCLAP' ? /^Deal [\d.]+ damage and apply (\d+) Vulnerable to ALL enemies\.(?:\s|$)/i
+    : card.id === 'SHOCKWAVE' ? /^Apply (\d+) Weak and Vulnerable to ALL enemies\.(?:\s|$)/i
+      : new RegExp(`(?:^|\\.\\s*)Apply (\\d+) ${kind}\\.`);
+  return Number(card.description.match(rule)?.[1]);
+}
 const power = (entity, id) => (entity.powers || []).find(p => p.id === id && p.amount > 0);
 const caps = entity => ['INTANGIBLE_POWER', 'SLIPPERY_POWER', 'BUFFER_POWER'].some(id => power(entity, id));
 const customMultiplier = (combat, enemy, kind) => power(enemy, 'DEBILITATE_POWER')
@@ -39,6 +45,10 @@ export function projectDebuffDependencies(state, steps) {
     for (const id of ids) {
       const original = observed.enemies.find(e => e.combat_id === id);
       if (!original) continue;
+      // Native target previews enumerate HittableEnemies for area effects,
+      // including non-damaging skills. Absence is not permission to invent a
+      // recipient (e.g. a creature temporarily outside that set).
+      if (card.target_type === 'AllEnemies' && !card.target_previews?.some(p => p.target_id === id)) continue;
       const perHit = {};
       let boosted = false;
       for (const { bound, enemies } of branches) {
@@ -62,7 +72,7 @@ export function projectDebuffDependencies(state, steps) {
           perHit[bound] = preview ?? null;
         }
         for (const kind of applications[card.id] || []) {
-          const amount = Number(card.description.match(new RegExp(`(?:^|\\.\\s*)Apply (\\d+) ${kind}\\.`))?.[1]);
+          const amount = applicationAmount(card, kind);
           const powerId = kind === 'Weak' ? 'WEAK_POWER' : 'VULNERABLE_POWER';
           let outcome = 'applied';
           if (!Number.isSafeInteger(amount) || amount <= 0 || blockedRule(enemy)) {
@@ -75,7 +85,9 @@ export function projectDebuffDependencies(state, steps) {
             else enemy.powers.push({ id: powerId, amount });
             affected.add(id);
           }
-          if (bound === 'min') transitions.push({ sequence, card_id: card.id, target_id: id, power_id: powerId, amount: Number.isFinite(amount) ? amount : null, timing: 'after_card_damage', outcome });
+          if (bound === 'min') transitions.push({ sequence, card_id: card.id, target_id: id, power_id: powerId, amount: Number.isFinite(amount) ? amount : null,
+            timing: card.type === 'Attack' ? 'after_card_damage' : 'during_card_effect', outcome,
+            condition: 'Minimum-damage branch; a target killed by greater possible preceding damage receives no later application.' });
         }
       }
       if (card.type === 'Attack') damage.push({ sequence, card_id: card.id, target_id: id,
@@ -100,6 +112,6 @@ export function projectDebuffDependencies(state, steps) {
       depleted_if_all_declared_hits_resolve: hp.max === null ? null : hp.max === 0,
       current_attack_after_debuffs: attacks.includes(null) ? { min: null, max: null } : { min: Math.min(...attacks), max: Math.max(...attacks) } };
   });
-  return { is_observed_effect: false, adapters: ['BASH', 'UPPERCUT'], affected_target_ids: [...affected], transitions, ordered_damage: damage, enemies,
-    scope: 'Conditional ordered damage and current-intent bounds for native v0.111.0 Bash/Uppercut followed by known target previews. Weak/Vulnerable apply after damage; Artifact consumes applications in order. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so new 1.5x/0.75x modifiers yield ranges. Known damage caps, custom multipliers or unreadable applications stay unknown. Assumes other preview inputs/hooks remain unchanged and every declared hit resolves; no upgrades, potions, changing card values, unknown repetitions, reactions, random targets or future enemy moves are simulated. These ranges replace stale point estimates for affected enemies, not actual observations.' };
+  return { is_observed_effect: false, adapters: [...new Set(transitions.map(t => t.card_id))], affected_target_ids: [...affected], transitions, ordered_damage: damage, enemies,
+    scope: 'Conditional ordered damage and current-intent bounds for verified native v0.111.0 debuff applications followed by known target previews. Attack-source debuffs apply after damage; Artifact consumes applications in order. Area recipients come from native target previews. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so new 1.5x/0.75x modifiers yield ranges. Known damage caps, custom multipliers or unreadable applications stay unknown. Assumes other preview inputs/hooks remain unchanged and every declared hit resolves; no upgrades, potions, changing card values, automatic card replays, unknown repetitions, reactions, random targets or future enemy moves are simulated. These ranges replace stale point estimates for affected enemies, not actual observations.' };
 }

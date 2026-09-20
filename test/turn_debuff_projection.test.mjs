@@ -21,6 +21,26 @@ function fixture() {
 }
 const steps = s => ['card_0_target_42', 'card_1_target_42', 'end_turn'].map(id => planStep(s, buildModCandidates(s).get(id)));
 
+test('area damage precedes debuffs for each native recipient, with independent Artifact counts', () => {
+  const s = fixture(); s.combat.enemies[0].hp = 16;
+  s.combat.enemies.push({ ...structuredClone(s.combat.enemies[0]), combat_id: 43, hp: 20, powers: [{ id: 'ARTIFACT_POWER', amount: 1 }] });
+  s.combat.hand[0] = { ...s.combat.hand[0], id: 'THUNDERCLAP', target_type: 'AllEnemies', cost: 1,
+    description: 'Deal 7 damage and apply 1 Vulnerable to ALL enemies.', target_previews: [{ target_id: 42, damage: 7 }, { target_id: 43, damage: 7 }] };
+  const candidates = buildModCandidates(s), plan = ['card_0', 'card_1_target_42', 'end_turn'].map(id => planStep(s, candidates.get(id)));
+  let p = describeTurnProjection(s, plan).debuff_dependencies;
+  assert.deepEqual(p.enemies.map(e => e.hp_remaining), [{ min: 0, max: 0 }, { min: 13, max: 13 }]);
+  assert.deepEqual(p.transitions.map(t => t.outcome), ['applied', 'absorbed_by_artifact']);
+  s.combat.hand[0] = { ...s.combat.hand[0], id: 'SHOCKWAVE', type: 'Skill', cost: 2,
+    description: 'Apply 5 Weak and Vulnerable to ALL enemies.', target_previews: [{ target_id: 42, damage: null }, { target_id: 43, damage: null }] };
+  plan[0] = planStep(s, buildModCandidates(s).get('card_0'));
+  p = describeTurnProjection(s, plan).debuff_dependencies;
+  assert.ok(p.transitions.every(t => t.amount === 5 && t.timing === 'during_card_effect'));
+  assert.deepEqual(p.enemies[0].current_attack_after_debuffs, { min: 7, max: 8 });
+  assert.deepEqual(p.enemies[1].current_attack_after_debuffs, { min: 10, max: 10 });
+  s.combat.hand[0].target_previews = [{ target_id: 42, damage: null }];
+  assert.ok(describeTurnProjection(s, plan).debuff_dependencies.transitions.every(t => t.target_id === 42), 'No debuff applied to a non-recipient');
+});
+
 test('new Vulnerable propagates through an ordered plan; reversing order or using weaker setup does not promise the same kill', () => {
   const s = fixture(), before = structuredClone(s), plan = steps(s);
   const p = describeTurnProjection(s, plan);

@@ -76,5 +76,14 @@
       "engine_events_included": 11
     }
   },
-  "completed_goal": false
+  "completed_goal": false,
+  "area_extension": {
+    "sources": [
+      "Native v0.111.0 Thunderclap.OnPlay",
+      "Shockwave.OnPlay"
+    ],
+    "checks_passed": 36,
+    "coverage": "Native target recipients, area damage before Vulnerable, Weak then Vulnerable, independent Artifact consumption and non-recipients.",
+    "runtime_loaded": false
+  }
 }
