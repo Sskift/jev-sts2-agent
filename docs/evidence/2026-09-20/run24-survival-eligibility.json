@@ -1,0 +1,342 @@
+{
+  "run_id": "run-1789900349",
+  "source": "run-artifacts/2026-09-20T10-32-26-082Z-389690fd/step-0064",
+  "current_hp": 80,
+  "enemies": [
+    {
+      "id": "LEAF_SLIME_S",
+      "intents": [
+        {
+          "type": "StatusCard",
+          "description": "This enemy intends to give you 1 Status card."
+        }
+      ],
+      "powers": []
+    },
+    {
+      "id": "TWIG_SLIME_M",
+      "intents": [
+        {
+          "type": "StatusCard",
+          "description": "This enemy intends to give you 1 Status card."
+        }
+      ],
+      "powers": []
+    },
+    {
+      "id": "TWIG_SLIME_S",
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 4,
+          "hits": 1,
+          "description": "This enemy intends to Attack for 4 damage."
+        }
+      ],
+      "powers": []
+    }
+  ],
+  "old_pair": {
+    "plan_a": {
+      "ordered_sequence": [
+        {
+          "action": "Defend",
+          "hand_index": 1,
+          "printed_cost": 1,
+          "rules": "Gain 5 Block.",
+          "energy_after_reserved_costs": 2
+        },
+        {
+          "action": "Conflagration",
+          "hand_index": 0,
+          "printed_cost": 1,
+          "rules": {
+            "text_ref": "t3"
+          },
+          "energy_after_reserved_costs": 1,
+          "intended_followthrough": "Strike"
+        },
+        {
+          "action": "Strike",
+          "hand_index": 3,
+          "printed_cost": 1,
+          "target": 3,
+          "rules": "Deal 6 damage.",
+          "energy_after_reserved_costs": 0
+        }
+      ],
+      "then": {
+        "text_ref": "t15"
+      },
+      "energy_left": 0,
+      "energy_spent": 3,
+      "conditional_preview": {
+        "calculation_status": "incomplete",
+        "fully_simulated": false,
+        "known_effects_only": {
+          "block": 5,
+          "hp_if_ending": 80,
+          "hp_loss_if_ending": 0,
+          "block_including_end_turn_gains": 5,
+          "end_turn_block_gains": [],
+          "incoming_attack": 0,
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp": 3,
+              "block": 0,
+              "hp_removed": 8,
+              "block_removed": 0
+            },
+            {
+              "combat_id": 2,
+              "hp": 20,
+              "block": 0,
+              "hp_removed": 8,
+              "block_removed": 0
+            },
+            {
+              "combat_id": 3,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 10,
+              "block_removed": 0
+            }
+          ]
+        },
+        "omitted_effects": [
+          {
+            "text_ref": "t16"
+          }
+        ],
+        "interpretation": {
+          "text_ref": "t17"
+        },
+        "scope": {
+          "text_ref": "t18"
+        }
+      },
+      "limitation": {
+        "text_ref": "t19"
+      }
+    },
+    "plan_b": {
+      "ordered_sequence": [
+        {
+          "action": "Strike",
+          "hand_index": 2,
+          "printed_cost": 1,
+          "target": 1,
+          "rules": "Deal 6 damage.",
+          "energy_after_reserved_costs": 2
+        },
+        {
+          "action": "Conflagration",
+          "hand_index": 0,
+          "printed_cost": 1,
+          "rules": {
+            "text_ref": "t3"
+          },
+          "energy_after_reserved_costs": 1,
+          "intended_followthrough": "Strike"
+        },
+        {
+          "action": "Strike",
+          "hand_index": 3,
+          "printed_cost": 1,
+          "target": 3,
+          "rules": "Deal 6 damage.",
+          "energy_after_reserved_costs": 0
+        }
+      ],
+      "then": {
+        "text_ref": "t15"
+      },
+      "energy_left": 0,
+      "energy_spent": 3,
+      "conditional_preview": {
+        "calculation_status": "incomplete",
+        "fully_simulated": false,
+        "known_effects_only": {
+          "block": 0,
+          "hp_if_ending": 80,
+          "hp_loss_if_ending": 0,
+          "block_including_end_turn_gains": 0,
+          "end_turn_block_gains": [],
+          "incoming_attack": 0,
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 11,
+              "block_removed": 0
+            },
+            {
+              "combat_id": 2,
+              "hp": 20,
+              "block": 0,
+              "hp_removed": 8,
+              "block_removed": 0
+            },
+            {
+              "combat_id": 3,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 10,
+              "block_removed": 0
+            }
+          ]
+        },
+        "omitted_effects": [
+          {
+            "text_ref": "t16"
+          }
+        ],
+        "interpretation": {
+          "text_ref": "t17"
+        },
+        "scope": {
+          "text_ref": "t18"
+        }
+      },
+      "limitation": {
+        "text_ref": "t19"
+      }
+    }
+  },
+  "old_judgment": {
+    "selected": "variant_6",
+    "options": {
+      "plan_a": "variant_6",
+      "plan_b": "variant_7"
+    },
+    "selection_basis": "survival_constraint",
+    "survival_assessment": {
+      "type": "choice",
+      "choice": "plan_a",
+      "probabilities": {
+        "no_clear_difference": 0.31,
+        "plan_a": 0.68,
+        "plan_b": 0.01
+      },
+      "confidence": 0.51
+    },
+    "value_assessment": {
+      "type": "choice",
+      "choice": "plan_b",
+      "probabilities": {
+        "plan_a": 0.35,
+        "plan_b": 0.65
+      },
+      "confidence": 0.3
+    },
+    "probabilities": {
+      "no_clear_difference": 0.31,
+      "plan_a": 0.68,
+      "plan_b": 0.01
+    },
+    "confidence": 0.51
+  },
+  "current_gate": [],
+  "current_question_keys": [
+    "comparison_0"
+  ],
+  "recomposition_using_archived_value_answer": [
+    {
+      "selected": "variant_7",
+      "options": {
+        "plan_a": "variant_6",
+        "plan_b": "variant_7"
+      },
+      "selection_basis": "overall_value",
+      "survival_assessment": null,
+      "value_assessment": {
+        "type": "choice",
+        "choice": "plan_b",
+        "probabilities": {
+          "plan_a": 0.35,
+          "plan_b": 0.65
+        },
+        "confidence": 0.3
+      },
+      "probabilities": {
+        "plan_a": 0.35,
+        "plan_b": 0.65
+      },
+      "confidence": 0.3
+    }
+  ],
+  "recomposition_model_calls": 0,
+  "game_actions_sent": 0,
+  "dangerous_probe": {
+    "source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0/step-0182",
+    "artifact": "temp/run23-survival-gated/result.json",
+    "answers": {
+      "survival_0": {
+        "type": "choice",
+        "choice": "no_clear_difference",
+        "probabilities": {
+          "plan_a": 0.09,
+          "plan_b": 0.45,
+          "no_clear_difference": 0.46
+        },
+        "confidence": 0.19
+      },
+      "comparison_0": {
+        "type": "choice",
+        "choice": "plan_a",
+        "probabilities": {
+          "plan_a": 0.7,
+          "plan_b": 0.3
+        },
+        "confidence": 0.4
+      }
+    },
+    "resolved": [
+      {
+        "selected": "original_one_response",
+        "options": {
+          "plan_a": "original_one_response",
+          "plan_b": "two_responses"
+        },
+        "selection_basis": "overall_value",
+        "survival_assessment": {
+          "type": "choice",
+          "choice": "no_clear_difference",
+          "probabilities": {
+            "plan_a": 0.09,
+            "plan_b": 0.45,
+            "no_clear_difference": 0.46
+          },
+          "confidence": 0.19
+        },
+        "value_assessment": {
+          "type": "choice",
+          "choice": "plan_a",
+          "probabilities": {
+            "plan_a": 0.7,
+            "plan_b": 0.3
+          },
+          "confidence": 0.4
+        },
+        "probabilities": {
+          "plan_a": 0.7,
+          "plan_b": 0.3
+        },
+        "confidence": 0.4
+      }
+    ],
+    "usage": {
+      "input_tokens": 17210,
+      "output_tokens": 81,
+      "cost": 0.00072282
+    },
+    "note": "Actual additional request with the gate; taken before duplicate timer descriptions and the redundant health-loss label were consolidated. It selected no_clear_difference narrowly, so this is not evidence of robust deadline planning."
+  },
+  "limitations": [
+    "The gate identifies represented exposures; it is neither exhaustive mechanic recognition nor proof of safety.",
+    "Full observed state, legal choices and rules remain available to ordinary value comparisons.",
+    "No full-run victory or demonstrated win-rate improvement."
+  ]
+}

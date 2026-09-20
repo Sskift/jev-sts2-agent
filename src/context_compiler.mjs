@@ -22,6 +22,7 @@ const routes = [
   ['turn_planning.conditional_projection', 'analysis.proposed_sequence'],
   ['turn_planning.energy_reservation', 'analysis.energy_reservation'],
   ['turn_planning.comparisons', 'analysis.plan_alternatives'],
+  ['turn_planning.survival_constraints', 'analysis.survival_constraints'],
   ['screen_state.shop.route_context', 'analysis.shop_route_context'],
   ['screen_state.preceding_observed_action', 'history.selection_trigger'],
   ['screen_state.skipped_card_rewards', 'history.skipped_card_rewards'],

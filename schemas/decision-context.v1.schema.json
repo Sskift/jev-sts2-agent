@@ -85,7 +85,9 @@
     },
     "turn_planning": { "type": "object", "required": ["phase_scope", "energy_reservation"], "properties": {
       "phase_scope": { "$ref": "#/$defs/text" },
-      "comparisons": { "type": "array", "minItems": 1, "maxItems": 16, "items": {
+      "survival_constraints": { "type": "array", "items": { "type": "object", "required": ["kind"],
+        "properties": { "kind": { "enum": ["potential_lethal_health_loss", "observed_loss_countdown", "explicit_loss_rule"] } } } },
+      "comparisons": { "type": "array", "minItems": 1, "maxItems": 32, "items": {
         "type": "object", "additionalProperties": false, "required": ["plan_a", "plan_b"],
         "properties": { "plan_a": { "type": "object" }, "plan_b": { "type": "object" } }
       } },

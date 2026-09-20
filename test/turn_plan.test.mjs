@@ -9,7 +9,7 @@ import { makeModDecisionWithJev, prepareModDecision, buildModCandidates } from '
 import { planStep, inspectTurnPlan, turnFingerprint, resolvePlanStep, plannedUpgradeSelection } from '../src/turn_plan_state.mjs';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 import { refineTurnPlan } from '../src/turn_plan_refinement.mjs';
-import { resolvePlanComparisons } from '../src/turn_plan_comparison.mjs';
+import { resolvePlanComparisons, visibleSurvivalConstraints, planComparisonQuestions } from '../src/turn_plan_comparison.mjs';
 
 const card = (id, instance, index, extra = {}) => fixtureCard(id, {
   index, can_play: true, target_type: 'AnyEnemy', target_previews: [{ target_id: 42, damage: 6 }],
@@ -202,7 +202,7 @@ test('independent two-plan judgments share full state and a missing result commi
         assert.ok(Buffer.byteLength(JSON.stringify(logical)) <= 90000, 'Budget covers the actual v2 request before HTTP string escaping');
         sawMultiple ||= entries.length > 1;
         compared += entries.length;
-        assert.equal(full.turn_planning.comparisons.length * 2, entries.length);
+        assert.equal(full.turn_planning.comparisons.length * (full.turn_planning.survival_constraints.length ? 2 : 1), entries.length);
         for (const [id, question] of entries) assert.deepEqual(Object.keys(question.criteria),
           id.startsWith('survival_') ? ['plan_a', 'plan_b', 'no_clear_difference'] : ['plan_a', 'plan_b']);
         answers = Object.fromEntries(entries.slice(omitAnswer ? 1 : 0).map(([id]) => [id, { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 0.6, plan_b: 0.4 } }]));
@@ -233,6 +233,21 @@ test('survival constraint wins over conflicting ordinary value; unknown or equal
   assert.equal(resolvePlanComparisons(pairs, answers)[0].selection_basis, 'overall_value');
   delete answers.comparison_0;
   assert.throws(() => resolvePlanComparisons(pairs, answers), /invalid turn-plan comparison/);
+});
+
+test('ordinary nonlethal comparisons cannot override value through a survival preference', () => {
+  const state = stateWith([card('STRIKE_IRONCLAD', 'a', 0)]);
+  assert.deepEqual(visibleSurvivalConstraints(state), []);
+  const pairs = [[{ value: 'a' }, { value: 'b' }]];
+  assert.deepEqual(Object.keys(planComparisonQuestions(pairs, 'Compare value.', false)), ['comparison_0']);
+  const result = resolvePlanComparisons(pairs, { comparison_0: { type: 'choice', choice: 'plan_b' },
+    survival_0: { type: 'choice', choice: 'plan_a' } }, false)[0];
+  assert.equal(result.selected, 'b'); assert.equal(result.survival_assessment, null);
+  state.combat.player.hp = 2;
+  assert.ok(visibleSurvivalConstraints(state).some(c => c.kind === 'potential_lethal_health_loss'));
+  state.combat.player.hp = 80;
+  state.combat.enemies[0].powers.push({ id: 'DEADLINE_FIXTURE', amount: 2, description: 'In two turns, you die.' });
+  assert.ok(visibleSurvivalConstraints(state).some(c => c.kind === 'explicit_loss_rule'));
 });
 
 test('upgrade modal follows the beneficiary chosen before preparation and confirms it before reviewing the suffix', async () => {

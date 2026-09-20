@@ -6,7 +6,7 @@ import { turnStrategyInstructions } from './decision_instructions.mjs';
 import { refineTurnPlan } from './turn_plan_refinement.mjs';
 import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
 import { compileModelRequest } from './context_compiler.mjs';
-import { planComparisonQuestions, resolvePlanComparisons } from './turn_plan_comparison.mjs';
+import { planComparisonQuestions, resolvePlanComparisons, visibleSurvivalConstraints } from './turn_plan_comparison.mjs';
 
 export const turnObjectives = {
   remove_threat: 'Focus damage or disruption on a dangerous enemy, prioritizing an achievable kill or disable before its next action.',
@@ -97,21 +97,23 @@ export async function decideTurn(state, options, prepared, choose) {
   async function comparePairs(pairs, instructions, extra) {
     // Questions in one request are independent. Each contains exactly two
     // complete plans and shares the same full observed context and turn goal.
-    const comparisonState = { ...prepared.payload.state, turn_planning: planningState(extra) };
+    const constraints = visibleSurvivalConstraints(state), compareSurvival = constraints.length > 0;
+    const questionsPerPair = compareSurvival ? 2 : 1;
+    const comparisonState = { ...prepared.payload.state, turn_planning: planningState({ ...extra, survival_constraints: constraints }) };
     validateDecisionPacket(comparisonState);
     const winners = [];
     let batch = [];
     const payloadFor = items => compactPlanningRequest({ model: prepared.payload.model,
       state: { ...comparisonState, turn_planning: { ...comparisonState.turn_planning,
         comparisons: items.map(pair => ({ plan_a: pair[0].label, plan_b: pair[1].label })) } },
-      questions: planComparisonQuestions(items, `${instructions} ${turnStrategyInstructions(state)} ${wholeTurnValue} ${references}`) });
+      questions: planComparisonQuestions(items, `${instructions} ${turnStrategyInstructions(state)} ${wholeTurnValue} ${references}`, compareSurvival) });
     async function flush() {
       if (!batch.length) return;
       const payload = payloadFor(batch), body = JSON.stringify(payload);
       const decision = await choose(state, options, { candidates: prepared.candidates, payload, body,
-        metrics: { ...prepared.metrics, request_bytes: compileModelRequest(payload, { purpose: 'turn_refine_pairs' }).bytes, question_count: batch.length * 2, purpose: 'turn_refine_pairs' },
+        metrics: { ...prepared.metrics, request_bytes: compileModelRequest(payload, { purpose: 'turn_refine_pairs' }).bytes, question_count: batch.length * questionsPerPair, purpose: 'turn_refine_pairs' },
         parseResult(result) {
-          const comparisons = resolvePlanComparisons(batch, result.answers);
+          const comparisons = resolvePlanComparisons(batch, result.answers, compareSurvival);
           return { action: 'compare_turn_plans', comparisons };
         } });
       usage.input_tokens += decision.usage?.input_tokens || 0;
@@ -122,7 +124,7 @@ export async function decideTurn(state, options, prepared, choose) {
       batch = [];
     }
     for (const pair of pairs) {
-      if (batch.length && (batch.length >= 16 || compileModelRequest(payloadFor([...batch, pair]), { purpose: 'turn_refine_pairs' }).bytes > prepared.metrics.max_request_bytes)) await flush();
+      if (batch.length && (batch.length * questionsPerPair >= 32 || compileModelRequest(payloadFor([...batch, pair]), { purpose: 'turn_refine_pairs' }).bytes > prepared.metrics.max_request_bytes)) await flush();
       if (compileModelRequest(payloadFor([pair]), { purpose: 'turn_refine_pairs' }).bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete pairwise turn context exceeds the request budget; no game action sent');
       batch.push(pair);
     }
