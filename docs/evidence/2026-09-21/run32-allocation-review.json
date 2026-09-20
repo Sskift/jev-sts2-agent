@@ -131,5 +131,54 @@
     "passed": 29,
     "log": "temp/run32-allocation-checks.log"
   },
-  "scope": "Only diversity among finalists changes. Every concrete candidate keeps its original independent score. Native per-copy differences and bound preparation identities remain separate. This is not a semantic equivalence proof, a model re-evaluation or a win-rate claim."
+  "scope": "Only diversity among finalists changes. Every concrete candidate keeps its original independent score. Native per-copy differences and bound preparation identities remain separate. This is not a semantic equivalence proof, a model re-evaluation or a win-rate claim.",
+  "runtime_loaded": {
+    "commit": "db902d13878d1216188e5c904bf0b59e21f5f494",
+    "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-resume-2026-09-20T20-54-30.343Z",
+    "previous_controller_result": {
+      "file": "temp/run32-result.json",
+      "sha256": "df859d215d291bd9783e9644a29fc9d158fdc3b764b0b71e6dd3fb614c20fb42"
+    },
+    "before": {
+      "file": "temp/run32-before-shortlist-reload.json",
+      "sha256": "237b84978ca14cf9d2e163e631f4dc7da3f376d602993c63348324af123098fe"
+    },
+    "resume": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-resume-2026-09-20T20-54-30.343Z\\resume-native.json",
+      "sha256": "a0dec87f44f100d5b8bcbe2a037a40b87db272493b946ed959dc68f58b06dda7"
+    },
+    "same_fingerprint": true,
+    "run_id": "run-1789936871",
+    "floor": 14,
+    "turn": 1,
+    "hp": 50,
+    "prior_memory_pending": null,
+    "first_action": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-resume-2026-09-20T20-54-30.343Z\\step-0001\\decision.json",
+      "request": {
+        "cmd": "play_card",
+        "id": "INFLAME",
+        "nth": 0
+      },
+      "coverage": {
+        "inspected_prefixes": 29,
+        "enumerated_plans": 12,
+        "selected_plans": 12,
+        "first_action_variants": 5,
+        "search_truncated": false,
+        "candidate_selection_truncated": false,
+        "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+        "eligible_plans": 12,
+        "assessed_plans": 12,
+        "distinct_allocations": 8,
+        "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+        "compared_plans": 4
+      }
+    },
+    "response": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-resume-2026-09-20T20-54-30.343Z\\step-0001\\response.json",
+      "sha256": "29608f068869ecb52fbce9c460041957b66bec5142c534f054e32bef78852061"
+    },
+    "provider": "openrouter"
+  }
 }

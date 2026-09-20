@@ -6,7 +6,9 @@
 
 `989dce9` 推送后，正常完成第 31 局结算并核对菜单无存档，开始第 32 局 `run-1789936871`。铁甲战士、标准模式、进阶 0，[第一层证据](evidence/2026-09-21/run32-start.json)保留启动版本与原生观察，实际请求仍由 OpenRouter 返回 `typesafe/jev-1.13-20260917`。运行目录为 `run-artifacts/run32-2026-09-20T20-41-07.165Z`，继续同局并在结束后复盘。以下保留此前阶段记录。
 
-第 32 局第 7 层满血营火，13 个物理升级副本合为 6 种不同选项；Jev 选择 Pommel Strike，后续原生实例确认 Pommel Strike+，抽牌 1 → 2。检查第 2 层旧请求又发现战斗入围名额被三个“两张 Strike 加 Defend”的等价副本／排列占用。现仅调整入围分组，保留全部 50 个方案的原始评分和执行实例；相同数据重算后三个代表为两张 Strike 加 Defend、Bash 加 Defend、一张 Strike 加 Defend。29 项相关检查通过，[证据](evidence/2026-09-21/run32-allocation-review.json)明确这不是重新调用模型或胜率验证，准备推送后同局加载。
+第 32 局第 7 层满血营火，13 个物理升级副本合为 6 种不同选项；Jev 选择 Pommel Strike，后续原生实例确认 Pommel Strike+，抽牌 1 → 2。检查第 2 层旧请求又发现战斗入围名额被三个“两张 Strike 加 Defend”的等价副本／排列占用。现仅调整入围分组，保留全部 50 个方案的原始评分和执行实例；相同数据重算后三个代表为两张 Strike 加 Defend、Bash 加 Defend、一张 Strike 加 Defend。29 项相关检查通过，[证据](evidence/2026-09-21/run32-allocation-review.json)明确这不是重新调用模型或胜率验证。
+
+修改作为 `db902d1` 推送，在第 14 层 Bygone Effigy 第 1 回合、50/80 时同局加载。旧控制器在第 169 步确认后退出，pending=null；相同原生局面指纹核对通过。新控制器首个 Inflame 成功，随后使用 Distilled Chaos，并已击败该精英，战后 56/80。实际计划含新的分组标记；后续目录 `run-artifacts/run32-resume-2026-09-20T20-54-30.343Z`。继续同一局，尚无正式结果。
 
 第 30 局复盘后的 `49cadc8` 推送后，正常结算返回无存档菜单，开始第 31 局 `run-1789934018`，铁甲战士、标准模式、进阶 0。[第一层证据](evidence/2026-09-21/run31-start.json)保留原生记录、实际模型与源码版本；原始目录为 `run-artifacts/run31-2026-09-20T19-53-34.016Z`。
 

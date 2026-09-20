@@ -32,5 +32,38 @@
   "actual_models": [
     "typesafe/jev-1.13-20260917"
   ],
-  "goal_complete": false
+  "goal_complete": false,
+  "first_camp": {
+    "floor": 7,
+    "hp": 80,
+    "physical_upgrades": 13,
+    "distinct_upgrade_options": 6,
+    "request": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-2026-09-20T20-41-07.165Z\\step-0067\\jev-camp_upgrade_target-0001.json",
+      "sha256": "fd896df32febdffc9887502049999c22ed9a5779041282af2547f226843f844c"
+    },
+    "decision": {
+      "cmd": "choose_rest_option",
+      "id": "SMITH"
+    },
+    "after": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-2026-09-20T20-41-07.165Z\\step-0068\\after-state.json",
+      "sha256": "35b69505a18101159e0d5bfacefff9dad9ac709f1077944ffc08db569be132ac"
+    },
+    "native_upgraded_card": {
+      "details": {
+        "instance_id": "7b2d29c2cac042f093e9809c2b5b162d",
+        "upgrade_level": 1,
+        "target_type": "AnyEnemy"
+      },
+      "id": "POMMEL_STRIKE",
+      "name": "Pommel Strike+",
+      "type": "Attack",
+      "rarity": "Common",
+      "cost": 1,
+      "keywords": [],
+      "is_upgraded": true,
+      "description": "Deal 10 damage. Draw 2 cards."
+    }
+  }
 }
