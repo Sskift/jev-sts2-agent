@@ -1,0 +1,110 @@
+{
+  "recorded_at": "2026-09-20T19:54:16.607Z",
+  "run_number": 31,
+  "run_id": "run-1789934018",
+  "runtime_commit": "49cadc81cc55801dca0b4a42ab7f577902523f66",
+  "provider": "openrouter",
+  "requested_model": "typesafe/jev-1.13",
+  "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-2026-09-20T19-53-34.016Z",
+  "previous_run": {
+    "run_id": "run-1789929587",
+    "result": "defeat",
+    "review": "docs/run30-review.md",
+    "review_and_fixes_committed_before_start": true
+  },
+  "initial_menu": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-2026-09-20T19-53-34.016Z\\initial-menu.json",
+    "sha256": "1d661aab1e045dca05305d228e23bf7ff4432f4c68863d06ce17f5ddb567e5cc",
+    "screen": "MENU",
+    "has_run_save": false
+  },
+  "first_floor": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-2026-09-20T19-53-34.016Z\\step-0004\\before-state.json",
+    "sha256": "3513a2d36642bd057cb8e225064739179908bb223bc134b48dceb8e54cad9f64",
+    "screen": "EVENT",
+    "act_index": 0,
+    "total_floor": 1,
+    "game_mode": "Standard",
+    "ascension": 0,
+    "character": "IRONCLAD",
+    "hp": 80
+  },
+  "goal_complete": false,
+  "first_live_context": {
+    "request": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-2026-09-20T19-53-34.016Z\\step-0011\\jev-turn_objective-0001.json",
+      "sha256": "541889a069e66ab184cd8034c07946ac761ac14d91b9a7815bd39f62746754f5"
+    },
+    "response": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-2026-09-20T19-53-34.016Z\\step-0011\\jev-response-0002.json",
+      "sha256": "35ededa3b1c0246058e5d58a041b64bbbdcbf82d74b476dcf39fe729c1be8f7f",
+      "actual_model": "typesafe/jev-1.13-20260917"
+    },
+    "metrics": {
+      "request_bytes": 48487,
+      "original_bytes": 42463,
+      "max_request_bytes": 90000,
+      "compression": "lossless_records_and_text",
+      "candidate_count": 5,
+      "purpose": "turn_objective",
+      "context_version": "sts2.context.v2",
+      "context_phase": "turn_objective",
+      "observation_id": "b448026a76d90f433d6b62fc",
+      "entity_rule_links": 9,
+      "entities_without_static_reference": [],
+      "domain_bytes": {
+        "decision": 3645,
+        "observation": 9438,
+        "knowledge": 11276,
+        "history": 2322,
+        "intent": 2008,
+        "analysis": 9961,
+        "uncertainty": 543,
+        "text_dictionary": 1218
+      },
+      "questions_bytes": 3977,
+      "rule_counts": {
+        "cards": 5,
+        "relics": 2,
+        "powers": 4,
+        "monsters": 2,
+        "encounters": 1,
+        "keywords": 2,
+        "enchantments": 1
+      },
+      "source_bytes": 39966,
+      "preservation": "canonical_round_trip_verified",
+      "presentation": "current_records_expanded",
+      "expanded_fields": [
+        "combat.hand",
+        "player",
+        "legal_actions"
+      ],
+      "provider": "openrouter",
+      "requested_model": "typesafe/jev-1.13",
+      "attempt": 1,
+      "content_bytes": 44625,
+      "state_encoding": "compact_json_text",
+      "byte_budget_scope": "Logical request before HTTP string escaping; the provider independently enforces token limits."
+    },
+    "observed_combat_progress": {
+      "current_round": 1,
+      "history_coverage": "Game combat history since this combat was loaded; earlier loaded-save events may be unavailable.",
+      "enemies": [
+        {
+          "combat_id": 1,
+          "role": "not_identified_as_minion",
+          "current_hp": 42,
+          "recorded_damage_events": 0,
+          "recorded_hp_damage": 0,
+          "recorded_overkill": 0,
+          "last_damaged_round": null,
+          "observed_hp_depletions": 0
+        }
+      ],
+      "scope": "Totals from available executed native events and confirmed action snapshot changes in this combat only. Native unblocked damage already excludes overkill; it is not subtracted twice. Damage may have been healed or revived, and observed zero-HP transitions do not establish permanent removal. Missing earlier history is not reconstructed. Current HP, powers and revival/leader rules determine remaining work; these statistics do not prescribe a target."
+    },
+    "contains_power_applications": true,
+    "contains_old_raw_size_skip": false
+  }
+}
