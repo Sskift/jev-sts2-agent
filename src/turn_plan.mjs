@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { validateDecisionPacket, ContextError, compactPlanningRequest } from './decision_context.mjs';
 import { sameTurn, planStep, resolvePlanStep, inspectTurnPlan, turnFingerprint, cardInstance } from './turn_plan_state.mjs';
-import { projectTurnPrefix, sequenceEnergyBudget } from './turn_projection.mjs';
+import { describeTurnProjection, sequenceEnergyBudget } from './turn_projection.mjs';
 import { turnStrategyInstructions } from './decision_instructions.mjs';
 import { refineTurnPlan } from './turn_plan_refinement.mjs';
 import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
@@ -70,7 +70,7 @@ export async function decideTurn(state, options, prepared, choose) {
       proposed_steps: plan?.steps.map(step => ({ kind: step.kind, role: step.role, name: step.name, rules: step.rules_at_planning, cost: step.cost_at_planning, target: step.target })),
       retained_cards: plan?.retained_cards.map(step => ({ name: step.name, rules: step.rules_at_planning, hand_index: state.combat.hand.find(card => cardInstance(card) === step.card_instance_id)?.index })),
       observed_turn_situation: 'Use player for current HP, Block, energy and powers; combat.hand for every current card and upgrade preview; combat.enemies for current targets, HP, Block, powers and intents. These complete records are shared by every question and may use record tables.',
-      conditional_projection: projectTurnPrefix(state, plan?.steps || []),
+      conditional_projection: describeTurnProjection(state, plan?.steps || []),
       energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: budget.energy_left,
         is_observed: false, includes_future_energy_gains: false, steps: budget.transitions,
         scope: 'Current printed costs, plus the verified Stomp discount of 1 for each earlier planned Attack; X spends the remainder. Draws, new energy, other discounts, triggers and automatic plays are unconfirmed; execution must reobserve them.' },
@@ -141,7 +141,7 @@ export async function decideTurn(state, options, prepared, choose) {
       // the proposed end, not a new independent choice after every card.
       const payload = compactPlanningRequest({ ...prepared.payload, state: { ...prepared.payload.state,
         turn_planning: planningState({ phase_scope: 'The planned prefix has been executed and confirmed. Review the ACTUAL current state before ending the player turn.', objective: selectedPlan.objective,
-          proposed_steps: [], conditional_projection: projectTurnPrefix(state, []),
+          proposed_steps: [], conditional_projection: describeTurnProjection(state, []),
           energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
             is_observed: true, includes_future_energy_gains: false, steps: [], scope: 'Actual remaining resources before the end-turn handoff.' } }) },
         questions: { next_action: { ...prepared.payload.questions.next_action,

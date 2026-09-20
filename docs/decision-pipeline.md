@@ -30,6 +30,8 @@ context.14 在手牌提供 `upgrade_preview`，在手牌选择的 selectable/sel
 
 第二十一局发现已生效 Plating 的规则完整可读，但旧的结束回合估算遗漏了它，使原始能力与派生数字不一致。现在把 `block_after_card` / 方案的 `block` 留给当前格挡与立即收益；`end_turn_block_gains` 列明来源、数量和触发时机，`block_including_end_turn_gains` 用于结束回合的有限伤害计算。已核对本机 v0.111.0：Orichalcum 先检查零格挡，Plating 后获得当前层数的 Unpowered 格挡，因此无立即格挡时两者可以叠加，不额外应用敏捷/脆弱，也不在下一张牌之前重复获得。
 
+第二十一局第一幕 Boss 首回合的实际成对请求暴露了药水比较偏差：有无 Strength Potion 的方案都显示 27 伤害，因为算术忽略药水效果，模型最终移除了药水。原请求已经有 Strength / Dexterity 的关联规则，问题并非完全没有解释。现在数量、持续时间、影响对象和先后关系由 `potion_effects` 明确提供；数字移入 `known_effects_only`，未模拟效果单列，不能把相同的局部基线视为相同最终收益。原始状态与当时历史的只读完整管线回放改为 Dexterity Potion → Defend → Strength Potion → Strike → Strike（21 次模型请求），说明开始考虑持续增益；它仍在非攻击回合加入多余 Defend，不能据此宣称整体方案最优。回放没有发送游戏命令，记录在 `temp/potion-timing-replay/result.json`。
+
 真实局面 `2026-09-20T08-05-27-579Z-f2afa4b2/step-0005` 有 7 Plating、7 点敌人攻击，旧结束估算为 66 HP，修正后为 73 HP。保留当时历史、原计划和全部规则的只读 Jev 回放，从 Defend → Fisticuffs+ → Strike 改为 Fisticuffs+ → Strike → Strike；没有发送游戏命令或提供后续抽牌。该结果验证这个局面的输入修正有作用，不证明整局胜率或方案最优。后续实机第 8 步记录在敌人行动前获得 7 格挡，与规则时序一致。
 
 准备描述只识别原生明确、独立的手牌升级句子，不把 Aggression 的下回合随机攻击升级伪造成当前可选的升级。选定“下一张牌”类准备后，保留指定受益卡的消费顺序。“下一张 Attack/Skill/Power”按实际卡牌类型约束：例如 One-Two Punch 可以穿插技能，但不能让另一张攻击提前消耗它。原生明确写着下回合生效的规则不绑定本回合消费者。

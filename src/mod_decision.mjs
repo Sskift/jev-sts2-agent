@@ -2,6 +2,7 @@ import { decisionInstructions } from "./decision_instructions.mjs";
 import { getJevModel, requestJev, JEV_REQUEST_BUDGET } from './jev_client.mjs';
 import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactDecisionRequest, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
+import { potionEffectFacts, potionForRequest } from './potion_effects.mjs';
 import { combatForecast, firstHitHpLoss, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
 import { needsStrategyAssessment, prepareStrategyAssessment, parseStrategyAssessment } from './strategy_assessment.mjs';
@@ -306,7 +307,9 @@ export function prepareModDecision(gameState, options = {}) {
         const countedDamage = card?.attack_preview ? (target ? [target] : card.target_type === 'AllEnemies' ? gameState.combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) : []).map(enemy => `${enemy.name} #${enemy.combat_id}: ${previewDamageSum(card, enemy) ?? 'unknown'} damage before Block/prevention`).join('; ') : '';
         const effect = card ? `${card.name}, cost ${card.cost < 0 ? `X (current energy ${gameState.combat.player.energy})` : card.cost}: ${card.description}${target ? ` Target ${target.name} (${target.hp} HP, ${target.block} Block).` : ''}${card.attack_preview ? ` Current preview ${card.attack_preview.hits} hits; ${countedDamage}. Modifiers and later triggers may change totals.` : ''}` : candidate.description;
         const estimate = candidate.combat_estimate;
+        const potionEffect = potionEffectFacts(potionForRequest(gameState.combat?.player || gameState.decision_context?.player, candidate.request));
         return [id, { action_id: id, command: candidate.request?.cmd || 'plan_selection', effect,
+          ...(potionEffect ? { effect_facts: potionEffect } : {}),
           ...(estimate ? { limited_calculation: {
             energy_left: estimate.energy_after_printed_cost,
             block: estimate.block_after_card,

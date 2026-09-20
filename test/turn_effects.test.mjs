@@ -81,7 +81,7 @@ test('whole-plan substitutions can replace an expensive kill and use released en
     for (const choice of Object.values(choices)) {
       const names = choice.label.ordered_sequence.map(step => step.action);
       assert.equal(choice.label.energy_spent + choice.label.energy_left, state.combat.player.energy);
-      for (const enemy of choice.label.conditional_preview.enemies) {
+      for (const enemy of choice.label.conditional_preview.known_effects_only.enemies) {
         assert.equal(enemy.hp_removed + enemy.hp, state.combat.enemies.find(original => original.combat_id === enemy.combat_id).hp);
         assert.equal(enemy.block_removed + enemy.block, state.combat.enemies.find(original => original.combat_id === enemy.combat_id).block);
       }

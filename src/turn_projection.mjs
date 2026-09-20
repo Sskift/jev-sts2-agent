@@ -20,6 +20,31 @@ export function reserveSequence(state, steps) {
   return budget?.affordable ? { energy_left: budget.energy_left, costs: budget.costs } : null;
 }
 
+// Keep omitted effects next to an explicitly scoped baseline. A plan containing
+// a potion or another unresolved effect must not claim its final HP/damage
+// equals that of an otherwise identical plan without it.
+export function describeTurnProjection(state, steps) {
+  const projection = projectTurnPrefix(state, steps);
+  return {
+    calculation_status: projection.unresolved_effects.length ? 'incomplete' : 'preview_arithmetic',
+    fully_simulated: false,
+    known_effects_only: {
+      block: projection.block, hp_if_ending: projection.hp_if_ending_after_prefix,
+      hp_loss_if_ending: state.combat.player.hp - projection.hp_if_ending_after_prefix,
+      block_including_end_turn_gains: projection.block_including_end_turn_gains,
+      end_turn_block_gains: projection.end_turn_block_gains,
+      incoming_attack: projection.incoming_attack_after_prefix,
+      enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
+        const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
+        return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block };
+      })
+    },
+    omitted_effects: projection.unresolved_effects,
+    interpretation: 'Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.',
+    scope: projection.scope
+  };
+}
+
 // This is a conditional sum of visible previews, not a game simulator. Keeping
 // it separate from combat prevents planned outcomes from becoming observations.
 export function projectTurnPrefix(state, steps) {

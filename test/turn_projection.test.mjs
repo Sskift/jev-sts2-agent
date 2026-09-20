@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { projectTurnPrefix } from '../src/turn_projection.mjs';
+import { projectTurnPrefix, describeTurnProjection } from '../src/turn_projection.mjs';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 
 function state() {
@@ -12,6 +12,18 @@ function state() {
 }
 const strike = { kind: 'play_card', name: 'Strike', card_instance_id: 'STRIKE_IRONCLAD', target: 42 };
 const defend = { kind: 'play_card', name: 'Defend', card_instance_id: 'DEFEND_IRONCLAD' };
+
+test('uncomputed potion benefits stay distinct from equal numeric baselines', () => {
+  const s = state();
+  const plain = describeTurnProjection(s, [strike]);
+  const withPotion = describeTurnProjection(s, [{ kind: 'use_potion', name: 'Strength Potion' }, strike]);
+  assert.deepEqual(withPotion.known_effects_only, plain.known_effects_only);
+  assert.equal(withPotion.calculation_status, 'incomplete');
+  assert.equal(plain.calculation_status, 'preview_arithmetic');
+  assert.equal(withPotion.fully_simulated, false);
+  assert.match(withPotion.omitted_effects.join(' '), /Strength Potion/);
+  assert.equal(withPotion.hp_if_ending, undefined, 'A partial baseline is not a top-level outcome');
+});
 
 test('conditional sequence sums never mutate observations or trigger Orichalcum between cards', () => {
   const s = state(); s.combat.player.relics = [{ id: 'ORICHALCUM' }];

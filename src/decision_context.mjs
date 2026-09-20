@@ -7,6 +7,7 @@ import { previewDamageSum } from './combat_arithmetic.mjs';
 import { buildRuleReference } from './rule_reference.mjs';
 import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
 import { sameTurn, publicTurnPlan, turnGuard, advanceTurnPlan } from './turn_plan_state.mjs';
+import { potionEffectFacts } from './potion_effects.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -19,6 +20,12 @@ export function validateDecisionPacket(rawPacket) {
   const packet = expandRecordTables(rawPacket);
   if (!protocolCheck(packet)) throw new ContextError('Decision JSON does not match the versioned protocol', { errors: clone(protocolCheck.errors) });
   if (packet.in_combat !== Boolean(packet.combat)) throw new ContextError('in_combat contradicts combat data');
+  if (packet.resources?.potion_effects) {
+    const resolveText = value => value?.text_ref ? packet.text_dictionary?.[value.text_ref] : value;
+    const expected = (packet.player?.potions || []).map(potion => potionEffectFacts({ ...potion, description: resolveText(potion.description) })).filter(Boolean);
+    const actual = packet.resources.potion_effects.map(effect => ({ ...effect, source: resolveText(effect.source) }));
+    if (!isDeepStrictEqual(actual, expected)) throw new ContextError('Potion effect facts contradict the current potion rules or slots');
+  }
   if (packet.map?.routes) {
     const expected = routeFacts(packet.map, packet.map.legal_next_nodes);
     if (!isDeepStrictEqual(packet.map.routes, expected)) throw new ContextError('Route facts contradict the visible map or legal next nodes');
@@ -522,7 +529,8 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     turn_plan: publicTurnPlan(memory.data.turn_plan, source),
     run: context ? { run_id: context.run_id, combat_id: context.combat_id || null, act_index: context.act_index, act_floor: context.act_floor, total_floor: context.total_floor, ascension: context.ascension, game_mode: context.game_mode, modifiers: context.modifiers } : null,
     player: context?.player ?? null,
-    resources: context ? { potion_capacity: context.potion_capacity } : null,
+    resources: context ? { potion_capacity: context.potion_capacity,
+      potion_effects: context.player.potions.map(potionEffectFacts).filter(Boolean) } : null,
     deck: context ? {
       count: context.master_deck.length, cards: groupCards(context.master_deck), kind: 'permanent master deck, distinct from combat piles',
       statistics: {

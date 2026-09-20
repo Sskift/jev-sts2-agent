@@ -1,5 +1,6 @@
 import { planStep, cardInstance } from './turn_plan_state.mjs';
-import { projectTurnPrefix, reserveSequence } from './turn_projection.mjs';
+import { describeTurnProjection, reserveSequence } from './turn_projection.mjs';
+import { potionEffectFacts } from './potion_effects.mjs';
 import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from './turn_effects.mjs';
 
 const signature = steps => JSON.stringify(steps.map(step => [step.kind, step.card_instance_id, step.potion_id, step.slot, step.target]));
@@ -21,29 +22,23 @@ const bindFollowthrough = (step, following) => {
 export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
   if (plan.end_policy !== 'end_after_steps_unless_conditions_change') return;
   const label = steps => {
-    const budget = reserveSequence(state, steps), projection = projectTurnPrefix(state, steps);
+    const budget = reserveSequence(state, steps);
     let energyAfterPrintedCosts = state.combat.player.energy;
     return {
       ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map((step, index) => {
         energyAfterPrintedCosts -= budget.costs[index];
         const beneficiary = state.combat.hand.find(card => cardInstance(card) === step.beneficiary_instance_id);
         const card = state.combat.hand.find(card => cardInstance(card) === step.card_instance_id);
+        const potionEffect = step.kind === 'use_potion' ? potionEffectFacts(state.combat.player.potions.find(p => p.id === step.potion_id && p.slot === step.slot)) : null;
         return { action: step.name, ...(card ? { hand_index: card.index, printed_cost: card.cost } : {}), ...(step.target !== undefined ? { target: step.target } : {}), rules: step.rules_at_planning,
+          ...(potionEffect ? { effect_facts: potionEffect } : {}),
           energy_after_reserved_costs: energyAfterPrintedCosts,
           ...(beneficiary ? { intended_followthrough: beneficiary.name,
             ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
       }),
       then: 'End turn, unless a new observation requires a revision.',
       energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
-      conditional_preview: { block: projection.block, hp_if_ending: projection.hp_if_ending_after_prefix,
-        block_including_end_turn_gains: projection.block_including_end_turn_gains, end_turn_block_gains: projection.end_turn_block_gains,
-        hp_loss_if_ending: state.combat.player.hp - projection.hp_if_ending_after_prefix,
-        incoming_attack: projection.incoming_attack_after_prefix,
-        enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
-          const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
-          return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block };
-        }),
-        unconfirmed_effects: projection.unresolved_effects },
+      conditional_preview: describeTurnProjection(state, steps),
       limitation: 'Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers.'
     };
   };

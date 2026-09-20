@@ -20,6 +20,10 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 
 各规划阶段的 `turn_planning.energy_reservation.steps[]` 统一记录步骤序号、动作种类、当前手牌索引、`energy_before`、`reserved_cost`、`energy_after` 与 `affordable`。预算以实测能量为起点，只计当前费用、已核实的 Stomp 折扣及 X 费支出；`includes_future_energy_gains:false` 明确没有把未来获得能量算进去。`is_observed:false` 区分拟定预算和真实状态；结束回合前的实际检查为 `true` 且没有假设步骤。代码校验起点、每步连续性、计划/手牌关联与最终余额，避免只在最后比较时才说明中间资源。未知抽牌与其他效果仍需实际执行后重新观察，预算不代表完整模拟。
 
+`resources.potion_effects` 提供已核实药水的规则关系，并在候选使用动作和完整方案步骤旁复用：增益数量、力量/敏捷、持续至本回合末或本场战斗结束、影响每次受该能力修正的伤害/格挡、不会追溯改变已执行动作，也不会直接造成伤害或格挡。当前覆盖 Strength / Dexterity / Flex / Speed Potion，时序与作用条件核对本机 v0.111.0 的 Potion、StrengthPower、DexterityPower 与 Temporary*Power 类；数量只取实时英文说明，不使用 Wiki 基础数量。未知药水、缺失数量或无法解析的说明不生成假事实，完整原始规则仍保留。发送前核对这些字段与当前药水 ID、槽位和实时数量一致。
+
+规划阶段的 `conditional_projection` 与完整方案的 `conditional_preview` 使用同一表示：`known_effects_only` 保存有限算术，`omitted_effects` 列出未计算效果，存在遗漏时 `calculation_status:incomplete`，始终 `fully_simulated:false`。例如先喝力量药水和不喝时，旧算术都可能得到 27；这两个值只能表示忽略药水效果的基线，不能表示两条路线的最终伤害相等。字段没有伪造精确的未来伤害，执行后仍读取原生新预览。
+
 | 字段 | 内容 |
 |---|---|
 | `objective` | 完成同一局三幕和最终 Boss；正式胜利结算为执行终点 |
