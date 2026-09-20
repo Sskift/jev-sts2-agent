@@ -1,0 +1,57 @@
+{
+  "run_id": "run-1789888890",
+  "floor": 6,
+  "source_directory": "run-artifacts/2026-09-20T07-25-39-751Z-1def4d1e",
+  "steps": [
+    36,
+    37,
+    38,
+    39,
+    40
+  ],
+  "scope": "Live planning, selection, upgrade and follow-through identity; not optimal play or whole-run victory.",
+  "preparation": {
+    "card": "ARMAMENTS",
+    "beneficiary_instance_id": "67194354366d40a3b86c2cfdbef3333a",
+    "beneficiary_name": "Defend"
+  },
+  "selection": {
+    "request": {
+      "cmd": "hand_select_card",
+      "card_ids": [
+        "DEFEND_IRONCLAD"
+      ],
+      "nth_values": [
+        0
+      ]
+    },
+    "model": "jev-turn-plan-selection",
+    "instance_id": "67194354366d40a3b86c2cfdbef3333a"
+  },
+  "preview": {
+    "name": "Defend+",
+    "description": "Gain 8 Block.",
+    "cost": 1
+  },
+  "actual_after_upgrade": {
+    "name": "Defend+",
+    "instance_id": "67194354366d40a3b86c2cfdbef3333a",
+    "block": 8
+  },
+  "followthrough": {
+    "request": {
+      "cmd": "play_card",
+      "id": "DEFEND_IRONCLAD",
+      "nth": 0
+    },
+    "hand_instance_id": "67194354366d40a3b86c2cfdbef3333a",
+    "block_before": 5,
+    "block_after": 13,
+    "next_attack": {
+      "cmd": "play_card",
+      "id": "STRIKE_IRONCLAD",
+      "nth": 0,
+      "target": 2
+    }
+  }
+}
