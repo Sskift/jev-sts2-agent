@@ -262,7 +262,7 @@ export class DecisionMemory {
     delete recorded.turn_guard;
     delete recorded.turn_card_cost;
     this.data.actions.push(recorded);
-    this.data.pending = !response.ok && ['TIMEOUT', 'EVENT_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? { ...this.data.pending, outcome_unknown: true, error: response.error } : null;
+    this.data.pending = !response.ok && ['TIMEOUT', 'EVENT_TIMEOUT', 'PURCHASE_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? { ...this.data.pending, outcome_unknown: true, error: response.error } : null;
     this.persist();
   }
   context(state) {

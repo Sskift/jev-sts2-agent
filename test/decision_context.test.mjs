@@ -443,10 +443,16 @@ test('potion choices use authoritative usability/targets and nth among every sam
 });
 
 test('a mod-side action timeout remains unresolved in persistent memory', t => {
-  const file = path.join(temporary(t), 'memory.json'), state = completeCombat();
-  const memory = new DecisionMemory({ file }); memory.observe(state); memory.begin({ cmd: 'end_turn' }, state);
-  memory.finish({ ok: false, error: 'TIMEOUT' }, state);
-  assert.equal(new DecisionMemory({ file }).data.pending.outcome_unknown, true);
+  const directory = temporary(t), state = completeCombat();
+  for (const [cmd, error] of [['end_turn', 'TIMEOUT'], ['shop_buy_relic', 'PURCHASE_TIMEOUT']]) {
+    const file = path.join(directory, `${cmd}.json`);
+    const memory = new DecisionMemory({ file }); memory.observe(state); memory.begin({ cmd }, state);
+    memory.finish({ ok: false, error }, state);
+    const saved = new DecisionMemory({ file }).data.pending;
+    assert.equal(saved.outcome_unknown, true);
+    assert.equal(saved.request.cmd, cmd);
+    assert.equal(saved.error, error);
+  }
 });
 
 test('legacy map DTO cannot disclose an unrevealed extra boss through a future edge', () => {

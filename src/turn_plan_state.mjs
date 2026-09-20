@@ -137,7 +137,7 @@ function changesRequiringReview(before, after, step, remaining) {
 export function advanceTurnPlan(plan, pending, response, after) {
   if (!plan || pending?.turn_plan_id !== plan.id) return;
   if (!response.ok) {
-    plan.status = ['TIMEOUT', 'EVENT_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? 'outcome_unknown' : 'needs_review';
+    plan.status = ['TIMEOUT', 'EVENT_TIMEOUT', 'PURCHASE_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? 'outcome_unknown' : 'needs_review';
     plan.review_reasons = ['The last command did not have a confirmed successful result.'];
     return;
   }

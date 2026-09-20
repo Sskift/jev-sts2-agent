@@ -565,16 +565,17 @@ index 1197ced..e3c370e 100644
              var entry = FindPotionEntry(inventory, potionId, nth);
              if (entry == null)
 diff --git a/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs b/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
-index 8b37a1f..bcbdefe 100644
+index 8b37a1f..95e8f2b 100644
 --- a/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
 +++ b/STS2.Cli.Mod/Actions/ShopBuyRelicHandler.cs
-@@ -1,5 +1,4 @@
+@@ -1,5 +1,5 @@
  using MegaCrit.Sts2.Core.Entities.Merchant;
 -using MegaCrit.Sts2.Core.Nodes.Rooms;
++using STS2.Cli.Mod.Actions.Utils;
  using STS2.Cli.Mod.Models.Messages;
  using STS2.Cli.Mod.State;
  using STS2.Cli.Mod.Utils;
-@@ -17,7 +16,7 @@ namespace STS2.Cli.Mod.Actions;
+@@ -17,11 +17,14 @@ namespace STS2.Cli.Mod.Actions;
  ///     <para>
  ///         <b>CLI command:</b> <c>sts2 shop_buy_relic &lt;relic_id&gt; [--nth &lt;n&gt;]</c>
  ///     </para>
@@ -583,23 +584,129 @@ index 8b37a1f..bcbdefe 100644
  /// </remarks>
  public static class ShopBuyRelicHandler
  {
-@@ -38,13 +37,11 @@ public static class ShopBuyRelicHandler
+     private static readonly ModLogger Logger = new("ShopBuyRelicHandler");
++    // A pickup effect may wait for a later CLI selection. Keep the native task alive,
++    // and do not start a second purchase while the first entry is still settling.
++    private static Task<bool>? _pendingPurchase;
+ 
+     /// <summary>
+     ///     Executes the shop_buy_relic command.
+@@ -38,12 +41,21 @@ public static class ShopBuyRelicHandler
  
          try
          {
 -            // --- Guard: Check merchant room ---
 -            var merchantRoom = NMerchantRoom.Instance;
 -            if (merchantRoom == null || !merchantRoom.IsInsideTree())
++            if (_pendingPurchase is { IsCompleted: false })
++                return new
++                {
++                    ok = false, error = "PURCHASE_PENDING",
++                    message = "The previous relic purchase is awaiting completion; resolve its current selection first"
++                };
++
 +            // --- Guard: Check accessible merchant inventory ---
 +            var inventory = ShopUtils.GetCurrentInventory(out _, out _);
 +            if (inventory == null)
                  return new { ok = false, error = "NOT_IN_SHOP", message = "Not currently in a shop" };
  
 -            var inventory = merchantRoom.Room.GetLocalInventory();
--
++            // A merchant room can remain in the tree beneath a reward/selection overlay.
++            if (StateHandler.DetectScreen() != "SHOP")
++                return new { ok = false, error = "NOT_IN_SHOP", message = "The shop is not the active screen" };
+ 
              // --- Find the relic entry by ID + nth ---
              var entry = FindRelicEntry(inventory, relicId, nth);
-             if (entry == null)
+@@ -65,8 +77,46 @@ public static class ShopBuyRelicHandler
+                     message = $"Not enough gold to buy relic '{relicId}' (cost={entry.Cost})"
+                 };
+ 
+-            // --- Purchase ---
+-            var success = await entry.OnTryPurchaseWrapper(inventory);
++            // Keep the original price: purchase hooks may clear or restock this entry.
++            var cost = entry.Cost;
++
++            // Start on the Godot main thread, without Task.Run. Cauldron and other
++            // pickup effects await player input inside OnTryPurchaseWrapper, so waiting
++            // for the entire task would also block the single-connection pipe server.
++            var purchaseTask = entry.OnTryPurchaseWrapper(inventory);
++            _pendingPurchase = purchaseTask;
++            _ = ObservePurchaseAsync(purchaseTask, relicId);
++
++            await ActionUtils.PollUntilAsync(
++                () => purchaseTask.IsCompleted || IsPurchaseSelection(StateHandler.DetectScreen()),
++                ActionUtils.UiTimeoutMs);
++
++            if (!purchaseTask.IsCompleted)
++            {
++                var selectionScreen = StateHandler.DetectScreen();
++                if (IsPurchaseSelection(selectionScreen))
++                    return new
++                    {
++                        ok = true,
++                        data = new
++                        {
++                            action = "SHOP_BUY_RELIC", relic_id = relicId, cost,
++                            screen = selectionScreen, selection_required = true, purchase_complete = false
++                        }
++                    };
++
++                // Release the pipe even if no known selection has appeared. The native
++                // transaction is not cancelled, and the pending guard prevents replay.
++                return new
++                {
++                    ok = false, error = "PURCHASE_TIMEOUT",
++                    message = "Relic purchase is still running; inspect state and do not repeat the purchase",
++                    data = new { action = "SHOP_BUY_RELIC", relic_id = relicId, cost, screen = selectionScreen,
++                        purchase_complete = false }
++                };
++            }
++
++            var success = await purchaseTask;
+             if (!success)
+                 return new { ok = false, error = "PURCHASE_FAILED", message = $"Failed to purchase relic '{relicId}'" };
+ 
+@@ -80,8 +130,9 @@ public static class ShopBuyRelicHandler
+                 {
+                     action = "SHOP_BUY_RELIC",
+                     relic_id = relicId,
+-                    cost = entry.Cost,
+-                    screen
++                    cost,
++                    screen,
++                    purchase_complete = true
+                 }
+             };
+         }
+@@ -92,6 +143,28 @@ public static class ShopBuyRelicHandler
+         }
+     }
+ 
++    private static bool IsPurchaseSelection(string screen) => screen is
++        "REWARD" or "CARD_REWARD" or "GRID_CARD_SELECT" or "RELIC_SELECT" or "TRI_SELECT" or "BUNDLE_SELECT";
++
++    private static async Task ObservePurchaseAsync(Task<bool> purchaseTask, string relicId)
++    {
++        try
++        {
++            var success = await purchaseTask;
++            Logger.Info($"Relic purchase task settled: {relicId}, success={success}");
++        }
++        catch (Exception ex)
++        {
++            // A task that outlives this request still needs its eventual fault observed.
++            Logger.Error($"Relic purchase task failed: {relicId}: {ex.Message}");
++        }
++        finally
++        {
++            if (ReferenceEquals(_pendingPurchase, purchaseTask))
++                _pendingPurchase = null;
++        }
++    }
++
+     /// <summary>
+     ///     Finds a relic entry in the inventory by relic_id and nth occurrence.
+     /// </summary>
 diff --git a/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs b/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs
 index 5235f87..f35f2a2 100644
 --- a/STS2.Cli.Mod/Actions/ShopRemoveCardHandler.cs
