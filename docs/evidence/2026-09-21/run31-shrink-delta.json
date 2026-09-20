@@ -124,5 +124,42 @@
     "passed": 26,
     "failed": 0
   },
-  "runtime_loaded": false
+  "runtime_loaded": true,
+  "same_run_reload": {
+    "runtime_commit": "bfbad079204922d658645c06658b1516b1aa8bb4",
+    "previous_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-2026-09-20T19-53-34.016Z",
+    "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume-2026-09-20T20-03-51.274Z",
+    "run_id": "run-1789934018",
+    "screen": "COMBAT",
+    "floor": 11,
+    "hp": 62,
+    "turn": 3,
+    "prior_pending": null,
+    "native": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume-2026-09-20T20-03-51.274Z\\resume-native.json",
+      "sha256": "3ac6bc6493308c835d929aebe2ee2a16f7904accf0bd83922a621b2b2084c3a3"
+    },
+    "first_confirmed_request": {
+      "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume-2026-09-20T20-03-51.274Z\\step-0001\\jev-turn_assess_plans-0003.json",
+      "sha256": "c0ff2857a0cc7fbb55aa92e0ad13a4fd5c7efd584ee3f33ae4d2b02c195f550a",
+      "decision_file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume-2026-09-20T20-03-51.274Z\\step-0001\\decision.json",
+      "confirmed_action": {
+        "ok": true,
+        "data": {
+          "card_index": 2,
+          "card_id": "BATTLE_TRANCE",
+          "results": [
+            {
+              "type": "power",
+              "target_id": 0,
+              "target_name": "IRONCLAD",
+              "power_id": "NO_DRAW_POWER",
+              "amount": 1
+            }
+          ]
+        }
+      },
+      "after_state": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume-2026-09-20T20-03-51.274Z\\step-0001\\after-state.json"
+    }
+  }
 }
