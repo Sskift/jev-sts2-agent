@@ -158,5 +158,17 @@
     "Only the verified Ringing rule currently has an action-constraint adapter.",
     "The replay still chooses Armaments. It proves the impossible follow-through was removed, not that the chosen single card is best.",
     "No original battle was reset or replayed in game. Final three-act victory remains incomplete."
-  ]
+  ],
+  "live_reload": {
+    "run_id": "run-1789900349",
+    "loaded_commit": "d6b6fed",
+    "artifact_directory": "run-artifacts/2026-09-20T11-00-04-270Z-80ddb435",
+    "floor_23_completed": true,
+    "after_floor_23_hp": 71,
+    "max_hp": 80,
+    "continued_to_floor": 27,
+    "ringing_seen_under_new_code": false,
+    "feishu_revision": 76,
+    "full_run_complete": false
+  }
 }
