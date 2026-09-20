@@ -5,6 +5,7 @@ import { ModClient, ModTransportError, validateModRequest } from './mod_client.m
 import { makeModDecisionWithJev, prepareModDecision, buildModCandidates } from './mod_decision.mjs';
 import { DecisionMemory, ContextError, canonicalObservation } from './decision_context.mjs';
 import { createSession } from './artifacts.mjs';
+import { getJevConfig } from './jev_client.mjs';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const save = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n');
@@ -89,7 +90,8 @@ export function observedEventProgress(before, request, after) {
 export async function runModLoop({ client, driver = null, decide = makeModDecisionWithJev, maxSteps = 3000, intervalMs = 600, artifactDir = createSession(), memoryFile = path.join(artifactDir, 'memory.json'), signal, logger = console.log, stopAfterBattle = false, onObservation, onBeforeAction } = {}) {
   if (!client) throw new Error('Mod client is required');
   const battle = { sawCombat: false, complete: false, failed: false, playedCards: 0, endedTurns: 0 };
-  const summary = { startedAt: new Date().toISOString(), mode: 'mod', decisionModel: 'jev-latest', artifactDir, steps: 0, battle };
+  const { provider, model } = getJevConfig();
+  const summary = { startedAt: new Date().toISOString(), mode: 'mod', decisionProvider: provider, decisionModel: model, artifactDir, steps: 0, battle };
   const memory = new DecisionMemory({ file: memoryFile });
   const previous = memory.data.run_progress;
   const progress = summary.run = previous?.failed || previous?.complete ? {} : previous || {};

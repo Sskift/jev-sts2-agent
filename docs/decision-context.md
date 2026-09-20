@@ -108,3 +108,7 @@ TypeSafe 当前公开 HTTP 契约只有 `model`、`state`、`questions`，SDK �
 规则参考层和近期行动摘要已接入，详见[决策管线](decision-pipeline.md)。`rule_reference` 来自固定 v0.111.0 的本地 Spire Codex 快照，按当前实体及关联规则选取；`related_rules` 将药水、牌和能力解释连起来。当前模组状态优先，Wiki 基础值不替代实时预览，事件分支只表示可能结果。`decision_brief` 保留最近四个已确认命令及实际资源变化，完整历史仍在原字段和本地记录中。Choice 候选旁直接提供与完整候选一致的有限算术；后续动作及抽牌仍由 Jev 判断。
 
 长战斗历史还支持 `event_timeline_v1`：所有事件保持原顺序，序号为 `sequence_start + 事件索引`，`rounds` 为 `[事件索引, 回合]` 的变化边界，`events` 可继续使用上述表格。仅在原始序号连续且每项都有回合时启用；序号有缺口则保持普通表格。展开后逐事件、逐字段与原数据相同，没有截断历史。
+
+选牌、手牌选择、升级预览和地图节点也使用已有可逆表格。`text_dictionary` 现在覆盖同一次请求的 `state` 和 `questions`：候选效果与状态里完全相同的描述只保存一次，问题中的 `text_ref` 仍在该请求的 `state.text_dictionary` 内解析，不依赖服务端记忆。原生顶层继续只有 `model/state/questions`。所有副本、费用、目标和候选 ID 保留；新增往返检查验证还原后与原数据一致。
+
+第十九局第 21 层的 31 项 Headbutt 选牌请求，原有整理后为 74,631 字节。上述整理与专用选牌提示将它降至 66,426 字节，实际 OpenRouter Jev 调用成功，使用 32,725 输入 tokens。这仍接近单题窗口上限，不能作为任意长战斗的容量保证。OpenRouter 包装的 `max_tokens_exceeded` 现在会保留为有界错误分类，方便区分容量、额度和其他 HTTP 错误，不打印原始响应内容。

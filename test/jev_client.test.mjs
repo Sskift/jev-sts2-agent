@@ -41,4 +41,7 @@ test('provider failures stop without fallback or exposing response secrets', asy
     return { ok: false, status: 402, json: async () => ({ detail: { error_type: 'billing_error', message: 'secret' } }) };
   } }), { message: 'Jev API error 402 (billing_error) via typesafe' });
   assert.equal(calls, 1);
+  await assert.rejects(requestJev({ model: 'jev-latest' }, { env: { JEV_PROVIDER: 'openrouter', OPENROUTER_API_KEY: 'router-test' }, fetchImpl: async () => ({
+    ok: false, status: 400, json: async () => ({ error: { code: 400, message: 'HTTP 400: {"detail":{"error_type":"max_tokens_exceeded","message":"secret"}}' } })
+  }) }), { message: 'Jev API error 400 (max_tokens_exceeded) via openrouter' });
 });

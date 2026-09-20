@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { buildDecisionContext, DecisionMemory, groupCards, routeFacts, deduplicateText, compactContext, validateDecisionPacket, expandRecordTables } from '../src/decision_context.mjs';
+import { buildDecisionContext, DecisionMemory, groupCards, routeFacts, deduplicateText, compactContext, compactDecisionRequest, validateDecisionPacket, expandRecordTables } from '../src/decision_context.mjs';
 import { buildModCandidates, prepareModDecision, makeModDecisionWithJev } from '../src/mod_decision.mjs';
 import { actionFingerprint, runModLoop } from '../src/mod_loop.mjs';
 import { completeCombat, withContext, fixtureCard } from './fixtures/context.mjs';
@@ -313,6 +313,30 @@ test('long repeated rules can be restored exactly from the same request; oversiz
   let calls = 0;
   await assert.rejects(makeModDecisionWithJev(state, { maxRequestBytes: 30000, apiKey: 'test', fetchImpl: async () => { calls++; } }), /no facts were truncated/);
   assert.equal(calls, 0);
+});
+
+test('modal request packing preserves every copy, rule, map edge and criterion across a shared dictionary', () => {
+  const state = completeCombat();
+  state.screen = 'GRID_CARD_SELECT';
+  const description = 'Gain 7 Block. Put this specific card on top of your Draw Pile after use. '.repeat(4);
+  state.grid_card_select = { prompt: 'Choose a card to put on top of your Draw Pile.', min_select: 1, max_select: 1, cancelable: false,
+    cards: Array.from({ length: 24 }, (_, index) => ({ index, card_id: 'SAME_CARD', card_name: 'Same card', card_type: 'Skill', cost: index % 2, description })) };
+  const candidates = buildModCandidates(state), context = buildDecisionContext(state, { candidates });
+  const payload = { model: 'jev-latest', state: context, questions: { next_action: { type: 'choice', instructions: 'Resolve the selection.',
+    criteria: Object.fromEntries([...candidates].map(([id, c]) => [id, { effect: c.description }])) } } };
+  const original = JSON.parse(JSON.stringify(payload)), packed = compactDecisionRequest(payload);
+  validateDecisionPacket(packed.state);
+  const dictionary = packed.state.text_dictionary;
+  const expand = item => item?.text_ref ? dictionary[item.text_ref] : Array.isArray(item) ? item.map(expand)
+    : item && typeof item === 'object' ? Object.fromEntries(Object.entries(item).filter(([k]) => k !== 'text_dictionary').map(([k, v]) => [k, expand(v)])) : item;
+  assert.deepEqual(expand(expandRecordTables(packed)), original);
+  assert.deepEqual(JSON.parse(JSON.stringify(payload)), original, 'Packing does not mutate the original context');
+  assert.deepEqual(Object.keys(packed), ['model', 'state', 'questions']);
+  assert.equal(Object.keys(packed.questions.next_action.criteria).length, 24);
+  assert.ok(Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(original)) * 0.7);
+  const prepared = prepareModDecision(state);
+  assert.match(prepared.payload.questions.next_action.instructions, /Preserve the current turn_plan objective/);
+  assert.match(prepared.payload.questions.next_action.instructions, /top of the Draw Pile is not in hand/);
 });
 
 test('every independent atomic action request contains the full JSON context and exactly the offered action IDs', async () => {

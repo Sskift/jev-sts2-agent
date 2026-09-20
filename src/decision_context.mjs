@@ -661,8 +661,8 @@ export function expandRecordTables(item) {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => [key, expandRecordTables(value)]));
 }
 
-export function compactContext(context) {
-  const interned = deduplicateText(context);
+export function compactContext(context, { deduplicate = true } = {}) {
+  const interned = deduplicate ? deduplicateText(context) : context;
   const copy = Buffer.byteLength(JSON.stringify(interned)) < Buffer.byteLength(JSON.stringify(context)) ? interned : clone(context);
   const deckStates = new Map((copy.deck?.cards || []).map((group, index) => [JSON.stringify(group.card), index]));
   for (const observation of copy.memory.observations || []) {
@@ -709,6 +709,24 @@ export function compactContext(context) {
   if (copy.legal_actions?.length) copy.legal_actions = compactRecords(copy.legal_actions);
   if (copy.decision_brief?.recent_confirmed_actions?.length) copy.decision_brief.recent_confirmed_actions = compactRecords(copy.decision_brief.recent_confirmed_actions);
   for (const key of ['ordered_steps', 'completed_actions', 'retained_cards']) if (copy.turn_plan?.[key]?.length) copy.turn_plan[key] = compactRecords(copy.turn_plan[key]);
+  // Modal cards and map nodes repeat the same fields just like combat piles.
+  // Preserve the exact order, distinct copies, constraints and instance IDs.
+  for (const key of ['nodes', 'visited', 'legal_next_nodes']) if (copy.map?.[key]?.length) copy.map[key] = compactRecords(copy.map[key]);
+  for (const [screen, fields] of Object.entries({
+    grid_card_select: ['cards'], tri_select: ['cards'], hand_select: ['selectable_cards'],
+    rest_site: ['deck_upgrade_previews']
+  })) for (const field of fields) if (copy.screen_state?.[screen]?.[field]?.length) {
+    copy.screen_state[screen][field] = compactRecords(copy.screen_state[screen][field]);
+  }
   if (copy.rule_reference?.entries) for (const [category, rows] of Object.entries(copy.rule_reference.entries)) copy.rule_reference.entries[category] = compactRecords(rows);
   return copy;
+}
+
+// Criteria often repeat the same rule as legal_actions and modal cards. Intern
+// text across BOTH parts before record encoding, keeping the dictionary in state
+// so the API still receives only its native model/state/questions fields.
+export function compactDecisionRequest(payload) {
+  const { state, questions, text_dictionary } = deduplicateText({ state: payload.state, questions: payload.questions });
+  const packed = { ...payload, state: compactContext({ ...state, text_dictionary }, { deduplicate: false }), questions };
+  return Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(payload)) ? packed : payload;
 }

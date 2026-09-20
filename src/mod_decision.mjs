@@ -1,7 +1,7 @@
 import { decisionInstructions } from "./decision_instructions.mjs";
 import { getJevModel, requestJev } from './jev_client.mjs';
 import { validateModRequest } from './mod_client.mjs';
-import { buildDecisionContext, ContextError, compactContext, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
+import { buildDecisionContext, ContextError, compactDecisionRequest, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
 import { combatForecast, firstHitHpLoss, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
 import { needsStrategyAssessment, prepareStrategyAssessment, parseStrategyAssessment } from './strategy_assessment.mjs';
@@ -318,7 +318,7 @@ export function prepareModDecision(gameState, options = {}) {
   const maxBytes = options.maxRequestBytes ?? 70000;
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) throw new ContextError('Invalid Jev request byte budget');
   const shouldPack = originalBytes > Math.min(maxBytes, 30000);
-  if (shouldPack) payload = { ...payload, state: compactContext(context) };
+  if (shouldPack) payload = compactDecisionRequest(payload);
   validateDecisionPacket(payload.state);
   const body = JSON.stringify(payload), requestBytes = Buffer.byteLength(body);
   const metrics = { request_bytes: requestBytes, original_bytes: originalBytes, max_request_bytes: maxBytes, compression: shouldPack ? 'lossless_records_and_text' : 'none', candidate_count: candidates.size };

@@ -51,6 +51,10 @@ export async function requestJev(payload, options = {}) {
     try {
       const error = await response.json();
       kind = error?.detail?.error_type ?? error?.error?.type;
+      // OpenRouter wraps the upstream JSON inside an HTTP-prefixed message.
+      // Parse just that documented observed shape; never log the raw message.
+      const upstream = error?.error?.message?.match(/^HTTP \d{3}: (\{.*\})$/s);
+      if (!kind && upstream) kind = JSON.parse(upstream[1])?.detail?.error_type;
     } catch {}
     // Provider bodies can echo headers or request data. Keep only a bounded code.
     throw new Error(`Jev API error ${response.status}${typeof kind === 'string' && /^[a-z_]{1,80}$/.test(kind) ? ` (${kind})` : ''} via ${config.provider}`);
