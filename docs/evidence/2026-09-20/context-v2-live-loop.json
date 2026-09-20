@@ -1,0 +1,15 @@
+{
+  "run_id": "run-1789894658",
+  "artifact_directory": "run-artifacts/2026-09-20T09-16-25-722Z-ec23effd",
+  "step": "step-0001",
+  "inspected_context_metric_files": 16,
+  "context_versions": ["sts2.context.v2"],
+  "phases": ["turn_payoff", "turn_preparation", "turn_refine_pairs", "turn_review"],
+  "observation_ids": ["057d32d141a651b0362011f8"],
+  "preservation": "canonical_round_trip_verified",
+  "maximum_logical_request_bytes": 89971,
+  "maximum_questions_in_one_request": 6,
+  "confirmed_first_action": {"cmd": "play_card", "id": "PERFECTED_STRIKE", "nth": 0, "target": 1},
+  "confirmed_after_action": {"screen": "COMBAT", "act_index": 0, "total_floor": 17, "hp": 74, "energy": 0},
+  "interpretation": "The compiled context reached multiple live planning phases and the selected command executed normally. This does not establish optimal choices, improved win rate or a completed run."
+}
