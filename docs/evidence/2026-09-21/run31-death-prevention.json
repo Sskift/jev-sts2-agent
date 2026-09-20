@@ -1,0 +1,92 @@
+{
+  "at": "2026-09-20T20:12:21.815Z",
+  "native_sources": {
+    "FairyInABottle.cs": {
+      "file": "temp/knowledge-research/FairyInABottle.cs",
+      "sha256": "2e17dc4d75dd53d2f75e5540c305277426958dccfc9f0f275cf00f803a2ae20e"
+    },
+    "PotionModel.cs": {
+      "file": "temp/knowledge-research/PotionModel.cs",
+      "sha256": "d628ba26c246862deb6367c5be2ba1d583a63c4baa2cf01d5db31e90a82b0d90"
+    },
+    "CreatureCmd.cs": {
+      "file": "temp/knowledge-research/CreatureCmd.cs",
+      "sha256": "8a50731d4cc286f2f2095d88e825f5661e3e8df55df002783b58e6e76855e6bd"
+    },
+    "SandpitPower.cs": {
+      "file": "temp/knowledge-research/SandpitPower.cs",
+      "sha256": "33966cbbb2b865c065ca7cc1711f95e879d84ae5f8aa9afca5c23db31d6d146e"
+    }
+  },
+  "snapshot": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run31-resume-2026-09-20T20-03-51.274Z\\step-0035\\after-state.json",
+    "sha256": "e564ae2a47da4f251e54c511928f1bd9ff251f85710cc0b8702c4fe4bc201f19",
+    "run_id": "run-1789934018",
+    "floor": 14,
+    "hp": 76,
+    "owned_potion": {
+      "can_use": false,
+      "valid_target_ids": [
+        0
+      ],
+      "slot": 1,
+      "id": "FAIRY_IN_A_BOTTLE",
+      "name": "Fairy in a Bottle",
+      "description": "When your HP would be reduced to 0, instead this potion is discarded and you heal to 30% of your Max HP.",
+      "rarity": "Rare",
+      "usage": "Automatic",
+      "target_type": "Self"
+    }
+  },
+  "effect": {
+    "source_id": "FAIRY_IN_A_BOTTLE",
+    "category": "potions",
+    "owner": "player",
+    "active": true,
+    "potion_slot": 1,
+    "live_rule": "When your HP would be reduced to 0, instead this potion is discarded and you heal to 30% of your Max HP.",
+    "wiki_rule_id": "potions/FAIRY_IN_A_BOTTLE",
+    "activation": "already_present",
+    "trigger": "ordinary_owner_death_check",
+    "expires": "consumed_when_triggered",
+    "consequence": "prevent_death_and_heal",
+    "timing_detail": "Automatic while held; no manual use is needed. Consumed before healing for 30% of maximum HP, minimum 1 before modifiers. Later damage can still kill. Forced death, including Sandpit, bypasses this prevention.",
+    "timing_coverage": "versioned_rule_adapter"
+  },
+  "prior_behavior": {
+    "effect_active": false,
+    "activation": "after_use",
+    "lethal_forecast_ignored_automatic_recovery": true
+  },
+  "synthetic_probe": {
+    "scope": "A copy of the saved combat with player HP changed to 1 and first intent to 30x2; no native state was changed and no model request or command was sent.",
+    "forecast": {
+      "energy_after_printed_cost": 0,
+      "first_hit_hp_loss": null,
+      "block_after_card": 0,
+      "block_including_end_turn_gains": 0,
+      "end_turn_block_gains": [],
+      "displayed_attacks_after_target_depletion": 69,
+      "uncomputed_death_prevention": [
+        {
+          "source_id": "FAIRY_IN_A_BOTTLE",
+          "potion_slot": 1,
+          "description": "When your HP would be reduced to 0, instead this potion is discarded and you heal to 30% of your Max HP.",
+          "base_heal_fraction_of_max_hp": 0.3,
+          "minimum_base_heal": 1,
+          "scope": "Automatic ordinary-death prevention, consumed before healing. Trigger order, heal modifiers, repeated damage and remaining potion inventory are not simulated; do not infer final HP or survival from the damage sum. Forced death bypasses this effect."
+        }
+      ],
+      "hp_loss_if_end_turn": null,
+      "hp_remaining_if_end_turn": null,
+      "fatal_if_end_turn": null
+    }
+  },
+  "implementation": "Automatic potions are armed while held. Native Fairy prevents ordinary death, is consumed before healing, and heals max(30% max HP, 1) before modifiers. Sum-only damage cannot determine post-revival HP or survival; expose the dependency and conditional consumption. Sandpit force:true bypasses prevention. Other revival adapters are not claimed.",
+  "validation": {
+    "passed": 44,
+    "failed": 0,
+    "command": "node --test test/effect_lifecycle.test.mjs test/combat_arithmetic.test.mjs test/turn_projection.test.mjs test/turn_sequence.test.mjs test/context_compiler.test.mjs"
+  },
+  "runtime_loaded": false
+}

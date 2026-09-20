@@ -29,6 +29,8 @@ export function describePlanAlternative(state, steps) {
   const sequence = inspectSequence(state, steps), projection = describeTurnProjection(state, steps);
   const usedPotions = new Set(sequence.entries.filter(e => e.potion).map(e => e.potion.slot));
   const potions = (state.combat.player.potions || []).map(p => ({ id: p.id, slot: p.slot }));
+  const automaticPotions = new Set((state.combat.player.potions || []).filter(p => p.usage === 'Automatic').map(p => p.slot));
+  const conditionalPotions = new Set((projection.uncomputed_death_prevention || []).map(effect => effect.potion_slot));
   const known = projection.known_effects_only;
   const currentAttack = state.combat.enemies.filter(e => e.is_alive && e.hp > 0).reduce((sum, e) => sum + intentDamage(e), 0);
   const blockable = known.incoming_attack === null ? null : known.incoming_attack + known.end_turn_damage_events.reduce((sum, event) => sum + event.amount, 0);
@@ -37,11 +39,13 @@ export function describePlanAlternative(state, steps) {
     resource_consequences: {
       current_displayed_attack_damage: currentAttack,
       consumed_potions: potions.filter(p => usedPotions.has(p.slot)),
-      potions_still_available: potions.filter(p => !usedPotions.has(p.slot)),
+      potions_still_available: potions.filter(p => !usedPotions.has(p.slot) && !conditionalPotions.has(p.slot) && !automaticPotions.has(p.slot)),
+      ...(automaticPotions.size ? { automatic_potions_held_until_triggered: potions.filter(p => automaticPotions.has(p.slot)) } : {}),
+      ...(conditionalPotions.size ? { potions_consumed_if_death_prevention_triggers: potions.filter(p => conditionalPotions.has(p.slot)) } : {}),
       known_blockable_damage_before_block: blockable,
       block_unused_by_known_damage: blockable === null || known.block_including_end_turn_gains === null ? null : Math.max(0, known.block_including_end_turn_gains - blockable),
       ordinary_block_reset: 'At the next owner turn start; it protects through this enemy response, but does not carry to a later enemy turn without a retention rule.',
-      scope: 'Conditional on the declared actions. Consumed potions are unavailable afterward. Block accounting covers only calculated incoming damage; evaluate uncomputed triggers, retention and other uses of Block from the current rules.'
+      scope: 'Conditional on the declared actions. Consumed potions are unavailable afterward; held automatic potions remain armed until their conditions trigger, and their final inventory is not simulated. Block accounting covers only calculated incoming damage; evaluate uncomputed triggers, retention and other uses of Block from the current rules.'
     },
     ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map((step, index) => {
       energyAfterPrintedCosts -= budget.costs[index];

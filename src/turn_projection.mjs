@@ -79,6 +79,7 @@ export function describeTurnProjection(state, steps) {
     },
     ...(projection.positioning ? { positioning: projection.positioning } : {}),
     ...(projection.uncomputed_reactions.length ? { uncomputed_reactions: projection.uncomputed_reactions } : {}),
+    ...(projection.uncomputed_death_prevention.length ? { uncomputed_death_prevention: projection.uncomputed_death_prevention } : {}),
     ...(projection.card_flow ? { card_flow: projection.card_flow } : {}),
     ...(debuffs ? { debuff_dependencies: debuffs } : {}),
     ...(lifecycle ? { effect_lifecycle: lifecycle } : {}),
@@ -176,6 +177,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
   if (sequence.checkpoint) unresolved.push(`Observe after ${sequence.checkpoint.source_id}: ${sequence.checkpoint.reason} No later action or end-turn outcome is promised.`);
   if (sequence.unknown_targets.length || sequence.unknown_block) unresolved.push('A changed modifier has an unresolved preview range; affected damage, Block and final HP are unknown. See sequence_dependencies.');
   if (end.uncomputed_turn_end_effects?.length) unresolved.push('Current turn-end health/damage/Block rules are not calculated; final HP and turn-end Block remain unknown. See uncomputed_turn_end_effects for the current sources and conditions.');
+  if (end.uncomputed_death_prevention?.length) unresolved.push('An automatic death-prevention potion may be consumed. Revival timing and later damage are not simulated; final HP and survival remain unknown. See uncomputed_death_prevention.');
   const depleted = new Set(combat.enemies.filter(enemy => !enemy.is_alive || enemy.hp <= 0).map(enemy => enemy.combat_id));
   const positioning = projectPositioning(state.combat, steps, depleted);
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
@@ -208,6 +210,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved || reactions.length || sequence.unknown_block || sequence.unknown_targets.length || sequence.checkpoint ? null : end.hp_remaining_if_end_turn,
     incoming_attack_after_prefix: facingUnresolved || reactions.length || sequence.unknown_targets.length || sequence.checkpoint ? null : end.displayed_attacks_after_target_depletion,
     uncomputed_reactions: reactions,
+    uncomputed_death_prevention: end.uncomputed_death_prevention || [],
     attack_effects: attackEffects,
     uncomputed_turn_end_effects: end.uncomputed_turn_end_effects || [],
     end_turn_damage_events: end.end_turn_damage_events || [],

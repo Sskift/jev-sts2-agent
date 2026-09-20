@@ -243,7 +243,8 @@ export function buildModCandidates(state) {
       if (estimate.active_rage_block_gain) action.description += ` Active Rage adds ${estimate.active_rage_block_gain} Block for playing this Attack (once per card, already included in the estimate).`;
       if (estimate.end_turn_block_gains.length) action.description += ` Automatic turn-end Block: ${estimate.end_turn_block_gains.map(gain => `${gain.source_id} +${gain.amount}`).join(', ')}; included once in end-now HP, not immediate Block.`;
       if (card?.cost < 0 && !card.attack_preview) action.description += ' X-cost: per-hit damage does not guarantee a hit. Without a known hit count this estimate assumes no attack repetitions; use current energy, card rules and modifiers.';
-      if (estimate.declared_self_hp_loss) action.description += ` Printed self HP loss ${estimate.declared_self_hp_loss}; HP after that loss ${estimate.hp_remaining_after_declared_loss}${estimate.fatal_from_declared_hp_loss ? ' (LETHAL SELF-LOSS before waiting for enemies)' : ''}. Check any loss-prevention effects.`;
+      if (estimate.declared_self_hp_loss) action.description += ` Printed self HP loss ${estimate.declared_self_hp_loss}; HP after that loss ${estimate.hp_remaining_after_declared_loss ?? 'unknown'}${estimate.fatal_from_declared_hp_loss ? ' (LETHAL SELF-LOSS before waiting for enemies)' : ''}. Check any loss-prevention effects.`;
+      if (estimate.uncomputed_death_prevention?.length) action.description += ' An automatic death-prevention potion can be consumed during this sequence; final HP and survival require its trigger order and subsequent damage, which are not simulated.';
       if (estimate.end_turn_hand_damage) action.description += ` Remaining Toxic cards deal ${estimate.end_turn_hand_damage} extra blockable damage at end of turn.`;
       if (estimate.attack_trigger_potential) {
         const trigger = estimate.attack_trigger_potential;
@@ -331,6 +332,7 @@ export function prepareModDecision(gameState, options = {}) {
             ...(estimate.card_flow ? { card_flow: estimate.card_flow } : {}),
             ...(estimate.uncomputed_reactions ? { uncomputed_reactions: estimate.uncomputed_reactions, reaction_coverage: estimate.reaction_coverage } : {}),
             ...(estimate.uncomputed_turn_end_effects ? { uncomputed_turn_end_effects: estimate.uncomputed_turn_end_effects } : {}),
+            ...(estimate.uncomputed_death_prevention ? { uncomputed_death_prevention: estimate.uncomputed_death_prevention } : {}),
             ...(estimate.positioning ? { positioning: estimate.positioning } : {}),
             ...(estimate.active_rage_block_gain ? { rage_block_included: estimate.active_rage_block_gain } : {}),
             ...(estimate.followup_attacks?.hand_indices.length ? { conditional_followups: estimate.followup_attacks } : {}),

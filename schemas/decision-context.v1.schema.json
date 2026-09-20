@@ -783,6 +783,7 @@
         },
         "encounter_progress": { "type": "array", "items": { "type": "object" } },
         "uncomputed_depletion_effects": { "type": "array", "items": { "type": "object" } },
+        "uncomputed_death_prevention": { "type": "array", "items": { "type": "object" } },
         "sequence_dependencies": { "type": "object", "required": ["is_observed", "steps", "checkpoint", "violations", "scope"],
           "properties": { "is_observed": { "const": false }, "steps": { "type": "array" }, "checkpoint": { "type": ["object", "null"] }, "violations": { "type": "array" }, "scope": { "$ref": "#/$defs/text" } } },
         "loss_deadlines": { "type": "array", "items": { "type": "object", "required": ["source_id", "owner_combat_id", "counter_after_declared_actions", "counter_after_upcoming_enemy_start", "enemy_starts_until_lethal_without_further_changes", "known_delay_cards", "scope"],

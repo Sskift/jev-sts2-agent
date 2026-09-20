@@ -147,13 +147,25 @@ export function combatForecast(combat, card = null, target = null) {
     .flatMap(enemy => (enemy.powers || []).filter(p => p.id === 'SANDPIT_POWER' && p.amount > 0)
       .map(power => ({ target_id: enemy.combat_id, power_id: power.id, enemy_turns_remaining_after_card: power.amount + Number(card?.id === 'FRANTIC_ESCAPE') })));
   const instantDeath = deathTimers.some(timer => timer.enemy_turns_remaining_after_card <= 1);
+  const hasFairy = combat.player.potions?.some(potion => potion.id === 'FAIRY_IN_A_BOTTLE');
+  const selfLossPreventable = hasFairy && selfHpLoss >= combat.player.hp;
+  // Verified Fairy / CreatureCmd hooks: normal death checks can consume the
+  // potion; Sandpit's force:true bypasses prevention. Aggregate incoming damage
+  // cannot establish how much damage remains after an intervening revival.
+  const deathPrevention = !instantDeath && loss >= combat.player.hp ? (combat.player.potions || [])
+    .filter(potion => potion.id === 'FAIRY_IN_A_BOTTLE').map(potion => ({ source_id: potion.id, potion_slot: potion.slot,
+      description: potion.description, base_heal_fraction_of_max_hp: 0.3, minimum_base_heal: 1,
+      scope: 'Automatic ordinary-death prevention, consumed before healing. Trigger order, heal modifiers, repeated damage and remaining potion inventory are not simulated; do not infer final HP or survival from the damage sum. Forced death bypasses this effect.' })) : [];
+  const hpUnresolved = healthUnresolved || deathPrevention.length > 0;
   return {
     ...(cardFlow ? { card_flow: cardFlow } : {}),
     energy_after_printed_cost: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
     first_hit_hp_loss: target && card ? firstHitHpLoss(card, target)?.hp_loss ?? null : null,
     ...(hit ? { attack_hp_loss: hit.hp_loss, preview_hits: hit.hits } : {}),
     ...(areaHits ? { attack_hp_loss_by_target: areaHits } : {}),
-    ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss, hp_remaining_after_declared_loss: combat.player.hp - selfHpLoss, fatal_from_declared_hp_loss: selfHpLoss >= combat.player.hp } : {}),
+    ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss,
+      hp_remaining_after_declared_loss: selfLossPreventable ? null : combat.player.hp - selfHpLoss,
+      fatal_from_declared_hp_loss: selfLossPreventable ? null : selfHpLoss >= combat.player.hp } : {}),
     ...(endTurnHandDamage ? { end_turn_hand_damage: endTurnHandDamage } : {}),
     ...(endTurnDamage.length ? { end_turn_damage_events: endTurnDamage } : {}),
     block_after_card: reactionUnresolved ? null : block,
@@ -168,9 +180,10 @@ export function combatForecast(combat, card = null, target = null) {
       reaction_coverage: 'HP, final Block and remaining incoming damage are unknown. Attack damage/removal and turn-end gain entries are conditional baselines only: reaction may prevent the card or later hits from finishing.' } : {}),
     ...(timedEffects.length ? { uncomputed_turn_end_effects: timedEffects } : {}),
     ...(positioning ? { positioning, incoming_attack_preview_valid: !facingUnresolved } : {}),
-    hp_loss_if_end_turn: healthUnresolved ? null : instantDeath ? combat.player.hp : facingUnresolved ? null : loss,
-    hp_remaining_if_end_turn: healthUnresolved ? null : instantDeath ? 0 : facingUnresolved ? null : combat.player.hp - loss,
-    fatal_if_end_turn: healthUnresolved ? null : instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null || facingUnresolved ? null : loss >= combat.player.hp,
+    ...(deathPrevention.length ? { uncomputed_death_prevention: deathPrevention } : {}),
+    hp_loss_if_end_turn: hpUnresolved ? null : instantDeath ? combat.player.hp : facingUnresolved ? null : loss,
+    hp_remaining_if_end_turn: hpUnresolved ? null : instantDeath ? 0 : facingUnresolved ? null : combat.player.hp - loss,
+    fatal_if_end_turn: hpUnresolved ? null : instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null || facingUnresolved ? null : loss >= combat.player.hp,
     ...(exhausted ? { exhausted_hand_cards: exhausted.map(c => ({ index: c.index, id: c.id, type: c.type })), immediate_block_gain: immediateBlock } : {}),
     ...(deathTimers.length ? { death_timers: deathTimers, instant_death_if_end_turn: instantDeath } : {}),
     ...(followup?.hand_indices.length ? { followup_attacks: followup } : {}),

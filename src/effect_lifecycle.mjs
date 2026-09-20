@@ -16,7 +16,8 @@ const timing = {
   SANDPIT: { trigger: 'enemy_turn_start_countdown', expires: 'owner_death_or_countdown_resolution', consequence: 'player_death_at_zero', detail: 'Decrements at enemy turn start. HP and Block cannot prevent this loss condition; a delay changes the deadline, not the need to handle later deadlines.' },
   PERSONAL_HIVE: { trigger: 'each_incoming_attack_hit', expires: 'until_removed', consequence: 'dazed_inserted_randomly_into_draw_pile', detail: 'Count hits rather than Attack cards. Generated status cards affect later draw quality and can displace a known top card.' },
   BURN: { trigger: 'player_turn_end_while_in_hand', expires: 'leaves_hand', consequence: 'blockable_damage_to_player' },
-  TOXIC: { trigger: 'player_turn_end_while_in_hand', expires: 'leaves_hand', consequence: 'blockable_damage_to_player' }
+  TOXIC: { trigger: 'player_turn_end_while_in_hand', expires: 'leaves_hand', consequence: 'blockable_damage_to_player' },
+  FAIRY_IN_A_BOTTLE: { trigger: 'ordinary_owner_death_check', expires: 'consumed_when_triggered', consequence: 'prevent_death_and_heal', detail: 'Automatic while held; no manual use is needed. Consumed before healing for 30% of maximum HP, minimum 1 before modifiers. Later damage can still kill. Forced death, including Sandpit, bypasses this prevention.' }
 };
 const idOf = entity => entity.id.replace(/_POWER$/, '');
 export const effectTiming = id => timing[id.replace(/_POWER$/, '')] ?? null;
@@ -30,7 +31,7 @@ export function describeCombatEffects(combat) {
     ...combat.enemies.filter(e => e.is_alive && e.hp > 0).flatMap(e => (e.powers || []).map(entity => ({ entity, category: 'powers', owner: e.combat_id, active: true }))),
     ...(combat.player.relics || []).map(entity => ({ entity, category: 'relics', owner: 'player', active: true })),
     ...combat.hand.map(entity => ({ entity, category: 'cards', owner: 'player', active: ['BURN', 'TOXIC'].includes(entity.id) })),
-    ...(combat.player.potions || []).map(entity => ({ entity, category: 'potions', owner: 'player', active: false }))
+    ...(combat.player.potions || []).map(entity => ({ entity, category: 'potions', owner: 'player', active: entity.usage === 'Automatic' }))
   ];
   const effects = [];
   for (const { entity, category, owner, active } of sources) {
@@ -53,7 +54,7 @@ export function describeCombatEffects(combat) {
     });
   }
   return { game_version: 'v0.111.0', effects,
-    scope: 'Resolved live rules and public timing semantics. Available cards/potions are not active effects. Wiki example numbers are never current stacks. This ledger describes causal timing, not fully simulated outcomes; read uncomputed effects in each candidate projection.',
+    scope: 'Resolved live rules and public timing semantics. Hand cards and manually used potions require activation; automatic potions are already armed while held. Wiki example numbers are never current stacks. This ledger describes causal timing, not fully simulated outcomes; read uncomputed effects in each candidate projection.',
     phase_order: ['player_actions_and_immediate_reactions', 'player_end_early_block', 'player_end_damage_and_expiry', 'enemy_start_countdowns', 'enemy_actions_and_reactions', 'enemy_end_expiry', 'next_player_turn_start'] };
 }
 

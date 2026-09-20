@@ -6,6 +6,40 @@ import { combatForecast } from '../src/combat_arithmetic.mjs';
 import { describeTurnProjection } from '../src/turn_projection.mjs';
 import { prepareModDecision } from '../src/mod_decision.mjs';
 import { compileModelRequest } from '../src/context_compiler.mjs';
+import { describePlanAlternative } from '../src/turn_plan_refinement.mjs';
+
+test('automatic revival is armed while held and invalidates summed lethal damage without overriding forced death', () => {
+  const s = completeCombat();
+  s.combat.player.hp = 5;
+  s.combat.player.potions = [{ id: 'FAIRY_IN_A_BOTTLE', name: 'Fairy in a Bottle', slot: 0, usage: 'Automatic', can_use: false, target_type: 'Self', rarity: 'Rare', valid_target_ids: [0],
+    description: 'When your HP would be reduced to 0, instead this potion is discarded and you heal to 30% of your Max HP.' }];
+  const before = structuredClone(s), effect = describeCombatEffects(s.combat).effects.find(e => e.source_id === 'FAIRY_IN_A_BOTTLE');
+  assert.equal(effect.active, true); assert.equal(effect.activation, 'already_present');
+  const forecast = combatForecast(s.combat);
+  assert.equal(forecast.hp_remaining_if_end_turn, null); assert.equal(forecast.fatal_if_end_turn, null);
+  assert.equal(forecast.uncomputed_death_prevention[0].potion_slot, 0);
+  const end = [{ kind: 'end_turn' }], plan = describePlanAlternative(s, end);
+  assert.equal(plan.conditional_preview.known_effects_only.hp_if_ending, null);
+  assert.equal(plan.conditional_preview.calculation_status, 'incomplete');
+  assert.deepEqual(plan.resource_consequences.potions_still_available, []);
+  assert.deepEqual(plan.resource_consequences.automatic_potions_held_until_triggered, [{ id: 'FAIRY_IN_A_BOTTLE', slot: 0 }]);
+  assert.deepEqual(plan.resource_consequences.potions_consumed_if_death_prevention_triggers, [{ id: 'FAIRY_IN_A_BOTTLE', slot: 0 }]);
+  const harm = combatForecast(s.combat, { cost: 0, hp_loss: 6 });
+  assert.equal(harm.hp_remaining_after_declared_loss, null); assert.equal(harm.fatal_from_declared_hp_loss, null);
+  assert.deepEqual(s, before);
+  s.decision_context.player = structuredClone(s.combat.player);
+  const prepared = prepareModDecision(s);
+  prepared.payload.state.turn_planning = { phase_scope: 'Death-prevention fixture', conditional_projection: plan.conditional_preview,
+    energy_reservation: { observed_energy: s.combat.player.energy, remaining_after_printed_costs: s.combat.player.energy, is_observed: false, includes_future_energy_gains: false, steps: [], scope: 'No prefix' } };
+  assert.doesNotThrow(() => compileModelRequest(prepared.payload));
+  s.combat.enemies[0].powers.push({ id: 'SANDPIT_POWER', amount: 1 });
+  assert.equal(combatForecast(s.combat).fatal_if_end_turn, true, 'Sandpit force:true bypasses the Fairy');
+  s.combat.enemies[0].powers.pop(); s.combat.player.hp = 50;
+  assert.equal(combatForecast(s.combat).uncomputed_death_prevention, undefined, 'Nonlethal arithmetic remains useful');
+  s.combat.player.potions = [];
+  s.combat.player.hp = 5;
+  assert.equal(combatForecast(s.combat).fatal_if_end_turn, true, 'An absent/consumed Fairy cannot be reused');
+});
 
 test('an uncomputed current turn-end health rule invalidates endpoint claims without hiding current attack or immediate Block', () => {
   const s = completeCombat();
