@@ -22,6 +22,19 @@ test('conditional sequence sums never mutate observations or trigger Orichalcum 
   assert.deepEqual(s, original);
   const noBlock = projectTurnPrefix(s, [strike]);
   assert.equal(noBlock.hp_if_ending_after_prefix, 34, 'Orichalcum applies once at turn end');
+  assert.equal(noBlock.block, 0);
+  assert.equal(noBlock.block_including_end_turn_gains, 6);
+});
+
+test('Plating is applied once after the whole sequence and never becomes intermediate card Block', () => {
+  const s = state(); s.combat.player.powers = [{ id: 'PLATING_POWER', amount: 7 }];
+  const original = structuredClone(s);
+  const projection = projectTurnPrefix(s, [strike, defend]);
+  assert.equal(projection.block, 5);
+  assert.equal(projection.block_including_end_turn_gains, 12);
+  assert.equal(projection.hp_if_ending_after_prefix, s.combat.player.hp);
+  assert.equal(projection.end_turn_block_gains.length, 1);
+  assert.deepEqual(s, original);
 });
 
 test('Rage preparation precedes attack-triggered Block and unknown potion/draw effects remain explicit', () => {

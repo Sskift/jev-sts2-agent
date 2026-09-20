@@ -233,6 +233,7 @@ export function buildModCandidates(state) {
       if (unknownBlock) action.description += ' Block contribution is UNKNOWN, not zero: this HP number omits that effect and cannot establish fatality. Evaluate the complete live rule.';
       else if (estimate.block_preview) action.description += ` Immediate Block ${estimate.block_preview.amount} from the resolved live first sentence; its native numeric preview is absent.`;
       if (estimate.active_rage_block_gain) action.description += ` Active Rage adds ${estimate.active_rage_block_gain} Block for playing this Attack (once per card, already included in the estimate).`;
+      if (estimate.end_turn_block_gains.length) action.description += ` Automatic turn-end Block: ${estimate.end_turn_block_gains.map(gain => `${gain.source_id} +${gain.amount}`).join(', ')}; included once in end-now HP, not immediate Block.`;
       if (card?.cost < 0 && !card.attack_preview) action.description += ' X-cost: per-hit damage does not guarantee a hit. Without a known hit count this estimate assumes no attack repetitions; use current energy, card rules and modifiers.';
       if (estimate.declared_self_hp_loss) action.description += ` Printed self HP loss ${estimate.declared_self_hp_loss}; HP after that loss ${estimate.hp_remaining_after_declared_loss}${estimate.fatal_from_declared_hp_loss ? ' (LETHAL SELF-LOSS before waiting for enemies)' : ''}. Check any loss-prevention effects.`;
       if (estimate.end_turn_hand_damage) action.description += ` Remaining Toxic cards deal ${estimate.end_turn_hand_damage} extra blockable damage at end of turn.`;
@@ -309,6 +310,8 @@ export function prepareModDecision(gameState, options = {}) {
           ...(estimate ? { limited_calculation: {
             energy_left: estimate.energy_after_printed_cost,
             block: estimate.block_after_card,
+            block_including_end_turn_gains: estimate.block_including_end_turn_gains,
+            end_turn_block_gains: estimate.end_turn_block_gains,
             ...(estimate.block_preview ? { block_preview: estimate.block_preview } : {}),
             ...(estimate.attack_hp_loss !== undefined ? { target_hp_loss: estimate.attack_hp_loss } : {}),
             ...(estimate.attack_hp_loss_by_target ? { hp_loss_by_target: estimate.attack_hp_loss_by_target } : {}),

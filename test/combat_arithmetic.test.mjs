@@ -45,7 +45,25 @@ test('Orichalcum and delayed Rage block are not mistaken for immediate block gai
   const combat = { player: { hp: 10, energy: 3, block: 0, relics: [{ id: 'ORICHALCUM' }] }, hand: [], enemies: [{ is_alive: true, hp: 20, intents: [{ damage: 6 }] }] };
   assert.equal(combatForecast(combat).hp_loss_if_end_turn, 0);
   assert.equal(combatForecast(combat, { cost: 1, block: 5 }).hp_loss_if_end_turn, 1);
-  assert.equal(combatForecast(combat, { id: 'RAGE', cost: 0, block: 3 }).block_after_card, 6);
+  const rage = combatForecast(combat, { id: 'RAGE', cost: 0, block: 3 });
+  assert.equal(rage.block_after_card, 0);
+  assert.equal(rage.block_including_end_turn_gains, 6);
+});
+
+test('active Plating and Orichalcum use native turn-end timing, with no Dexterity or Frail scaling', () => {
+  const combat = { player: { hp: 73, energy: 3, block: 0, powers: [
+    { id: 'PLATING_POWER', amount: 7 }, { id: 'DEXTERITY_POWER', amount: 2 }, { id: 'FRAIL_POWER', amount: 1 }
+  ], relics: [] }, hand: [], enemies: [{ is_alive: true, hp: 28, intents: [{ damage: 7 }] }] };
+  const end = combatForecast(combat);
+  assert.equal(end.block_after_card, 0);
+  assert.equal(end.block_including_end_turn_gains, 7);
+  assert.equal(end.hp_remaining_if_end_turn, 73);
+  assert.equal(end.end_turn_block_gains[0].source_id, 'PLATING_POWER');
+  combat.player.relics.push({ id: 'ORICHALCUM' });
+  assert.equal(combatForecast(combat).block_including_end_turn_gains, 13, 'Orichalcum checks zero before Plating triggers');
+  assert.equal(combatForecast(combat, { cost: 1, block: 5 }).block_including_end_turn_gains, 12, 'Immediate Block suppresses only Orichalcum');
+  combat.player.powers[0].amount = 6;
+  assert.equal(combatForecast(combat).block_including_end_turn_gains, 12, 'Use the current observed stack, not the original potion grant');
 });
 
 test('Rage exposes an affordable attack sequence as conditional Block without granting it immediately', () => {

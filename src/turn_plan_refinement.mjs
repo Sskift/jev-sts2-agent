@@ -36,6 +36,7 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
       then: 'End turn, unless a new observation requires a revision.',
       energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
       conditional_preview: { block: projection.block, hp_if_ending: projection.hp_if_ending_after_prefix,
+        block_including_end_turn_gains: projection.block_including_end_turn_gains, end_turn_block_gains: projection.end_turn_block_gains,
         hp_loss_if_ending: state.combat.player.hp - projection.hp_if_ending_after_prefix,
         incoming_attack: projection.incoming_attack_after_prefix,
         enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {

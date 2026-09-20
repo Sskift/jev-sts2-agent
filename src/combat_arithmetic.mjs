@@ -88,9 +88,21 @@ export function combatForecast(combat, card = null, target = null) {
   // Dexterity/Frail do not modify this amount. Other block hooks remain outside
   // this limited estimate, as with printed Block above.
   const rageBlock = card?.type === 'Attack' ? (combat.player.powers || []).filter(power => power.id === 'RAGE_POWER').reduce((sum, power) => sum + Math.max(0, power.amount || 0), 0) : 0;
-  let block = combat.player.block + immediateBlock + rageBlock;
-  if (block === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) block = 6;
-  const loss = selfHpLoss + Math.max(0, incoming + endTurnHandDamage - block);
+  const block = combat.player.block + immediateBlock + rageBlock;
+  // Native v0.111.0: Orichalcum checks zero Block in VeryEarly, before Plating
+  // grants its current Amount in Early. Both grants are Unpowered; neither is
+  // immediate card Block or repeated between planned actions.
+  const endTurnBlockGains = [];
+  if (living.some(enemy => !depleted.has(enemy.combat_id))) {
+    for (const power of combat.player.powers || []) if (power.id === 'PLATING_POWER' && power.amount > 0) {
+      endTurnBlockGains.push({ source_id: power.id, amount: power.amount, timing: 'turn_end_early' });
+    }
+    if (block === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) {
+      endTurnBlockGains.push({ source_id: 'ORICHALCUM', amount: 6, timing: 'turn_end', condition_checked: 'zero_before_end_effects' });
+    }
+  }
+  const blockIncludingEndTurnGains = block + endTurnBlockGains.reduce((sum, gain) => sum + gain.amount, 0);
+  const loss = selfHpLoss + Math.max(0, incoming + endTurnHandDamage - blockIncludingEndTurnGains);
   const followup = card && target && hit ? followupAttackBudget(combat, card, target, hit) : null;
   // Sandpit is a visible, deterministic instant-death countdown. Ordinary
   // Block/HP cannot prevent it; Frantic Escape visibly adds one turn.
@@ -106,6 +118,8 @@ export function combatForecast(combat, card = null, target = null) {
     ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss, hp_remaining_after_declared_loss: combat.player.hp - selfHpLoss, fatal_from_declared_hp_loss: selfHpLoss >= combat.player.hp } : {}),
     ...(endTurnHandDamage ? { end_turn_hand_damage: endTurnHandDamage } : {}),
     block_after_card: block,
+    block_including_end_turn_gains: blockIncludingEndTurnGains,
+    end_turn_block_gains: endTurnBlockGains,
     ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
     displayed_attacks_after_target_depletion: incoming,

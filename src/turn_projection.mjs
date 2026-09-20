@@ -35,9 +35,8 @@ export function projectTurnPrefix(state, steps) {
       unresolved.push(`${card.name}: X-cost hit count after earlier spending is not recomputed`);
     }
     const target = combat.enemies.find(enemy => enemy.combat_id === step.target);
-    // Orichalcum belongs to turn end, not each intermediate card preview.
-    const intermediate = { ...combat, player: { ...combat.player, relics: combat.player.relics.filter(relic => relic.id !== 'ORICHALCUM') } };
-    const estimate = combatForecast(intermediate, card, target);
+    // Keep immediate Block separate from effects due only at turn end.
+    const estimate = combatForecast(combat, card, target);
     if (estimate.block_preview?.amount === null) unresolved.push(`${card.name}: Block contribution is unknown, not zero; HP arithmetic omits it`);
     const targets = card.target_type === 'AllEnemies' ? combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) : target ? [target] : [];
     for (const enemy of targets) {
@@ -58,9 +57,10 @@ export function projectTurnPrefix(state, steps) {
   }
   const end = combatForecast(combat);
   return {
-    scope: 'Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, and Second Wind hand exhaustion. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices.',
+    scope: 'Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, Second Wind hand exhaustion, and active Plating/Orichalcum once at turn end. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices.',
     remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
-    block: combat.player.block, hp_after_declared_self_loss: combat.player.hp,
+    block: combat.player.block, block_including_end_turn_gains: end.block_including_end_turn_gains, end_turn_block_gains: end.end_turn_block_gains,
+    hp_after_declared_self_loss: combat.player.hp,
     hp_if_ending_after_prefix: end.hp_remaining_if_end_turn, incoming_attack_after_prefix: end.displayed_attacks_after_target_depletion,
     unresolved_effects: [...new Set(unresolved)]
   };
