@@ -42,6 +42,7 @@ export function describeTurnProjection(state, steps) {
       })
     },
     ...(projection.positioning ? { positioning: projection.positioning } : {}),
+    ...(projection.uncomputed_reactions.length ? { uncomputed_reactions: projection.uncomputed_reactions } : {}),
     omitted_effects: projection.unresolved_effects,
     interpretation: 'Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.',
     scope: projection.scope
@@ -51,7 +52,7 @@ export function describeTurnProjection(state, steps) {
 // This is a conditional sum of visible previews, not a game simulator. Keeping
 // it separate from combat prevents planned outcomes from becoming observations.
 export function projectTurnPrefix(state, steps) {
-  const combat = structuredClone(state.combat), unresolved = [];
+  const combat = structuredClone(state.combat), unresolved = [], reactions = [];
   for (const [index, step] of steps.entries()) {
     if (step.kind === 'end_turn') break;
     if (step.kind !== 'play_card') { unresolved.push(`${step.name}: potion effects are not simulated`); continue; }
@@ -65,6 +66,7 @@ export function projectTurnPrefix(state, steps) {
     const target = combat.enemies.find(enemy => enemy.combat_id === step.target);
     // Keep immediate Block separate from effects due only at turn end.
     const estimate = combatForecast(combat, card, target);
+    for (const reaction of estimate.uncomputed_reactions || []) reactions.push({ sequence: index, ...reaction });
     if (estimate.block_preview?.amount === null) unresolved.push(`${card.name}: Block contribution is unknown, not zero; HP arithmetic omits it`);
     const targets = card.target_type === 'AllEnemies' ? combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) : target ? [target] : [];
     for (const enemy of targets) {
@@ -72,7 +74,7 @@ export function projectTurnPrefix(state, steps) {
       if (hit) { enemy.hp = Math.max(0, enemy.hp - hit.hp_loss); enemy.block = hit.block_after; enemy.powers = hit.powers_after; enemy.is_alive = enemy.hp > 0; }
     }
     combat.player.energy = reserveSequence(state, steps.slice(0, index + 1))?.energy_left ?? estimate.energy_after_printed_cost;
-    combat.player.block = estimate.block_after_card;
+    combat.player.block = estimate.block_after_card ?? estimate.block_baseline_without_reactions;
     combat.player.hp -= estimate.declared_self_hp_loss || 0;
     const exhausted = new Set(estimate.exhausted_hand_cards?.map(card => card.index));
     combat.hand = combat.hand.filter(other => other !== original && !exhausted.has(other.index));
@@ -88,6 +90,7 @@ export function projectTurnPrefix(state, steps) {
   const positioning = projectPositioning(state.combat, steps, depleted);
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
   if (facingUnresolved) unresolved.push('Player facing changes: current enemy intent damage includes the previous facing; final incoming damage and HP are unknown until new native previews are observed.');
+  if (reactions.length) unresolved.push('Uncomputed attack reactions affect HP and Block before later actions and turn-end gains. Final HP, Block and remaining attack totals are unknown; enemy HP/removal values are conditional on all proposed attacks resolving. See uncomputed_reactions for source, timing and per-hit exposure.');
   // The single-action forecast can know a current loss timer without the
   // sequence evaluator knowing how an omitted effect changes that timer.
   // Reusing its old value would falsely declare every such plan fatal.
@@ -96,10 +99,11 @@ export function projectTurnPrefix(state, steps) {
   return {
     scope: 'Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, Second Wind hand exhaustion, and active Plating/Orichalcum once at turn end. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices.',
     remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
-    block: combat.player.block, block_including_end_turn_gains: end.block_including_end_turn_gains, end_turn_block_gains: end.end_turn_block_gains,
+    block: reactions.length ? null : combat.player.block, block_including_end_turn_gains: reactions.length ? null : end.block_including_end_turn_gains, end_turn_block_gains: end.end_turn_block_gains,
     hp_after_declared_self_loss: combat.player.hp,
-    hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved ? null : end.hp_remaining_if_end_turn,
-    incoming_attack_after_prefix: facingUnresolved ? null : end.displayed_attacks_after_target_depletion,
+    hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved || reactions.length ? null : end.hp_remaining_if_end_turn,
+    incoming_attack_after_prefix: facingUnresolved || reactions.length ? null : end.displayed_attacks_after_target_depletion,
+    uncomputed_reactions: reactions,
     ...(positioning ? { positioning } : {}),
     unresolved_effects: [...new Set(unresolved)]
   };

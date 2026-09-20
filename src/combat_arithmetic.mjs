@@ -1,4 +1,5 @@
 import { projectPositioning } from './combat_positioning.mjs';
+import { uncomputedAttackReactions } from './combat_reactions.mjs';
 
 // Arithmetic over player-visible facts only. These are single-action estimates,
 // not a combat simulator: draws, general triggered effects and future choices stay unknown.
@@ -69,6 +70,8 @@ export function immediateBlockPreview(card) {
 }
 
 export function combatForecast(combat, card = null, target = null) {
+  const reactions = uncomputedAttackReactions(combat, card, target, card ? previewHitCount(card) : 0);
+  const reactionUnresolved = reactions.length > 0;
   const hit = target && card ? attackHpLoss(card, target) : null;
   const targetDepleted = hit && hit.hp_loss >= target.hp;
   const areaHits = card?.target_type === 'AllEnemies' ? combat.enemies.filter(e => e.is_alive && e.hp > 0).map(enemy => {
@@ -121,16 +124,19 @@ export function combatForecast(combat, card = null, target = null) {
     ...(areaHits ? { attack_hp_loss_by_target: areaHits } : {}),
     ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss, hp_remaining_after_declared_loss: combat.player.hp - selfHpLoss, fatal_from_declared_hp_loss: selfHpLoss >= combat.player.hp } : {}),
     ...(endTurnHandDamage ? { end_turn_hand_damage: endTurnHandDamage } : {}),
-    block_after_card: block,
-    block_including_end_turn_gains: blockIncludingEndTurnGains,
+    block_after_card: reactionUnresolved ? null : block,
+    block_including_end_turn_gains: reactionUnresolved ? null : blockIncludingEndTurnGains,
     end_turn_block_gains: endTurnBlockGains,
     ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
-    displayed_attacks_after_target_depletion: incoming,
+    displayed_attacks_after_target_depletion: reactionUnresolved ? null : incoming,
+    ...(reactionUnresolved ? { uncomputed_reactions: reactions,
+      block_baseline_without_reactions: block,
+      reaction_coverage: 'HP, final Block and remaining incoming damage are unknown. Attack damage/removal and turn-end gain entries are conditional baselines only: reaction may prevent the card or later hits from finishing.' } : {}),
     ...(positioning ? { positioning, incoming_attack_preview_valid: !facingUnresolved } : {}),
-    hp_loss_if_end_turn: instantDeath ? combat.player.hp : facingUnresolved ? null : loss,
-    hp_remaining_if_end_turn: instantDeath ? 0 : facingUnresolved ? null : combat.player.hp - loss,
-    fatal_if_end_turn: instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null || facingUnresolved ? null : loss >= combat.player.hp,
+    hp_loss_if_end_turn: reactionUnresolved ? null : instantDeath ? combat.player.hp : facingUnresolved ? null : loss,
+    hp_remaining_if_end_turn: reactionUnresolved ? null : instantDeath ? 0 : facingUnresolved ? null : combat.player.hp - loss,
+    fatal_if_end_turn: reactionUnresolved ? null : instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null || facingUnresolved ? null : loss >= combat.player.hp,
     ...(exhausted ? { exhausted_hand_cards: exhausted.map(c => ({ index: c.index, id: c.id, type: c.type })), immediate_block_gain: immediateBlock } : {}),
     ...(deathTimers.length ? { death_timers: deathTimers, instant_death_if_end_turn: instantDeath } : {}),
     ...(followup?.hand_indices.length ? { followup_attacks: followup } : {}),

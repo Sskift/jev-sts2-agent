@@ -729,8 +729,8 @@
           "type": "object", "additionalProperties": false,
           "required": ["block", "hp_if_ending", "hp_loss_if_ending", "block_including_end_turn_gains", "end_turn_block_gains", "incoming_attack", "enemies"],
           "properties": {
-            "block": { "type": "number" }, "hp_if_ending": { "type": ["number", "null"] }, "hp_loss_if_ending": { "type": ["number", "null"] },
-            "block_including_end_turn_gains": { "type": "number" }, "incoming_attack": { "type": ["number", "null"] },
+            "block": { "type": ["number", "null"] }, "hp_if_ending": { "type": ["number", "null"] }, "hp_loss_if_ending": { "type": ["number", "null"] },
+            "block_including_end_turn_gains": { "type": ["number", "null"] }, "incoming_attack": { "type": ["number", "null"] },
             "end_turn_block_gains": { "type": "array", "items": {
               "type": "object", "required": ["source_id", "amount", "timing"],
               "properties": { "source_id": { "type": "string" }, "amount": { "type": "number", "minimum": 0 }, "timing": { "type": "string" } }
@@ -745,6 +745,10 @@
           }
         },
         "positioning": { "$ref": "#/$defs/positioningProjection" },
+        "uncomputed_reactions": { "type": "array", "items": { "type": "object", "required": ["source_id", "owner_combat_id", "sequence", "timing", "damage_per_trigger", "preview_hits", "affected_outputs"],
+          "properties": { "source_id": { "type": "string" }, "owner_combat_id": { "type": "integer" }, "sequence": { "type": "integer", "minimum": 0 },
+            "timing": { "$ref": "#/$defs/text" }, "damage_per_trigger": { "type": "number", "minimum": 0 }, "preview_hits": { "type": ["integer", "null"], "minimum": 0 },
+            "affected_outputs": { "type": "array", "items": { "type": "string" } } } } },
         "omitted_effects": { "type": "array", "items": { "$ref": "#/$defs/text" } },
         "interpretation": { "$ref": "#/$defs/text" }, "scope": { "$ref": "#/$defs/text" }
       }

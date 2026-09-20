@@ -30,5 +30,14 @@
   "live_reload": { "commit": "69d7d91", "run_id": "run-1789903049", "started_at_floor": 1,
     "artifacts": "run-artifacts/2026-09-20T11-17-25-318Z-f7fc1220", "camp_flow_observed": false,
     "feishu_revision": 79 },
+  "live_camp": {
+    "run_id": "run-1789903049", "floor": 8,
+    "decision": "run-artifacts/2026-09-20T11-17-25-318Z-f7fc1220/step-0116/decision.json",
+    "confirmation": "run-artifacts/2026-09-20T11-17-25-318Z-f7fc1220/step-0117/after-state.json",
+    "target": "BASH", "instance_id": "1f12047140e842449e8c3ab8021b5e08",
+    "probabilities": { "rest_SMITH": 0.77, "rest_HEAL": 0.23 },
+    "followthrough_model": "jev-camp-plan-selection", "followthrough_model_calls": 0,
+    "native_upgrade_confirmed": true
+  },
   "scope": "Concrete conditional comparison and bounded interaction intention. Close model probabilities do not establish improved win rate or that resting would have won the failed run. Three-act formal victory remains incomplete."
 }

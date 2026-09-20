@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-20",
+  "source": "run-artifacts/2026-09-20T11-00-04-270Z-80ddb435/step-0075/before-state.json",
+  "run_id": "run-1789900349",
+  "observation": { "floor": 29, "round": 2, "hp": 24, "block": 5, "energy": 2,
+    "enemy": "SPINY_TOAD", "enemy_hp": 92, "incoming_attack": 23, "thorns": 5, "plating": 5 },
+  "verified_rule": {
+    "version": "v0.111.0", "source": "Installed game assembly, MegaCrit.Sts2.Core.Models.Powers.ThornsPower.BeforeDamageReceived",
+    "timing": "Before each qualifying damage instance", "kind": "Unpowered blockable damage",
+    "trigger": "Powered attack or Omnislice; target HP loss is not required."
+  },
+  "new_forecasts": {
+    "PERFECTED_STRIKE": { "preview_hits": 1, "conditional_reaction_damage": 5, "final_hp": null, "final_block": null },
+    "CONFLAGRATION": { "preview_hits": 4, "conditional_reaction_damage": 20, "final_hp": null, "final_block": null },
+    "STRIKE_IRONCLAD": { "preview_hits": 1, "conditional_reaction_damage": 5, "final_hp": null, "final_block": null },
+    "scope": "Conditional exposure before prevention, not predicted actual HP loss or proof all hits resolve. Same uncertainty propagates through whole-sequence estimates."
+  },
+  "read_only_replay": {
+    "source": "temp/run24-reaction-replay/result.json", "model_calls": 18,
+    "input_tokens": 361459, "output_tokens": 2464,
+    "first_action": "PERFECTED_STRIKE", "next_intention": "SWIFT_POTION",
+    "old_first_action": "STRIKE_IRONCLAD", "game_commands_sent": 0,
+    "context": "Current observation, already-confirmed preceding commands and contemporaneous strategy only. Fresh plan; no future draw or formal outcome supplied."
+  },
+  "validation": { "passed": 41, "failed": 0, "log": "temp/reaction-checks.log" },
+  "limitations": "First reaction adapter covers Thorns on selected/all-enemy targets. It does not simulate reaction prevention, death interruption or all other powers. No win-rate or counterfactual victory claim."
+}

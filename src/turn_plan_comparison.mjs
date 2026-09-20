@@ -1,4 +1,5 @@
-import { combatForecast, intentDamage } from './combat_arithmetic.mjs';
+import { combatForecast, intentDamage, previewHitCount } from './combat_arithmetic.mjs';
+import { uncomputedAttackReactions } from './combat_reactions.mjs';
 
 // Eligibility is deliberately separate from a model's preference. With no
 // represented lethal exposure, better ordinary mitigation is a value trade,
@@ -8,11 +9,19 @@ export function visibleSurvivalConstraints(state) {
   const incoming = combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0)
     .reduce((sum, enemy) => sum + intentDamage(enemy), 0);
   const selfLoss = combat.hand.reduce((sum, card) => sum + Math.max(0, card.hp_loss || 0), 0);
+  const reactionRules = new Set();
+  const reactionExposure = combat.hand.reduce((sum, card) => {
+    const targets = card.target_type === 'AllEnemies' ? [null] : combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0);
+    const alternatives = targets.map(target => uncomputedAttackReactions(combat, card, target, previewHitCount(card)));
+    for (const reaction of alternatives.flat()) reactionRules.add(reaction.source_id);
+    return sum + Math.max(0, ...alternatives.map(reactions => reactions.reduce((total, reaction) => total + (reaction.damage_if_all_preview_hits_resolve ?? 0), 0)));
+  }, 0);
   const forecast = combatForecast(combat);
-  if (incoming + selfLoss >= combat.player.hp || forecast.fatal_if_end_turn === true && !forecast.instant_death_if_end_turn) {
+  if (incoming + selfLoss + reactionExposure >= combat.player.hp || forecast.fatal_if_end_turn === true && !forecast.instant_death_if_end_turn) {
     constraints.push({ kind: 'potential_lethal_health_loss', current_hp: combat.player.hp,
       displayed_attacks_before_block: incoming, hand_declared_self_loss_upper_bound: selfLoss,
-      scope: 'Exposure bound only; not all cards are affordable or will be played. Evaluate each full plan, prevention and current Block.' });
+      ...(reactionExposure ? { hand_preview_reaction_exposure: reactionExposure, reaction_rule_ids: [...reactionRules] } : {}),
+      scope: 'Conditional exposure only; not all cards are affordable or will be played. Reactive exposure uses known preview hits, largest possible target exposure per single-target card, and excludes unknown hit counts. Evaluate each full plan, reaction timing, prevention and current Block; this is not predicted HP loss.' });
   }
   for (const timer of forecast.death_timers || []) {
     const power = combat.enemies.find(enemy => enemy.combat_id === timer.target_id)?.powers.find(power => power.id === timer.power_id);

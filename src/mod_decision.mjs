@@ -97,7 +97,7 @@ export function buildModCandidates(state) {
             const preview = card.target_previews?.find(p => p.target_id === enemy.combat_id);
             const effect = `${description}${Number.isFinite(preview?.damage) ? ` Deal ${preview.damage} damage per hit.` : ''}`;
             const hit = firstHitHpLoss(card, enemy);
-            const lethal = hit && hit.hp_loss >= enemy.hp ? ' First hit depletes target HP.' : '';
+            const lethal = hit && hit.hp_loss >= enemy.hp ? ' Current first-hit preview is enough to deplete target HP if the hit resolves.' : '';
             const revival = enemy.powers?.some(power => power.id === 'ILLUSION_POWER' && power.amount > 0);
             const deathRule = revival ? ' Illusion: revives next turn at full HP; a knockdown only provides temporary relief.' : enemy.is_minion ? ' Minion: abandons combat when its leader dies.' : enemies.some(other => other.is_minion) && enemies.filter(other => !other.is_minion).length === 1 ? ' Last non-minion: defeating this leader makes its minions abandon combat.' : '';
             add(`card_${card.index}_target_${enemy.combat_id}`, { ...request, target: enemy.combat_id }, `${effect} Target ${enemy.name} #${enemy.combat_id}.${lethal}${deathRule}`, { card_hand_index: card.index, target_combat_id: enemy.combat_id });
@@ -237,6 +237,7 @@ export function buildModCandidates(state) {
       const unknownBlock = estimate.block_preview?.amount === null;
       action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn ?? 'unknown'}${estimate.fatal_if_end_turn && !unknownBlock ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
       if (estimate.incoming_attack_preview_valid === false) action.description += ` Facing changes to ${estimate.positioning.facing_after_sequence}; current enemy intent damage is stale for this outcome. Do not reuse it as the final incoming damage.`;
+      if (estimate.uncomputed_reactions?.length) action.description += ` ${estimate.reaction_coverage} Evaluate the listed uncomputed_reactions before treating an attack or target depletion as safe.`;
       if (unknownBlock) action.description += ' Block contribution is UNKNOWN, not zero: this HP number omits that effect and cannot establish fatality. Evaluate the complete live rule.';
       else if (estimate.block_preview) action.description += ` Immediate Block ${estimate.block_preview.amount} from the resolved live first sentence; its native numeric preview is absent.`;
       if (estimate.active_rage_block_gain) action.description += ` Active Rage adds ${estimate.active_rage_block_gain} Block for playing this Attack (once per card, already included in the estimate).`;
@@ -327,6 +328,7 @@ export function prepareModDecision(gameState, options = {}) {
             ...(estimate.attack_hp_loss !== undefined ? { target_hp_loss: estimate.attack_hp_loss } : {}),
             ...(estimate.attack_hp_loss_by_target ? { hp_loss_by_target: estimate.attack_hp_loss_by_target } : {}),
             end_now_hp: estimate.hp_remaining_if_end_turn,
+            ...(estimate.uncomputed_reactions ? { uncomputed_reactions: estimate.uncomputed_reactions, reaction_coverage: estimate.reaction_coverage } : {}),
             ...(estimate.positioning ? { positioning: estimate.positioning } : {}),
             ...(estimate.active_rage_block_gain ? { rage_block_included: estimate.active_rage_block_gain } : {}),
             ...(estimate.followup_attacks?.hand_indices.length ? { conditional_followups: estimate.followup_attacks } : {}),
