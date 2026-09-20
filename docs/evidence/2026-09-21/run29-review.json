@@ -1,0 +1,428 @@
+{
+  "recorded_at": "2026-09-20T18:35:07.252Z",
+  "run_id": "run-1789925824",
+  "game_version": "v0.111.0",
+  "runtimes": [
+    "9b590b225206ff76e9271af27546415f71a24212",
+    "cffbb4a0795cc044ca498af22e4fe958b216a9b5"
+  ],
+  "artifacts": [
+    "C:\\Users\\skift\\jevmake\\run-artifacts\\run29-2026-09-20T17-37-00.808Z",
+    "C:\\Users\\skift\\jevmake\\run-artifacts\\run29-resume-2026-09-20T18-14-07.432Z"
+  ],
+  "final": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run29-resume-2026-09-20T18-14-07.432Z/step-0068/after-state.json",
+    "sha256": "b2a6ec4d1d815493926c694ff2955548cb4f75bd1ab4b5c9f657d04a3a96867c",
+    "is_victory": false,
+    "floor": 23,
+    "score": 393,
+    "epochs_discovered": 0,
+    "can_return_to_menu": false,
+    "can_continue": false,
+    "hp": 0,
+    "turn": 8,
+    "enemies": [
+      {
+        "id": 1,
+        "hp": 2,
+        "max_hp": 63
+      },
+      {
+        "id": 2,
+        "hp": 38,
+        "max_hp": 64
+      }
+    ]
+  },
+  "calls": {
+    "responses": 2547,
+    "models": [
+      "typesafe/jev-1.13-20260917"
+    ],
+    "cost": 2.226134274000005,
+    "inTokens": 53003197,
+    "outTokens": 234434
+  },
+  "myte_turns": [
+    {
+      "turn": 1,
+      "hp_before": 44,
+      "block": 5,
+      "incoming": 4,
+      "timed_damage": 0,
+      "expected_hp": 44,
+      "hp_after": 44,
+      "enemies": [
+        {
+          "id": 1,
+          "hp": 36
+        },
+        {
+          "id": 2,
+          "hp": 57
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "hp_before": 44,
+      "block": 18,
+      "incoming": 13,
+      "timed_damage": 10,
+      "expected_hp": 39,
+      "hp_after": 39,
+      "enemies": [
+        {
+          "id": 1,
+          "hp": 36
+        },
+        {
+          "id": 2,
+          "hp": 57
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "hp_before": 39,
+      "block": 19,
+      "incoming": 19,
+      "timed_damage": 5,
+      "expected_hp": 34,
+      "hp_after": 34,
+      "enemies": [
+        {
+          "id": 1,
+          "hp": 36
+        },
+        {
+          "id": 2,
+          "hp": 57
+        }
+      ]
+    },
+    {
+      "turn": 4,
+      "hp_before": 34,
+      "block": 13,
+      "incoming": 6,
+      "timed_damage": 0,
+      "expected_hp": 33,
+      "hp_after": 33,
+      "enemies": [
+        {
+          "id": 1,
+          "hp": 27
+        },
+        {
+          "id": 2,
+          "hp": 48
+        }
+      ]
+    },
+    {
+      "turn": 5,
+      "hp_before": 33,
+      "block": 13,
+      "incoming": 15,
+      "timed_damage": 15,
+      "expected_hp": 16,
+      "hp_after": 16,
+      "enemies": [
+        {
+          "id": 1,
+          "hp": 22
+        },
+        {
+          "id": 2,
+          "hp": 42
+        }
+      ]
+    },
+    {
+      "turn": 6,
+      "hp_before": 16,
+      "block": 18,
+      "incoming": 23,
+      "timed_damage": 10,
+      "expected_hp": 1,
+      "hp_after": 1,
+      "enemies": [
+        {
+          "id": 1,
+          "hp": 12
+        },
+        {
+          "id": 2,
+          "hp": 42
+        }
+      ]
+    },
+    {
+      "turn": 7,
+      "hp_before": 1,
+      "block": 13,
+      "incoming": 8,
+      "timed_damage": 5,
+      "expected_hp": 1,
+      "hp_after": 1,
+      "enemies": [
+        {
+          "id": 1,
+          "hp": 8
+        },
+        {
+          "id": 2,
+          "hp": 38
+        }
+      ]
+    },
+    {
+      "turn": 8,
+      "hp_before": 1,
+      "block": 10,
+      "incoming": 17,
+      "timed_damage": 15,
+      "expected_hp": -21,
+      "hp_after": 0,
+      "enemies": [
+        {
+          "id": 1,
+          "hp": 2
+        },
+        {
+          "id": 2,
+          "hp": 38
+        }
+      ]
+    }
+  ],
+  "forecast_interpretation": "Current-turn Toxic damage was included. Turns 1-7 matched actual HP; the final arithmetic remainder was -21, with native defeat clamping HP to 0. This is not a future-draw or whole-fight forecast.",
+  "knowledge_before": {
+    "status_move_matches": 0,
+    "toxic_card_rule_present": false
+  },
+  "knowledge_after": {
+    "status_move_matches": 1,
+    "generated": [
+      {
+        "card_id": "TOXIC",
+        "destination": "Hand",
+        "count": 2,
+        "recipients": "move_targets",
+        "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+      }
+    ],
+    "request_bytes": 53905,
+    "generated_card_calls": 14,
+    "unknown_amounts": 3
+  },
+  "checks": {
+    "passed": 83,
+    "failed": 0,
+    "log": "temp/run29-review-checks.log"
+  },
+  "development_replays": [
+    {
+      "id": "run29-myte-turn1",
+      "label": "enemy-card-effects",
+      "cohort": "development",
+      "input_sha256": "00c01ad4b972d4b07ada4dfb42053c72cbb92b5e1a768c94e753be0752b8e3bc",
+      "source_sha256": "9faafa12c15d81568f0f13c259db8795da84fd4f21de404f9ea3ba5790229163",
+      "model": "typesafe/jev-1.13-20260917",
+      "providers": [
+        "openrouter"
+      ],
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Setup Strike",
+          "card_id": "SETUP_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Thunderclap",
+          "card_id": "THUNDERCLAP"
+        },
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Twin Strike",
+          "card_id": "TWIN_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 52,
+      "usage": {
+        "input_tokens": 1203138,
+        "output_tokens": 3291
+      },
+      "cost": 0.050531796,
+      "order_disagreements": 3,
+      "balanced_pairs": 6,
+      "error": null,
+      "summary_file": "run-artifacts/run29-review/results/run29-myte-turn1/enemy-card-effects/1/summary.json"
+    },
+    {
+      "id": "run29-myte-turn4",
+      "label": "enemy-card-effects",
+      "cohort": "development",
+      "input_sha256": "fab4305304c9621f5a12f75d78004484c184d67a4153fa9a8a78b6387f466865",
+      "source_sha256": "9faafa12c15d81568f0f13c259db8795da84fd4f21de404f9ea3ba5790229163",
+      "model": "typesafe/jev-1.13-20260917",
+      "providers": [
+        "openrouter"
+      ],
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Shrug It Off",
+          "card_id": "SHRUG_IT_OFF"
+        }
+      ],
+      "calls": 25,
+      "usage": {
+        "input_tokens": 563813,
+        "output_tokens": 1707
+      },
+      "cost": 0.023680146,
+      "order_disagreements": 6,
+      "balanced_pairs": 6,
+      "error": null,
+      "summary_file": "run-artifacts/run29-review/results/run29-myte-turn4/enemy-card-effects/1/summary.json"
+    },
+    {
+      "id": "run29-myte-turn1",
+      "label": "enemy-effects-and-bounds",
+      "cohort": "development",
+      "input_sha256": "00c01ad4b972d4b07ada4dfb42053c72cbb92b5e1a768c94e753be0752b8e3bc",
+      "source_sha256": "e24fa607609ccf5176ccd7fbcc77a4dc7c0075245b3d1f9eff86106ff48590f2",
+      "model": "typesafe/jev-1.13-20260917",
+      "providers": [
+        "openrouter"
+      ],
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Setup Strike",
+          "card_id": "SETUP_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Thunderclap",
+          "card_id": "THUNDERCLAP"
+        },
+        {
+          "kind": "play_card",
+          "name": "Iron Wave",
+          "card_id": "IRON_WAVE",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Twin Strike",
+          "card_id": "TWIN_STRIKE",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 52,
+      "usage": {
+        "input_tokens": 1207710,
+        "output_tokens": 3291
+      },
+      "cost": 0.050723820000000024,
+      "order_disagreements": 3,
+      "balanced_pairs": 6,
+      "error": null,
+      "summary_file": "run-artifacts/run29-release-review/results/run29-myte-turn1/enemy-effects-and-bounds/1/summary.json"
+    }
+  ],
+  "final_candidate_projection": {
+    "known_effects_only": {
+      "block": 5,
+      "hp_if_ending": 44,
+      "hp_loss_if_ending": 0,
+      "block_including_end_turn_gains": 5,
+      "end_turn_block_gains": [],
+      "end_turn_damage_events": [],
+      "incoming_attack": 4,
+      "enemies": [
+        {
+          "combat_id": 1,
+          "hp": null,
+          "block": null,
+          "hp_removed": null,
+          "block_removed": null,
+          "power_changes": [
+            {
+              "power_id": "VULNERABLE_POWER",
+              "before": 0,
+              "after_declared_actions": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ],
+          "conditional_bounds": {
+            "hp": {
+              "min": 10,
+              "max": 13
+            },
+            "hp_removed": {
+              "min": 50,
+              "max": 53
+            },
+            "block": {
+              "min": 0,
+              "max": 0
+            }
+          }
+        },
+        {
+          "combat_id": 2,
+          "hp": 57,
+          "block": 0,
+          "hp_removed": 7,
+          "block_removed": 0,
+          "power_changes": [
+            {
+              "power_id": "VULNERABLE_POWER",
+              "before": 0,
+              "after_declared_actions": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+    "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+  },
+  "limitations": [
+    "All replay states are development data, not holdout or new games.",
+    "No historical action or counterfactual combat was executed.",
+    "Replay plan changes do not establish win-rate improvement; position-sensitive judgments remain.",
+    "Bounded candidate search and incomplete trigger simulation remain."
+  ]
+}

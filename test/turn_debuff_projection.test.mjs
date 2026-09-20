@@ -64,6 +64,32 @@ test('a current X-cost hit count is not reused after spending on debuff setup', 
   assert.deepEqual(p.enemies[0].hp_remaining, { min: null, max: null });
 });
 
+test('uncertain enemy HP preserves an unchanged response but never assumes a possible kill', () => {
+  const s = fixture();
+  s.combat.hand[0] = { ...s.combat.hand[0], id: 'BASH', description: 'Deal 10 damage. Apply 3 Vulnerable.', target_previews: [{ target_id: 42, damage: 10 }] };
+  let p = describeTurnProjection(s, steps(s));
+  assert.equal(p.known_effects_only.enemies[0].hp, null);
+  assert.deepEqual(p.known_effects_only.enemies[0].conditional_bounds, {
+    hp: { min: 2, max: 3 }, hp_removed: { min: 19, max: 20 }, block: { min: 0, max: 0 }
+  });
+  assert.equal(p.known_effects_only.incoming_attack, 10);
+  assert.equal(p.known_effects_only.hp_if_ending, s.combat.player.hp - 10);
+  const prepared = prepareModDecision(s);
+  prepared.payload.state.turn_planning = { phase_scope: 'Hypothetical sequence.',
+    energy_reservation: { observed_energy: 3, remaining_after_printed_costs: 3, scope: 'No action has executed.', is_observed: false, includes_future_energy_gains: false, steps: [] },
+    conditional_projection: p };
+  validateDecisionPacket(prepared.payload.state);
+  compileModelRequest(prepared.payload);
+  s.combat.enemies[0].hp = 20;
+  p = describeTurnProjection(s, steps(s));
+  assert.deepEqual(p.known_effects_only.enemies[0].conditional_bounds.hp, { min: 0, max: 1 });
+  assert.equal(p.known_effects_only.incoming_attack, null);
+  assert.equal(p.known_effects_only.hp_if_ending, null);
+  s.combat.enemies[0].hp = 22;
+  s.combat.enemies[0].powers.push({ id: 'THORNS_POWER', amount: 3, description: 'When hit by an attack, deal 3 damage back.' });
+  assert.equal(describeTurnProjection(s, steps(s)).known_effects_only.hp_if_ending, null);
+});
+
 test('Weak uses integer-preview bounds and existing debuffs are not multiplied twice', () => {
   const s = fixture(); s.combat.enemies[0].hp = 50;
   assert.deepEqual(describeTurnProjection(s, steps(s)).debuff_dependencies.enemies[0].current_attack_after_debuffs, { min: 7, max: 8 });

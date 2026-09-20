@@ -80,6 +80,9 @@ export function buildRuleReference(state) {
     for (const power of row.powers_applied || []) add('powers', power.power_key || power.power);
     for (const power of row.innate_powers || []) add('powers', power.power_id);
     for (const move of row.moves || []) for (const power of move.powers || []) add('powers', power.power_id);
+    if (category === 'monsters') for (const move of enemyPattern(row.id)?.states || []) {
+      for (const generated of move.generated_cards || []) add('cards', generated.card_id);
+    }
     if (category === 'encounters') for (const monster of row.monsters || []) add('monsters', monster.id);
     for (const variable of Object.keys(row.vars || {})) if (variable !== 'Power' && variable.endsWith('Power')) add('powers', variable);
     // Exact tagged terms link mechanics and named generated items. Unknown or

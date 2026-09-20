@@ -8,7 +8,7 @@ export const enemyPatternSource = { game_version: data.game_version, assembly_sh
 // Match only public intent shape. Internal move IDs and RNG are never inputs.
 // Similar attacks can stay ambiguous; native damage includes modifiers, so
 // equality with a Wiki base damage is NOT an identification rule.
-const intentKind = kind => /Attack/.test(kind) ? 'Attack' : kind.replace(/Intent$/, '');
+const intentKind = kind => /Attack/.test(kind) ? 'Attack' : kind.replace(/Intent$/, '').replace(/^StatusCard$/, 'Status');
 function compatible(node, enemy, repertoire) {
   const actual = (enemy.intents || []).map(i => intentKind(i.type)).sort();
   const expected = (node.intents || []).map(intentKind).sort();
@@ -27,13 +27,15 @@ export function enemyOutlook(enemy, repertoire = []) {
   function next(id, depth, path = new Set()) {
     const node = byId.get(id);
     if (!node || path.has(id)) return { unknown: 'Missing or cyclic branch transition.' };
-    if (node.type === 'move') return { move_id: node.move_id, ...(depth > 1 && node.next ? { then: next(node.next, depth - 1) } : {}) };
+    if (node.type === 'move') return { move_id: node.move_id, ...(node.generated_cards ? { generated_cards: node.generated_cards } : {}),
+      ...(depth > 1 && node.next ? { then: next(node.next, depth - 1) } : {}) };
     return { branch: node.type, candidates: node.branches.map(b => ({ ...b, outcome: next(b.next, depth, new Set([...path, id])) })),
       resolution: 'Unknown. Conditions, cooldowns and prior-move eligibility are not evaluated; no RNG result or normalized probability is asserted.' };
   }
   return { combat_id: enemy.combat_id,
     identification: matches.length === 1 ? 'One static move matches the visible intent shape.' : 'Visible intent is ambiguous or unmatched; all compatible normal transitions remain possible.',
     matching_moves: matches.map(node => ({ current_move: node.move_id,
+      ...(node.generated_cards ? { generated_cards_if_current_move_resolves: node.generated_cards } : {}),
       after_current_intent: node.next ? next(node.next, 2) : { unknown: 'No ordinary follow-up extracted.' } })),
     external_transitions: pattern.external_transitions, coverage_gaps: pattern.gaps,
     scope: 'Conditional on this identification, current intent resolving, survival and no interrupt. Current intent has not executed. Stuns, phase/death powers and other live rules override normal transitions; future damage is not the current intent damage.' };

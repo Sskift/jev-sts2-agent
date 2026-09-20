@@ -745,6 +745,8 @@
               "properties": {
                 "combat_id": { "type": "integer" }, "hp": { "type": ["number", "null"] }, "block": { "type": ["number", "null"] },
                 "hp_removed": { "type": ["number", "null"] }, "block_removed": { "type": ["number", "null"] },
+                "conditional_bounds": { "type": "object", "additionalProperties": false, "required": ["hp", "hp_removed", "block"],
+                  "properties": { "hp": { "$ref": "#/$defs/conditionalCount" }, "hp_removed": { "$ref": "#/$defs/conditionalCount" }, "block": { "$ref": "#/$defs/conditionalCount" } } },
                 "power_changes": { "type": "array", "items": { "type": "object", "required": ["power_id", "before", "after_declared_actions"],
                   "properties": { "power_id": { "type": "string" }, "before": { "type": "number" }, "after_declared_actions": { "$ref": "#/$defs/conditionalCount" } } } }
               }

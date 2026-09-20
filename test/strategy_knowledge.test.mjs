@@ -48,6 +48,37 @@ test('future patterns follow only visible intent and do not consume an internal 
   assert.equal(beast.matching_moves.length, 2, 'Same visible shape must not identify a hidden phase');
 });
 
+test('visible status-card intents identify their public move and linked card generation', () => {
+  const enemy = { combat_id: 1, id: 'MYTE', intents: [{ type: 'StatusCard' }] };
+  const outlook = enemyOutlook(enemy, lookupRule('monsters', 'MYTE').moves);
+  assert.equal(outlook.matching_moves.length, 1);
+  const move = outlook.matching_moves[0];
+  assert.equal(move.current_move, 'TOXIC');
+  assert.equal(move.after_current_intent.move_id, 'BITE');
+  assert.equal(move.after_current_intent.then.move_id, 'SUCK');
+  assert.deepEqual(move.generated_cards_if_current_move_resolves.map(e => [e.card_id, e.destination, e.count]), [['TOXIC', 'Hand', 2]]);
+  assert.deepEqual(enemyOutlook({ ...enemy, move_id: 'HIDDEN_OTHER_MOVE' }, lookupRule('monsters', 'MYTE').moves), outlook);
+  assert.equal(enemyOutlook({ ...enemy, intents: [{ type: 'CardDebuff' }] }).matching_moves.length, 0);
+});
+
+test('move card generation keeps symbolic amounts and conditional invocation limits', () => {
+  const graph = extractPattern(`GenerateMoveStateMachine() {
+    MoveState a = new MoveState("A", Emit, new StatusIntent(2));
+    return new MonsterMoveStateMachine(list, a);
+  }
+  private async Task Emit(IReadOnlyList<Creature> targets) {
+    if (condition) { await CardPileCmd.AddToCombatAndPreview<Toxic>(targets, PileType.Hand, 2, null); }
+    await CardPileCmd.AddToCombatAndPreview<FranticEscape>(targets, PileType.Discard, Amount, null);
+  }`);
+  const effects = graph.states[0].generated_cards;
+  assert.equal(effects.length, 2);
+  assert.equal(effects[0].count, 2);
+  assert.match(effects[0].scope, /if reached/);
+  assert.equal(effects[1].card_id, 'FRANTIC_ESCAPE');
+  assert.equal(effects[1].count, null);
+  assert.equal(effects[1].count_expression, 'Amount');
+});
+
 test('knowledge stays relevant and advisory, and revival progress is not permanent removal', () => {
   const state = completeCombat();
   state.decision_context.master_deck = [{ id: 'BASH', description: 'Apply 2 Vulnerable.' }];

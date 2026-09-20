@@ -19,6 +19,21 @@ test('Wiki closure follows generated cards, powers and keywords without expandin
   assert.equal(rules.game_version, 'v0.111.0');
 });
 
+test('enemy move generation links future card rules before those cards enter observed piles', () => {
+  const state = completeCombat();
+  Object.assign(state.combat.enemies[0], { id: 'MYTE', name: 'Myte', intents: [{ type: 'StatusCard', description: 'Give 2 Status cards.' }] });
+  const before = structuredClone(state);
+  const reference = buildRuleReference(state);
+  const toxic = reference.entries.cards.find(c => c.id === 'TOXIC');
+  assert.match(toxic.base_rules, /take 5 damage/);
+  assert.equal(toxic.base_energy_cost, 1);
+  assert.ok(reference.entries.monsters.find(m => m.id === 'MYTE').related_rules.includes('cards/TOXIC'));
+  const compiled = compileModelRequest(prepareModDecision(state).payload);
+  assert.equal(compiled.payload.state.analysis.enemy_outlook[0].matching_moves[0].current_move, 'TOXIC');
+  assert.match(JSON.stringify(compiled.payload.state.knowledge), /TOXIC/);
+  assert.deepEqual(state, before, 'Public move effects must never become an observed card or legal action');
+});
+
 test('base/upgrade/X rules stay separate and never replace current combat values', () => {
   const state = stateWith({ combat: { hand: [{ id: 'RAGE', block: 0, rage_block_per_attack: 5 }, { id: 'WHIRLWIND', cost: -1, damage: 12 }], player: { powers: [{ id: 'RAGE_POWER', amount: 5, description: 'Gain 5 Block per Attack.' }] } } });
   const before = structuredClone(state), rules = buildRuleReference(state);

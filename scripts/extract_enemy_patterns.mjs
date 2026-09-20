@@ -30,6 +30,25 @@ function argumentsOf(text) {
 }
 const numeric = value => /^-?\d+(?:\.\d+)?[fm]?$/.test(value || '') ? Number(value.replace(/[fm]$/, '')) : null;
 
+// Resolve only a named move's direct card-generation calls. Amounts describe
+// one invocation, not a simulated enemy turn; guards and hand overflow remain
+// explicit. A symbolic amount is never turned into a guessed number.
+function generatedCards(source, method) {
+  if (!/^\w+$/.test(method || '')) return [];
+  const declaration = new RegExp(`(?:private|protected|public)\\s+(?:(?:override|async|virtual|static)\\s+)*Task(?:<[^>]+>)?\\s+${method}\\s*\\(`).exec(source);
+  if (!declaration) return [];
+  const body = balanced(source, source.indexOf('{', declaration.index), '{', '}');
+  return [...body.matchAll(/CardPileCmd\.AddToCombatAndPreview<(\w+)>\(/g)].map(match => {
+    const args = argumentsOf(balanced(body, body.indexOf('(', match.index)));
+    const pile = args[1]?.match(/^PileType\.(\w+)$/)?.[1];
+    return { card_id: match[1].replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase(),
+      destination: pile ?? null, count: numeric(args[2]),
+      ...(numeric(args[2]) === null ? { count_expression: args[2] ?? 'unknown' } : {}),
+      recipients: args[0] === 'targets' ? 'move_targets' : 'unresolved',
+      scope: 'Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles.' };
+  });
+}
+
 export function extractPattern(source) {
   const offset = source.indexOf('GenerateMoveStateMachine()');
   if (offset < 0) return { states: [], gaps: ['Inherited or unavailable state-machine method.'] };
@@ -46,6 +65,8 @@ export function extractPattern(source) {
     if (node.type === 'move') {
       node.move_id = node.id.replace(/_MOVE$/, '');
       node.intents = [...args.slice(2).join(',').matchAll(/new (\w+)Intent\(/g)].map(m => m[1]);
+      const cards = generatedCards(source, args[1]);
+      if (cards.length) node.generated_cards = cards;
       if (/MustPerformOnceBeforeTransitioning\s*=\s*true/.test(body.slice(match.index, body.indexOf(';', match.index)))) node.must_perform_once = true;
     } else node.branches = [];
     if (states.some(s => s.id === node.id)) gaps.push(`Duplicate state ${node.id}`);

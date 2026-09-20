@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "game_version": "v0.111.0",
-  "extracted_at": "2026-09-20T15:50:27.268Z",
+  "extracted_at": "2026-09-20T18:26:45.384Z",
   "source": "Local installed sts2.dll; static inspection only. No native code or live RNG is invoked.",
   "assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
   "semantics": {
@@ -42,6 +42,16 @@
           "intents": [
             "Status",
             "Buff"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "WITHER",
+              "destination": "Discard",
+              "count": null,
+              "count_expression": "WitherAmount",
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "EBB_MOVE"
         }
@@ -586,6 +596,15 @@
           "intents": [
             "Status"
           ],
+          "generated_cards": [
+            {
+              "card_id": "DAZED",
+              "destination": "Discard",
+              "count": 3,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
           "next": "CLAMP_MOVE"
         }
       ],
@@ -1025,6 +1044,15 @@
           "move_id": "DISTRACT",
           "intents": [
             "Status"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "DAZED",
+              "destination": "Discard",
+              "count": 3,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "DISTRACT_MOVE"
         }
@@ -1732,6 +1760,16 @@
             "Debuff",
             "Status"
           ],
+          "generated_cards": [
+            {
+              "card_id": "DAZED",
+              "destination": "Discard",
+              "count": null,
+              "count_expression": "HauntDazed",
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
           "next": "SWIPE_MOVE"
         }
       ],
@@ -2155,6 +2193,15 @@
           "intents": [
             "Status"
           ],
+          "generated_cards": [
+            {
+              "card_id": "SLIMED",
+              "destination": "Discard",
+              "count": 2,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
           "next": "CLUMP_SHOT"
         }
       ],
@@ -2182,6 +2229,15 @@
           "move_id": "GOOP",
           "intents": [
             "Status"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "SLIMED",
+              "destination": "Discard",
+              "count": 1,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "RAND"
         },
@@ -2463,6 +2519,15 @@
             "SingleAttack",
             "Status"
           ],
+          "generated_cards": [
+            {
+              "card_id": "BURN",
+              "destination": "Hand",
+              "count": 4,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
           "next": "WINDUP_MOVE"
         },
         {
@@ -2500,6 +2565,15 @@
           "move_id": "TOXIC",
           "intents": [
             "Status"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "TOXIC",
+              "destination": "Hand",
+              "count": 2,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "BITE_MOVE"
         },
@@ -2859,6 +2933,15 @@
           "move_id": "INFECT",
           "intents": [
             "Status"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "INFECTION",
+              "destination": "Discard",
+              "count": 3,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "LASH_MOVE"
         },
@@ -3299,6 +3382,15 @@
           "move_id": "VOMIT_ICHOR",
           "intents": [
             "Status"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "SLIMED",
+              "destination": "Discard",
+              "count": 10,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "FURIOUS_PUMMELING_MOVE"
         },
@@ -3883,6 +3975,16 @@
           "intents": [
             "Status",
             "Buff"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "BURN",
+              "destination": "Discard",
+              "count": null,
+              "count_expression": "BurningGrowlBurnCount",
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "PHASE3_LACERATE_MOVE"
         },
@@ -4529,6 +4631,15 @@
           "intents": [
             "Status"
           ],
+          "generated_cards": [
+            {
+              "card_id": "SLIMED",
+              "destination": "Discard",
+              "count": 1,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -4682,6 +4793,15 @@
           "intents": [
             "SingleAttack",
             "Status"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "WOUND",
+              "destination": "Discard",
+              "count": 3,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "PREPARE_MOVE"
         },
@@ -4849,6 +4969,15 @@
           "intents": [
             "Buff",
             "Status"
+          ],
+          "generated_cards": [
+            {
+              "card_id": "INFECTION",
+              "destination": "Discard",
+              "count": 1,
+              "recipients": "move_targets",
+              "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+            }
           ],
           "next": "NASTY_BITE_MOVE"
         },

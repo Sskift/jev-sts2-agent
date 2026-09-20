@@ -40,7 +40,17 @@ export function describeTurnProjection(state, steps) {
     return enemy.hp <= 0 && before.hp > 0 ? uncomputedDepletionRules(before).map(power => ({ owner_combat_id: enemy.combat_id, source_id: power.id, description: power.description })) : [];
   });
   for (const effect of depletionEffects) affected.add(effect.owner_combat_id);
-  const hp = affected.size ? null : projection.hp_if_ending_after_prefix;
+  // A rounded damage range can leave the enemy certainly alive with the same
+  // displayed attack. Its uncertain HP must not erase an independent response.
+  // Possible depletion, changed attacks and other unknown modifiers still do.
+  const responseUnresolved = [...affected].some(id => {
+    const result = debuffs?.enemies.find(e => e.combat_id === id);
+    const before = state.combat.enemies.find(e => e.combat_id === id);
+    return sequence.unknown_targets.includes(id) || !result || !(result.hp_remaining.min > 0)
+      || result.current_attack_after_debuffs.min !== intentDamage(before)
+      || result.current_attack_after_debuffs.max !== intentDamage(before);
+  });
+  const hp = responseUnresolved ? null : projection.hp_if_ending_after_prefix;
   return {
     calculation_status: projection.unresolved_effects.length || debuffs || depletionEffects.length ? 'incomplete' : 'preview_arithmetic',
     fully_simulated: false,
@@ -50,13 +60,20 @@ export function describeTurnProjection(state, steps) {
       block_including_end_turn_gains: depletionEffects.length ? null : projection.block_including_end_turn_gains,
       end_turn_block_gains: projection.end_turn_block_gains,
       end_turn_damage_events: projection.end_turn_damage_events,
-      incoming_attack: affected.size ? null : projection.incoming_attack_after_prefix,
+      incoming_attack: responseUnresolved ? null : projection.incoming_attack_after_prefix,
       enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
         const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
         const after = projection.remaining_enemies.find(enemy => enemy.combat_id === combat_id);
-        const powerChanges = debuffs?.enemies.find(e => e.combat_id === combat_id)?.power_changes
+        const dependency = debuffs?.enemies.find(e => e.combat_id === combat_id);
+        const powerChanges = dependency?.power_changes
           || modeledPowerChanges(before, [after], affected.has(combat_id));
-        if (affected.has(combat_id)) return { combat_id, hp: null, block: null, hp_removed: null, block_removed: null, power_changes: powerChanges };
+        if (affected.has(combat_id)) {
+          const range = dependency?.hp_remaining;
+          const bounded = Number.isFinite(range?.min) && Number.isFinite(range?.max)
+            && !sequence.unknown_targets.includes(combat_id) && !depletionEffects.some(e => e.owner_combat_id === combat_id);
+          return { combat_id, hp: null, block: null, hp_removed: null, block_removed: null, power_changes: powerChanges,
+            ...(bounded ? { conditional_bounds: { hp: range, hp_removed: { min: before.hp - range.max, max: before.hp - range.min }, block: dependency.block_remaining } } : {}) };
+        }
         return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block, power_changes: powerChanges };
       })
     },
