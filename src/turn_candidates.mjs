@@ -6,9 +6,22 @@ import { reserveActionSequence } from './turn_action_constraints.mjs';
 
 export const planSignature = steps => JSON.stringify(steps.map(s => [s.kind, s.card_instance_id, s.potion_id, s.slot, s.target, s.beneficiary_instance_id, s.next_card_instance_id]));
 
-// Used only for shortlist diversity. All orders are still assessed, and the
-// best assessed order represents its allocation of physical cards and targets.
-export const planAllocation = steps => JSON.stringify(JSON.parse(planSignature(steps)).map(item => JSON.stringify(item)).sort());
+// Only shortlist diversity changes: every exact sequence is still assessed.
+// Equivalent visible copies should not crowd out other resource commitments.
+export function planAllocation(steps, state) {
+  const allocation = JSON.parse(planSignature(steps));
+  // Keep bound identities distinct: upgrading one copy then playing another
+  // must not collapse into upgrading and playing the same copy.
+  if (state && !steps.some(s => s.beneficiary_instance_id || s.next_card_instance_id)) {
+    const copies = new Map((state.combat.hand || []).map(card => {
+      const copy = structuredClone(card); delete copy.index; delete copy.instance_id;
+      if (copy.details) delete copy.details.instance_id;
+      return [cardInstance(card), JSON.stringify(copy)];
+    }));
+    for (const item of allocation) if (item[0] === 'play_card' && copies.has(item[1])) item[1] = copies.get(item[1]);
+  }
+  return JSON.stringify(allocation.map(item => JSON.stringify(item)).sort());
+}
 
 export function shortlistPlans(candidates, judgments) {
   if (judgments.length !== candidates.length || judgments.some((j, index) => j.value !== candidates[index].value || !Number.isFinite(j.score))) throw new Error('Invalid turn-plan assessment coverage');

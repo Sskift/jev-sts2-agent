@@ -33,6 +33,28 @@ test('finalist review exposes position bias and does not mistake unanimous slot 
   assert.equal(stable.selected, 'other'); assert.equal(stable.audit.order_disagreements.length, 0);
 });
 
+test('identical copies share shortlist capacity while targets, multiplicity, modifiers and bound identities remain distinct', () => {
+  const state = completeCombat();
+  state.combat.hand = ['a', 'b', 'c'].map((id, index) => fixtureCard('STRIKE_IRONCLAD', { index, details: { instance_id: id } }));
+  state.combat.hand.push(fixtureCard('BASH', { index: 3, cost: 2, details: { instance_id: 'bash' } }));
+  const hit = id => ({ kind: 'play_card', card_instance_id: id, target: 42 });
+  const entry = (value, steps) => ({ value, allocation: planAllocation(steps, state),
+    label: { energy_left: 0, continuation: { handoff: 'enemy_turn', further_player_choices: false } } });
+  const plans = [entry('copy-a', [hit('a')]), entry('copy-b', [hit('b')]), entry('copy-c', [hit('c')]),
+    entry('bash', [hit('bash')]), entry('two-hits', [hit('a'), hit('b')])];
+  const original = structuredClone(state);
+  const shortlist = shortlistPlans(plans, plans.map((p, i) => ({ value: p.value, score: 4 - i / 10 })));
+  assert.deepEqual(shortlist.candidates.map(p => p.value), ['copy-a', 'bash', 'two-hits']);
+  assert.notEqual(planAllocation([hit('a')], state), planAllocation([{ ...hit('b'), target: 43 }], state));
+  state.combat.hand[1].details.enchantment = { id: 'SHARP', amount: 2 };
+  assert.notEqual(planAllocation([hit('a')], state), planAllocation([hit('b')], state));
+  delete state.combat.hand[1].details.enchantment;
+  const upgrade = { kind: 'play_card', card_instance_id: 'armaments', beneficiary_instance_id: 'a' };
+  assert.notEqual(planAllocation([upgrade, hit('a')], state), planAllocation([upgrade, hit('b')], state));
+  assert.equal(plans.length, 5, 'Every concrete sequence remains in the assessment pool');
+  assert.deepEqual(state, original);
+});
+
 test('a potion next-card trigger is consumed before a later manual action can reuse old previews', () => {
   const state = completeCombat();
   state.combat.player.potions = [{ id: 'DUPLICATOR', slot: 0, description: 'This turn, your next card is played an extra time.' }];

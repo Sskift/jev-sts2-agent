@@ -1,0 +1,135 @@
+{
+  "at": "2026-09-20T20:52:36.915Z",
+  "run_id": "run-1789936871",
+  "source": "run-artifacts/run32-2026-09-20T20-41-07.165Z/step-0015",
+  "source_sha256": "548b361fc2124d24d259a39e69802e7be8530dac8d09d5742828bffddeb3d0ae",
+  "purpose": "Reapply shortlist grouping to exactly the recorded candidates and Jev scores. No new judgments and no game commands.",
+  "assessed_plans": 50,
+  "old_allocations": 20,
+  "new_allocations": 10,
+  "original_shortlist": [
+    {
+      "value": "variant_40",
+      "score": 2.71,
+      "steps": [
+        {
+          "name": "Defend",
+          "hand_index": 4
+        },
+        {
+          "name": "Strike",
+          "hand_index": 0,
+          "target": 1
+        },
+        {
+          "name": "Strike",
+          "hand_index": 2,
+          "target": 1
+        }
+      ],
+      "known_hp_if_ending": 78
+    },
+    {
+      "value": "variant_9",
+      "score": 2.53,
+      "steps": [
+        {
+          "name": "Strike",
+          "hand_index": 1,
+          "target": 1
+        },
+        {
+          "name": "Defend",
+          "hand_index": 4
+        },
+        {
+          "name": "Strike",
+          "hand_index": 2,
+          "target": 1
+        }
+      ],
+      "known_hp_if_ending": 78
+    },
+    {
+      "value": "variant_22",
+      "score": 2.5,
+      "steps": [
+        {
+          "name": "Defend",
+          "hand_index": 4
+        },
+        {
+          "name": "Strike",
+          "hand_index": 1,
+          "target": 1
+        },
+        {
+          "name": "Strike",
+          "hand_index": 0,
+          "target": 1
+        }
+      ],
+      "known_hp_if_ending": 78
+    }
+  ],
+  "grouped_shortlist": [
+    {
+      "value": "variant_40",
+      "score": 2.71,
+      "steps": [
+        {
+          "name": "Defend",
+          "hand_index": 4
+        },
+        {
+          "name": "Strike",
+          "hand_index": 0,
+          "target": 1
+        },
+        {
+          "name": "Strike",
+          "hand_index": 2,
+          "target": 1
+        }
+      ],
+      "known_hp_if_ending": 78
+    },
+    {
+      "value": "variant_23",
+      "score": 2.26,
+      "steps": [
+        {
+          "name": "Defend",
+          "hand_index": 4
+        },
+        {
+          "name": "Bash",
+          "hand_index": 3,
+          "target": 1
+        }
+      ],
+      "known_hp_if_ending": 78
+    },
+    {
+      "value": "variant_25",
+      "score": 2.16,
+      "steps": [
+        {
+          "name": "Strike",
+          "hand_index": 0,
+          "target": 1
+        },
+        {
+          "name": "Defend",
+          "hand_index": 4
+        }
+      ],
+      "known_hp_if_ending": 78
+    }
+  ],
+  "targeted_tests": {
+    "passed": 29,
+    "log": "temp/run32-allocation-checks.log"
+  },
+  "scope": "Only diversity among finalists changes. Every concrete candidate keeps its original independent score. Native per-copy differences and bound preparation identities remain separate. This is not a semantic equivalence proof, a model re-evaluation or a win-rate claim."
+}

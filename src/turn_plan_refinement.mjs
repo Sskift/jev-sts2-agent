@@ -195,11 +195,12 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
     objective: null, retained_cards: [], proposed_steps: [], conditional_projection: [],
     energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
       is_observed: false, includes_future_energy_gains: false, steps: [], scope: 'No option has executed. Each option contains its own complete energy reservation and conditional outcome.' } };
-  const candidates = [...alternatives].map(([value, steps]) => ({ value, allocation: planAllocation(steps), label: label(steps) }));
+  const candidates = [...alternatives].map(([value, steps]) => ({ value, allocation: planAllocation(steps, state), label: label(steps) }));
   const judgments = await assessPlans(candidates, 'Assess the overall quality of committing this ordered segment toward winning the run. Evaluate the whole remaining turn, including the ability to continue after an observation; use current rules and available resources, not hypothetical favorable draws.', comparisonState);
   const shortlist = shortlistPlans(candidates, judgments);
   plan.candidate_coverage.assessed_plans = judgments.length;
   plan.candidate_coverage.distinct_allocations = shortlist.allocation_count;
+  plan.candidate_coverage.allocation_grouping = 'same_visible_copies; bound_preparation_identities_preserved';
   plan.assessment_shortlist = shortlist.assessments;
   const final = await compareFinalists(shortlist.candidates, keep, comparePairs, instruction, comparisonState);
   plan.candidate_coverage.compared_plans = new Set((final.audit.balanced_pairs || []).flatMap(pair => pair.candidates)).size;
