@@ -296,6 +296,11 @@ test('route calculations preserve branch uncertainty and reject broken topology'
   const result = routeFacts(map, [{ col: 0, row: 0 }])[0];
   assert.deepEqual(result.counts.ELITE, { min: 0, max: 1 });
   assert.deepEqual(result.counts.UNKNOWN, { min: 1, max: 1 });
+  assert.equal(result.minimum_elite_route_example.known_elites, 0);
+  assert.deepEqual(result.minimum_elite_route_example.nodes.map(node => node.type), ['UNKNOWN', 'REST_SITE', 'BOSS']);
+  const deadEnd = structuredClone(map); deadEnd.nodes[2].children = [];
+  assert.equal(routeFacts(deadEnd, [{ col: 0, row: 0 }])[0].minimum_elite_route_example.known_elites, 1, 'An unfinished branch cannot be an elite-free route to the boss');
+  assert.equal(routeFacts(deadEnd, [{ col: 1, row: 1 }])[0].minimum_elite_route_example, null);
   map.nodes[1].children = [{ col: 9, row: 9 }];
   assert.throws(() => routeFacts(map, [{ col: 0, row: 0 }]), /missing node/);
   map.nodes[1].children = [{ col: 0, row: 0 }];

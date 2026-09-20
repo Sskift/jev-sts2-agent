@@ -137,6 +137,12 @@ export function routeFacts(map, choices) {
       const own = Number(node.type === type);
       result.counts[type] = { min: own + (children.length ? Math.min(...children.map(c => c.counts[type].min)) : 0), max: own + (children.length ? Math.max(...children.map(c => c.counts[type].max)) : 0) };
     }
+    const continuation = children.map(child => child.minimum_elite_route_example).filter(Boolean)
+      .sort((a, b) => a.known_elites - b.known_elites)[0];
+    result.minimum_elite_route_example = node.type === 'BOSS' || continuation ? {
+      known_elites: Number(node.type === 'ELITE') + (continuation?.known_elites || 0),
+      nodes: [{ col: node.col, row: node.row, type: node.type }, ...(continuation?.nodes || [])]
+    } : null;
     visiting.delete(id); memo.set(id, result); return result;
   }
   return choices.map(choice => {
