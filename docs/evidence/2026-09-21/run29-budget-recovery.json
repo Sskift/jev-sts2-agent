@@ -46,7 +46,41 @@
     "Validate each appended step and the seed entering refinement."
   ],
   "resume": {
-    "status": "not_yet_started",
-    "same_game_required": true
+    "status": "confirmed_game_action",
+    "runtime_commit": "cffbb4a0795cc044ca498af22e4fe958b216a9b5",
+    "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run29-resume-2026-09-20T18-14-07.432Z",
+    "first_step": "step-0001",
+    "same_run": true,
+    "request": {
+      "cmd": "play_card",
+      "id": "ARMAMENTS",
+      "nth": 0
+    },
+    "plan": [
+      {
+        "kind": "play_card",
+        "card_id": "ARMAMENTS",
+        "reserved_energy": 1
+      },
+      {
+        "kind": "play_card",
+        "card_id": "JUGGERNAUT",
+        "reserved_energy": 2
+      }
+    ],
+    "budget": {
+      "initial_energy": 3,
+      "remaining_after_printed_costs": 0,
+      "scope": "Ordered known costs including inspectable hand upgrades and Stomp reductions. Unresolved gains, automatic effects and other changes require a new native observation."
+    },
+    "after": {
+      "screen": "HAND_SELECT",
+      "turn": 4,
+      "hp": 54,
+      "energy": 2
+    },
+    "before_sha256": "d693c73aeb20ccbdefe3aa12de991c938038b76e4ae80cbc65eb746df5756f3d",
+    "after_sha256": "3846a5734297c1922fbaf3607646be5be395b49269b2f414cbd51f72cc43d1ca",
+    "includes_joint_route_change": true
   }
 }
