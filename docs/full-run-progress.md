@@ -2,6 +2,8 @@
 
 更新：2026-09-20。目标是同一局标准游戏经过三幕、击败最终 Boss、进入正式胜利结算；当前尚未达到该目标。
 
+第二十局第 7 层 Shrinker Beetle + Fuzzy Wurm Crawler 战拖长，角色受到 Shrink、另一敌人逐步增长力量。发现整套方案比较没有继承目标/主要动作阶段的完整战术说明，现统一传入同一 `turnStrategyInstructions`。第 67 步原状态与此前记忆的只读回放由 Defend → Headbutt → Defend 改为 Setup Strike → Headbutt → Defend；27 次规划调用成功，12 项回合检查通过。记录在 `temp/shrinker-full-strategy/result.json`。同局第 111 步已确认 Defend 后重载 Node，仍为第 7 层、12 生命；未重置战斗，不能挽回此前损失。
+
 第二十局第 6 层已在真实战斗完成 Armaments → 选择原计划指定的 Defend → 确认升级 → 打出同一张 Defend+ → Strike。手牌、原计划与选择界面的实例 ID 一致；原生预览 8 Block 与升级后的实际 8 Block 一致，打出后格挡从 5 变为 13。选牌阶段沿用回合意图、没有独立 Jev 选择，升级后复核再执行收益动作。[实机证据摘要](evidence/2026-09-20/live-upgrade-followthrough.json)对应第 36–40 步。本局继续运行，尚未进入正式结算。
 
 第二十局 `run-1789888890` 已正常开始，推进到第一幕第 5 层、73/80 生命。随后为回合规划、完整方案比较及结束前复核统一澄清：回合目标是优先级，不排除有价值的其余行动；未立刻击杀的伤害仍可能缩短后续战斗，免费牌也需检查反击、留牌与卡组变化等实际代价。同一第十九局局面的只读回放由仅 Expect a Fight 改为 Expect a Fight → 零费 Strike 攻击主敌人，同时保留 25 Block；仍未选 Anger，不能称为最优。12 项回合计划检查通过。第二十局在已确认动作后仅重载 Node，保留同一游戏进程和战斗，不回退房间。飞书正文已同步至修订 59，回读确认 OpenRouter、context.16、紧凑 JSON 与第十九局结果。

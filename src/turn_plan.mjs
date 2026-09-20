@@ -96,7 +96,7 @@ export async function decideTurn(state, options, prepared, choose) {
     let batch = [];
     const payloadFor = items => compactPlanningRequest({ model: prepared.payload.model, state: comparisonState,
       questions: Object.fromEntries(items.map((pair, index) => [`comparison_${index}`, {
-        type: 'choice', instructions: `${instructions} ${wholeTurnValue} ${references}`,
+        type: 'choice', instructions: `${instructions} ${turnStrategyInstructions(state)} ${wholeTurnValue} ${references}`,
         criteria: { plan_a: pair[0].label, plan_b: pair[1].label }
       }])) });
     async function flush() {
