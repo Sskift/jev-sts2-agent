@@ -23,6 +23,16 @@
   ],
   "additionalProperties": false,
   "properties": {
+    "decision_brief": { "type": ["object", "null"] },
+    "rule_reference": {
+      "type": ["object", "null"],
+      "properties": {
+        "source": { "$ref": "#/$defs/text" },
+        "game_version": { "type": "string" },
+        "scope": { "$ref": "#/$defs/text" },
+        "entries": { "type": "object" }
+      }
+    },
     "strategy_assessment": {
       "oneOf": [
         {

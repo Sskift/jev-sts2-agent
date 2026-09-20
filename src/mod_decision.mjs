@@ -2,7 +2,7 @@ import { decisionInstructions } from "./decision_instructions.mjs";
 import { getJevApiKey } from './decision_jev.mjs';
 import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactContext, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
-import { combatForecast, firstHitHpLoss } from './combat_arithmetic.mjs';
+import { combatForecast, firstHitHpLoss, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
 import { needsStrategyAssessment, prepareStrategyAssessment, parseStrategyAssessment } from './strategy_assessment.mjs';
 
@@ -228,7 +228,8 @@ export function buildModCandidates(state) {
       const estimate = combatForecast(state.combat, card, target);
       action.combat_estimate = estimate;
       action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn}${estimate.fatal_if_end_turn ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
-      if (card?.cost < 0) action.description += ' X-cost: per-hit damage does not guarantee a hit. The estimate does not assume any attack repetitions; use current energy, card rules and modifiers.';
+      if (estimate.active_rage_block_gain) action.description += ` Active Rage adds ${estimate.active_rage_block_gain} Block for playing this Attack (once per card, already included in the estimate).`;
+      if (card?.cost < 0 && !card.attack_preview) action.description += ' X-cost: per-hit damage does not guarantee a hit. Without a known hit count this estimate assumes no attack repetitions; use current energy, card rules and modifiers.';
       if (estimate.declared_self_hp_loss) action.description += ` Printed self HP loss ${estimate.declared_self_hp_loss}; HP after that loss ${estimate.hp_remaining_after_declared_loss}${estimate.fatal_from_declared_hp_loss ? ' (LETHAL SELF-LOSS before waiting for enemies)' : ''}. Check any loss-prevention effects.`;
       if (estimate.end_turn_hand_damage) action.description += ` Remaining Toxic cards deal ${estimate.end_turn_hand_damage} extra blockable damage at end of turn.`;
       if (estimate.attack_trigger_potential) {
@@ -238,8 +239,8 @@ export function buildModCandidates(state) {
       if (estimate.exhausted_hand_cards) action.description += ` Exhausts ${estimate.exhausted_hand_cards.map(c => `${c.id} (hand ${c.index})`).join(', ') || 'no other cards'} for ${estimate.immediate_block_gain} immediate Block.`;
       if (estimate.instant_death_if_end_turn) action.description += ' Sandpit causes instant death on the next enemy turn, regardless of HP/Block.';
       else if (card?.id === 'FRANTIC_ESCAPE' && estimate.death_timers?.length) action.description += ` Sandpit deadline extended to ${estimate.death_timers[0].enemy_turns_remaining_after_card} enemy turns.`;
-      const hit = card && target ? firstHitHpLoss(card, target) : null;
-      if (hit?.limits.length) action.description += ` ${hit.limits.join(', ')}: first-hit HP damage ${hit.hp_loss}.`;
+      const hit = card && target ? attackHpLoss(card, target) : null;
+      if (hit?.limits.length) action.description += ` ${hit.limits.join(', ')}: preview HP damage ${hit.hp_loss} across ${hit.hits} counted hits.`;
       const followup = estimate.followup_attacks;
       if (followup?.enough_to_deplete_target && followup.hand_indices.length) action.description += ` Then hand ${followup.hand_indices.join(', ')} has ${followup.hp_damage} damage: enough to finish this target.`;
     }
@@ -295,8 +296,20 @@ export function prepareModDecision(gameState, options = {}) {
         const card = gameState.screen === 'COMBAT' && candidate.request?.cmd === 'play_card'
           ? gameState.combat.hand.find(card => card.index === candidate.card_hand_index) : null;
         const target = card && gameState.combat.enemies.find(enemy => enemy.combat_id === candidate.target_combat_id);
-        const effect = card ? `${card.name}, cost ${card.cost < 0 ? `X (current energy ${gameState.combat.player.energy})` : card.cost}: ${card.description}${target ? ` Target ${target.name} (${target.hp} HP, ${target.block} Block).` : ''}` : candidate.description;
-        return [id, { action_id: id, command: candidate.request?.cmd || 'plan_selection', effect }];
+        const countedDamage = card?.attack_preview ? (target ? [target] : card.target_type === 'AllEnemies' ? gameState.combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) : []).map(enemy => `${enemy.name} #${enemy.combat_id}: ${previewDamageSum(card, enemy) ?? 'unknown'} damage before Block/prevention`).join('; ') : '';
+        const effect = card ? `${card.name}, cost ${card.cost < 0 ? `X (current energy ${gameState.combat.player.energy})` : card.cost}: ${card.description}${target ? ` Target ${target.name} (${target.hp} HP, ${target.block} Block).` : ''}${card.attack_preview ? ` Current preview ${card.attack_preview.hits} hits; ${countedDamage}. Modifiers and later triggers may change totals.` : ''}` : candidate.description;
+        const estimate = candidate.combat_estimate;
+        return [id, { action_id: id, command: candidate.request?.cmd || 'plan_selection', effect,
+          ...(estimate ? { limited_calculation: {
+            energy_left: estimate.energy_after_printed_cost,
+            block: estimate.block_after_card,
+            ...(estimate.attack_hp_loss !== undefined ? { target_hp_loss: estimate.attack_hp_loss } : {}),
+            ...(estimate.attack_hp_loss_by_target ? { hp_loss_by_target: estimate.attack_hp_loss_by_target } : {}),
+            end_now_hp: estimate.hp_remaining_if_end_turn,
+            ...(estimate.active_rage_block_gain ? { rage_block_included: estimate.active_rage_block_gain } : {}),
+            ...(estimate.followup_attacks?.hand_indices.length ? { conditional_followups: estimate.followup_attacks } : {}),
+            ...(estimate.attack_trigger_potential ? { conditional_attack_block: { hand_indices: estimate.attack_trigger_potential.hand_indices, additional_block_if_all_played: estimate.attack_trigger_potential.additional_block_if_all_played } } : {})
+          } } : {}) }];
       }))
     } }
   };

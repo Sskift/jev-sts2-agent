@@ -2,6 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
 import Ajv2020 from 'ajv/dist/2020.js';
+import { previewDamageSum } from './combat_arithmetic.mjs';
+import { buildRuleReference } from './rule_reference.mjs';
+import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -232,13 +235,19 @@ export class DecisionMemory {
     if (this.data.pending) throw new ContextError('An earlier action has an unresolved outcome; inspect the saved memory before continuing.');
     const matching = state.combat?.hand?.filter(card => card.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.index - b.index);
     this.data.pending = { request: clone(request), floor: state.decision_context?.total_floor, combat_id: state.decision_context?.combat_id || null, round: state.combat?.turn_number, screen: state.screen,
+      ...(state.combat ? { combat_frame_before: combatFrame(state) } : {}),
       ...(request.cmd === 'play_card' ? { played_card_at_request: clone(matching?.[request.nth ?? 0]) } : {}) };
     if (request.cmd === 'use_potion') this.data.pending.potion_at_request = clone(state.decision_context?.player?.potions.filter(p => p.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.slot - b.slot)[request.nth ?? 0]);
     if (request.cmd === 'reward_skip_card') this.data.pending.card_reward_key = cardRewardKey(state.rewards?.rewards?.filter(reward => reward.type.toLowerCase() === 'card')[request.nth ?? 0]);
     this.persist();
   }
   finish(response, after) {
-    this.data.actions.push({ ...this.data.pending, ok: response.ok, result: clone(response.data ?? response.error ?? null), after_screen: after.screen });
+    const change = response.ok && this.data.pending?.combat_id === after.decision_context?.combat_id
+      ? observedCombatChange(this.data.pending?.combat_frame_before, after) : null;
+    const recorded = { ...this.data.pending, ok: response.ok, result: clone(response.data ?? response.error ?? null), after_screen: after.screen,
+      ...(change ? { observed_combat_change: change } : {}) };
+    delete recorded.combat_frame_before;
+    this.data.actions.push(recorded);
     this.data.pending = !response.ok && ['TIMEOUT', 'EVENT_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? { ...this.data.pending, outcome_unknown: true, error: response.error } : null;
     this.persist();
   }
@@ -256,6 +265,7 @@ export class DecisionMemory {
         && visited.has(`${a.request.args?.[0]},${a.request.args?.[1]}`))));
     for (const action of actions) {
       delete action.card_reward_key; // Local identity bookkeeping; the skip action itself is retained.
+      delete action.observed_combat_change; // Recent pairs appear in decision_brief; full engine history is retained.
       if (action.floor < state.decision_context.total_floor && action.result?.event_state) {
         const event = action.result.event_state;
         action.result = { event_id: event.event_id, title: event.title, description: event.description, chosen_options: event.options?.filter(option => option.was_chosen) || [] };
@@ -412,17 +422,17 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
       energy_remaining: context.player.energy,
       fatal_if_end_turn_from_visible_attacks: Math.max(0, incoming - context.player.block) >= context.player.hp,
       extra_block_needed_to_survive_visible_attacks: Math.max(0, incoming - context.player.block - context.player.hp + 1),
-      note: 'Arithmetic from current visible intents only. Action estimates use one hit and printed Block, including explicit hp_loss and Toxic hand damage, but excluding other self-damage, multi-hits, draws, buffs, general triggers, death prevention/revival and later actions. Printed hp_loss is before prevention hooks. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
+      note: 'Arithmetic from current visible intents only. Action estimates use known attack_preview.hits (otherwise one hit, or unknown for X), printed Block, active Rage once per Attack, explicit hp_loss and Toxic hand damage. They exclude other self-damage, changing hit modifiers, draws, buffs, other triggers, death prevention/revival and later actions. Printed hp_loss is before prevention hooks. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
     };
     combat.visible_arithmetic.attack_budgets = combat.enemies.filter(enemy => enemy.is_alive).map(enemy => {
       const energy = Math.max(0, Math.min(30, context.player.energy || 0));
       const dp = Array.from({ length: energy + 1 }, () => ({ damage: 0, hand_indices: [] }));
       for (const card of combat.hand) {
-        const damage = card.target_previews?.find(p => p.target_id === enemy.combat_id)?.damage;
+        const damage = previewDamageSum(card, enemy);
         if (!card.can_play || !Number.isFinite(damage) || damage <= 0 || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy || (card.hp_loss || 0) >= context.player.hp) continue;
         for (let budget = energy; budget >= card.cost; budget--) if (dp[budget - card.cost].damage + damage > dp[budget].damage) dp[budget] = { damage: dp[budget - card.cost].damage + damage, hand_indices: [...dp[budget - card.cost].hand_indices, card.index] };
       }
-      return { target_id: enemy.combat_id, hp_plus_block: enemy.hp + enemy.block, energy_budget: energy, first_hit_damage_sum: dp[energy].damage, hand_indices: dp[energy].hand_indices, note: 'Sum of current per-target first-hit previews under current costs, one use per listed card. Does not simulate changing costs, new buffs, multi-hits, draws, extra resources or death-prevention powers.' };
+      return { target_id: enemy.combat_id, hp_plus_block: enemy.hp + enemy.block, energy_budget: energy, attack_preview_damage_sum: dp[energy].damage, hand_indices: dp[energy].hand_indices, note: 'Sum of current per-target previews under current fixed costs, one use per listed card. Uses known attack_preview.hits; other cards contribute only one hit. Excludes X-cost sequences and does not simulate changing costs, new buffs, draws, extra resources or death-prevention powers.' };
     });
     combat.play_pile = context.play_pile;
     combat.history = clone(context.combat_history);
@@ -465,6 +475,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     schema_version: CONTEXT_VERSION,
     objective: { strategy: 'Win this entire run through all three acts and the final boss. Balance immediate survival, efficient combat, coherent deck/relic synergies, resources, and visible future routes.', execution_checkpoint: 'Continue through ordinary rewards and act transitions until the formal final victory screen.' },
     screen: state.screen, in_combat: Boolean(combat),
+    decision_brief: buildDecisionBrief(source, memory),
     run: context ? { run_id: context.run_id, combat_id: context.combat_id || null, act_index: context.act_index, act_floor: context.act_floor, total_floor: context.total_floor, ascension: context.ascension, game_mode: context.game_mode, modifiers: context.modifiers } : null,
     player: context?.player ?? null,
     resources: context ? { potion_capacity: context.potion_capacity } : null,
@@ -480,6 +491,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     map, combat, screen_state: screenState,
     memory: memoryContext,
     rules: context?.glossary || [],
+    rule_reference: buildRuleReference(source),
     information: { source: 'single mod main-thread snapshot plus explicitly scoped local memory', unknown: ['unobserved draw order; recorded card effects may establish partial knowledge', 'unrevealed question-mark contents and rewards', 'future enemy random choices', 'later acts', 'history before available observations', ...(context?.extraction_errors || []).filter(e => /^history\.\d+\.description: NullReferenceException$/.test(e)).map(e => `Unavailable history display text (${e}); typed event and recorded actions retained.`)], card_grouping: 'Each cards entry with count represents that many exactly equivalent card states; instance_ids distinguish copies. Never infer draw order from array order or IDs.', extraction_errors: (context?.extraction_errors || []).filter(e => !/^history\.\d+\.description: NullReferenceException$/.test(e)) },
     legal_actions: legalActions
   }));
@@ -640,5 +652,7 @@ export function compactContext(context) {
   for (const container of [copy.deck, copy.combat?.draw_pile]) if (container?.cards?.length) container.cards = compactRecords(container.cards);
   for (const key of ['hand', 'discard_pile', 'exhaust_pile', 'play_pile', 'enemies']) if (copy.combat?.[key]?.length) copy.combat[key] = compactRecords(copy.combat[key]);
   if (copy.legal_actions?.length) copy.legal_actions = compactRecords(copy.legal_actions);
+  if (copy.decision_brief?.recent_confirmed_actions?.length) copy.decision_brief.recent_confirmed_actions = compactRecords(copy.decision_brief.recent_confirmed_actions);
+  if (copy.rule_reference?.entries) for (const [category, rows] of Object.entries(copy.rule_reference.entries)) copy.rule_reference.entries[category] = compactRecords(rows);
   return copy;
 }

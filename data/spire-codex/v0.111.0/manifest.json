@@ -1,0 +1,95 @@
+{
+  "source": "Spire Codex",
+  "source_url": "https://spire-codex.com/developers",
+  "game_version": "v0.111.0",
+  "channel": "beta",
+  "language": "eng",
+  "fetched_at": "2026-09-20T01:55:17.251Z",
+  "terms_url": "https://github.com/ptrlrd/spire-codex/blob/main/API_TERMS.md",
+  "files": {
+    "cards": {
+      "count": 595,
+      "bytes": 679244,
+      "sha256": "3af3d90f38ea09c2b26aade48923fd99e6ab47b7db64cabdcd00fed51ed6bea6",
+      "url": "https://spire-codex.com/api/cards?lang=eng&channel=beta"
+    },
+    "relics": {
+      "count": 298,
+      "bytes": 176940,
+      "sha256": "e3fb619462a74f4a7576f2e985fb430d0e777d2fdaa772ca030dcc30f97833e0",
+      "url": "https://spire-codex.com/api/relics?lang=eng&channel=beta"
+    },
+    "potions": {
+      "count": 64,
+      "bytes": 24262,
+      "sha256": "f2760921dfd9630d32b397aee9e565214820d4232f5c5f73edc7ad6ad45db4e8",
+      "url": "https://spire-codex.com/api/potions?lang=eng&channel=beta"
+    },
+    "powers": {
+      "count": 265,
+      "bytes": 86713,
+      "sha256": "a4990f8d01a3c373ecb24109f64fae20dd6fc3b6fc22249c13d3fe5a86001cab",
+      "url": "https://spire-codex.com/api/powers?lang=eng&channel=beta"
+    },
+    "events": {
+      "count": 66,
+      "bytes": 166061,
+      "sha256": "0724c282d2a7f11b8d539e85bba905b77012405b88c65aea446c9ac059bd86ee",
+      "url": "https://spire-codex.com/api/events?lang=eng&channel=beta"
+    },
+    "monsters": {
+      "count": 115,
+      "bytes": 183792,
+      "sha256": "647bd47ce09541ce05ed83c6066b1b7b527703dc26ff049f7752dbab8be7b3ef",
+      "url": "https://spire-codex.com/api/monsters?lang=eng&channel=beta"
+    },
+    "encounters": {
+      "count": 90,
+      "bytes": 26521,
+      "sha256": "0dd92ca7c435a0c6657e5a99ee530c3b1be3342b048865182e4c09968eb0fa2b",
+      "url": "https://spire-codex.com/api/encounters?lang=eng&channel=beta"
+    },
+    "characters": {
+      "count": 5,
+      "bytes": 37403,
+      "sha256": "8c7f1afb759f4b4a1fdcdce1fb8b61f3bde1b020511ae2307a872ac62f5fb4f0",
+      "url": "https://spire-codex.com/api/characters?lang=eng&channel=beta"
+    },
+    "keywords": {
+      "count": 7,
+      "bytes": 789,
+      "sha256": "1f88af3ec17f445093d90f44a10d1a2d227cb1e951a68f2ccc62b90482eb30b0",
+      "url": "https://spire-codex.com/api/keywords?lang=eng&channel=beta"
+    },
+    "enchantments": {
+      "count": 22,
+      "bytes": 7130,
+      "sha256": "0cb6af2ca8617f6eb60cafd7d3244c02ac2f5cce6ff896202f35fa86bc92831a",
+      "url": "https://spire-codex.com/api/enchantments?lang=eng&channel=beta"
+    },
+    "afflictions": {
+      "count": 7,
+      "bytes": 1129,
+      "sha256": "b6f8d6ebfec18e7ad39286bdf5e66dcdc4c5eb40c1bfff27ab38448fc6db4eeb",
+      "url": "https://spire-codex.com/api/afflictions?lang=eng&channel=beta"
+    },
+    "intents": {
+      "count": 14,
+      "bytes": 2340,
+      "sha256": "174a841ac48d94756b15fd4a312f695b9074b7fa3c47047351f1aaa5704e6e9e",
+      "url": "https://spire-codex.com/api/intents?lang=eng&channel=beta"
+    },
+    "orbs": {
+      "count": 5,
+      "bytes": 2582,
+      "sha256": "ec985c1fe5a63815453315e178e343d97577ac248e19072d3782d12d679264ba",
+      "url": "https://spire-codex.com/api/orbs?lang=eng&channel=beta"
+    },
+    "modifiers": {
+      "count": 16,
+      "bytes": 2136,
+      "sha256": "c29ef9798bddc29797db86e1de6045eb462f65bf31917e92f06ff0e0c2492ff3",
+      "url": "https://spire-codex.com/api/modifiers?lang=eng&channel=beta"
+    }
+  }
+}

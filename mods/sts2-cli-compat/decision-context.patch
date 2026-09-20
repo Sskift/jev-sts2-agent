@@ -627,8 +627,38 @@ index 5235f87..f35f2a2 100644
              // --- Guard: Check card removal entry exists ---
              var entry = inventory.CardRemovalEntry;
              if (entry == null)
+diff --git a/STS2.Cli.Mod/Models/State/CardAttackPreviewDto.cs b/STS2.Cli.Mod/Models/State/CardAttackPreviewDto.cs
+new file mode 100644
+index 0000000..5453b4e
+--- /dev/null
++++ b/STS2.Cli.Mod/Models/State/CardAttackPreviewDto.cs
+@@ -0,0 +1,24 @@
++namespace STS2.Cli.Mod.Models.State;
++
++/// <summary>
++///     Read-only attack-count preview for a card in the current hand and combat state.
++/// </summary>
++public class CardAttackPreviewDto
++{
++    /// <summary>
++    ///     Nonnegative number of hits per targeted enemy in the current state.
++    ///     This is not the number of card plays or a guarantee that every hit will occur.
++    /// </summary>
++    public required int Hits { get; set; }
++
++    /// <summary>
++    ///     Energy that an X-cost card would spend now, before X-effect modifiers.
++    ///     Null for fixed-hit cards. No energy is spent by this preview.
++    /// </summary>
++    public int? EnergyToSpend { get; set; }
++
++    /// <summary>
++    ///     Explicit limits of the current-state preview.
++    /// </summary>
++    public required string Scope { get; set; }
++}
 diff --git a/STS2.Cli.Mod/Models/State/CardStateDto.cs b/STS2.Cli.Mod/Models/State/CardStateDto.cs
-index 3a446ca..25a1ed9 100644
+index 3a446ca..5f9df9a 100644
 --- a/STS2.Cli.Mod/Models/State/CardStateDto.cs
 +++ b/STS2.Cli.Mod/Models/State/CardStateDto.cs
 @@ -12,8 +12,12 @@ namespace STS2.Cli.Mod.Models.State;
@@ -646,7 +676,21 @@ index 3a446ca..25a1ed9 100644
      // -- DTO context --
  
      /// <summary>
-@@ -93,9 +97,23 @@ public class CardStateDto
+@@ -87,15 +91,35 @@ public class CardStateDto
+     ///     Preview damage value after all modifiers (strength, powers, relics, enchantments).
+     ///     Null if the card does not deal damage.
+     /// </summary>
+-    public int? Damage { get; set; }
+-
++    public int? Damage { get; set; }
++
++    /// <summary>
++    ///     Current-state attack count for explicitly supported cards, with preview limitations.
++    ///     Damage and TargetPreviews damage remain per-hit values. Null means unknown.
++    /// </summary>
++    public CardAttackPreviewDto? AttackPreview { get; set; }
++
+     /// <summary>
      ///     Preview block value after all modifiers (dexterity, powers, relics, enchantments).
      ///     Null if the card does not grant any block.
      /// </summary>
@@ -673,7 +717,7 @@ index 3a446ca..25a1ed9 100644
  
      /// <summary>
      ///     Enchantment model ID (e.g., "SHARP", "NIMBLE", "GLAM").
-@@ -128,4 +146,4 @@ public class CardStateDto
+@@ -128,4 +152,4 @@ public class CardStateDto
      ///     Null when the card is playable.
      /// </summary>
      public string? UnplayableReason { get; set; }
@@ -954,8 +998,101 @@ index c38d702..735d23f 100644
                          });
                      }
                  }
+diff --git a/STS2.Cli.Mod/State/Builders/CardAttackPreviewBuilder.cs b/STS2.Cli.Mod/State/Builders/CardAttackPreviewBuilder.cs
+new file mode 100644
+index 0000000..242e7e7
+--- /dev/null
++++ b/STS2.Cli.Mod/State/Builders/CardAttackPreviewBuilder.cs
+@@ -0,0 +1,87 @@
++using MegaCrit.Sts2.Core.Commands.Builders;
++using MegaCrit.Sts2.Core.Entities.Cards;
++using MegaCrit.Sts2.Core.Hooks;
++using MegaCrit.Sts2.Core.Models;
++using MegaCrit.Sts2.Core.Models.Cards;
++using STS2.Cli.Mod.Models.State;
++
++namespace STS2.Cli.Mod.State.Builders;
++
++/// <summary>
++///     Exposes verified native attack counts without playing cards or executing attacks.
++/// </summary>
++public static class CardAttackPreviewBuilder
++{
++    /// <summary>
++    ///     Builds a current-state preview only for cards whose native attack construction is known.
++    ///     Unsupported cards and failures remain unknown rather than assuming a single hit.
++    /// </summary>
++    public static CardAttackPreviewDto? Build(CardModel card)
++    {
++        try
++        {
++            if (card is not (Conflagration or TwinStrike or Whirlwind) ||
++                card.Type != CardType.Attack || card.CombatState is not { } combat)
++                return null;
++
++            int hits;
++            int? energyToSpend = null;
++            switch (card)
++            {
++                case Conflagration when card.TargetType == TargetType.AllEnemies:
++                    hits = card.DynamicVars.Repeat.IntValue;
++                    break;
++                case TwinStrike when card.TargetType == TargetType.AnyEnemy:
++                    hits = 2; // Native TwinStrike.OnPlay uses WithHitCount(2), including its upgrade.
++                    break;
++                case Whirlwind when card.TargetType == TargetType.AllEnemies && card.EnergyCost.CostsX:
++                    energyToSpend = card.EnergyCost.GetAmountToSpend();
++                    // CapturedXValue belongs to a previous payment, not the current hand preview.
++                    hits = Hook.ModifyXValue(combat, card, energyToSpend.Value);
++                    break;
++                default:
++                    return null;
++            }
++
++            // These setters only configure a detached command. Never call Execute or BeforeAttack.
++            // Native hit-count hooks are read-only; card-play and between-hit effects are not simulated.
++            AttackCommand CreateAttack() => new AttackCommand(card.DynamicVars.Damage.BaseValue)
++                .FromCard(card, null).WithHitCount(hits);
++
++            decimal? modifiedHits = null;
++            if (card.TargetType == TargetType.AllEnemies)
++            {
++                modifiedHits = Hook.ModifyAttackHitCount(combat, CreateAttack().TargetingAllOpponents(combat), hits);
++            }
++            else
++            {
++                // A card-level count must be valid for every currently selectable enemy.
++                foreach (var enemy in combat.HittableEnemies)
++                {
++                    if (!card.CanPlayTargeting(enemy))
++                        continue;
++                    var targetHits = Hook.ModifyAttackHitCount(combat, CreateAttack().Targeting(enemy), hits);
++                    if (modifiedHits.HasValue && modifiedHits.Value != targetHits)
++                        return null;
++                    modifiedHits = targetHits;
++                }
++            }
++
++            if (!modifiedHits.HasValue)
++                return null;
++
++            return new CardAttackPreviewDto
++            {
++                Hits = checked((int)Math.Max(0m, modifiedHits.Value)),
++                EnergyToSpend = energyToSpend,
++                Scope = "Current-state preview of hits per targeted enemy, not a guarantee of final execution. " +
++                        "Resource-spend, card-play, pre-attack, between-hit, death, and combat-end effects are not simulated."
++            };
++        }
++        catch (Exception ex)
++        {
++            DecisionContextBuilder.Report($"card attack preview: {ex.GetType().Name}");
++            return null;
++        }
++    }
++}
 diff --git a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-index de41515..67c3887 100644
+index de41515..c33174b 100644
 --- a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 @@ -1,5 +1,7 @@
@@ -966,17 +1103,18 @@ index de41515..67c3887 100644
  using STS2.Cli.Mod.Models.State;
  using STS2.Cli.Mod.Utils;
  using static STS2.Cli.Mod.Utils.TextUtils;
-@@ -25,6 +27,9 @@ public static class CardStateBuilder
+@@ -25,6 +27,10 @@ public static class CardStateBuilder
  
              var state = new CardStateDto
              {
 +                Details = DecisionContextBuilder.CardDetails(card),
 +                ValidTargetIds = DecisionContextBuilder.CardTargets(card),
 +                TargetPreviews = DecisionContextBuilder.CardTargetPreviews(card),
++                AttackPreview = CardAttackPreviewBuilder.Build(card),
                  Index = index,
                  Id = card.Id.Entry,
                  Name = StripGameTags(card.Title),
-@@ -52,12 +57,21 @@ public static class CardStateBuilder
+@@ -52,12 +58,21 @@ public static class CardStateBuilder
                  if (tag != CardTag.None)
                      state.Tags.Add(tag.ToString());
  
@@ -999,7 +1137,7 @@ index de41515..67c3887 100644
              if (card.Enchantment is { } enchantment)
                  state.Enchantment = enchantment.Id.Entry;
  
-@@ -68,6 +82,7 @@ public static class CardStateBuilder
+@@ -68,6 +83,7 @@ public static class CardStateBuilder
          }
          catch (Exception ex)
          {
@@ -1007,7 +1145,7 @@ index de41515..67c3887 100644
              Logger.Error($"Failed to build card state: {ex.Message}");
              return null;
          }
-@@ -91,9 +106,10 @@ public static class CardStateBuilder
+@@ -91,9 +107,10 @@ public static class CardStateBuilder
              }
              catch (Exception ex2)
              {

@@ -3,10 +3,10 @@
 export const intentDamage = enemy => (enemy.intents || []).reduce((sum, intent) => sum + (Number.isFinite(intent.damage) ? intent.damage * (intent.hits || 1) : 0), 0);
 
 export function firstHitHpLoss(card, enemy) {
-  // A per-hit preview does not establish that an X-cost card will hit at all.
+  // A per-hit preview without a verified count does not establish that X will hit.
   // Zero-energy Whirlwind is playable but can deal no damage; payment modifiers
   // also mean current energy alone cannot establish the number of hits.
-  if (card.cost < 0) return null;
+  if (card.attack_preview?.hits === 0 || (card.cost < 0 && !(card.attack_preview?.hits > 0))) return null;
   const damage = card.target_previews?.find(p => p.target_id === enemy.combat_id)?.damage;
   if (!Number.isFinite(damage)) return null;
   let hpLoss = Math.max(0, damage - enemy.block);
@@ -18,11 +18,49 @@ export function firstHitHpLoss(card, enemy) {
   return { damage, hp_loss: hpLoss, limits };
 }
 
+export function previewHitCount(card) {
+  const hits = card.attack_preview?.hits;
+  return Number.isSafeInteger(hits) && hits >= 0 ? hits : card.cost < 0 ? null : 1;
+}
+
+export function previewDamageSum(card, enemy) {
+  const damage = card.target_previews?.find(preview => preview.target_id === enemy.combat_id)?.damage;
+  const hits = previewHitCount(card);
+  return Number.isFinite(damage) && hits !== null ? damage * hits : null;
+}
+
+// Known hit counts use the same visible per-hit preview. Only the listed caps
+// and Block are advanced between hits; other changing triggers remain unknown.
+export function attackHpLoss(card, enemy) {
+  const hits = previewHitCount(card);
+  if (hits === null) return null;
+  if (hits === 0) return { damage: 0, hp_loss: 0, hits: 0, limits: [], block_after: enemy.block, powers_after: enemy.powers || [] };
+  const remaining = { ...enemy, powers: (enemy.powers || []).map(power => ({ ...power })) };
+  // Simultaneous damage-prevention hooks may consume stacks in an order this
+  // arithmetic does not model. Keep the original first-hit bound in that case.
+  const ambiguousCaps = remaining.powers.filter(power => power.amount > 0 && ['SLIPPERY_POWER', 'BUFFER_POWER', 'INTANGIBLE_POWER'].includes(power.id)).length > 1;
+  const limit = ambiguousCaps ? 1 : hits;
+  let hpLoss = 0, damage = 0;
+  const limits = new Set();
+  for (let index = 0; index < limit; index++) {
+    const hit = firstHitHpLoss(card, remaining);
+    if (!hit) return null;
+    const unblocked = hit.damage > remaining.block;
+    remaining.block = Math.max(0, remaining.block - hit.damage);
+    hpLoss += hit.hp_loss; damage += hit.damage;
+    hit.limits.forEach(name => limits.add(name));
+    if (unblocked && !ambiguousCaps) for (const power of remaining.powers) {
+      if (['SLIPPERY_POWER', 'BUFFER_POWER'].includes(power.id) && power.amount > 0) power.amount--;
+    }
+  }
+  return { damage, hp_loss: hpLoss, hits: limit, limits: [...limits], block_after: remaining.block, powers_after: remaining.powers };
+}
+
 export function combatForecast(combat, card = null, target = null) {
-  const hit = target && card ? firstHitHpLoss(card, target) : null;
+  const hit = target && card ? attackHpLoss(card, target) : null;
   const targetDepleted = hit && hit.hp_loss >= target.hp;
   const areaHits = card?.target_type === 'AllEnemies' ? combat.enemies.filter(e => e.is_alive && e.hp > 0).map(enemy => {
-    const preview = firstHitHpLoss(card, enemy);
+    const preview = attackHpLoss(card, enemy);
     return { target_id: enemy.combat_id, hp_loss: preview?.hp_loss ?? null, hp_depleted: Boolean(preview && preview.hp_loss >= enemy.hp) };
   }) : null;
   const depleted = new Set(areaHits?.filter(preview => preview.hp_depleted).map(preview => preview.target_id));
@@ -35,7 +73,11 @@ export function combatForecast(combat, card = null, target = null) {
   const endTurnHandDamage = allTargetsDepleted ? 0 : remainingHand.filter(other => other.id === 'TOXIC').reduce((sum, other) => sum + Math.max(0, other.damage || 0), 0);
   const selfHpLoss = Math.max(0, card?.hp_loss || 0);
   const immediateBlock = card?.id === 'RAGE' || card?.type === 'Power' ? 0 : Math.max(0, card?.block || 0) * (exhausted ? exhausted.length : 1);
-  let block = combat.player.block + immediateBlock;
+  // The active power grants unpowered Block once per Attack card, not per hit.
+  // Dexterity/Frail do not modify this amount. Other block hooks remain outside
+  // this limited estimate, as with printed Block above.
+  const rageBlock = card?.type === 'Attack' ? (combat.player.powers || []).filter(power => power.id === 'RAGE_POWER').reduce((sum, power) => sum + Math.max(0, power.amount || 0), 0) : 0;
+  let block = combat.player.block + immediateBlock + rageBlock;
   if (block === 0 && combat.player.relics?.some(relic => relic.id === 'ORICHALCUM')) block = 6;
   const loss = selfHpLoss + Math.max(0, incoming + endTurnHandDamage - block);
   const followup = card && target && hit ? followupAttackBudget(combat, card, target, hit) : null;
@@ -47,11 +89,13 @@ export function combatForecast(combat, card = null, target = null) {
   const instantDeath = deathTimers.some(timer => timer.enemy_turns_remaining_after_card <= 1);
   return {
     energy_after_printed_cost: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
-    first_hit_hp_loss: hit?.hp_loss ?? null,
-    ...(areaHits ? { first_hit_hp_loss_by_target: areaHits } : {}),
+    first_hit_hp_loss: target && card ? firstHitHpLoss(card, target)?.hp_loss ?? null : null,
+    ...(hit ? { attack_hp_loss: hit.hp_loss, preview_hits: hit.hits } : {}),
+    ...(areaHits ? { attack_hp_loss_by_target: areaHits } : {}),
     ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss, hp_remaining_after_declared_loss: combat.player.hp - selfHpLoss, fatal_from_declared_hp_loss: selfHpLoss >= combat.player.hp } : {}),
     ...(endTurnHandDamage ? { end_turn_hand_damage: endTurnHandDamage } : {}),
     block_after_card: block,
+    ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
     displayed_attacks_after_target_depletion: incoming,
     hp_loss_if_end_turn: instantDeath ? combat.player.hp : loss,
     hp_remaining_if_end_turn: instantDeath ? 0 : combat.player.hp - loss,
@@ -83,24 +127,20 @@ function rageFollowups(combat, rage) {
 
 function followupAttackBudget(combat, played, target, hit) {
   if (hit.hp_loss >= target.hp) return { hp_damage: 0, hand_indices: [], enough_to_deplete_target: true };
-  const postPowers = (target.powers || []).map(p => ({ ...p }));
+  const postPowers = hit.powers_after;
   if (postPowers.filter(p => p.amount > 0 && ['SLIPPERY_POWER', 'BUFFER_POWER'].includes(p.id)).length > 1) return null;
-  // Slippery and Buffer consume one stack only when an unblocked hit arrives.
-  if (hit.damage > target.block) for (const power of postPowers) {
-    if (['SLIPPERY_POWER', 'BUFFER_POWER'].includes(power.id)) power.amount--;
-  }
   if (postPowers.some(p => p.amount > 0 && ['SLIPPERY_POWER', 'BUFFER_POWER', 'INTANGIBLE_POWER'].includes(p.id))) return null;
   const energy = played.cost < 0 ? 0 : Math.max(0, Math.min(30, combat.player.energy - played.cost));
   const dp = Array.from({ length: energy + 1 }, () => ({ damage: 0, hand_indices: [] }));
   for (const card of combat.hand || []) {
     if (card.index === played.index || !card.can_play || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy || (card.hp_loss || 0) >= combat.player.hp - (played.hp_loss || 0)) continue;
-    const damage = card.target_previews?.find(p => p.target_id === target.combat_id)?.damage;
+    const damage = previewDamageSum(card, target);
     if (!Number.isFinite(damage) || damage <= 0) continue;
     for (let budget = energy; budget >= card.cost; budget--) {
       const prior = dp[budget - card.cost];
       if (prior.damage + damage > dp[budget].damage) dp[budget] = { damage: prior.damage + damage, hand_indices: [...prior.hand_indices, card.index] };
     }
   }
-  const hpDamage = Math.max(0, dp[energy].damage - Math.max(0, target.block - hit.damage));
+  const hpDamage = Math.max(0, dp[energy].damage - hit.block_after);
   return { hp_damage: hpDamage, hand_indices: dp[energy].hand_indices, enough_to_deplete_target: hpDamage + hit.hp_loss >= target.hp };
 }

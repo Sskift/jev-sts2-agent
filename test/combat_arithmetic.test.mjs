@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { combatForecast, firstHitHpLoss } from '../src/combat_arithmetic.mjs';
+import { combatForecast, firstHitHpLoss, attackHpLoss } from '../src/combat_arithmetic.mjs';
 
 test('visible damage caps prevent a false lethal and defensive arithmetic exposes survival', () => {
   const enemy = { combat_id: 1, hp: 15, block: 0, is_alive: true, powers: [{ id: 'SLIPPERY_POWER', amount: 1, name: 'Slippery' }], intents: [{ damage: 2, hits: 3 }] };
@@ -49,6 +49,19 @@ test('Rage exposes an affordable attack sequence as conditional Block without gr
   assert.equal(combatForecast(combat, rage).attack_trigger_potential, null, 'A legacy mod missing the amount cannot claim that Rage grants zero Block');
 });
 
+test('active Rage counts once per Attack, even at zero X, without Dexterity or Frail scaling', () => {
+  const combat = { player: { hp: 5, block: 0, energy: 0, powers: [
+    { id: 'RAGE_POWER', amount: 5 }, { id: 'DEXTERITY_POWER', amount: 10 }, { id: 'FRAIL_POWER', amount: 1 }
+  ] }, hand: [], enemies: [{ is_alive: true, hp: 50, intents: [{ damage: 9 }] }] };
+  const attack = { type: 'Attack', cost: 0 };
+  assert.equal(combatForecast(combat, attack).hp_remaining_if_end_turn, 1);
+  assert.equal(combatForecast(combat, attack).active_rage_block_gain, 5);
+  assert.equal(combatForecast(combat, { ...attack, cost: -1 }).active_rage_block_gain, 5);
+  assert.equal(combatForecast(combat, { ...attack, block: 3 }).block_after_card, 8);
+  assert.equal(combatForecast(combat, { type: 'Skill', cost: 0 }).block_after_card, 0);
+  assert.equal(combatForecast(combat).block_after_card, 0);
+});
+
 test('visible Sandpit instant death overrides safe-looking HP and Block arithmetic', () => {
   const boss = { combat_id: 1, hp: 143, block: 0, is_alive: true, intents: [{ damage: 10, hits: 2 }], powers: [{ id: 'SANDPIT_POWER', amount: 1 }] };
   const combat = { player: { hp: 45, block: 10, energy: 1 }, hand: [], enemies: [boss] };
@@ -90,8 +103,8 @@ test('an all-enemy attack uses each target preview and preserves surviving or un
   const area = { cost: 1, target_type: 'AllEnemies', target_previews: [1, 2, 3].map(target_id => ({ target_id, damage: 8 })) };
   const estimate = combatForecast(combat, area);
   assert.equal(estimate.hp_remaining_if_end_turn, 7, 'Only the first enemy loses all HP; the other three still threaten damage');
-  assert.deepEqual(estimate.first_hit_hp_loss_by_target.map(p => p.hp_loss), [8, 5, 1, null]);
-  assert.deepEqual(estimate.first_hit_hp_loss_by_target.map(p => p.hp_depleted), [true, false, false, false]);
+  assert.deepEqual(estimate.attack_hp_loss_by_target.map(p => p.hp_loss), [8, 5, 1, null]);
+  assert.deepEqual(estimate.attack_hp_loss_by_target.map(p => p.hp_depleted), [true, false, false, false]);
   assert.equal(combatForecast(combat, { ...area, target_type: 'RandomEnemy' }).hp_remaining_if_end_turn, -3, 'A random-target attack cannot claim to hit every enemy');
 });
 
@@ -101,9 +114,48 @@ test('a playable zero-energy X attack must not falsely remove a lethal attacker'
   const combat = { player: { hp: 10, energy: 0, block: 0 }, hand: [whirlwind], enemies: [enemy] };
   const estimate = combatForecast(combat, whirlwind);
   assert.equal(firstHitHpLoss(whirlwind, enemy), null);
-  assert.deepEqual(estimate.first_hit_hp_loss_by_target, [{ target_id: 1, hp_loss: null, hp_depleted: false }]);
+  assert.deepEqual(estimate.attack_hp_loss_by_target, [{ target_id: 1, hp_loss: null, hp_depleted: false }]);
   assert.equal(estimate.fatal_if_end_turn, true);
   assert.equal(whirlwind.target_previews[0].damage, 7, 'The real per-hit preview remains available to Jev');
+});
+
+test('known repeated attacks include all hits but trigger active Rage only once', () => {
+  const enemy = { combat_id: 1, hp: 7, block: 0, is_alive: true, intents: [{ damage: 20 }] };
+  const card = { type: 'Attack', cost: 1, target_type: 'AllEnemies', attack_preview: { hits: 4 }, target_previews: [{ target_id: 1, damage: 2 }] };
+  const combat = { player: { hp: 5, block: 0, energy: 3, powers: [{ id: 'RAGE_POWER', amount: 5 }] }, hand: [card], enemies: [enemy] };
+  assert.equal(firstHitHpLoss(card, enemy).hp_loss, 2);
+  assert.equal(attackHpLoss(card, enemy).hp_loss, 8);
+  const estimate = combatForecast(combat, card);
+  assert.equal(estimate.attack_hp_loss_by_target[0].hp_depleted, true);
+  assert.equal(estimate.active_rage_block_gain, 5);
+  assert.equal(estimate.fatal_if_end_turn, false);
+  enemy.block = 3; enemy.powers = [{ id: 'BUFFER_POWER', amount: 1 }];
+  card.target_previews[0].damage = 5;
+  assert.equal(attackHpLoss(card, enemy).hp_loss, 15, 'Block and Buffer are consumed before later hits');
+  enemy.block = 0; enemy.powers = [{ id: 'SLIPPERY_POWER', amount: 2 }];
+  assert.equal(attackHpLoss(card, enemy).hp_loss, 12);
+});
+
+test('explicit X hit previews distinguish zero hits, energy-paid hits and a visible X modifier', () => {
+  const enemy = { combat_id: 1, hp: 9, block: 0, is_alive: true, intents: [{ damage: 10 }] };
+  const card = { type: 'Attack', cost: -1, target_type: 'AllEnemies', attack_preview: { hits: 0, energy_to_spend: 0 }, target_previews: [{ target_id: 1, damage: 5 }] };
+  assert.equal(firstHitHpLoss(card, enemy), null);
+  assert.equal(attackHpLoss(card, enemy).hp_loss, 0);
+  card.attack_preview.hits = 2;
+  assert.equal(attackHpLoss(card, enemy).hp_loss, 10, 'A current modifier may grant hits at zero energy');
+  card.attack_preview = { hits: 3, energy_to_spend: 3 };
+  assert.equal(attackHpLoss(card, enemy).hp_loss, 15);
+});
+
+test('the observed Obscura hand exposes its affordable 23-damage follower knockdown', () => {
+  const target = { combat_id: 2, hp: 21, block: 0, is_alive: true, powers: [{ id: 'ILLUSION_POWER', amount: 1 }], intents: [{ damage: 16 }] };
+  const card = (index, damage, hits = 1) => ({ index, type: 'Attack', cost: 1, can_play: true, target_type: 'AnyEnemy', attack_preview: { hits }, target_previews: [{ target_id: 2, damage }] });
+  const hand = [card(0, 9), card(1, 2, 4), card(2, 6)];
+  const combat = { player: { hp: 30, block: 0, energy: 3 }, hand, enemies: [target] };
+  const forecast = combatForecast(combat, hand[0], target);
+  assert.equal(forecast.followup_attacks.hp_damage, 14);
+  assert.equal(forecast.followup_attacks.enough_to_deplete_target, true);
+  assert.equal(target.powers[0].amount, 1, 'A predicted temporary knockdown never mutates the source state');
 });
 
 test('declared self HP loss can kill before an otherwise fully blocked enemy turn', () => {

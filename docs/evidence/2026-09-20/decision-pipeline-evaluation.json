@@ -1,0 +1,434 @@
+{
+  "date": "2026-09-20",
+  "model": "jev-1.13.0",
+  "method": "Six selected historical failures; both variants use current rule reference/arithmetic/instructions and the full original context. Organized variant also includes recent confirmed effects and arithmetic beside choices. Verified native hit/Rage metadata was reconstructed from recorded state when missing. One result per final variant; this is not a held-out win-rate study.",
+  "game_actions_sent": 0,
+  "cases": [
+    {
+      "name": "exhaust_selection",
+      "source": "run-artifacts/2026-09-20T00-40-45-275Z-fe0bafa6/step-0129/",
+      "recorded": {
+        "cmd": "hand_select_card",
+        "card_ids": [
+          "PERFECTED_STRIKE"
+        ],
+        "nth_values": [
+          0
+        ]
+      },
+      "variants": [
+        {
+          "variant": "rules_and_arithmetic",
+          "status": 200,
+          "request_bytes": 47713,
+          "answer": {
+            "type": "choice",
+            "choice": "hand_select_0",
+            "confidence": 0.1,
+            "probabilities": {
+              "hand_select_3": 0.24,
+              "hand_select_1": 0.3,
+              "hand_select_2": 0.13,
+              "hand_select_0": 0.33
+            }
+          },
+          "request": {
+            "cmd": "hand_select_card",
+            "card_ids": [
+              "STRIKE_IRONCLAD"
+            ],
+            "nth_values": [
+              0
+            ]
+          },
+          "usage": {
+            "input_tokens": 21933,
+            "output_tokens": 61
+          }
+        },
+        {
+          "variant": "organized_decision",
+          "status": 200,
+          "request_bytes": 48553,
+          "answer": {
+            "type": "choice",
+            "choice": "hand_select_0",
+            "confidence": 0.12,
+            "probabilities": {
+              "hand_select_1": 0.28,
+              "hand_select_2": 0.11,
+              "hand_select_3": 0.27,
+              "hand_select_0": 0.34
+            }
+          },
+          "request": {
+            "cmd": "hand_select_card",
+            "card_ids": [
+              "STRIKE_IRONCLAD"
+            ],
+            "nth_values": [
+              0
+            ]
+          },
+          "usage": {
+            "input_tokens": 22238,
+            "output_tokens": 61
+          }
+        }
+      ],
+      "game_actions_sent": 0
+    },
+    {
+      "name": "late_speed_potion",
+      "source": "run-artifacts/2026-09-20T00-40-45-275Z-fe0bafa6/step-0105/",
+      "recorded": {
+        "cmd": "use_potion",
+        "id": "SPEED_POTION",
+        "nth": 0,
+        "target": 0
+      },
+      "variants": [
+        {
+          "variant": "rules_and_arithmetic",
+          "status": 200,
+          "request_bytes": 51230,
+          "answer": {
+            "type": "choice",
+            "choice": "end_turn",
+            "confidence": 0.33,
+            "probabilities": {
+              "end_turn": 0.67,
+              "potion_0_target_0": 0.33
+            }
+          },
+          "request": {
+            "cmd": "end_turn"
+          },
+          "usage": {
+            "input_tokens": 24907,
+            "output_tokens": 40
+          }
+        },
+        {
+          "variant": "organized_decision",
+          "status": 200,
+          "request_bytes": 53225,
+          "answer": {
+            "type": "choice",
+            "choice": "end_turn",
+            "confidence": 0.49,
+            "probabilities": {
+              "potion_0_target_0": 0.25,
+              "end_turn": 0.75
+            }
+          },
+          "request": {
+            "cmd": "end_turn"
+          },
+          "usage": {
+            "input_tokens": 25797,
+            "output_tokens": 40
+          }
+        }
+      ],
+      "game_actions_sent": 0
+    },
+    {
+      "name": "obscura",
+      "source": "run-artifacts/2026-09-20T01-32-35-096Z-eedd0863/step-0022/",
+      "recorded": {
+        "cmd": "play_card",
+        "id": "WHIRLWIND",
+        "nth": 0
+      },
+      "variants": [
+        {
+          "variant": "rules_and_arithmetic",
+          "status": 200,
+          "request_bytes": 58296,
+          "answer": {
+            "type": "choice",
+            "choice": "card_3_target_2",
+            "confidence": 0.26,
+            "probabilities": {
+              "card_3_target_2": 0.32,
+              "card_1": 0.04,
+              "card_2_target_1": 0.05,
+              "potion_2_target_0": 0.04,
+              "card_0": 0.2,
+              "card_2_target_2": 0.02,
+              "potion_1_target_0": 0.01,
+              "card_3_target_1": 0.03,
+              "potion_0_target_0": 0.03,
+              "end_turn": 0.02,
+              "card_4_target_1": 0.05,
+              "card_4_target_2": 0.19
+            }
+          },
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 2
+          },
+          "usage": {
+            "input_tokens": 26660,
+            "output_tokens": 160
+          }
+        },
+        {
+          "variant": "organized_decision",
+          "status": 200,
+          "request_bytes": 61349,
+          "answer": {
+            "type": "choice",
+            "choice": "card_3_target_2",
+            "confidence": 0.38,
+            "probabilities": {
+              "potion_0_target_0": 0.03,
+              "potion_1_target_0": 0.01,
+              "card_0": 0.1,
+              "potion_2_target_0": 0.02,
+              "card_3_target_2": 0.42,
+              "card_2_target_2": 0.01,
+              "card_2_target_1": 0.02,
+              "end_turn": 0.01,
+              "card_4_target_2": 0.31,
+              "card_4_target_1": 0.04,
+              "card_3_target_1": 0.01,
+              "card_1": 0.02
+            }
+          },
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 2
+          },
+          "usage": {
+            "input_tokens": 28033,
+            "output_tokens": 160
+          }
+        }
+      ],
+      "game_actions_sent": 0
+    },
+    {
+      "name": "rage_setup",
+      "source": "run-artifacts/2026-09-19T23-42-40-240Z-054dbf70/step-0118/",
+      "recorded": {
+        "cmd": "play_card",
+        "id": "POMMEL_STRIKE",
+        "nth": 0,
+        "target": 2
+      },
+      "variants": [
+        {
+          "variant": "rules_and_arithmetic",
+          "status": 200,
+          "request_bytes": 64681,
+          "answer": {
+            "type": "choice",
+            "choice": "card_5",
+            "confidence": 0.42,
+            "probabilities": {
+              "card_2_target_1": 0.02,
+              "potion_0_target_0": 0.02,
+              "card_2_target_2": 0.11,
+              "card_1": 0.1,
+              "card_0_target_2": 0.17,
+              "card_3": 0.03,
+              "end_turn": 0.01,
+              "card_4_target_1": 0,
+              "card_6_target_1": 0,
+              "card_5": 0.47000000000000003,
+              "card_7": 0.01,
+              "card_6_target_2": 0.01,
+              "card_4_target_2": 0.02,
+              "card_0_target_1": 0.02
+            }
+          },
+          "request": {
+            "cmd": "play_card",
+            "id": "RAGE",
+            "nth": 0
+          },
+          "usage": {
+            "input_tokens": 29980,
+            "output_tokens": 173
+          }
+        },
+        {
+          "variant": "organized_decision",
+          "status": 200,
+          "request_bytes": 68934,
+          "answer": {
+            "type": "choice",
+            "choice": "card_5",
+            "confidence": 0.47,
+            "probabilities": {
+              "card_2_target_1": 0.04,
+              "end_turn": 0.01,
+              "card_2_target_2": 0.14,
+              "card_1": 0.11,
+              "card_0_target_2": 0.09,
+              "card_3": 0.02,
+              "potion_0_target_0": 0.02,
+              "card_4_target_1": 0,
+              "card_6_target_1": 0,
+              "card_5": 0.51,
+              "card_7": 0.01,
+              "card_6_target_2": 0.01,
+              "card_4_target_2": 0.03,
+              "card_0_target_1": 0.01
+            }
+          },
+          "request": {
+            "cmd": "play_card",
+            "id": "RAGE",
+            "nth": 0
+          },
+          "usage": {
+            "input_tokens": 31925,
+            "output_tokens": 173
+          }
+        }
+      ],
+      "game_actions_sent": 0
+    },
+    {
+      "name": "safe_setup",
+      "source": "run-artifacts/2026-09-20T00-15-50-405Z-4804c89c/step-0055/",
+      "recorded": {
+        "cmd": "play_card",
+        "id": "SHRUG_IT_OFF",
+        "nth": 0
+      },
+      "variants": [
+        {
+          "variant": "rules_and_arithmetic",
+          "status": 200,
+          "request_bytes": 58312,
+          "answer": {
+            "type": "choice",
+            "choice": "card_2",
+            "confidence": 0.45,
+            "probabilities": {
+              "card_0_target_1": 0,
+              "card_1": 0.04,
+              "end_turn": 0.09,
+              "card_2": 0.54,
+              "card_3": 0.22,
+              "card_4": 0.11
+            }
+          },
+          "request": {
+            "cmd": "play_card",
+            "id": "JUGGERNAUT",
+            "nth": 0
+          },
+          "usage": {
+            "input_tokens": 28258,
+            "output_tokens": 76
+          }
+        },
+        {
+          "variant": "organized_decision",
+          "status": 200,
+          "request_bytes": 61544,
+          "answer": {
+            "type": "choice",
+            "choice": "card_2",
+            "confidence": 0.29,
+            "probabilities": {
+              "card_0_target_1": 0,
+              "card_4": 0.1,
+              "end_turn": 0.1,
+              "card_1": 0.07,
+              "card_3": 0.31,
+              "card_2": 0.42
+            }
+          },
+          "request": {
+            "cmd": "play_card",
+            "id": "JUGGERNAUT",
+            "nth": 0
+          },
+          "usage": {
+            "input_tokens": 29779,
+            "output_tokens": 76
+          }
+        }
+      ],
+      "game_actions_sent": 0
+    },
+    {
+      "name": "stomp_order",
+      "source": "run-artifacts/2026-09-20T01-00-03-403Z-23c4dcfd/step-0152/",
+      "recorded": {
+        "cmd": "play_card",
+        "id": "STOMP",
+        "nth": 0
+      },
+      "variants": [
+        {
+          "variant": "rules_and_arithmetic",
+          "status": 200,
+          "request_bytes": 36554,
+          "answer": {
+            "type": "choice",
+            "choice": "card_0_target_1",
+            "confidence": 0.43,
+            "probabilities": {
+              "card_4": 0.27,
+              "card_2": 0.13,
+              "card_3": 0.02,
+              "card_0_target_1": 0.53,
+              "end_turn": 0.02,
+              "card_1_target_1": 0.03
+            }
+          },
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "usage": {
+            "input_tokens": 16061,
+            "output_tokens": 82
+          }
+        },
+        {
+          "variant": "organized_decision",
+          "status": 200,
+          "request_bytes": 39328,
+          "answer": {
+            "type": "choice",
+            "choice": "card_0_target_1",
+            "confidence": 0.28,
+            "probabilities": {
+              "card_4": 0.24,
+              "card_3": 0.03,
+              "card_1_target_1": 0.04,
+              "card_2": 0.28,
+              "card_0_target_1": 0.39,
+              "end_turn": 0.02
+            }
+          },
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "usage": {
+            "input_tokens": 17331,
+            "output_tokens": 82
+          }
+        }
+      ],
+      "game_actions_sent": 0
+    }
+  ]
+}
