@@ -1,0 +1,48 @@
+{
+  "run_id": "run-1789890786",
+  "game_version": "0.111.0",
+  "kind": "act_one_boss_and_same_run_act_two",
+  "original_start": "run-artifacts/2026-09-20T07-53-03-178Z-bc12030a",
+  "boss_before_final_action": {
+    "source": "run-artifacts/2026-09-20T08-13-01-379Z-59d1854a/step-0028/before-state.json",
+    "floor": 17,
+    "turn": 16,
+    "player_hp": 10,
+    "enemies": [
+      {
+        "id": "CEREMONIAL_BEAST",
+        "hp": 10,
+        "is_alive": true
+      }
+    ]
+  },
+  "final_action": {
+    "cmd": "play_card",
+    "id": "STRIKE_IRONCLAD",
+    "nth": 0,
+    "target": 1
+  },
+  "reward": {
+    "source": "run-artifacts/2026-09-20T08-13-01-379Z-59d1854a/step-0040/before-state.json",
+    "screen": "REWARD",
+    "hp": 16
+  },
+  "act_two_map": {
+    "source": "run-artifacts/2026-09-20T08-13-01-379Z-59d1854a/step-0046/after-state.json",
+    "screen": "MAP",
+    "act_index": 1,
+    "floor": 18,
+    "hp": 80
+  },
+  "act_two_first_combat": {
+    "source": "run-artifacts/2026-09-20T08-13-01-379Z-59d1854a/step-0047/after-state.json",
+    "floor": 19,
+    "enemies": [
+      {
+        "id": "THIEVING_HOPPER",
+        "hp": 79
+      }
+    ]
+  },
+  "remaining": "Acts Two and Three and the formal final victory are not yet completed."
+}
