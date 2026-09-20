@@ -18,5 +18,122 @@
     "structure_changed": false,
     "immediate_refresh_reason": null,
     "post_combat_refresh_reason": "The permanent deck, owned relics or maximum HP changed."
+  },
+  "live_check": {
+    "source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0",
+    "run_id": "run-1789896546",
+    "continued_actions": [
+      {
+        "step": 9,
+        "screen": "COMBAT",
+        "request": {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 1
+        },
+        "model": "jev-turn-plan",
+        "modelCalls": 28,
+        "strategicAssessments": 0,
+        "turnObjective": "protect_hp",
+        "planRevision": 0,
+        "plannedStep": 0,
+        "planningCalls": 28,
+        "ok": true,
+        "changed": true,
+        "afterScreen": "COMBAT",
+        "act": 1,
+        "floor": 22,
+        "hp": 45,
+        "energy": 2,
+        "enemies": [
+          {
+            "name": "Myte",
+            "hp": 41
+          }
+        ]
+      },
+      {
+        "step": 10,
+        "screen": "COMBAT",
+        "request": {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        "model": "jev-turn-plan",
+        "modelCalls": 0,
+        "strategicAssessments": 0,
+        "turnObjective": "protect_hp",
+        "planRevision": 0,
+        "plannedStep": 1,
+        "planningCalls": 0,
+        "ok": true,
+        "changed": true,
+        "afterScreen": "COMBAT",
+        "act": 1,
+        "floor": 22,
+        "hp": 45,
+        "energy": 1,
+        "enemies": [
+          {
+            "name": "Myte",
+            "hp": 41
+          }
+        ]
+      },
+      {
+        "step": 11,
+        "screen": "COMBAT",
+        "request": {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 2
+        },
+        "model": "jev-turn-plan",
+        "modelCalls": 0,
+        "strategicAssessments": 0,
+        "turnObjective": "protect_hp",
+        "planRevision": 0,
+        "plannedStep": 2,
+        "planningCalls": 0,
+        "ok": true,
+        "changed": true,
+        "afterScreen": "COMBAT",
+        "act": 1,
+        "floor": 22,
+        "hp": 45,
+        "energy": 0,
+        "enemies": [
+          {
+            "name": "Myte",
+            "hp": 32
+          }
+        ]
+      }
+    ],
+    "retained_assessment": {
+      "source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0/step-0013/jev-turn_objective-0001.json",
+      "revision": 60,
+      "freshness": {
+        "needs_review": false,
+        "reason": null,
+        "deferred_until_post_combat": true
+      }
+    },
+    "aftermath_assessment": {
+      "source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0/step-0018/run-strategy-decision.json",
+      "revision": 61,
+      "basis": {
+        "run_id": "run-1789896546",
+        "act_index": 1,
+        "floor": 22,
+        "checkpoint": "22:between_rooms",
+        "structure_id": "a6b4c6bfcb2d3154c9942178",
+        "build_id": "0dba05202b151018ab896587"
+      },
+      "reason": "The permanent deck, owned relics or maximum HP changed."
+    },
+    "scope": "Confirmed runtime action logs and actual model requests. This verifies strategic update scheduling, not tactical optimality."
   }
 }
