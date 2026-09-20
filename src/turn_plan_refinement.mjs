@@ -178,16 +178,14 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
       add([...prefix.slice(0, index), inserted, ...prefix.slice(index), end]);
     }
   }
-  plan.candidate_coverage.compared_plans = alternatives.size;
+  plan.candidate_coverage.eligible_plans = alternatives.size;
   if (alternatives.size === 1) return;
   // Assess each complete alternative, then compare a diverse small shortlist.
   // Neither a local damage heuristic nor a card-specific strategy ranks them.
   const keep = { value: 'keep', label: label(plan.steps) };
-  const maxLabels = prepared.metrics.max_request_bytes - prepared.metrics.request_bytes - 6000;
-  if (maxLabels < Buffer.byteLength(JSON.stringify(keep)) * 2) {
-    plan.refinement_limit = 'Optional whole-plan comparisons skipped because the complete state leaves insufficient request space.';
-    return;
-  }
+  // judgePlans measures each actual compiled request and batches it to fit.
+  // Raw label length cannot predict that size: shared descriptions and table
+  // records compact together, and comparison state replaces the seed prefix.
   const instruction = 'Compare two mutually exclusive COMPLETE ordered plans starting from the actual current combat state. Choose the greater overall value toward winning the run. Compare HP actually lost, enemy damage and removal, lasting benefits, changed card piles, and persistent resources consumed or preserved. Read resource_consequences with conditional_preview: additional expiring Block is valuable only through damage it prevents or another supported rule interaction. Check preparation before its beneficiaries and actual follow-through. Ignore which plan was proposed earlier. Conditional arithmetic is incomplete; evaluate uncomputed rules without inventing hidden outcomes.';
   const comparisonState = { phase_scope: 'Compare mutually exclusive complete plans from the ACTUAL current state. These proposed steps have NOT happened. Every option replaces the entire unexecuted proposed prefix; do not execute both the old prefix and an option.',
     objective: null, retained_cards: [], proposed_steps: [], conditional_projection: [],
@@ -200,6 +198,7 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
   plan.candidate_coverage.distinct_allocations = shortlist.allocation_count;
   plan.assessment_shortlist = shortlist.assessments;
   const final = await compareFinalists(shortlist.candidates, keep, comparePairs, instruction, comparisonState);
+  plan.candidate_coverage.compared_plans = new Set((final.audit.balanced_pairs || []).flatMap(pair => pair.candidates)).size;
   plan.comparison_audit = final.audit;
   const selected = final.selected;
   if (selected === 'keep') return;

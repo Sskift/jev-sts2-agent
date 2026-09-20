@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "game_version": "v0.111.0",
-  "extracted_at": "2026-09-20T19:12:07.442Z",
+  "extracted_at": "2026-09-20T19:36:54.334Z",
   "source": "Local installed sts2.dll; static inspection only. No native code or live RNG is invoked.",
   "assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
   "semantics": {
@@ -62,6 +62,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "IncreasingIntensityTotalStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "EBB_MOVE"
@@ -167,6 +176,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "BootUpStrGain * RespawnCount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "HAMMER_UPPERCUT_MOVE"
         },
         {
@@ -194,6 +212,20 @@
             {
               "category": "powers",
               "id": "FRAIL"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "FRAIL",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "ONE_TWO_MOVE"
@@ -304,6 +336,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "BuffStrengthGain",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "THRASH2_MOVE"
         },
         {
@@ -391,6 +432,14 @@
               "id": "WEAK"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "THRASH_MOVE"
         }
       ],
@@ -425,6 +474,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "BEAT_MOVE"
         }
       ],
@@ -457,6 +514,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 10,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "SLASHES_MOVE"
@@ -547,6 +612,15 @@
               "id": "RITUAL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "RITUAL",
+              "amount": null,
+              "amount_expression": "IncantationAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "DARK_STRIKE_MOVE"
         },
         {
@@ -581,6 +655,15 @@
               "id": "PLOW"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "PLOW",
+              "amount": null,
+              "amount_expression": "PlowAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "PLOW_MOVE"
         },
         {
@@ -595,6 +678,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "PlowStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "PLOW_MOVE"
@@ -622,6 +714,14 @@
               "id": "RINGING"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "RINGING",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "STOMP_MOVE"
         },
         {
@@ -645,6 +745,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "CrushStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BEAST_CRY_MOVE"
@@ -737,6 +846,15 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": null,
+              "amount_expression": "GoopFrailAmt",
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "WHIP_SLAP_MOVE"
         }
       ],
@@ -815,6 +933,20 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "FRAIL",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "ADAPT_MOVE"
         },
         {
@@ -828,6 +960,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "AdaptStrengthGain",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "GUARDED_STRIKE_MOVE"
@@ -865,6 +1006,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "REPEATER_BLAST_MOVE"
         },
         {
@@ -881,6 +1030,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "REPEATER_BLAST_MOVE_2"
         },
         {
@@ -895,6 +1052,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "EXPEL_MOVE"
@@ -929,6 +1094,15 @@
             {
               "category": "powers",
               "id": "RITUAL"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "RITUAL",
+              "amount": null,
+              "amount_expression": "IncantationAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "DARK_STRIKE_MOVE"
@@ -975,6 +1149,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "BulkStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "WRITHE_MOVE"
         },
         {
@@ -989,6 +1172,14 @@
             {
               "category": "powers",
               "id": "WEAK"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BULK_MOVE"
@@ -1056,6 +1247,15 @@
               "id": "RITUAL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "RITUAL",
+              "amount": null,
+              "amount_expression": "_ritualGain",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SAVAGE_MOVE"
         },
         {
@@ -1092,6 +1292,26 @@
             {
               "category": "powers",
               "id": "PERSONAL_HIVE"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "PERSONAL_HIVE",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "STRENGTH",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BEES_MOVE"
@@ -1153,6 +1373,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "RAND"
@@ -1339,6 +1567,14 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "RAND_ATTACK_MOVE"
         },
         {
@@ -1352,6 +1588,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "RAND_MOVE"
@@ -1455,6 +1699,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -1521,6 +1773,14 @@
               "id": "VULNERABLE"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "VULNERABLE",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -1535,6 +1795,14 @@
             {
               "category": "powers",
               "id": "FRAIL"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "RAND"
@@ -1621,6 +1889,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "BRANCH"
         },
         {
@@ -1635,6 +1911,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "HEADBUTT_MOVE"
@@ -1686,6 +1970,14 @@
             {
               "category": "powers",
               "id": "FRAIL"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "RAND"
@@ -1755,6 +2047,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 5,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "HALF_HEALTH"
         },
         {
@@ -1778,6 +2078,14 @@
             {
               "category": "powers",
               "id": "FRAIL"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "STRIKE_DOWN_EVIL"
@@ -1846,6 +2154,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 7,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "ACID_GOOP"
         }
       ],
@@ -1899,6 +2215,14 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "THUNDER_STRIKE"
         },
         {
@@ -1913,6 +2237,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "SHOCKING_SLAP"
@@ -1950,6 +2282,14 @@
               "id": "WEAK"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "HEHE_MOVE"
         },
         {
@@ -1964,6 +2304,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "GIMME_MOVE"
@@ -2043,6 +2391,14 @@
               "id": "WEAK"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 3,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SWIPE_MOVE"
         }
       ],
@@ -2066,6 +2422,14 @@
             {
               "category": "powers",
               "id": "TENDER"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "TENDER",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "RAND"
@@ -2156,6 +2520,15 @@
             {
               "category": "powers",
               "id": "VITAL_SPARK"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "VITAL_SPARK",
+              "amount": null,
+              "amount_expression": "VitalSparkAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "JAB_MOVE"
@@ -2273,6 +2646,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "DanceStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "QUICK_SLASH_MOVE"
         }
       ],
@@ -2301,6 +2683,14 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "ORB_OF_WEAKNESS_MOVE"
         },
         {
@@ -2315,6 +2705,14 @@
             {
               "category": "powers",
               "id": "WEAK"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BEAM_MOVE"
@@ -2339,6 +2737,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "RitualStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "ORB_OF_FRAILTY_MOVE"
@@ -2393,6 +2800,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "PonderStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "CurseOfKnowledgeBranch"
@@ -2474,6 +2890,26 @@
             {
               "category": "powers",
               "id": "DEXTERITY"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": -2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "DEXTERITY",
+              "amount": -2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "SLASH_MOVE"
@@ -2618,6 +3054,14 @@
               "id": "SMOGGY"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "SMOGGY",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "BLOAT_MOVE"
         },
         {
@@ -2686,6 +3130,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "EnrageStr",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SMASH_MOVE"
         }
       ],
@@ -2712,6 +3165,14 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "CURL_AND_GROW_MOVE"
         },
         {
@@ -2735,6 +3196,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "GrowStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "POUNCE_MOVE"
@@ -2833,6 +3303,14 @@
               "id": "VULNERABLE"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "VULNERABLE",
+              "amount": 3,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -2923,6 +3401,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 5,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "HEAVY_CLEAVE_MOVE"
         },
         {
@@ -2991,6 +3477,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "SuckStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "TOXIC_MOVE"
         },
         {
@@ -3047,6 +3542,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "HissStrengthGain",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BUTT_MOVE"
@@ -3137,6 +3641,15 @@
               "id": "MINION"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "MINION",
+              "amount": 1,
+              "recipients": "unresolved",
+              "recipients_expression": "target",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SMASH_MOVE"
         },
         {
@@ -3162,6 +3675,14 @@
               "id": "VULNERABLE"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "VULNERABLE",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SUMMON_BRANCH_STATE"
         },
         {
@@ -3175,6 +3696,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "NutritionalPasteStrengthAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "SMASH_MOVE"
@@ -3234,6 +3764,14 @@
               "id": "SOAR"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "SOAR",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "VERDICT"
         },
         {
@@ -3252,6 +3790,14 @@
             {
               "category": "powers",
               "id": "SOAR"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "VULNERABLE",
+              "amount": 4,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "MAGISTRATE_SCRUTINY"
@@ -3340,6 +3886,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "EnlargeStr",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BITE_MOVE"
@@ -3467,6 +4022,14 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "STRONG_PUNCH_MOVE"
         }
       ],
@@ -3494,6 +4057,14 @@
               "id": "CHAINS_OF_BINDING"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "CHAINS_OF_BINDING",
+              "amount": 3,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "YOU_ARE_MINE_MOVE"
         },
         {
@@ -3515,6 +4086,26 @@
             {
               "category": "powers",
               "id": "VULNERABLE"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 99,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "WEAK",
+              "amount": 99,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "VULNERABLE",
+              "amount": 99,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "YOURE_MINE_NOW_BRANCH"
@@ -3545,6 +4136,16 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "strengthAmount",
+              "recipients": "unresolved",
+              "recipients_expression": "item",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BURN_BRIGHT_FOR_ME_BRANCH"
@@ -3594,6 +4195,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "OFF_WITH_YOUR_HEAD_MOVE"
         }
       ],
@@ -3637,6 +4246,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "ChargeUpStrengthGain",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "LASER_MOVE"
@@ -3698,6 +4316,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "CHEW"
@@ -3763,6 +4389,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "BubbleStr",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SEA_KICK_MOVE"
         }
       ],
@@ -3786,6 +4421,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 4,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "JET_MOVE"
@@ -3820,6 +4463,14 @@
             {
               "category": "powers",
               "id": "SHRINK"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "SHRINK",
+              "amount": -1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "CHOMP_MOVE"
@@ -3882,6 +4533,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "InertiaStrengthGain",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "PIERCING_STABS_MOVE"
@@ -3947,6 +4607,20 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 3,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "STRENGTH",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SMOTHER_MOVE"
         },
         {
@@ -3988,6 +4662,14 @@
             {
               "category": "powers",
               "id": "CONSTRICT"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "CONSTRICT",
+              "amount": 3,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "rand"
@@ -4051,6 +4733,14 @@
               "id": "WEAK"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -4074,6 +4764,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "RAND"
@@ -4132,6 +4830,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "ROLL_OUT_MOVE"
         },
         {
@@ -4170,6 +4876,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "ENERGY_ORB_MOVE"
@@ -4265,6 +4979,14 @@
               "id": "INTANGIBLE"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "INTANGIBLE",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SCREAM_MOVE"
         },
         {
@@ -4279,6 +5001,15 @@
             {
               "category": "powers",
               "id": "VULNERABLE"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "VULNERABLE",
+              "amount": null,
+              "amount_expression": "ScreamMoveAmount",
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BECKON_MOVE"
@@ -4329,6 +5060,20 @@
               "id": "WEAK"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "VULNERABLE",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "WEAK",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -4373,6 +5118,15 @@
             {
               "category": "powers",
               "id": "HEX"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "HEX",
+              "amount": 2,
+              "recipients": "unresolved",
+              "recipients_expression": "target",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "SOUL_SLASH"
@@ -4435,6 +5189,14 @@
               "id": "THORNS"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "THORNS",
+              "amount": 5,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SPIKE_EXPLOSION_MOVE"
         },
         {
@@ -4448,6 +5210,14 @@
             {
               "category": "powers",
               "id": "THORNS"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "THORNS",
+              "amount": -5,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "TONGUE_LASH_MOVE"
@@ -4485,6 +5255,14 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "STAB_MOVE"
         }
       ],
@@ -4520,6 +5298,14 @@
               "id": "VIGOR"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "VIGOR",
+              "amount": 6,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "CRASH_MOVE"
         },
         {
@@ -4542,6 +5328,14 @@
             {
               "category": "powers",
               "id": "VULNERABLE"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "VULNERABLE",
+              "amount": 99,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "CRASH_MOVE"
@@ -4578,6 +5372,20 @@
               "id": "ADAPTABLE"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "PAINFUL_STABS",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "NEMESIS",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "must_perform_once": true,
           "next": "REVIVE_BRANCH"
         },
@@ -4602,6 +5410,14 @@
             {
               "category": "powers",
               "id": "VULNERABLE"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "VULNERABLE",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BITE_MOVE"
@@ -4659,6 +5475,15 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "BurningGrowlStrengthGain",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "PHASE3_LACERATE_MOVE"
@@ -4721,6 +5546,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "SMASH_MOVE"
         }
       ],
@@ -4763,6 +5596,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 4,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "CRASH_MOVE"
@@ -4809,6 +5650,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "BASH_MOVE"
         }
       ],
@@ -4834,6 +5683,22 @@
             {
               "category": "powers",
               "id": "DEXTERITY"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "DEXTERITY",
+              "amount": null,
+              "amount_expression": "-DebilitatingSmogDexStealAmount",
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "DEXTERITY",
+              "amount": null,
+              "amount_expression": "DebilitatingSmogDexStealAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "DREAD"
@@ -4917,6 +5782,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "SalivateStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "THRASH_MOVE_2"
         }
       ],
@@ -4941,6 +5815,22 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "-DebilitatingSmogStrengthStealAmount",
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "DebilitatingSmogStrengthStealAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "EYE_LASERS"
@@ -4993,6 +5883,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 3,
+              "recipients": "self_and_allies",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "RAND"
@@ -5085,6 +5983,14 @@
               "id": "FLUTTER"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FLUTTER",
+              "amount": 5,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "HAT_TRICK_MOVE"
         },
         {
@@ -5119,6 +6025,15 @@
               "id": "THORNS"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "THORNS",
+              "amount": null,
+              "amount_expression": "-SpikenAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "WHIRL_MOVE"
         },
         {
@@ -5141,6 +6056,15 @@
             {
               "category": "powers",
               "id": "THORNS"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "THORNS",
+              "amount": null,
+              "amount_expression": "SpikenAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "SPIKE_SPIT_MOVE"
@@ -5271,6 +6195,14 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 2,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "HOUNDS_MOVE"
         },
         {
@@ -5313,6 +6245,14 @@
             {
               "category": "powers",
               "id": "BURROWED"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "BURROWED",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BELOW_MOVE"
@@ -5376,6 +6316,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 1,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "UNLOAD_MOVE"
@@ -5500,6 +6448,14 @@
               "id": "FRAIL"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "FRAIL",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "RAND"
         },
         {
@@ -5611,6 +6567,14 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "INK_BLOT_MOVE"
         }
       ],
@@ -5635,6 +6599,14 @@
             {
               "category": "powers",
               "id": "TANGLED"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "TANGLED",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "CHOMP_MOVE"
@@ -5680,6 +6652,15 @@
               "id": "STEAM_ERUPTION"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STEAM_ERUPTION",
+              "amount": null,
+              "amount_expression": "PressurizeAmount",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "STOMP_MOVE"
         },
         {
@@ -5701,6 +6682,20 @@
               "id": "STEAM_ERUPTION"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            },
+            {
+              "power_id": "STEAM_ERUPTION",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "RAM_MOVE"
         },
         {
@@ -5715,6 +6710,14 @@
             {
               "category": "powers",
               "id": "STEAM_ERUPTION"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STEAM_ERUPTION",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "SIPHON_MOVE"
@@ -5733,6 +6736,14 @@
               "id": "STEAM_ERUPTION"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STEAM_ERUPTION",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "PRESSURE_GUN_MOVE"
         },
         {
@@ -5749,6 +6760,14 @@
               "id": "STEAM_ERUPTION"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STEAM_ERUPTION",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "PRESSURE_UP_MOVE"
         },
         {
@@ -5763,6 +6782,14 @@
             {
               "category": "powers",
               "id": "STEAM_ERUPTION"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STEAM_ERUPTION",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "STOMP_MOVE"
@@ -5838,6 +6865,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 2,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "NASTY_BITE_MOVE"
@@ -5928,6 +6963,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "BulkStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "WRITHE_MOVE"
         },
         {
@@ -5942,6 +6986,14 @@
             {
               "category": "powers",
               "id": "WEAK"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BULK_MOVE"
@@ -6020,6 +7072,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "BulkStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "WRITHE_MOVE"
         },
         {
@@ -6034,6 +7095,14 @@
             {
               "category": "powers",
               "id": "WEAK"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BULK_MOVE"
@@ -6112,6 +7181,15 @@
               "id": "STRENGTH"
             }
           ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": null,
+              "amount_expression": "BulkStrength",
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+            }
+          ],
           "next": "WRITHE_MOVE"
         },
         {
@@ -6126,6 +7204,14 @@
             {
               "category": "powers",
               "id": "WEAK"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "WEAK",
+              "amount": 1,
+              "recipients": "move_targets",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "BULK_MOVE"
@@ -6192,6 +7278,14 @@
             {
               "category": "powers",
               "id": "STRENGTH"
+            }
+          ],
+          "power_applications": [
+            {
+              "power_id": "STRENGTH",
+              "amount": 3,
+              "recipients": "self",
+              "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
             }
           ],
           "next": "RAND"

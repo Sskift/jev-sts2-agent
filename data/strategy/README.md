@@ -25,6 +25,8 @@
 
 曾查看 [EnemyCycle](https://github.com/sts2mods/EnemyCycle) 的预测设计作为研究参考；没有安装它、复制其实现或使用它读取 RNG 的路径。
 
+原生泛型 `PowerCmd.Apply<T>` 调用另提供 `power_applications`：目前覆盖 83 种怪物、121 个招式的 135 次调用，其中 96 个数量为字面量、132 个作用对象可识别。已核对的对象包括自身、本次招式目标和包含自身的己方全队；符号数量及其他对象保持未解析。例如 The Obscura 的 Wail 是向自身及队友各施加 3 点力量。记录只描述调用到达时的参数，不模拟条件、循环、阻止施加或修饰后的最终层数；非泛型调用和辅助方法仍有缺口。[提取与回放证据](../../docs/evidence/2026-09-21/run30-progress-review.json)。
+
 ## 更新
 
 使用 ILSpy 对所需 `MegaCrit.Sts2.Core.Models.Monsters.*` 类型导出独立 C# 文件，再运行：

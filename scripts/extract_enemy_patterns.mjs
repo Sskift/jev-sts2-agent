@@ -62,6 +62,21 @@ function generatedCards(body) {
   });
 }
 
+// Verified v0.111.0 generic overloads: context, target(s), amount, applier,
+// cardSource, optional silent. A call argument is not a simulated final stack.
+function powerApplications(body) {
+  return [...body.matchAll(/PowerCmd\.Apply<(\w+)>\s*\(/g)].map(match => {
+    const args = argumentsOf(balanced(body, body.indexOf('(', match.index)));
+    const target = args[1]?.replace(/\s+/g, '');
+    const recipients = { 'base.Creature': 'self', targets: 'move_targets',
+      'base.CombatState.GetTeammatesOf(base.Creature)': 'self_and_allies' }[target] ?? 'unresolved';
+    return { power_id: ruleId(match[1].replace(/Power$/, '')), amount: numeric(args[2]),
+      ...(numeric(args[2]) === null ? { amount_expression: args[2] ?? 'unknown' } : {}), recipients,
+      ...(recipients === 'unresolved' ? { recipients_expression: args[1] ?? 'unknown' } : {}),
+      scope: 'Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries.' };
+  });
+}
+
 export function extractPattern(source) {
   const offset = source.indexOf('GenerateMoveStateMachine()');
   if (offset < 0) return { states: [], gaps: ['Inherited or unavailable state-machine method.'] };
@@ -79,9 +94,10 @@ export function extractPattern(source) {
       node.move_id = node.id.replace(/_MOVE$/, '');
       node.intents = [...args.slice(2).join(',').matchAll(/new (\w+)Intent\(/g)].map(m => m[1]);
       const move = moveBody(source, args[1]);
-      const cards = generatedCards(move), references = referencedRules(move);
+      const cards = generatedCards(move), references = referencedRules(move), powers = powerApplications(move);
       if (cards.length) node.generated_cards = cards;
       if (references.length) node.rule_references = references;
+      if (powers.length) node.power_applications = powers;
       if (/MustPerformOnceBeforeTransitioning\s*=\s*true/.test(body.slice(match.index, body.indexOf(';', match.index)))) node.must_perform_once = true;
     } else node.branches = [];
     if (states.some(s => s.id === node.id)) gaps.push(`Duplicate state ${node.id}`);

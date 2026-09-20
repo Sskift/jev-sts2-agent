@@ -415,6 +415,34 @@
           ],
           "properties": {
             "effect_timing": { "$ref": "#/$defs/combatEffects" },
+            "observed_progress": {
+              "type": "object",
+              "required": ["current_round", "history_coverage", "enemies", "scope"],
+              "properties": {
+                "current_round": { "type": "integer", "minimum": 0 },
+                "history_coverage": { "$ref": "#/$defs/text" },
+                "scope": { "$ref": "#/$defs/text" },
+                "enemies": {
+                  "oneOf": [
+                    { "$ref": "#/$defs/recordTable" },
+                    { "type": "array", "items": {
+                      "type": "object",
+                      "required": ["combat_id", "role", "current_hp", "recorded_damage_events", "recorded_hp_damage", "recorded_overkill", "last_damaged_round", "observed_hp_depletions"],
+                      "properties": {
+                        "combat_id": { "type": "integer" },
+                        "role": { "enum": ["minion", "not_identified_as_minion"] },
+                        "current_hp": { "type": "number", "minimum": 0 },
+                        "recorded_damage_events": { "type": "integer", "minimum": 0 },
+                        "recorded_hp_damage": { "type": ["number", "null"], "minimum": 0 },
+                        "recorded_overkill": { "type": ["number", "null"], "minimum": 0 },
+                        "last_damaged_round": { "type": ["integer", "null"], "minimum": 0 },
+                        "observed_hp_depletions": { "type": ["integer", "null"], "minimum": 0 }
+                      }
+                    } }
+                  ]
+                }
+              }
+            },
             "hand": {
               "oneOf": [
                 {

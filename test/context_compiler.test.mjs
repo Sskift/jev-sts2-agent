@@ -14,8 +14,10 @@ test('one compiler separates observations, rules, history, intentions and calcul
   assert.equal(view.decision.output_role, 'unexecuted_plan_component');
   assert.equal(view.observation.combat.history, undefined);
   assert.equal(view.observation.combat.visible_arithmetic, undefined);
+  assert.equal(view.observation.combat.observed_progress, undefined);
   assert.ok(view.history.combat.events);
   assert.ok(view.analysis.current_combat);
+  assert.ok(view.analysis.combat_progress);
   assert.ok(Object.keys(view.analysis.action_estimates).length);
   assert.ok(expandRecordTables(view.observation.legal_actions).every(action => !action.combat_estimate));
   assert.equal(view.knowledge.entity_rules['cards/STRIKE_IRONCLAD'], 'cards/STRIKE_IRONCLAD');

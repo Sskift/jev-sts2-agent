@@ -68,3 +68,16 @@ test('between-room decisions retain this interaction while using current build a
   assert.equal(context.memory.actions[0].request.cmd, 'reward_skip_card');
   assert.equal(context.memory.relevance.mode, 'current_room');
 });
+
+test('old executed damage remains in a compact encounter total without restoring old raw events', () => {
+  const state = completeCombat(); state.combat.turn_number = 5;
+  state.decision_context.combat_history = [
+    { sequence: 0, round: 1, side: 'Player', type: 'DamageReceivedEntry', actor_id: 42, damage: { total: 6, blocked: 0, unblocked: 6, overkill: 0 } },
+    { sequence: 1, round: 5, side: 'Player', type: 'EnergySpentEntry', amount: 1 }
+  ];
+  const memory = new DecisionMemory(); memory.observe(state);
+  const packet = buildDecisionContext(state, { candidates: buildModCandidates(state), memory });
+  assert.ok(!packet.combat.history.some(event => event.sequence === 0));
+  assert.equal(packet.combat.observed_progress.enemies[0].recorded_hp_damage, 6);
+  assert.equal(packet.combat.observed_progress.enemies[0].last_damaged_round, 1);
+});

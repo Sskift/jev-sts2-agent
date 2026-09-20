@@ -27,6 +27,30 @@ export function describeEnemyOutlook(state) {
   return state.combat.enemies.filter(e => e.is_alive).map(enemy => enemyOutlook(enemy, lookupRule('monsters', enemy.id)?.moves));
 }
 
+// Retain compact encounter feedback even when old turn-by-turn history is
+// scoped out. These are observed totals, never a target preference or forecast.
+export function describeCombatProgress(state, memory) {
+  const context = state.decision_context, combat = state.combat;
+  const history = (context.combat_history || []).filter(e => e.round <= combat.turn_number);
+  const actions = memory?.data.run_id === context.run_id ? memory.data.actions.filter(a => a.ok
+    && a.combat_id === context.combat_id && a.round <= combat.turn_number) : null;
+  const sum = (events, key) => events.every(e => Number.isFinite(e.damage?.[key]) && e.damage[key] >= 0)
+    ? events.reduce((total, e) => total + e.damage[key], 0) : null;
+  return { current_round: combat.turn_number, history_coverage: context.history_coverage,
+    enemies: combat.enemies.map(enemy => {
+      const damage = history.filter(e => e.type === 'DamageReceivedEntry' && e.actor_id === enemy.combat_id);
+      const minion = enemy.powers?.some(p => ['ILLUSION_POWER', 'MINION_POWER'].includes(p.id));
+      return { combat_id: enemy.combat_id, role: minion ? 'minion' : 'not_identified_as_minion', current_hp: enemy.hp,
+        recorded_damage_events: damage.length, recorded_hp_damage: sum(damage, 'unblocked'),
+        recorded_overkill: sum(damage, 'overkill'),
+        last_damaged_round: damage.filter(e => e.damage?.unblocked > 0).at(-1)?.round ?? null,
+        observed_hp_depletions: actions === null ? null : actions.reduce((total, action) => total +
+          (action.observed_combat_change?.enemy_changes || []).filter(e => e.combat_id === enemy.combat_id
+            && e.changes?.hp?.before > 0 && e.changes.hp.after === 0).length, 0) };
+    }),
+    scope: 'Totals from available executed native events and confirmed action snapshot changes in this combat only. Native unblocked damage already excludes overkill; it is not subtracted twice. Damage may have been healed or revived, and observed zero-HP transitions do not establish permanent removal. Missing earlier history is not reconstructed. Current HP, powers and revival/leader rules determine remaining work; these statistics do not prescribe a target.' };
+}
+
 // These labels expose how HP depletion relates to the encounter objective.
 // They are facts/unknowns for Jev to weigh, never an automatic target policy.
 export function encounterProgress(combat, remaining, unknownTargets = []) {

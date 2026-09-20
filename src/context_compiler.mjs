@@ -17,6 +17,7 @@ const routes = [
   ['combat.visible_arithmetic', 'analysis.current_combat'],
   ['combat.effect_timing', 'analysis.combat_effects'],
   ['combat.enemy_outlook', 'analysis.enemy_outlook'],
+  ['combat.observed_progress', 'analysis.combat_progress'],
   ['deck.statistics', 'analysis.deck_statistics'],
   ['map.routes', 'analysis.routes'],
   ['map.route_semantics', 'analysis.route_semantics'],

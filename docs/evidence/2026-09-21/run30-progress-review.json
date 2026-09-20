@@ -1,0 +1,1478 @@
+{
+  "at": "2026-09-20T19:52:05.121Z",
+  "scope": "Development snapshots from the already reviewed run 30; model requests only. No game command or post-cutoff memory. Not an independent holdout or a counterfactual win.",
+  "baseline_commit": "e4338af9cded1e4d268fd772f94e1bf4e2c89e30",
+  "native_sources": {
+    "PowerCmd.cs": {
+      "path": "temp/knowledge-research/PowerCmd.cs",
+      "sha256": "61991c0bf4849e4ab9592645b8709805305527b1d75ce2079385477206967405"
+    },
+    "CombatState.cs": {
+      "path": "temp/knowledge-research/CombatState.cs",
+      "sha256": "55a84ddd4bddb9f8139491d1defb313e5ac74cc997931278316d25fe873a6e50"
+    },
+    "monsters/TheObscura.cs": {
+      "path": "temp/knowledge-research/monsters/TheObscura.cs",
+      "sha256": "85a7127f3d351524182ae7b06dae855adbd9a393832142ff687bf2e82310cf2b"
+    }
+  },
+  "power_application_coverage": {
+    "calls": 135,
+    "moves": 121,
+    "monsters": 83,
+    "numeric": 96,
+    "known_recipients": 132,
+    "missing": [],
+    "graph_unchanged": true,
+    "same_assembly": true,
+    "obscura": {
+      "id": "SAIL_MOVE",
+      "type": "move",
+      "move_id": "SAIL",
+      "intents": [
+        "Buff"
+      ],
+      "rule_references": [
+        {
+          "category": "powers",
+          "id": "STRENGTH"
+        }
+      ],
+      "power_applications": [
+        {
+          "power_id": "STRENGTH",
+          "amount": 3,
+          "recipients": "self_and_allies",
+          "scope": "Native call arguments per invocation if reached. Conditions, loops, target availability, modifiers, prevention and duration are not simulated. Amount is not a resulting stack; referenced rules and live values take precedence over generic Wiki move summaries."
+        }
+      ],
+      "next": "RAND"
+    }
+  },
+  "compiled_snapshots": [
+    {
+      "id": "run30-obscura-turn4",
+      "input_sha256": "b8605d6099f85a79d6610d15ffd52775c1364d69fdf8c3ba3d6eee63cf5abaf3",
+      "progress": {
+        "current_round": 4,
+        "history_coverage": "Game combat history since this combat was loaded; earlier loaded-save events may be unavailable.",
+        "enemies": [
+          {
+            "combat_id": 2,
+            "role": "minion",
+            "current_hp": 21,
+            "recorded_damage_events": 5,
+            "recorded_hp_damage": 42,
+            "recorded_overkill": 13,
+            "last_damaged_round": 3,
+            "observed_hp_depletions": 2
+          },
+          {
+            "combat_id": 1,
+            "role": "not_identified_as_minion",
+            "current_hp": 95,
+            "recorded_damage_events": 4,
+            "recorded_hp_damage": 28,
+            "recorded_overkill": 0,
+            "last_damaged_round": 3,
+            "observed_hp_depletions": 0
+          }
+        ],
+        "scope": "Totals from available executed native events and confirmed action snapshot changes in this combat only. Native unblocked damage already excludes overkill; it is not subtracted twice. Damage may have been healed or revived, and observed zero-HP transitions do not establish permanent removal. Missing earlier history is not reconstructed. Current HP, powers and revival/leader rules determine remaining work; these statistics do not prescribe a target."
+      },
+      "request_bytes": 71619,
+      "existing_plan": "377c72f2-b018-47d5-870f-b89128cde848"
+    },
+    {
+      "id": "run30-obscura-turn7",
+      "input_sha256": "82a3d8f3069985d298baf5ed37b692beee3d9e5290170bcd8cfb8cbe6e5a7804",
+      "progress": {
+        "current_round": 7,
+        "history_coverage": "Game combat history since this combat was loaded; earlier loaded-save events may be unavailable.",
+        "enemies": [
+          {
+            "combat_id": 2,
+            "role": "minion",
+            "current_hp": 21,
+            "recorded_damage_events": 9,
+            "recorded_hp_damage": 84,
+            "recorded_overkill": 27,
+            "last_damaged_round": 6,
+            "observed_hp_depletions": 4
+          },
+          {
+            "combat_id": 1,
+            "role": "not_identified_as_minion",
+            "current_hp": 89,
+            "recorded_damage_events": 5,
+            "recorded_hp_damage": 34,
+            "recorded_overkill": 0,
+            "last_damaged_round": 6,
+            "observed_hp_depletions": 0
+          }
+        ],
+        "scope": "Totals from available executed native events and confirmed action snapshot changes in this combat only. Native unblocked damage already excludes overkill; it is not subtracted twice. Damage may have been healed or revived, and observed zero-HP transitions do not establish permanent removal. Missing earlier history is not reconstructed. Current HP, powers and revival/leader rules determine remaining work; these statistics do not prescribe a target."
+      },
+      "request_bytes": 66638,
+      "existing_plan": "c341000b-af70-49f7-87e8-243190a4ce12"
+    }
+  ],
+  "trials": [
+    {
+      "id": "run30-obscura-turn4",
+      "label": "power-facts-and-progress",
+      "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0007",
+      "case_file": "run-artifacts/run30-progress-review/cases/run30-obscura-turn4.json",
+      "input_sha256": "b8605d6099f85a79d6610d15ffd52775c1364d69fdf8c3ba3d6eee63cf5abaf3",
+      "freeze": "8c9ad0e911999235410aabb80f8102e940532976a5be617eea72cc948d0a6d15",
+      "result_directory": "run-artifacts/run30-progress-review/results/run30-obscura-turn4/power-facts-and-progress/1",
+      "result_sha256": "adf65124595a146a2ea6971710293bc350c83c60e2b01f38b0d271b6850e512b",
+      "summary": {
+        "id": "run30-obscura-turn4",
+        "cohort": "development",
+        "label": "power-facts-and-progress",
+        "repeat": 1,
+        "input_sha256": "b8605d6099f85a79d6610d15ffd52775c1364d69fdf8c3ba3d6eee63cf5abaf3",
+        "code_root": "C:\\Users\\skift\\jevmake",
+        "request": {
+          "cmd": "play_card",
+          "id": "PERFECTED_STRIKE",
+          "nth": 0,
+          "target": 2
+        },
+        "objective": {
+          "id": "remove_threat",
+          "meaning": "Focus damage or disruption on a dangerous enemy, prioritizing an achievable kill or disable before its next action."
+        },
+        "model": "typesafe/jev-1.13-20260917",
+        "sequence": [
+          {
+            "kind": "play_card",
+            "name": "Perfected Strike+",
+            "card_id": "PERFECTED_STRIKE",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "name": "Strike+",
+            "card_id": "STRIKE_IRONCLAD",
+            "target": 1
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "candidate_coverage": {
+          "inspected_prefixes": 3908,
+          "enumerated_plans": 885,
+          "selected_plans": 64,
+          "first_action_variants": 10,
+          "search_truncated": false,
+          "candidate_selection_truncated": true,
+          "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+          "compared_plans": 75,
+          "assessed_plans": 75,
+          "distinct_allocations": 57
+        },
+        "assessment_shortlist": [
+          {
+            "value": "variant_63",
+            "score": 2.13,
+            "probabilities": {
+              "0": 0.06,
+              "1": 0.31,
+              "2": 0.21,
+              "3": 0.3,
+              "4": 0.12
+            },
+            "confidence": 0,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "enemy_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "variant_69",
+            "score": 2.11,
+            "probabilities": {
+              "0": 0.03,
+              "1": 0.32,
+              "2": 0.24,
+              "3": 0.32,
+              "4": 0.09
+            },
+            "confidence": 0.02,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "enemy_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "keep",
+            "score": 2.07,
+            "probabilities": {
+              "0": 0.04,
+              "1": 0.33,
+              "2": 0.24,
+              "3": 0.3,
+              "4": 0.09
+            },
+            "confidence": 0.04,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "enemy_turn",
+            "energy_left": 1
+          }
+        ],
+        "comparison_audit": {
+          "comparisons": 6,
+          "preference_support": {
+            "variant_63": 0.9750000000000001,
+            "variant_69": 1.12,
+            "keep": 0.905
+          },
+          "balanced_pairs": [
+            {
+              "candidates": [
+                "variant_63",
+                "variant_69"
+              ],
+              "preference_support": {
+                "variant_63": 0.46,
+                "variant_69": 0.54
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.46,
+                "plan_b": 0.54,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": true,
+              "selected_by_order": [
+                "variant_63",
+                "variant_69"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_63",
+                "keep"
+              ],
+              "preference_support": {
+                "variant_63": 0.515,
+                "keep": 0.485
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.515,
+                "plan_b": 0.485,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": true,
+              "selected_by_order": [
+                "variant_63",
+                "keep"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_69",
+                "keep"
+              ],
+              "preference_support": {
+                "variant_69": 0.5800000000000001,
+                "keep": 0.42000000000000004
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.5800000000000001,
+                "plan_b": 0.42000000000000004,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": true,
+              "selected_by_order": [
+                "variant_69",
+                "keep"
+              ]
+            }
+          ],
+          "order_disagreements": [
+            {
+              "candidates": [
+                "variant_63",
+                "variant_69"
+              ],
+              "selected_by_order": [
+                "variant_63",
+                "variant_69"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_63",
+                "keep"
+              ],
+              "selected_by_order": [
+                "variant_63",
+                "keep"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_69",
+                "keep"
+              ],
+              "selected_by_order": [
+                "variant_69",
+                "keep"
+              ]
+            }
+          ],
+          "tied_at_top": [
+            "variant_69"
+          ],
+          "interpretation": "Position-balanced preference support among these finalists only, not correctness or win probability. Independent quality scores and bounded search can still omit a better plan."
+        },
+        "usage": {
+          "input_tokens": 1016174,
+          "output_tokens": 1919
+        },
+        "calls": 42,
+        "responses": 42,
+        "elapsed_ms": 27356
+      },
+      "original": {
+        "sequence": [
+          {
+            "kind": "play_card",
+            "id": "TAUNT",
+            "target": 1
+          },
+          {
+            "kind": "play_card",
+            "id": "PERFECTED_STRIKE",
+            "target": 2
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "conditional_projection": {
+          "calculation_status": "incomplete",
+          "fully_simulated": false,
+          "known_effects_only": {
+            "block": 7,
+            "hp_if_ending": 54,
+            "hp_loss_if_ending": 0,
+            "block_including_end_turn_gains": 7,
+            "end_turn_block_gains": [],
+            "end_turn_damage_events": [],
+            "incoming_attack": 0,
+            "enemies": [
+              {
+                "combat_id": 2,
+                "hp": 0,
+                "block": 0,
+                "hp_removed": 21,
+                "block_removed": 0,
+                "power_changes": []
+              },
+              {
+                "combat_id": 1,
+                "hp": 95,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": [
+                  {
+                    "power_id": "VULNERABLE_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 2,
+                      "max": 2
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+        },
+        "objective_judgment": {
+          "stage": "objective",
+          "selected": "remove_threat",
+          "value": "remove_threat",
+          "probabilities": {
+            "remove_threat": 0.69,
+            "develop": 0,
+            "protect_hp": 0.22,
+            "cycle": 0.01,
+            "damage": 0.08
+          },
+          "confidence": 0.61,
+          "model": "typesafe/jev-1.13-20260917",
+          "usage": {
+            "input_tokens": 20251,
+            "output_tokens": 58,
+            "cost": 0.000850542
+          }
+        },
+        "refinement_limit": null
+      },
+      "replay": {
+        "sequence": [
+          {
+            "kind": "play_card",
+            "id": "PERFECTED_STRIKE",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "target": 1
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "conditional_projection": {
+          "calculation_status": "incomplete",
+          "fully_simulated": false,
+          "known_effects_only": {
+            "block": 0,
+            "hp_if_ending": 54,
+            "hp_loss_if_ending": 0,
+            "block_including_end_turn_gains": 6,
+            "end_turn_block_gains": [
+              {
+                "source_id": "ORICHALCUM",
+                "amount": 6,
+                "timing": "turn_end_very_early",
+                "condition_checked": "zero_after_before_turn_end_effects"
+              }
+            ],
+            "end_turn_damage_events": [],
+            "incoming_attack": 0,
+            "enemies": [
+              {
+                "combat_id": 2,
+                "hp": 0,
+                "block": 0,
+                "hp_removed": 21,
+                "block_removed": 0,
+                "power_changes": []
+              },
+              {
+                "combat_id": 1,
+                "hp": 86,
+                "block": 0,
+                "hp_removed": 9,
+                "block_removed": 0,
+                "power_changes": []
+              }
+            ]
+          },
+          "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+        },
+        "objective_judgment": {
+          "stage": "objective",
+          "selected": "remove_threat",
+          "value": "remove_threat",
+          "probabilities": {
+            "develop": 0.01,
+            "protect_hp": 0.24,
+            "cycle": 0.01,
+            "remove_threat": 0.62,
+            "damage": 0.12
+          },
+          "confidence": 0.54,
+          "model": "typesafe/jev-1.13-20260917",
+          "usage": {
+            "input_tokens": 20855,
+            "output_tokens": 58,
+            "cost": 0.00087591
+          }
+        },
+        "refinement_limit": null
+      },
+      "progress": {
+        "current_round": 4,
+        "history_coverage": "Game combat history since this combat was loaded; earlier loaded-save events may be unavailable.",
+        "enemies": [
+          {
+            "combat_id": 2,
+            "role": "minion",
+            "current_hp": 21,
+            "recorded_damage_events": 5,
+            "recorded_hp_damage": 42,
+            "recorded_overkill": 13,
+            "last_damaged_round": 3,
+            "observed_hp_depletions": 2
+          },
+          {
+            "combat_id": 1,
+            "role": "not_identified_as_minion",
+            "current_hp": 95,
+            "recorded_damage_events": 4,
+            "recorded_hp_damage": 28,
+            "recorded_overkill": 0,
+            "last_damaged_round": 3,
+            "observed_hp_depletions": 0
+          }
+        ],
+        "scope": "Totals from available executed native events and confirmed action snapshot changes in this combat only. Native unblocked damage already excludes overkill; it is not subtracted twice. Damage may have been healed or revived, and observed zero-HP transitions do not establish permanent removal. Missing earlier history is not reconstructed. Current HP, powers and revival/leader rules determine remaining work; these statistics do not prescribe a target."
+      },
+      "actual_providers": [
+        "openrouter"
+      ],
+      "actual_models": [
+        "typesafe/jev-1.13-20260917"
+      ],
+      "max_logical_request_bytes": 89928,
+      "cost_usd": 0.04267930800000001,
+      "request_purposes": {
+        "turn_objective": 1,
+        "turn_assess_plans": 35,
+        "turn_payoff": 2,
+        "turn_preparation": 1,
+        "turn_refine_pairs": 3
+      }
+    },
+    {
+      "id": "run30-obscura-turn7",
+      "label": "power-facts-and-progress",
+      "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0018",
+      "case_file": "run-artifacts/run30-progress-review/cases/run30-obscura-turn7.json",
+      "input_sha256": "82a3d8f3069985d298baf5ed37b692beee3d9e5290170bcd8cfb8cbe6e5a7804",
+      "freeze": "8c9ad0e911999235410aabb80f8102e940532976a5be617eea72cc948d0a6d15",
+      "result_directory": "run-artifacts/run30-progress-review/results/run30-obscura-turn7/power-facts-and-progress/1",
+      "result_sha256": "f4d17d9d4379a89fc034e8492c6d355d439da55efd4aa7c48e0bb8a6c597d653",
+      "summary": {
+        "id": "run30-obscura-turn7",
+        "cohort": "development",
+        "label": "power-facts-and-progress",
+        "repeat": 1,
+        "input_sha256": "82a3d8f3069985d298baf5ed37b692beee3d9e5290170bcd8cfb8cbe6e5a7804",
+        "code_root": "C:\\Users\\skift\\jevmake",
+        "request": {
+          "cmd": "play_card",
+          "id": "UPPERCUT",
+          "nth": 0,
+          "target": 2
+        },
+        "objective": {
+          "id": "remove_threat",
+          "meaning": "Focus damage or disruption on a dangerous enemy, prioritizing an achievable kill or disable before its next action."
+        },
+        "model": "typesafe/jev-1.13-20260917",
+        "sequence": [
+          {
+            "kind": "play_card",
+            "name": "Uppercut",
+            "card_id": "UPPERCUT",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "name": "Squash",
+            "card_id": "SQUASH",
+            "target": 2
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "candidate_coverage": {
+          "inspected_prefixes": 173,
+          "enumerated_plans": 62,
+          "selected_plans": 62,
+          "first_action_variants": 7,
+          "search_truncated": false,
+          "candidate_selection_truncated": false,
+          "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+          "compared_plans": 62
+        },
+        "usage": {
+          "input_tokens": 106266,
+          "output_tokens": 356
+        },
+        "calls": 5,
+        "responses": 5,
+        "elapsed_ms": 3340
+      },
+      "original": {
+        "sequence": [
+          {
+            "kind": "play_card",
+            "id": "UPPERCUT",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "id": "SQUASH",
+            "target": 2
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "conditional_projection": {
+          "calculation_status": "incomplete",
+          "fully_simulated": false,
+          "known_effects_only": {
+            "block": 0,
+            "hp_if_ending": 41,
+            "hp_loss_if_ending": 13,
+            "block_including_end_turn_gains": 6,
+            "end_turn_block_gains": [
+              {
+                "source_id": "ORICHALCUM",
+                "amount": 6,
+                "timing": "turn_end_very_early",
+                "condition_checked": "zero_after_before_turn_end_effects"
+              }
+            ],
+            "end_turn_damage_events": [],
+            "incoming_attack": 19,
+            "enemies": [
+              {
+                "combat_id": 2,
+                "hp": 0,
+                "block": 0,
+                "hp_removed": 21,
+                "block_removed": 0,
+                "power_changes": [
+                  {
+                    "power_id": "WEAK_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 1,
+                      "max": 1
+                    }
+                  },
+                  {
+                    "power_id": "VULNERABLE_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 1,
+                      "max": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "combat_id": 1,
+                "hp": 89,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              }
+            ]
+          },
+          "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+        },
+        "objective_judgment": {
+          "stage": "objective",
+          "selected": "remove_threat",
+          "value": "remove_threat",
+          "probabilities": {
+            "develop": 0.01,
+            "damage": 0.02,
+            "remove_threat": 0.51,
+            "cycle": 0.02,
+            "protect_hp": 0.44
+          },
+          "confidence": 0.38,
+          "model": "typesafe/jev-1.13-20260917",
+          "usage": {
+            "input_tokens": 19200,
+            "output_tokens": 58,
+            "cost": 0.0008064
+          }
+        },
+        "refinement_limit": null
+      },
+      "replay": {
+        "sequence": [
+          {
+            "kind": "play_card",
+            "id": "UPPERCUT",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "id": "SQUASH",
+            "target": 2
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "conditional_projection": {
+          "calculation_status": "incomplete",
+          "fully_simulated": false,
+          "known_effects_only": {
+            "block": 0,
+            "hp_if_ending": 41,
+            "hp_loss_if_ending": 13,
+            "block_including_end_turn_gains": 6,
+            "end_turn_block_gains": [
+              {
+                "source_id": "ORICHALCUM",
+                "amount": 6,
+                "timing": "turn_end_very_early",
+                "condition_checked": "zero_after_before_turn_end_effects"
+              }
+            ],
+            "end_turn_damage_events": [],
+            "incoming_attack": 19,
+            "enemies": [
+              {
+                "combat_id": 2,
+                "hp": 0,
+                "block": 0,
+                "hp_removed": 21,
+                "block_removed": 0,
+                "power_changes": [
+                  {
+                    "power_id": "WEAK_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 1,
+                      "max": 1
+                    }
+                  },
+                  {
+                    "power_id": "VULNERABLE_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 1,
+                      "max": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "combat_id": 1,
+                "hp": 89,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              }
+            ]
+          },
+          "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+        },
+        "objective_judgment": {
+          "stage": "objective",
+          "selected": "remove_threat",
+          "value": "remove_threat",
+          "probabilities": {
+            "protect_hp": 0.42,
+            "damage": 0.03,
+            "remove_threat": 0.52,
+            "develop": 0.01,
+            "cycle": 0.02
+          },
+          "confidence": 0.41,
+          "model": "typesafe/jev-1.13-20260917",
+          "usage": {
+            "input_tokens": 19761,
+            "output_tokens": 58,
+            "cost": 0.000829962
+          }
+        },
+        "refinement_limit": "Optional whole-plan comparisons skipped because the complete state leaves insufficient request space."
+      },
+      "progress": {
+        "current_round": 7,
+        "history_coverage": "Game combat history since this combat was loaded; earlier loaded-save events may be unavailable.",
+        "enemies": [
+          {
+            "combat_id": 2,
+            "role": "minion",
+            "current_hp": 21,
+            "recorded_damage_events": 9,
+            "recorded_hp_damage": 84,
+            "recorded_overkill": 27,
+            "last_damaged_round": 6,
+            "observed_hp_depletions": 4
+          },
+          {
+            "combat_id": 1,
+            "role": "not_identified_as_minion",
+            "current_hp": 89,
+            "recorded_damage_events": 5,
+            "recorded_hp_damage": 34,
+            "recorded_overkill": 0,
+            "last_damaged_round": 6,
+            "observed_hp_depletions": 0
+          }
+        ],
+        "scope": "Totals from available executed native events and confirmed action snapshot changes in this combat only. Native unblocked damage already excludes overkill; it is not subtracted twice. Damage may have been healed or revived, and observed zero-HP transitions do not establish permanent removal. Missing earlier history is not reconstructed. Current HP, powers and revival/leader rules determine remaining work; these statistics do not prescribe a target."
+      },
+      "actual_providers": [
+        "openrouter"
+      ],
+      "actual_models": [
+        "typesafe/jev-1.13-20260917"
+      ],
+      "max_logical_request_bytes": 75553,
+      "cost_usd": 0.004463172,
+      "request_purposes": {
+        "turn_objective": 1,
+        "turn_payoff": 2,
+        "turn_preparation": 2
+      }
+    },
+    {
+      "id": "run30-obscura-turn7",
+      "label": "compiled-budget",
+      "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0018",
+      "case_file": "run-artifacts/run30-progress-review/cases/run30-obscura-turn7.json",
+      "input_sha256": "82a3d8f3069985d298baf5ed37b692beee3d9e5290170bcd8cfb8cbe6e5a7804",
+      "freeze": "c5f66f6cc4a14507c284910c198583623b8bee9a503ff0e19a5feee19e98e873",
+      "result_directory": "run-artifacts/run30-progress-budget-review/results/run30-obscura-turn7/compiled-budget/1",
+      "result_sha256": "06963be7f429390b7cec9e11d222ef0e6d30cb37442ec596fb734073d3e30e7a",
+      "summary": {
+        "id": "run30-obscura-turn7",
+        "cohort": "development",
+        "label": "compiled-budget",
+        "repeat": 1,
+        "input_sha256": "82a3d8f3069985d298baf5ed37b692beee3d9e5290170bcd8cfb8cbe6e5a7804",
+        "code_root": "C:\\Users\\skift\\jevmake",
+        "request": {
+          "cmd": "play_card",
+          "id": "SQUASH",
+          "nth": 0,
+          "target": 2
+        },
+        "objective": {
+          "id": "remove_threat",
+          "meaning": "Focus damage or disruption on a dangerous enemy, prioritizing an achievable kill or disable before its next action."
+        },
+        "model": "typesafe/jev-1.13-20260917",
+        "sequence": [
+          {
+            "kind": "play_card",
+            "name": "Squash",
+            "card_id": "SQUASH",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "name": "Uppercut",
+            "card_id": "UPPERCUT",
+            "target": 2
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "candidate_coverage": {
+          "inspected_prefixes": 173,
+          "enumerated_plans": 62,
+          "selected_plans": 62,
+          "first_action_variants": 7,
+          "search_truncated": false,
+          "candidate_selection_truncated": false,
+          "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+          "eligible_plans": 73,
+          "assessed_plans": 73,
+          "distinct_allocations": 43,
+          "compared_plans": 5
+        },
+        "assessment_shortlist": [
+          {
+            "value": "variant_16",
+            "score": 2.19,
+            "probabilities": {
+              "0": 0.06,
+              "1": 0.28,
+              "2": 0.2,
+              "3": 0.32,
+              "4": 0.14
+            },
+            "confidence": 0.09,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "enemy_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "variant_46",
+            "score": 2.11,
+            "probabilities": {
+              "0": 0.03,
+              "1": 0.3,
+              "2": 0.24,
+              "3": 0.37,
+              "4": 0.06
+            },
+            "confidence": 0.16,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "observe_then_continue_same_player_turn",
+            "energy_left": 1
+          },
+          {
+            "value": "variant_51",
+            "score": 2.11,
+            "probabilities": {
+              "0": 0.05,
+              "1": 0.3,
+              "2": 0.21,
+              "3": 0.36,
+              "4": 0.08
+            },
+            "confidence": 0.12,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "observe_then_continue_same_player_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "variant_2",
+            "score": 2.05,
+            "probabilities": {
+              "0": 0.04,
+              "1": 0.31,
+              "2": 0.27,
+              "3": 0.31,
+              "4": 0.07
+            },
+            "confidence": 0.06,
+            "reason": "preserve_resources_for_observation",
+            "handoff": "observe_then_continue_same_player_turn",
+            "energy_left": 2
+          }
+        ],
+        "comparison_audit": {
+          "comparisons": 20,
+          "preference_support": {
+            "variant_16": 1.9749999999999999,
+            "variant_46": 2.06,
+            "variant_51": 2.14,
+            "variant_2": 1.5050000000000001,
+            "keep": 2.32
+          },
+          "balanced_pairs": [
+            {
+              "candidates": [
+                "variant_16",
+                "variant_46"
+              ],
+              "preference_support": {
+                "variant_16": 0.46,
+                "variant_46": 0.54
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.46,
+                "plan_b": 0.54,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": true,
+              "selected_by_order": [
+                "variant_16",
+                "variant_46"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_16",
+                "variant_51"
+              ],
+              "preference_support": {
+                "variant_16": 0.49,
+                "variant_51": 0.51
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.49,
+                "plan_b": 0.51,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": true,
+              "selected_by_order": [
+                "variant_51",
+                "variant_16"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_16",
+                "variant_2"
+              ],
+              "preference_support": {
+                "variant_16": 0.46,
+                "variant_2": 0.54
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.46,
+                "plan_b": 0.54,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": true,
+              "selected_by_order": [
+                "variant_16",
+                "variant_2"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_16",
+                "keep"
+              ],
+              "preference_support": {
+                "variant_16": 0.565,
+                "keep": 0.435
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.565,
+                "plan_b": 0.435,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": true,
+              "selected_by_order": [
+                "variant_16",
+                "keep"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_46",
+                "variant_51"
+              ],
+              "preference_support": {
+                "variant_46": 0.495,
+                "variant_51": 0.505
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.495,
+                "plan_b": 0.505,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": true,
+              "selected_by_order": [
+                "variant_46",
+                "variant_51"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_46",
+                "variant_2"
+              ],
+              "preference_support": {
+                "variant_46": 0.715,
+                "variant_2": 0.28500000000000003
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.715,
+                "plan_b": 0.28500000000000003,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": false,
+              "selected_by_order": [
+                "variant_46",
+                "variant_46"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_46",
+                "keep"
+              ],
+              "preference_support": {
+                "variant_46": 0.31,
+                "keep": 0.69
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.31,
+                "plan_b": 0.69,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": false,
+              "selected_by_order": [
+                "keep",
+                "keep"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_51",
+                "variant_2"
+              ],
+              "preference_support": {
+                "variant_51": 0.755,
+                "variant_2": 0.245
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.755,
+                "plan_b": 0.245,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": false,
+              "selected_by_order": [
+                "variant_51",
+                "variant_51"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_51",
+                "keep"
+              ],
+              "preference_support": {
+                "variant_51": 0.37,
+                "keep": 0.63
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.37,
+                "plan_b": 0.63,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": false,
+              "selected_by_order": [
+                "keep",
+                "keep"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_2",
+                "keep"
+              ],
+              "preference_support": {
+                "variant_2": 0.435,
+                "keep": 0.565
+              },
+              "selection_basis": "balanced_overall_value",
+              "value_distribution": {
+                "plan_a": 0.435,
+                "plan_b": 0.565,
+                "no_clear_difference": 0
+              },
+              "survival_distribution": null,
+              "order_disagreement": false,
+              "selected_by_order": [
+                "keep",
+                "keep"
+              ]
+            }
+          ],
+          "order_disagreements": [
+            {
+              "candidates": [
+                "variant_16",
+                "variant_46"
+              ],
+              "selected_by_order": [
+                "variant_16",
+                "variant_46"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_16",
+                "variant_51"
+              ],
+              "selected_by_order": [
+                "variant_51",
+                "variant_16"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_16",
+                "variant_2"
+              ],
+              "selected_by_order": [
+                "variant_16",
+                "variant_2"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_16",
+                "keep"
+              ],
+              "selected_by_order": [
+                "variant_16",
+                "keep"
+              ]
+            },
+            {
+              "candidates": [
+                "variant_46",
+                "variant_51"
+              ],
+              "selected_by_order": [
+                "variant_46",
+                "variant_51"
+              ]
+            }
+          ],
+          "tied_at_top": [
+            "keep"
+          ],
+          "interpretation": "Position-balanced preference support among these finalists only, not correctness or win probability. Independent quality scores and bounded search can still omit a better plan."
+        },
+        "usage": {
+          "input_tokens": 1027449,
+          "output_tokens": 2214
+        },
+        "calls": 43,
+        "responses": 43,
+        "elapsed_ms": 26541
+      },
+      "original": {
+        "sequence": [
+          {
+            "kind": "play_card",
+            "id": "UPPERCUT",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "id": "SQUASH",
+            "target": 2
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "conditional_projection": {
+          "calculation_status": "incomplete",
+          "fully_simulated": false,
+          "known_effects_only": {
+            "block": 0,
+            "hp_if_ending": 41,
+            "hp_loss_if_ending": 13,
+            "block_including_end_turn_gains": 6,
+            "end_turn_block_gains": [
+              {
+                "source_id": "ORICHALCUM",
+                "amount": 6,
+                "timing": "turn_end_very_early",
+                "condition_checked": "zero_after_before_turn_end_effects"
+              }
+            ],
+            "end_turn_damage_events": [],
+            "incoming_attack": 19,
+            "enemies": [
+              {
+                "combat_id": 2,
+                "hp": 0,
+                "block": 0,
+                "hp_removed": 21,
+                "block_removed": 0,
+                "power_changes": [
+                  {
+                    "power_id": "WEAK_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 1,
+                      "max": 1
+                    }
+                  },
+                  {
+                    "power_id": "VULNERABLE_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 1,
+                      "max": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "combat_id": 1,
+                "hp": 89,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              }
+            ]
+          },
+          "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+        },
+        "objective_judgment": {
+          "stage": "objective",
+          "selected": "remove_threat",
+          "value": "remove_threat",
+          "probabilities": {
+            "develop": 0.01,
+            "damage": 0.02,
+            "remove_threat": 0.51,
+            "cycle": 0.02,
+            "protect_hp": 0.44
+          },
+          "confidence": 0.38,
+          "model": "typesafe/jev-1.13-20260917",
+          "usage": {
+            "input_tokens": 19200,
+            "output_tokens": 58,
+            "cost": 0.0008064
+          }
+        },
+        "refinement_limit": null
+      },
+      "replay": {
+        "sequence": [
+          {
+            "kind": "play_card",
+            "id": "SQUASH",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "id": "UPPERCUT",
+            "target": 2
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "conditional_projection": {
+          "calculation_status": "incomplete",
+          "fully_simulated": false,
+          "known_effects_only": {
+            "block": 0,
+            "hp_if_ending": 41,
+            "hp_loss_if_ending": 13,
+            "block_including_end_turn_gains": 6,
+            "end_turn_block_gains": [
+              {
+                "source_id": "ORICHALCUM",
+                "amount": 6,
+                "timing": "turn_end_very_early",
+                "condition_checked": "zero_after_before_turn_end_effects"
+              }
+            ],
+            "end_turn_damage_events": [],
+            "incoming_attack": 19,
+            "enemies": [
+              {
+                "combat_id": 2,
+                "hp": 0,
+                "block": 0,
+                "hp_removed": 21,
+                "block_removed": 0,
+                "power_changes": []
+              },
+              {
+                "combat_id": 1,
+                "hp": 89,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              }
+            ]
+          },
+          "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+        },
+        "objective_judgment": {
+          "stage": "objective",
+          "selected": "remove_threat",
+          "value": "remove_threat",
+          "probabilities": {
+            "damage": 0.03,
+            "remove_threat": 0.52,
+            "protect_hp": 0.42,
+            "develop": 0.01,
+            "cycle": 0.02
+          },
+          "confidence": 0.4,
+          "model": "typesafe/jev-1.13-20260917",
+          "usage": {
+            "input_tokens": 19761,
+            "output_tokens": 58,
+            "cost": 0.000829962
+          }
+        },
+        "refinement_limit": null
+      },
+      "progress": {
+        "current_round": 7,
+        "history_coverage": "Game combat history since this combat was loaded; earlier loaded-save events may be unavailable.",
+        "enemies": [
+          {
+            "combat_id": 2,
+            "role": "minion",
+            "current_hp": 21,
+            "recorded_damage_events": 9,
+            "recorded_hp_damage": 84,
+            "recorded_overkill": 27,
+            "last_damaged_round": 6,
+            "observed_hp_depletions": 4
+          },
+          {
+            "combat_id": 1,
+            "role": "not_identified_as_minion",
+            "current_hp": 89,
+            "recorded_damage_events": 5,
+            "recorded_hp_damage": 34,
+            "recorded_overkill": 0,
+            "last_damaged_round": 6,
+            "observed_hp_depletions": 0
+          }
+        ],
+        "scope": "Totals from available executed native events and confirmed action snapshot changes in this combat only. Native unblocked damage already excludes overkill; it is not subtracted twice. Damage may have been healed or revived, and observed zero-HP transitions do not establish permanent removal. Missing earlier history is not reconstructed. Current HP, powers and revival/leader rules determine remaining work; these statistics do not prescribe a target."
+      },
+      "actual_providers": [
+        "openrouter"
+      ],
+      "actual_models": [
+        "typesafe/jev-1.13-20260917"
+      ],
+      "max_logical_request_bytes": 89984,
+      "cost_usd": 0.04315285799999999,
+      "request_purposes": {
+        "turn_objective": 1,
+        "turn_assess_plans": 27,
+        "turn_payoff": 1,
+        "turn_preparation": 2,
+        "turn_refine_pairs": 11,
+        "turn_followthrough": 1
+      }
+    }
+  ],
+  "checks": {
+    "knowledge_context": 57,
+    "planning": 28,
+    "failures": 0
+  },
+  "findings": [
+    "135 generic native power calls in 121 moves / 83 monsters; 96 literal amounts, 132 recognized recipients, every power ID resolves. Prior graphs/references/card effects and assembly hash unchanged.",
+    "The Obscura SAIL declares Strength 3 to self and allies per invocation. Guards, loops, modifiers and final stacks remain unsimulated; non-generic and helper-method calls are not covered.",
+    "Compact observed combat progress retains native capped HP damage and confirmed zero-HP transitions without restoring old raw history or claiming permanent removal.",
+    "Turn 4 changed from Taunt leader then Perfected Strike phantom to Perfected Strike phantom then Strike leader. This trades a setup effect for current damage; changed selection alone is not proven improvement.",
+    "Initial turn 7 replay skipped comparisons due to a raw-size estimate despite compact requests fitting. Removed that estimate; all actual requests still enforce the compiled 90000-byte limit. Coverage now distinguishes eligible, assessed and pairwise-compared plans.",
+    "Final turn 7 replay assessed 73 plans and compared 5 finalists in both orders; it still commits both attacks to the phantom. Five of ten balanced pairs disagree by presentation order. Long-horizon target choice and model stability remain unresolved."
+  ],
+  "total": {
+    "calls": 90,
+    "input_tokens": 2149889,
+    "output_tokens": 4489,
+    "cost_usd": 0.090295338
+  }
+}
