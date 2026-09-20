@@ -2,7 +2,9 @@
 
 更新：2026-09-20。完整上下文已接入真实 Jev 调用与游戏模组，正在持续进行整局测试；最新结果见[整局进展](full-run-progress.md)。本项目直接在 `master` 开发提交；仅外部 CLI 模组的改动考虑上游 PR。
 
-现增加统一的模型上下文编译层。本文原有 `sts2.decision.v1` 是内部规范；实际模型请求使用 [v2 schema](../schemas/model-context.v2.schema.json)，由 [context_compiler.mjs](../src/context_compiler.mjs) 将内容分为 `decision / observation / knowledge / history / intent / analysis / uncertainty`。完整字段、规则、历史、问题和候选均保留；编译后还原必须与内部规范逐字段一致。`decision.reference_paths` 为规划器中的原路径提供明确映射，`knowledge.entity_rules` 和按 ID 索引的 `catalog` 连接当前实体与相关规则。详见[上下文架构](context-architecture.md)。
+现增加统一的模型上下文编译层。本文原有 `sts2.decision.v1` 是内部规范；实际模型请求使用 [v2 schema](../schemas/model-context.v2.schema.json)，由 [context_compiler.mjs](../src/context_compiler.mjs) 将内容分为 `decision / observation / knowledge / history / intent / analysis / uncertainty`。历史先按本次决策相关性选择，再编译；编译后还原必须与这份内部规范逐字段一致，问题和候选不变。`decision.reference_paths` 为规划器中的原路径提供明确映射，`knowledge.entity_rules` 和按 ID 索引的 `catalog` 连接当前实体与相关规则。详见[上下文架构](context-architecture.md)。
+
+当前历史策略：默认提供本回合完整过程与上一轮敌人响应；规则依赖上回合或本场累计时扩展窗口，延迟效果及尚可能影响抽牌顺序的操作保留相应证据。牌序证据只补入操作和相关牌移动，不因此恢复所有旧格挡、能量和掉血记录。旧房间账目与重复快照由当前卡组、资源、地图和状态承担；战术请求只带当前战略，不带战略修订沿革。`memory.relevance` 明确窗口、原因和条目数量，完整日志留在本地，不假定 Jev 能隐式读取它们。
 
 ## 朝向与背击的状态契约
 

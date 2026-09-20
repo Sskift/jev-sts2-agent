@@ -34,7 +34,8 @@ test('a complete strategic judgment persists across restart but belongs only to 
   const compiled = compileModelRequest(prepareModDecision(state, { memory: restored }).payload).payload.state;
   assert.equal(compiled.intent.run_strategy.development_priority.id, 'draw_consistency');
   assert.equal(compiled.analysis.run_capability_assessment.source, 'jev_judgment');
-  assert.equal(expandRecordTables(compiled.history.strategy_revisions).length, 1);
+  assert.equal(expandRecordTables(compiled.history.strategy_revisions).length, 0, 'Tactical context uses current strategy without its revision history');
+  assert.equal(compiled.history.strategy_coverage.assessments_archived, 1);
   state.decision_context.run_id = 'another-run';
   assert.equal(publicRunStrategy(state, restored), null);
   restored.observe(state);

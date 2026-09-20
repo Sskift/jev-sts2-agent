@@ -36,7 +36,7 @@
         },
         "revision_coverage": { "type": "object", "additionalProperties": false,
           "required": ["policy", "assessments_archived", "intention_changes_included", "scope"],
-          "properties": { "policy": { "const": "current_assessment_and_all_intention_changes" },
+          "properties": { "policy": { "enum": ["current_assessment_and_all_intention_changes", "current_assessment_only_in_combat"] },
             "assessments_archived": { "type": "integer", "minimum": 0 },
             "intention_changes_included": { "type": "integer", "minimum": 0 }, "scope": { "$ref": "#/$defs/text" } } },
         "freshness": { "type": "object", "additionalProperties": false, "required": ["needs_review", "reason"],

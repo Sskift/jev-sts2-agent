@@ -1,0 +1,145 @@
+{
+  "run_id": "run-1789896546",
+  "source": "run-artifacts/2026-09-20T09-41-15-494Z-df193ad8",
+  "scope": "Read-only comparison of decision-scoped views over saved observations and their then-current canonical requests. Prior action dependency checks exclude actions at/after the sample turn; no later game facts are injected. Same questions and current observation identity before/after.",
+  "game_actions_sent": 0,
+  "model_calls": 0,
+  "results": [
+    {
+      "step": "step-0015",
+      "screen": "COMBAT",
+      "act_index": 0,
+      "floor": 13,
+      "round": 7,
+      "observation_id": "54fe27f22c69ec643d26c0bf",
+      "request_bytes": {
+        "before": 62721,
+        "after": 45587
+      },
+      "history_bytes": {
+        "before": 22818,
+        "after": 5993
+      },
+      "events": {
+        "before": 161,
+        "after": 44
+      },
+      "local_actions": {
+        "before": 39,
+        "after": 0
+      },
+      "local_observations": {
+        "before": 16,
+        "after": 0
+      },
+      "policy": {
+        "mode": "current_turn_and_dependencies",
+        "floor": 13,
+        "current_round": 7,
+        "from_round": 7,
+        "preceding_enemy_round": 6,
+        "ordering_windows": [
+          {
+            "round": 1,
+            "rule_id": "HEADBUTT"
+          }
+        ],
+        "reasons": [
+          {
+            "kind": "possible_remaining_order_knowledge",
+            "note": "Only ordering commands and intervening card draws, discards, exhausts or shuffles are retained from these older windows. This is past evidence, not a claim that the order still holds."
+          }
+        ],
+        "engine_events_available": 161,
+        "engine_events_included": 44
+      }
+    },
+    {
+      "step": "step-0094",
+      "screen": "COMBAT",
+      "act_index": 0,
+      "floor": 17,
+      "round": 9,
+      "observation_id": "488a99a1aa20ce7316efb70a",
+      "request_bytes": {
+        "before": 67543,
+        "after": 44885
+      },
+      "history_bytes": {
+        "before": 30021,
+        "after": 7625
+      },
+      "events": {
+        "before": 209,
+        "after": 47
+      },
+      "local_actions": {
+        "before": 51,
+        "after": 0
+      },
+      "local_observations": {
+        "before": 25,
+        "after": 0
+      },
+      "policy": {
+        "mode": "current_turn_and_dependencies",
+        "floor": 17,
+        "current_round": 9,
+        "from_round": 9,
+        "preceding_enemy_round": 8,
+        "ordering_windows": [
+          {
+            "round": 4,
+            "rule_id": "HEADBUTT"
+          },
+          {
+            "round": 6,
+            "rule_id": "HEADBUTT"
+          }
+        ],
+        "reasons": [
+          {
+            "kind": "possible_remaining_order_knowledge",
+            "note": "Only ordering commands and intervening card draws, discards, exhausts or shuffles are retained from these older windows. This is past evidence, not a claim that the order still holds."
+          }
+        ],
+        "engine_events_available": 209,
+        "engine_events_included": 47
+      }
+    },
+    {
+      "step": "step-0126",
+      "screen": "REWARD",
+      "act_index": 1,
+      "floor": 19,
+      "observation_id": "dc1e1306a4db421605b2d1f5",
+      "request_bytes": {
+        "before": 48674,
+        "after": 37729
+      },
+      "history_bytes": {
+        "before": 13258,
+        "after": 2424
+      },
+      "events": {
+        "before": 0,
+        "after": 0
+      },
+      "local_actions": {
+        "before": 43,
+        "after": 0
+      },
+      "local_observations": {
+        "before": 3,
+        "after": 0
+      },
+      "policy": {
+        "mode": "current_room",
+        "floor": 19,
+        "reasons": [],
+        "engine_events_available": 0,
+        "engine_events_included": 0
+      }
+    }
+  ]
+}

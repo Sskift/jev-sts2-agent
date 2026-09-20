@@ -10,6 +10,7 @@ import { sameTurn, publicTurnPlan, turnGuard, advanceTurnPlan } from './turn_pla
 import { potionEffectFacts } from './potion_effects.mjs';
 import { positioningError } from './combat_positioning.mjs';
 import { publicRunStrategy } from './run_strategy_state.mjs';
+import { scopeDecisionHistory } from './history_scope.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -541,7 +542,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
   const memoryContext = memory.context(state);
   mergeObservedCardPlays(combat, memoryContext);
   const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.planning_choice ? { planning_choice: candidate.planning_choice } : {}), ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}), ...(candidate.combat_estimate ? { combat_estimate: candidate.combat_estimate } : {}) }));
-  return validateDecisionPacket(aliasInstanceIds({
+  return validateDecisionPacket(aliasInstanceIds(scopeDecisionHistory({
     schema_version: CONTEXT_VERSION,
     objective: { strategy: 'Win this entire run through all three acts and the final boss. Balance immediate survival, efficient combat, coherent deck/relic synergies, resources, and visible future routes.', execution_checkpoint: 'Continue through ordinary rewards and act transitions until the formal final victory screen.' },
     screen: state.screen, in_combat: Boolean(combat),
@@ -565,9 +566,9 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     memory: memoryContext,
     rules: context?.glossary || [],
     rule_reference: buildRuleReference(source),
-    information: { source: 'single mod main-thread snapshot plus explicitly scoped local memory', unknown: ['unobserved draw order; recorded card effects may establish partial knowledge', 'unrevealed question-mark contents and rewards', 'future enemy random choices', 'later acts', 'history before available observations', ...(context?.extraction_errors || []).filter(e => /^history\.\d+\.description: NullReferenceException$/.test(e)).map(e => `Unavailable history display text (${e}); typed event and recorded actions retained.`)], card_grouping: 'Each cards entry with count represents that many exactly equivalent card states; instance_ids distinguish copies. Never infer draw order from array order or IDs.', extraction_errors: (context?.extraction_errors || []).filter(e => !/^history\.\d+\.description: NullReferenceException$/.test(e)) },
+    information: { source: 'single mod main-thread snapshot plus decision-relevant local memory', unknown: ['unobserved draw order; retained card effects may establish partial knowledge', 'unrevealed question-mark contents and rewards', 'future enemy random choices', 'later acts', 'history outside the stated decision window or before available observations', ...(context?.extraction_errors || []).filter(e => /^history\.\d+\.description: NullReferenceException$/.test(e)).map(e => `Unavailable history display text (${e}); retained typed events and commands are available.`)], card_grouping: 'Each cards entry with count represents that many exactly equivalent card states; instance_ids distinguish copies. Never infer draw order from array order or IDs.', extraction_errors: (context?.extraction_errors || []).filter(e => !/^history\.\d+\.description: NullReferenceException$/.test(e)) },
     legal_actions: legalActions
-  }));
+  }, source, memory)));
 }
 
 // Instance IDs are arbitrary identity labels, not gameplay facts. Use compact
