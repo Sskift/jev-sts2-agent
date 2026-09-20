@@ -849,7 +849,7 @@
     },
     "mapRoute": {
       "type": "object", "additionalProperties": false,
-      "required": ["next_node", "reachable_node_count", "nearest_steps_after_chosen_node", "reaches_boss", "counts", "minimum_elite_route_example", "known_elite_required_to_reach_boss"],
+      "required": ["next_node", "reachable_node_count", "nearest_steps_after_chosen_node", "reaches_boss", "counts", "route_examples", "minimum_elite_route_example", "known_elite_required_to_reach_boss"],
       "properties": {
         "next_node": { "$ref": "#/$defs/coord" },
         "reachable_node_count": { "type": "integer", "minimum": 1 },
@@ -865,6 +865,20 @@
             "BOSS": { "$ref": "#/$defs/nodeCountRange" }
           }
         },
+        "route_examples": { "type": "array", "maxItems": 5, "items": {
+          "type": "object", "additionalProperties": false, "required": ["criteria", "counts", "nodes"],
+          "properties": {
+            "criteria": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["fewest_known_elites", "most_known_elites", "most_rest_sites", "most_shops", "most_normal_fights"] } },
+            "counts": { "type": "object", "additionalProperties": false, "required": ["MONSTER", "ELITE", "REST_SITE", "SHOP", "TREASURE", "UNKNOWN", "BOSS"],
+              "properties": {
+                "MONSTER": { "type": "integer", "minimum": 0 }, "ELITE": { "type": "integer", "minimum": 0 },
+                "REST_SITE": { "type": "integer", "minimum": 0 }, "SHOP": { "type": "integer", "minimum": 0 },
+                "TREASURE": { "type": "integer", "minimum": 0 }, "UNKNOWN": { "type": "integer", "minimum": 0 }, "BOSS": { "type": "integer", "minimum": 0 }
+              } },
+            "nodes": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["col", "row", "type"],
+              "properties": { "col": { "type": "integer" }, "row": { "type": "integer" }, "type": { "type": "string" } } } }
+          }
+        } },
         "minimum_elite_route_example": {
           "oneOf": [{ "type": "null" }, {
             "type": "object", "additionalProperties": false, "required": ["known_elites", "nodes"],

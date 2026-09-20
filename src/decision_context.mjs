@@ -190,6 +190,8 @@ export function routeFacts(map, choices) {
   const nodes = new Map(map.nodes.map(node => [keyOf(node), node]));
   const memo = new Map(), visiting = new Set();
   const types = ['MONSTER', 'ELITE', 'REST_SITE', 'SHOP', 'TREASURE', 'UNKNOWN', 'BOSS'];
+  const examples = [['fewest_known_elites', 'ELITE', 1], ['most_known_elites', 'ELITE', -1],
+    ['most_rest_sites', 'REST_SITE', -1], ['most_shops', 'SHOP', -1], ['most_normal_fights', 'MONSTER', -1]];
   function bounds(id) {
     if (memo.has(id)) return memo.get(id);
     if (visiting.has(id)) throw new ContextError('Map contains a cycle');
@@ -198,16 +200,25 @@ export function routeFacts(map, choices) {
     visiting.add(id);
     const children = node.type === 'BOSS' ? [] : (node.children || []).map(child => bounds(keyOf(child)));
     const result = { reaches_boss: node.type === 'BOSS' || children.some(c => c.reaches_boss), counts: {} };
+    const complete = children.filter(child => child.reaches_boss);
     for (const type of types) {
       const own = Number(node.type === type);
-      result.counts[type] = { min: own + (children.length ? Math.min(...children.map(c => c.counts[type].min)) : 0), max: own + (children.length ? Math.max(...children.map(c => c.counts[type].max)) : 0) };
+      const continuations = result.reaches_boss ? complete : children;
+      result.counts[type] = { min: own + (continuations.length ? Math.min(...continuations.map(c => c.counts[type].min)) : 0), max: own + (continuations.length ? Math.max(...continuations.map(c => c.counts[type].max)) : 0) };
     }
-    const continuation = children.map(child => child.minimum_elite_route_example).filter(Boolean)
-      .sort((a, b) => a.known_elites - b.known_elites)[0];
-    result.minimum_elite_route_example = node.type === 'BOSS' || continuation ? {
-      known_elites: Number(node.type === 'ELITE') + (continuation?.known_elites || 0),
-      nodes: [{ col: node.col, row: node.row, type: node.type }, ...(continuation?.nodes || [])]
-    } : null;
+    // A small set of actual paths exposes joint tradeoffs, without combining
+    // incompatible independent extrema or prescribing a preferred route.
+    const routes = new Map();
+    if (result.reaches_boss) for (const [criterion, type, direction] of examples) {
+      const continuation = complete.flatMap(child => child.route_examples.filter(route => route.criteria.includes(criterion)))
+        .sort((a, b) => direction * (a.counts[type] - b.counts[type]) || JSON.stringify(a.nodes).localeCompare(JSON.stringify(b.nodes)))[0];
+      const path = [{ col: node.col, row: node.row, type: node.type }, ...(continuation?.nodes || [])], key = JSON.stringify(path);
+      const route = routes.get(key) || { criteria: [], counts: Object.fromEntries(types.map(type => [type, Number(node.type === type) + (continuation?.counts[type] || 0)])), nodes: path };
+      route.criteria.push(criterion); routes.set(key, route);
+    }
+    result.route_examples = [...routes.values()];
+    const minimum = result.route_examples.find(route => route.criteria.includes('fewest_known_elites'));
+    result.minimum_elite_route_example = minimum ? { known_elites: minimum.counts.ELITE, nodes: minimum.nodes } : null;
     visiting.delete(id); memo.set(id, result); return result;
   }
   return choices.map(choice => {
@@ -556,7 +567,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     map.nodes = [...nodes.values()];
     map.legal_next_nodes = source.map.travelable_coords;
     map.routes = routeFacts(map, map.legal_next_nodes);
-    map.route_semantics = 'Counts include the chosen node and end at the first boss or known terminal. Min/max for different node types may describe different paths. UNKNOWN nodes are not assumed safe or a specific encounter.';
+    map.route_semantics = 'Counts include the chosen node and follow paths to the first boss when one is reachable; otherwise they describe known terminal paths. Min/max for different types may be different paths. route_examples are bounded examples with jointly achievable counts and their full node order, not recommended routes or all tradeoffs. Several criteria can identify the same example. UNKNOWN nodes remain unresolved; no future reward or encounter is guaranteed, and movement effects can create later choices.';
   }
   if (map && Number.isInteger(map.current_coord?.row) && map.nodes.every(node => node.children.every(child => child.row > node.row))) {
     const firstRelevantRow = Math.min(map.current_coord.row, ...(map.legal_next_nodes || []).map(n => n.row));

@@ -295,9 +295,9 @@ export function prepareModDecision(gameState, options = {}) {
     const id = `map_${route.next_node.col}_${route.next_node.row}`, candidate = candidates.get(id);
     if (!candidate) continue;
     const nearest = route.nearest_steps_after_chosen_node;
-    candidate.description += ` After this node: nearest known elite ${nearest.ELITE ?? 'none reachable'} steps, rest ${nearest.REST_SITE ?? 'none reachable'} steps, shop ${nearest.SHOP ?? 'none reachable'} steps. Paths to boss contain ${route.counts.ELITE.min}-${route.counts.ELITE.max} elites and ${route.counts.REST_SITE.min}-${route.counts.REST_SITE.max} rests (bounds may be on different paths). Deck has ${context.deck.statistics.non_basic_attacks} non-basic attacks and ${context.deck.statistics.upgraded_attacks} upgraded attacks; consider their rules, relics and potions before taking early elites.`;
-    const example = route.minimum_elite_route_example;
-    if (example) candidate.description += ` One complete route with the fewest known elites is ${example.nodes.map(node => node.type).join(' -> ')} (${example.known_elites} known elites). ${example.known_elites ? 'Every currently visible route to the boss through this choice includes an elite.' : 'A route to the boss avoiding all currently known elites remains available.'} This is one example, not a commitment or a prediction of UNKNOWN rooms; compare the full map and resources.`;
+    candidate.description += ` From this node: nearest known elite ${nearest.ELITE ?? 'none reachable'} steps, rest ${nearest.REST_SITE ?? 'none reachable'} steps, shop ${nearest.SHOP ?? 'none reachable'} steps.`;
+    if (route.reaches_boss) candidate.description += ` Paths to the boss contain ${route.counts.ELITE.min}-${route.counts.ELITE.max} elites, ${route.counts.REST_SITE.min}-${route.counts.REST_SITE.max} rests, ${route.counts.SHOP.min}-${route.counts.SHOP.max} shops and ${route.counts.MONSTER.min}-${route.counts.MONSTER.max} normal fights. These separate bounds may describe different paths. Compare map.routes[].route_examples for concrete paths with joint counts and order, including elite exposure, rests, shops and normal fights. Examples do not recommend a route or predict UNKNOWN rooms. This action selects only the next node; later branches remain choices.`;
+    else candidate.description += ' No currently known path from this node reaches the boss; use the graph and any current movement rules.';
     context.legal_actions.find(action => action.action_id === id).description = candidate.description;
   }
   let payload = {

@@ -1,0 +1,160 @@
+{
+  "at": "2026-09-20T17:50:59.850Z",
+  "source_sha256": "b81b40d2fe385662255cbb81e53567e85d9eb9892e75aa01dd50faa2bc8aa404",
+  "reason": "Route descriptions singled out the minimum-elite example; independent room-count extrema could not show which opportunities coexist on a real path.",
+  "scope": "Up to five extremum examples per next node, merged when identical, with full topology and joint room counts. No path recommendation, hidden room prediction or future reward guarantee.",
+  "validation": {
+    "related_checks_passed": 40,
+    "compilation": [
+      {
+        "step": "0006",
+        "elapsed_ms": 104,
+        "bytes": 39951,
+        "max_bytes": 90000,
+        "choices": 3,
+        "example_counts": [
+          5,
+          5,
+          5
+        ]
+      },
+      {
+        "step": "0077",
+        "elapsed_ms": 42,
+        "bytes": 34722,
+        "max_bytes": 90000,
+        "choices": 2,
+        "example_counts": [
+          4,
+          4
+        ]
+      },
+      {
+        "step": "0145",
+        "elapsed_ms": 21,
+        "bytes": 34351,
+        "max_bytes": 90000,
+        "choices": 2,
+        "example_counts": [
+          1,
+          1
+        ]
+      }
+    ],
+    "first_node_examples": {
+      "next": {
+        "col": 0,
+        "row": 1
+      },
+      "examples": [
+        {
+          "criteria": [
+            "fewest_known_elites"
+          ],
+          "counts": {
+            "MONSTER": 5,
+            "ELITE": 0,
+            "REST_SITE": 1,
+            "SHOP": 0,
+            "TREASURE": 1,
+            "UNKNOWN": 8,
+            "BOSS": 1
+          }
+        },
+        {
+          "criteria": [
+            "most_known_elites"
+          ],
+          "counts": {
+            "MONSTER": 4,
+            "ELITE": 2,
+            "REST_SITE": 2,
+            "SHOP": 0,
+            "TREASURE": 1,
+            "UNKNOWN": 6,
+            "BOSS": 1
+          }
+        },
+        {
+          "criteria": [
+            "most_rest_sites"
+          ],
+          "counts": {
+            "MONSTER": 6,
+            "ELITE": 0,
+            "REST_SITE": 5,
+            "SHOP": 1,
+            "TREASURE": 1,
+            "UNKNOWN": 2,
+            "BOSS": 1
+          }
+        },
+        {
+          "criteria": [
+            "most_shops"
+          ],
+          "counts": {
+            "MONSTER": 4,
+            "ELITE": 1,
+            "REST_SITE": 1,
+            "SHOP": 2,
+            "TREASURE": 1,
+            "UNKNOWN": 6,
+            "BOSS": 1
+          }
+        },
+        {
+          "criteria": [
+            "most_normal_fights"
+          ],
+          "counts": {
+            "MONSTER": 9,
+            "ELITE": 0,
+            "REST_SITE": 2,
+            "SHOP": 1,
+            "TREASURE": 1,
+            "UNKNOWN": 2,
+            "BOSS": 1
+          }
+        }
+      ]
+    },
+    "topology": "Disconnected terminal branches are excluded from first-boss path bounds; examples terminate at the first boss."
+  },
+  "replay": {
+    "case": "run28-map-floor13",
+    "input_sha256": "ab4a0843a1bbd7aa5c8aaef3b79b6eb50c024e14edd92169a91b573c1cb66c46",
+    "provider": "openrouter",
+    "model": "typesafe/jev-1.13-20260917",
+    "original_request": {
+      "cmd": "choose_map_node",
+      "args": [
+        5,
+        13
+      ]
+    },
+    "new_request": {
+      "cmd": "choose_map_node",
+      "args": [
+        5,
+        13
+      ]
+    },
+    "probabilities": {
+      "map_5_13": 0.73,
+      "map_6_13": 0.27
+    },
+    "confidence": 0.46,
+    "calls": 1,
+    "usage": {
+      "input_tokens": 10247,
+      "output_tokens": 47,
+      "cost": 0.000430374
+    },
+    "artifact": "run-artifacts/joint-route-evaluation/results/run28-map-floor13/joint-routes/1"
+  },
+  "limitations": [
+    "One previously exposed development snapshot; same route choice, not win-rate evidence.",
+    "The active run 29 stays on 9b590b2; route changes are for the next controller after the run review."
+  ]
+}

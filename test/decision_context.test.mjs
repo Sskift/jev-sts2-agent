@@ -101,6 +101,7 @@ test('map decisions have current player, permanent deck, rules, downstream graph
   assert.match(prepared.payload.questions.next_action.criteria.map_1_1.effect, /nearest known elite 0 steps, rest none reachable/);
   for (const corrupt of [
     p => { p.map.routes[0].minimum_elite_route_example.nodes[1].col = 8; },
+    p => { p.map.routes[0].route_examples[0].counts.ELITE += 1; },
     p => { p.map.routes[1].known_elite_required_to_reach_boss = false; },
     p => { p.map.routes[1].counts.ELITE.min = 0; },
     p => { p.map.routes.pop(); }
@@ -311,11 +312,21 @@ test('route calculations preserve branch uncertainty and reject broken topology'
   assert.deepEqual(result.counts.UNKNOWN, { min: 1, max: 1 });
   assert.equal(result.minimum_elite_route_example.known_elites, 0);
   assert.deepEqual(result.minimum_elite_route_example.nodes.map(node => node.type), ['UNKNOWN', 'REST_SITE', 'BOSS']);
+  assert.equal(result.route_examples.find(route => route.criteria.includes('most_known_elites')).counts.ELITE, 1);
+  assert.equal(result.route_examples.find(route => route.criteria.includes('most_rest_sites')).counts.REST_SITE, 1);
+  assert.equal(result.route_examples.length, 2, 'Identical paths for different criteria share one example');
+  for (const example of result.route_examples) {
+    assert.equal(example.nodes.at(-1).type, 'BOSS');
+    for (const [type, count] of Object.entries(example.counts)) assert.equal(count, example.nodes.filter(node => node.type === type).length);
+    assert.ok(!(example.counts.ELITE && example.counts.REST_SITE), 'Independent maxima are not combined into an impossible path');
+  }
   const deadEnd = structuredClone(map); deadEnd.nodes[2].children = [];
   assert.equal(routeFacts(deadEnd, [{ col: 0, row: 0 }])[0].minimum_elite_route_example.known_elites, 1, 'An unfinished branch cannot be an elite-free route to the boss');
   assert.equal(routeFacts(deadEnd, [{ col: 1, row: 1 }])[0].minimum_elite_route_example, null);
   assert.equal(routeFacts(deadEnd, [{ col: 1, row: 1 }])[0].known_elite_required_to_reach_boss, null);
   assert.equal(routeFacts(deadEnd, [{ col: 0, row: 0 }])[0].known_elite_required_to_reach_boss, true);
+  assert.deepEqual(routeFacts(deadEnd, [{ col: 0, row: 0 }])[0].counts.ELITE, { min: 1, max: 1 }, 'Boss-path bounds exclude unfinished branches');
+  assert.deepEqual(routeFacts(deadEnd, [{ col: 1, row: 1 }])[0].route_examples, []);
   map.nodes[1].children = [{ col: 9, row: 9 }];
   assert.throws(() => routeFacts(map, [{ col: 0, row: 0 }]), /missing node/);
   map.nodes[1].children = [{ col: 0, row: 0 }];
