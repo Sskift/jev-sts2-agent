@@ -1,0 +1,304 @@
+{
+  "at": "2026-09-20T19:31:42.136Z",
+  "run_number": 30,
+  "run_id": "run-1789929587",
+  "character": "IRONCLAD",
+  "game_mode": "Standard",
+  "ascension": 0,
+  "result": {
+    "is_victory": false,
+    "floor": 29,
+    "score": 564,
+    "epochs_discovered": 0,
+    "can_return_to_menu": false,
+    "can_continue": false
+  },
+  "final_turn": 10,
+  "final_enemies": [
+    {
+      "name": "Parafright",
+      "hp": 17,
+      "max_hp": 21
+    },
+    {
+      "name": "The Obscura",
+      "hp": 61,
+      "max_hp": 123
+    }
+  ],
+  "formal_evidence": {
+    "file": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0033/after-state.json",
+    "sha256": "5921b424602edfce3b38686dde6c9d84e73ae6fe4f2f3e4fdfb0ec3cfd1a331d",
+    "settled_file": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/settled-game-over.json",
+    "settled_sha256": "a4081d94b829c965260bfec246bf8b6f5106e8233773765c5585bfdad95efe6a"
+  },
+  "runtime_commits": [
+    "86fda8756c85b8fe5dc6e660585516c00f69477a",
+    "966c3f67630d875bf1b718907b3e19640b1ae22a"
+  ],
+  "artifact_directories": [
+    "run-artifacts/run30-2026-09-20T18-39-43.601Z",
+    "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z"
+  ],
+  "live_usage": {
+    "responses": 2787,
+    "actual_models": [
+      "typesafe/jev-1.13-20260917"
+    ],
+    "input_tokens": 60659883,
+    "output_tokens": 214263,
+    "cost_usd": 2.5477150860000033,
+    "excludes_offline_replay": true
+  },
+  "first_act": {
+    "boss": "Kin Priest",
+    "turns": 10,
+    "player_hp_after": 39,
+    "max_hp": 85,
+    "evidence": "docs/evidence/2026-09-21/run30-act-one.json"
+  },
+  "last_combat": {
+    "entry_hp": 61,
+    "initial_enemies": [
+      {
+        "id": 1,
+        "name": "The Obscura",
+        "hp": 123
+      }
+    ],
+    "primary_enemy_hp_removed": 62,
+    "temporary_illusion_knockdowns": 6,
+    "turns": [
+      {
+        "turn": 1,
+        "hp_before": 61,
+        "block": 12,
+        "incoming": 0,
+        "forecast_hp": 61,
+        "observed_hp": 61,
+        "source": "run-artifacts/run30-2026-09-20T18-39-43.601Z/step-0408",
+        "enemies_before_end": [
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 102
+          }
+        ]
+      },
+      {
+        "turn": 2,
+        "hp_before": 61,
+        "block": 0,
+        "incoming": 0,
+        "forecast_hp": 61,
+        "observed_hp": 61,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0002",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 0
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 102
+          }
+        ]
+      },
+      {
+        "turn": 3,
+        "hp_before": 61,
+        "block": 0,
+        "incoming": 13,
+        "forecast_hp": 54,
+        "observed_hp": 54,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0006",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 0
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 95
+          }
+        ]
+      },
+      {
+        "turn": 4,
+        "hp_before": 54,
+        "block": 7,
+        "incoming": 0,
+        "forecast_hp": 54,
+        "observed_hp": 54,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0009",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 0
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 95
+          }
+        ]
+      },
+      {
+        "turn": 5,
+        "hp_before": 54,
+        "block": 39,
+        "incoming": 38,
+        "forecast_hp": 54,
+        "observed_hp": 54,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0013",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 21
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 95
+          }
+        ]
+      },
+      {
+        "turn": 6,
+        "hp_before": 54,
+        "block": 0,
+        "incoming": 0,
+        "forecast_hp": 54,
+        "observed_hp": 54,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0017",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 0
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 89
+          }
+        ]
+      },
+      {
+        "turn": 7,
+        "hp_before": 54,
+        "block": 0,
+        "incoming": 19,
+        "forecast_hp": 41,
+        "observed_hp": 41,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0020",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 0
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 89
+          }
+        ]
+      },
+      {
+        "turn": 8,
+        "hp_before": 41,
+        "block": 7,
+        "incoming": 25,
+        "forecast_hp": 23,
+        "observed_hp": 23,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0025",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 17
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 72
+          }
+        ]
+      },
+      {
+        "turn": 9,
+        "hp_before": 23,
+        "block": 0,
+        "incoming": 22,
+        "forecast_hp": 7,
+        "observed_hp": 7,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0028",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 0
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 65
+          }
+        ]
+      },
+      {
+        "turn": 10,
+        "hp_before": 7,
+        "block": 20,
+        "incoming": 46,
+        "forecast_hp": -19,
+        "observed_hp": 0,
+        "source": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0033",
+        "enemies_before_end": [
+          {
+            "id": 2,
+            "name": "Parafright",
+            "hp": 17
+          },
+          {
+            "id": 1,
+            "name": "The Obscura",
+            "hp": 61
+          }
+        ]
+      }
+    ],
+    "forecast_agreement": "Every recorded end-turn HP prediction matches actual HP after clamping the final negative value to zero. This does not establish full-sequence projection accuracy or good action choices."
+  },
+  "floor25": {
+    "entry_hp": 78,
+    "hp_before_final_hit": 30,
+    "hp_after_healing": 36,
+    "turns": 8,
+    "first_turn_block": 40,
+    "first_turn_displayed_attack": 15
+  },
+  "findings": [
+    {
+      "kind": "model_decision",
+      "evidence": "Illusion revival and Minion departure rules were supplied. Repeated temporary knockdowns suppressed current damage but left the leader alive and its team strengthening. Not every individual knockdown is wrong; the full long-fight tradeoff was poor."
+    },
+    {
+      "kind": "context_gap",
+      "evidence": "Public Wiki Wail/SAIL move has no power effects. Typed rule references add Strength, but not its native +3 application to the enemy team. Exact amounts/recipients remain an unimplemented static-effects gap."
+    },
+    {
+      "kind": "needs_counterfactual_review",
+      "evidence": "Turn 1 drew with Battle Trance after spending all energy. Floor 25 also exhausted Impervious before a large early Block surplus. No alternative complete combat or superior draw outcome has been established."
+    }
+  ],
+  "next_step": "Use selected already-exposed development snapshots to improve future enemy-effect facts and evaluate the missing encounter-level view of permanent progress versus temporary control. Complete supported changes and review before starting run 31.",
+  "status": "Review facts archived; further correction pending. No run 31 has started; full three-act goal remains active."
+}
