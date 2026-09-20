@@ -1,20 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-
-const envPath = path.join(process.cwd(), '.env');
-const envContent = fs.readFileSync(envPath, 'utf8');
-const match = envContent.match(/TYPESAFE_API_KEY\s*=\s*([^\r\n]+)/);
-
-if (!match) {
-  process.exit(1);
-}
-
-const apiKey = match[1].trim();
-const url = 'https://api.typesafe.ai/v1/systemone';
+import { getJevModel, requestJev } from './src/jev_client.mjs';
 
 const payload = {
   state: '客户反馈：你们的系统今天登录一直报500错误，严重影响我们上午的业务结算，请尽快修复！',
-  model: 'jev-latest',
+  model: getJevModel(),
   questions: {
     urgency_level: {
       type: 'score',
@@ -35,23 +23,12 @@ const payload = {
 
 async function testApi() {
   const startTime = Date.now();
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(30000)
-  });
-
+  const data = await requestJev(payload);
   const elapsed = Date.now() - startTime;
-  if (!res.ok) throw new Error(`Jev HTTP ${res.status}`);
-  const data = await res.json();
   if (!Number.isFinite(data.answers?.urgency_level?.score) || !Object.hasOwn(payload.questions.issue_category.criteria, data.answers?.issue_category?.choice)) {
     throw new Error('Unexpected Jev answer contract');
   }
-  console.log(`Status: ${res.status} OK (${elapsed}ms)`);
+  console.log(`Jev request succeeded (${elapsed}ms)`);
   console.log('Result:\n', JSON.stringify(data, null, 2));
 }
 

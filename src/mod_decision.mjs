@@ -1,5 +1,5 @@
 import { decisionInstructions } from "./decision_instructions.mjs";
-import { getJevApiKey } from './decision_jev.mjs';
+import { getJevModel, requestJev } from './jev_client.mjs';
 import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactContext, validateDecisionPacket, cardRewardKey } from './decision_context.mjs';
 import { combatForecast, firstHitHpLoss, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
@@ -8,7 +8,6 @@ import { needsStrategyAssessment, prepareStrategyAssessment, parseStrategyAssess
 import { decideTurn } from './turn_plan.mjs';
 import { plannedUpgradeSelection } from './turn_plan_state.mjs';
 
-const API_URL = 'https://api.typesafe.ai/v1/systemone';
 const integer = value => Number.isInteger(value) && value >= 0;
 const hasId = value => typeof value === 'string' && value.length > 0;
 
@@ -286,7 +285,7 @@ export function prepareModDecision(gameState, options = {}) {
     context.legal_actions.find(action => action.action_id === id).description = candidate.description;
   }
   let payload = {
-    model: options.model || 'jev-latest',
+    model: getJevModel(options),
     state: context,
     questions: { next_action: {
       type: 'choice',
@@ -350,7 +349,7 @@ export async function makeModDecisionWithJev(gameState, options = {}) {
 }
 
 async function choosePrepared(gameState, options, prepared) {
-  const { candidates, payload, body, metrics } = prepared;
+  const { candidates, payload, metrics } = prepared;
   const last = options.memory?.data.actions.at(-1);
   if (gameState.screen === 'REWARD' && gameState.rewards?.rewards.length === 1 && gameState.rewards.rewards[0].type === 'Card' && (prepared.skippedCardRewards?.includes(0) || (last?.ok && !last.card_reward_key && last.request.cmd === 'reward_skip_card' && last.floor === gameState.decision_context?.total_floor)) && candidates.has('proceed') && [...candidates.values()].every(candidate => ['proceed', 'reward_choose_card', 'reward_skip_card'].includes(candidate.request?.cmd))) {
     return { ...candidates.get('proceed'), candidate_id: 'proceed', model: 'complete-selected-skip', context_metrics: metrics };
@@ -359,22 +358,8 @@ async function choosePrepared(gameState, options, prepared) {
     const [candidate_id, candidate] = candidates.entries().next().value;
     return { ...candidate, candidate_id, model: 'forced-single-action', context_metrics: metrics };
   }
-  const apiKey = options.apiKey ?? getJevApiKey();
-  if (!apiKey) throw new Error('TYPESAFE_API_KEY not found');
-  options.onRequest?.(payload, metrics);
   const started = performance.now();
-  const response = await (options.fetchImpl || globalThis.fetch)(API_URL, {
-    method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body, signal: AbortSignal.timeout(options.timeoutMs ?? 30000)
-  });
-  if (!response.ok) {
-    let kind;
-    try { kind = (await response.json())?.detail?.error_type; } catch {}
-    // Retain the provider's bounded error category, never arbitrary response
-    // bodies or credentials, so capacity failures are distinguishable.
-    throw new Error(`Jev API error ${response.status}${typeof kind === 'string' && /^[a-z_]{1,80}$/.test(kind) ? ` (${kind})` : ''}`);
-  }
-  const result = await response.json();
+  const result = await requestJev(payload, { ...options, metrics });
   if (prepared.parseResult) return { ...prepared.parseResult(result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
   if (prepared.assessmentChoices) return { ...parseStrategyAssessment(prepared, result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
   const answer = result.answers?.next_action;

@@ -13,7 +13,7 @@
     "start:mod": "node --use-system-ca src/mod_loop.mjs",
     "test": "node --test test/*.test.mjs",
     "sim": "node src/agent_loop.mjs --sim",
-    "test:jev": "node test_jev.mjs",
+    "test:jev": "node --use-system-ca test_jev.mjs",
     "test:opus": "node --use-system-ca scripts/opus_smoke.mjs",
     "check:opus-config": "node --use-system-ca src/vision_opus.mjs",
     "start": "node --use-system-ca src/mod_loop.mjs",

@@ -6,7 +6,7 @@ Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结�
 
 当前阶段是整局通关开发与实测。每个 Jev 请求自带本局、玩家、永久卡组、地图、战斗各牌堆、相关历史和 `legal_actions`，已接入真实游戏。循环能继续普通奖励，并处理事件、选牌、商店、药水与休息；最终成功要求同一局经过三幕并显示正式胜利结算。[当前进展和待验证项](docs/full-run-progress.md)与下面旧版单场战斗记录分开维护。
 
-当前部署构建为 `0.111.0-context.14`。战斗改为先确定回合目标与有序计划，再逐条确认执行；新信息触发原计划复核。[回合决策管线与限制](docs/decision-pipeline.md)。`npm run context:preview` 可以只读检查完整上下文，不调用 Jev、不执行游戏动作。本项目在 `master` 直接提交，不为自身改动提 PR。
+当前部署构建为 `0.111.0-context.15`。战斗改为先确定回合目标与有序计划，再逐条确认执行；新信息触发原计划复核。[回合决策管线与限制](docs/decision-pipeline.md)。`npm run context:preview` 可以只读检查完整上下文，不调用 Jev、不执行游戏动作。本项目在 `master` 直接提交，不为自身改动提 PR。
 
 ## 早期单场验证记录
 
@@ -35,7 +35,17 @@ Windows 上的《Slay the Spire 2》Agent Loop：**Node 读取游戏 mod 的结�
 
 上述 `temp/` 是本机工作材料，默认不随 Git 提交。恢复前退出游戏；只恢复本次改变的 mod DLL/manifest 或配置，避免覆盖后续游戏进度。配置源位于 `%APPDATA%/SlayTheSpire2/steam/<account>/settings.save`，仓库无需记录账号标识。
 
-在 `.env` 设置 `TYPESAFE_API_KEY`，或通过同名环境变量提供。仅在使用视觉后备时需要 Claude 配置：从 `%USERPROFILE%/.claude/settings.json` 的 env 读取地址和凭据，支持 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN` 或 `ANTHROPIC_API_KEY` 覆盖，模型固定 `claude-opus-5`。带模型请求的项目启动命令使用 `--use-system-ca` 保持 TLS 校验；凭据不写入日志或提交仓库。
+在 `.env` 或环境变量配置 Jev。默认直连 TypeSafe，使用 `TYPESAFE_API_KEY`。使用 OpenRouter 时配置：
+
+```dotenv
+JEV_PROVIDER=openrouter
+JEV_MODEL=typesafe/jev-1.13
+OPENROUTER_API_KEY=在本地填写
+```
+
+OpenRouter 使用原生 `https://openrouter.ai/api/alpha/decisions`，保留 `state/questions/answers`、多问题批处理和概率分布。两种接入共用回合计划和上下文管线；不会在失败时自动更换模型或计费账号。`JEV_MODEL=jev-latest` 会在 OpenRouter 映射为 `~typesafe/jev-latest`。接口依据 [OpenRouter 官方 SDK](https://github.com/OpenRouterTeam/typescript-sdk/blob/main/src/funcs/alphaDecisionsCreate.ts)。
+
+仅在使用视觉后备时需要 Claude 配置：从 `%USERPROFILE%/.claude/settings.json` 的 env 读取地址和凭据，支持 `ANTHROPIC_BASE_URL`、`ANTHROPIC_AUTH_TOKEN` 或 `ANTHROPIC_API_KEY` 覆盖，模型固定 `claude-opus-5`。带模型请求的项目启动命令使用 `--use-system-ca` 保持 TLS 校验；凭据不写入日志或提交仓库。
 
 ## 启动与检查
 

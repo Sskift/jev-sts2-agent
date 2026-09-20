@@ -1,16 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import { getJevApiKey, getJevModel, requestJev } from './jev_client.mjs';
+export { getJevApiKey } from './jev_client.mjs';
 
-const API_URL = 'https://api.typesafe.ai/v1/systemone';
 const NON_COMBAT_SCENES = new Set(['reward', 'map', 'rest', 'event', 'main_menu', 'shop', 'treasure', 'card_select', 'character_select', 'dialog', 'settings']);
-
-export function getJevApiKey() {
-  if (process.env.TYPESAFE_API_KEY) return process.env.TYPESAFE_API_KEY;
-  const envPath = path.join(process.cwd(), '.env');
-  if (!fs.existsSync(envPath)) return '';
-  const match = fs.readFileSync(envPath, 'utf8').match(/^\s*TYPESAFE_API_KEY\s*=\s*(.*?)\s*$/m);
-  return match ? match[1].replace(/^(['"])(.*)\1$/, '$2') : '';
-}
 
 function hasPosition(position) {
   return Number.isFinite(position?.x) && Number.isFinite(position?.y);
@@ -81,10 +72,8 @@ export async function makeDecisionWithJev(gameState, options = {}) {
   if (candidates.size === 0) return wait('No complete visible action is available');
   if (candidates.size > 255) throw new Error('Jev Choice supports at most 255 action candidates');
 
-  const apiKey = options.apiKey ?? getJevApiKey();
-  if (!apiKey) throw new Error('TYPESAFE_API_KEY not found');
   const payload = {
-    model: options.model || 'jev-latest',
+    model: getJevModel(options),
     // Preserve visible descriptions/effects, resources and scene-specific context.
     state: gameState,
     questions: {
@@ -96,16 +85,7 @@ export async function makeDecisionWithJev(gameState, options = {}) {
     }
   };
   const started = performance.now();
-  const response = await (options.fetchImpl || globalThis.fetch)(API_URL, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(options.timeoutMs ?? 30000)
-  });
-  if (!response.ok) {
-    throw new Error(`Jev API error ${response.status}`);
-  }
-  const result = await response.json();
+  const result = await requestJev(payload, options);
   const answer = result.answers?.next_action;
   if (answer?.type !== 'choice' || typeof answer.choice !== 'string' || !candidates.has(answer.choice)) {
     throw new Error('Jev returned an invalid next_action choice');
