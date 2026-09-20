@@ -18,3 +18,9 @@ export function decisionInstructions(state) {
     ? ' Stomp in hand becomes 1 energy cheaper for every Attack played first this turn. A 1-cost attack before Stomp spends one energy but reduces Stomp cost by one, so the pair can cost the same total energy as Stomp alone. Compare affordable attacks followed by the discounted Stomp before spending its full current cost; consider defense and other triggers too.' : '';
   return `${common} ${state.combat ? combat : betweenRooms}${rewards}${setup}${potionTiming}${selection}${attackDiscount}`;
 }
+
+// The strategic criteria are shared by turn planning and modal decisions. The
+// atomic action-selection contract is excluded from planning questions.
+export function turnStrategyInstructions(state) {
+  return decisionInstructions(state).slice(common.length).replace('Plan a useful sequence, then choose its next step.', 'Compare the combined value of the whole remaining turn and preserve useful ordering dependencies.');
+}

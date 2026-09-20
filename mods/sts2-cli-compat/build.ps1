@@ -7,7 +7,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $upstreamCommit = 'e6ce5bb1f0e5af1213e59582b645c18027ded476'
-$compatVersion = '0.111.0-context.13'
+$compatVersion = '0.111.0-context.14'
 $gameDirPath = (Resolve-Path -LiteralPath $GameDir).Path
 $sourceDirPath = (Resolve-Path -LiteralPath $SourceDir).Path
 $outputDirPath = [System.IO.Path]::GetFullPath($OutputDir)
@@ -74,9 +74,9 @@ global using global::System.Threading;
 global using global::System.Threading.Tasks;
 '@, $utf8)
 [System.IO.File]::WriteAllText($generatedAssemblyInfo, @'
-[assembly: System.Reflection.AssemblyVersion("0.111.0.14")]
-[assembly: System.Reflection.AssemblyFileVersion("0.111.0.14")]
-[assembly: System.Reflection.AssemblyInformationalVersion("0.111.0-context.13")]
+[assembly: System.Reflection.AssemblyVersion("0.111.0.15")]
+[assembly: System.Reflection.AssemblyFileVersion("0.111.0.15")]
+[assembly: System.Reflection.AssemblyInformationalVersion("0.111.0-context.14")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v9.0")]
 '@, $utf8)
 

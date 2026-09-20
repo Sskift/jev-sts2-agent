@@ -658,7 +658,7 @@ index 0000000..5453b4e
 +    public required string Scope { get; set; }
 +}
 diff --git a/STS2.Cli.Mod/Models/State/CardStateDto.cs b/STS2.Cli.Mod/Models/State/CardStateDto.cs
-index 3a446ca..5f9df9a 100644
+index 3a446ca..e558be7 100644
 --- a/STS2.Cli.Mod/Models/State/CardStateDto.cs
 +++ b/STS2.Cli.Mod/Models/State/CardStateDto.cs
 @@ -12,8 +12,12 @@ namespace STS2.Cli.Mod.Models.State;
@@ -717,7 +717,23 @@ index 3a446ca..5f9df9a 100644
  
      /// <summary>
      ///     Enchantment model ID (e.g., "SHARP", "NIMBLE", "GLAM").
-@@ -128,4 +152,4 @@ public class CardStateDto
+@@ -114,7 +138,14 @@ public class CardStateDto
+     /// <summary>
+     ///     True if the card is upgraded.
+     /// </summary>
+-    public bool IsUpgraded { get; set; }
++    public bool IsUpgraded { get; set; }
++
++    /// <summary>
++    ///     Native next-upgrade inspection in the current state, without selecting a target.
++    ///     This is displayed rules and costs, not a simulation of playing the upgraded card.
++    ///     Null when the card cannot upgrade or an independent preview is unavailable.
++    /// </summary>
++    public CardUpgradePreviewDto? UpgradePreview { get; set; }
+ 
+     // -- Playability & State (CardModel line 650+) --
+ 
+@@ -128,4 +159,4 @@ public class CardStateDto
      ///     Null when the card is playable.
      /// </summary>
      public string? UnplayableReason { get; set; }
@@ -726,14 +742,15 @@ index 3a446ca..5f9df9a 100644
 +}
 diff --git a/STS2.Cli.Mod/Models/State/CardUpgradePreviewDto.cs b/STS2.Cli.Mod/Models/State/CardUpgradePreviewDto.cs
 new file mode 100644
-index 0000000..442fcbd
+index 0000000..8fc6289
 --- /dev/null
 +++ b/STS2.Cli.Mod/Models/State/CardUpgradePreviewDto.cs
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,17 @@
 +namespace STS2.Cli.Mod.Models.State;
 +
 +/// <summary>
-+///     Displayed name, rules, and costs of the next upgrade on an independent card preview.
++///     Displayed name, rules, and costs of the next upgrade on an independent, untargeted card preview.
++///     Values describe current-state inspection, not a future play after other cards or effects.
 +/// </summary>
 +public class CardUpgradePreviewDto
 +{
@@ -788,6 +805,30 @@ index 06ca918..0ace6a5 100644
      ///     List of cards available for selection.
      /// </summary>
      public List<SelectableCardDto> Cards { get; set; } = [];
+-}
+\ No newline at end of file
++}
+diff --git a/STS2.Cli.Mod/Models/State/HandSelectStateDto.cs b/STS2.Cli.Mod/Models/State/HandSelectStateDto.cs
+index 4b93c4d..217f81b 100644
+--- a/STS2.Cli.Mod/Models/State/HandSelectStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/HandSelectStateDto.cs
+@@ -70,6 +70,12 @@ public class HandSelectStateDto
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+ public class HandSelectCardDto
+ {
++    /// <summary>
++    ///     Card details including the same opaque instance_id used by combat hand and pile states.
++    ///     Stable while the native card object exists, including moves into the selected container.
++    /// </summary>
++    public object? Details { get; set; }
++
+     /// <summary>
+     ///     Index of the card among the selectable/selected cards (0-based).
+     /// </summary>
+@@ -99,4 +105,4 @@ public class HandSelectCardDto
+     ///     Card description text.
+     /// </summary>
+     public string? Description { get; set; }
 -}
 \ No newline at end of file
 +}
@@ -1092,7 +1133,7 @@ index 0000000..242e7e7
 +    }
 +}
 diff --git a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
-index de41515..c33174b 100644
+index de41515..baed13c 100644
 --- a/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/CardStateBuilder.cs
 @@ -1,5 +1,7 @@
@@ -1103,7 +1144,7 @@ index de41515..c33174b 100644
  using STS2.Cli.Mod.Models.State;
  using STS2.Cli.Mod.Utils;
  using static STS2.Cli.Mod.Utils.TextUtils;
-@@ -25,6 +27,10 @@ public static class CardStateBuilder
+@@ -25,6 +27,11 @@ public static class CardStateBuilder
  
              var state = new CardStateDto
              {
@@ -1111,10 +1152,11 @@ index de41515..c33174b 100644
 +                ValidTargetIds = DecisionContextBuilder.CardTargets(card),
 +                TargetPreviews = DecisionContextBuilder.CardTargetPreviews(card),
 +                AttackPreview = CardAttackPreviewBuilder.Build(card),
++                UpgradePreview = CardUpgradePreviewBuilder.Build(card),
                  Index = index,
                  Id = card.Id.Entry,
                  Name = StripGameTags(card.Title),
-@@ -52,12 +58,21 @@ public static class CardStateBuilder
+@@ -52,12 +59,21 @@ public static class CardStateBuilder
                  if (tag != CardTag.None)
                      state.Tags.Add(tag.ToString());
  
@@ -1137,7 +1179,7 @@ index de41515..c33174b 100644
              if (card.Enchantment is { } enchantment)
                  state.Enchantment = enchantment.Id.Entry;
  
-@@ -68,6 +83,7 @@ public static class CardStateBuilder
+@@ -68,6 +84,7 @@ public static class CardStateBuilder
          }
          catch (Exception ex)
          {
@@ -1145,7 +1187,7 @@ index de41515..c33174b 100644
              Logger.Error($"Failed to build card state: {ex.Message}");
              return null;
          }
-@@ -91,9 +107,10 @@ public static class CardStateBuilder
+@@ -91,9 +108,10 @@ public static class CardStateBuilder
              }
              catch (Exception ex2)
              {
@@ -1160,10 +1202,11 @@ index de41515..c33174b 100644
 +}
 diff --git a/STS2.Cli.Mod/State/Builders/CardUpgradePreviewBuilder.cs b/STS2.Cli.Mod/State/Builders/CardUpgradePreviewBuilder.cs
 new file mode 100644
-index 0000000..e9f3e71
+index 0000000..9119c80
 --- /dev/null
 +++ b/STS2.Cli.Mod/State/Builders/CardUpgradePreviewBuilder.cs
-@@ -0,0 +1,57 @@
+@@ -0,0 +1,90 @@
++using System.Reflection;
 +using MegaCrit.Sts2.Core.Entities.Cards;
 +using MegaCrit.Sts2.Core.Models;
 +using STS2.Cli.Mod.Models.State;
@@ -1178,11 +1221,19 @@ index 0000000..e9f3e71
 +public static class CardUpgradePreviewBuilder
 +{
 +    private static readonly ModLogger Logger = new("CardUpgradePreviewBuilder");
++    private static readonly MethodInfo? ShallowCloneMethod = typeof(object).GetMethod(
++        "MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
 +
 +    /// <summary>
 +    ///     Upgrades a detached copy using the native preview path. Returns null for cards that
 +    ///     cannot upgrade or whose preview could not be extracted. Call on the Godot main thread.
 +    /// </summary>
++    /// <remarks>
++    ///     Matches untargeted upgrade inspection, not a counterfactual play: no upgrade/play hooks,
++    ///     target modifiers, prior preparation effects, or later triggers are simulated. The native
++    ///     detached preview retains Owner and uses Combat preview mode for combat piles, allowing
++    ///     current combat dynamic variables and preview hooks without registering a card.
++    /// </remarks>
 +    public static CardUpgradePreviewDto? Build(CardModel card)
 +    {
 +        try
@@ -1191,7 +1242,7 @@ index 0000000..e9f3e71
 +
 +            // Match NUpgradePreview/NCard on a detached model. CardScope.CloneCard
 +            // registers a new card in live state, so it is unsuitable for a state read.
-+            var preview = (CardModel)card.MutableClone();
++            var preview = DetachedClone(card);
 +            preview.UpgradeInternal();
 +            preview.UpgradePreviewType = card.Pile?.IsCombatPile == true
 +                ? CardUpgradePreviewType.Combat
@@ -1219,6 +1270,30 @@ index 0000000..e9f3e71
 +            Logger.Warning($"Failed to build upgrade preview for '{card.Id.Entry}': {ex.Message}");
 +            return null;
 +        }
++    }
++
++    private static CardModel DetachedClone(CardModel card)
++    {
++        // Native MutableClone deep-clones enchantments and afflictions before AfterCloned
++        // clears delegates. Those setters may otherwise notify the live card's subscribers.
++        // Clear event fields on a shallow, unregistered staging object first; native cloning
++        // then supplies the independent variables, costs, enchantments, and afflictions.
++        var staging = (CardModel)(ShallowCloneMethod?.Invoke(card, null)
++            ?? throw new MissingMethodException("Card preview requires MemberwiseClone"));
++        for (var type = card.GetType(); type != null; type = type.BaseType)
++        {
++            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public |
++                                       BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
++            foreach (var eventInfo in type.GetEvents(flags))
++            {
++                var field = type.GetField(eventInfo.Name, flags);
++                if (field == null || !typeof(Delegate).IsAssignableFrom(field.FieldType))
++                    throw new MissingFieldException(type.FullName, eventInfo.Name);
++                field.SetValue(staging, null);
++            }
++        }
++
++        return (CardModel)staging.MutableClone();
 +    }
 +}
 diff --git a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
@@ -1386,10 +1461,16 @@ index aa3cb26..905c03b 100644
 \ No newline at end of file
 +}
 diff --git a/STS2.Cli.Mod/State/Builders/HandSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/HandSelectStateBuilder.cs
-index a2ae24d..9da5e2e 100644
+index a2ae24d..cd53c72 100644
 --- a/STS2.Cli.Mod/State/Builders/HandSelectStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/HandSelectStateBuilder.cs
-@@ -120,7 +120,7 @@ public static class HandSelectStateBuilder
+@@ -115,12 +115,13 @@ public static class HandSelectStateBuilder
+ 
+                 cards.Add(new HandSelectCardDto
+                 {
++                    Details = DecisionContextBuilder.CardDetails(cardModel),
+                     Index = i,
+                     CardId = cardModel.Id.Entry,
                      CardName = StripGameTags(cardModel.Title),
                      CardType = cardModel.Type.ToString(),
                      Cost = cardModel.EnergyCost.Canonical,
@@ -1398,7 +1479,13 @@ index a2ae24d..9da5e2e 100644
                  });
              }
          }
-@@ -152,7 +152,7 @@ public static class HandSelectStateBuilder
+@@ -147,12 +148,13 @@ public static class HandSelectStateBuilder
+                 var cardModel = selectedCards[i];
+                 cards.Add(new HandSelectCardDto
+                 {
++                    Details = DecisionContextBuilder.CardDetails(cardModel),
+                     Index = i,
+                     CardId = cardModel.Id.Entry,
                      CardName = StripGameTags(cardModel.Title),
                      CardType = cardModel.Type.ToString(),
                      Cost = cardModel.EnergyCost.Canonical,
@@ -1407,6 +1494,13 @@ index a2ae24d..9da5e2e 100644
                  });
              }
          }
+@@ -181,4 +183,4 @@ public static class HandSelectStateBuilder
+             return null;
+         }
+     }
+-}
+\ No newline at end of file
++}
 diff --git a/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs b/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs
 index 38c1138..28d00b2 100644
 --- a/STS2.Cli.Mod/State/Builders/IntentStateBuilder.cs

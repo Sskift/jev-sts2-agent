@@ -5,6 +5,8 @@ import { buildDecisionContext, ContextError, compactContext, validateDecisionPac
 import { combatForecast, firstHitHpLoss, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
 import { needsStrategyAssessment, prepareStrategyAssessment, parseStrategyAssessment } from './strategy_assessment.mjs';
+import { decideTurn } from './turn_plan.mjs';
+import { plannedUpgradeSelection } from './turn_plan_state.mjs';
 
 const API_URL = 'https://api.typesafe.ai/v1/systemone';
 const integer = value => Number.isInteger(value) && value >= 0;
@@ -331,6 +333,11 @@ export function prepareModDecision(gameState, options = {}) {
 export async function makeModDecisionWithJev(gameState, options = {}) {
   let prepared = options.prepared ?? prepareModDecision(gameState, options);
   if (prepared.action === 'wait') return prepared;
+  if (options.turnPlanning !== false) {
+    const selection = plannedUpgradeSelection(options.memory?.data.turn_plan, gameState, prepared.candidates);
+    if (selection) return { ...selection, model: 'jev-turn-plan-selection', turn_plan: options.memory.data.turn_plan, context_metrics: prepared.metrics };
+    if (gameState.screen === 'COMBAT' && prepared.candidates.size > 1) return decideTurn(gameState, options, prepared, choosePrepared);
+  }
   let assessment;
   if (needsStrategyAssessment(gameState, options, prepared)) {
     assessment = await choosePrepared(gameState, options, prepareStrategyAssessment(prepared, options));

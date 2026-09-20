@@ -23,6 +23,35 @@
   ],
   "additionalProperties": false,
   "properties": {
+    "turn_plan": {
+      "type": ["object", "null"],
+      "required": ["source", "revision", "turn", "objective", "status", "next_step", "ordered_steps"],
+      "properties": {
+        "source": { "$ref": "#/$defs/text" },
+        "revision": { "type": "integer", "minimum": 0 },
+        "turn": { "type": "integer", "minimum": 0 },
+        "objective": { "type": "object", "required": ["id", "meaning"], "properties": { "id": { "type": "string" }, "meaning": { "$ref": "#/$defs/text" } } },
+        "status": { "enum": ["active", "awaiting_selection", "needs_review", "completed", "outcome_unknown"] },
+        "next_step": { "type": "integer", "minimum": 0 },
+        "ordered_steps": { "type": "array", "items": {
+          "type": "object", "required": ["sequence", "kind", "role", "status"],
+          "properties": {
+            "sequence": { "type": "integer", "minimum": 0 },
+            "kind": { "enum": ["play_card", "use_potion", "end_turn"] },
+            "role": { "enum": ["payoff", "preparation", "finish_turn"] },
+            "status": { "enum": ["confirmed", "intended"] }
+          }
+        } }
+      }
+    },
+    "turn_planning": { "type": "object", "required": ["phase_scope", "energy_reservation"], "properties": {
+      "phase_scope": { "$ref": "#/$defs/text" },
+      "energy_reservation": { "type": "object", "required": ["observed_energy", "remaining_after_printed_costs", "scope"], "properties": {
+        "observed_energy": { "type": "integer", "minimum": 0 },
+        "remaining_after_printed_costs": { "type": "integer" },
+        "scope": { "$ref": "#/$defs/text" }
+      } }
+    } },
     "decision_brief": { "type": ["object", "null"] },
     "rule_reference": {
       "type": ["object", "null"],

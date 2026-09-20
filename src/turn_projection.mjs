@@ -1,0 +1,60 @@
+import { attackHpLoss, combatForecast, intentDamage } from './combat_arithmetic.mjs';
+
+export function reserveSequence(state, steps) {
+  let energy = state.combat.player.energy, attacks = 0;
+  const costs = [];
+  for (const step of steps) {
+    const card = step.kind === 'play_card' ? state.combat.hand.find(card => card.details?.instance_id === step.card_instance_id) : null;
+    if (step.kind === 'play_card' && !card) return null;
+    const cost = card ? card.cost < 0 ? energy : card.id === 'STOMP' ? Math.max(0, card.cost - attacks) : card.cost : 0;
+    if (cost > energy) return null;
+    costs.push(cost); energy -= cost;
+    if (card?.type === 'Attack') attacks++;
+  }
+  return { energy_left: energy, costs };
+}
+
+// This is a conditional sum of visible previews, not a game simulator. Keeping
+// it separate from combat prevents planned outcomes from becoming observations.
+export function projectTurnPrefix(state, steps) {
+  const combat = structuredClone(state.combat), unresolved = [];
+  for (const [index, step] of steps.entries()) {
+    if (step.kind === 'end_turn') break;
+    if (step.kind !== 'play_card') { unresolved.push(`${step.name}: potion effects are not simulated`); continue; }
+    let card = combat.hand.find(card => card.details?.instance_id === step.card_instance_id);
+    if (!card) { unresolved.push(`${step.name}: card availability is unconfirmed`); continue; }
+    const original = card;
+    if (card.cost < 0 && combat.player.energy !== state.combat.player.energy) {
+      card = { ...card, attack_preview: undefined };
+      unresolved.push(`${card.name}: X-cost hit count after earlier spending is not recomputed`);
+    }
+    const target = combat.enemies.find(enemy => enemy.combat_id === step.target);
+    // Orichalcum belongs to turn end, not each intermediate card preview.
+    const intermediate = { ...combat, player: { ...combat.player, relics: combat.player.relics.filter(relic => relic.id !== 'ORICHALCUM') } };
+    const estimate = combatForecast(intermediate, card, target);
+    const targets = card.target_type === 'AllEnemies' ? combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) : target ? [target] : [];
+    for (const enemy of targets) {
+      const hit = attackHpLoss(card, enemy);
+      if (hit) { enemy.hp = Math.max(0, enemy.hp - hit.hp_loss); enemy.block = hit.block_after; enemy.powers = hit.powers_after; enemy.is_alive = enemy.hp > 0; }
+    }
+    combat.player.energy = reserveSequence(state, steps.slice(0, index + 1))?.energy_left ?? estimate.energy_after_printed_cost;
+    combat.player.block = estimate.block_after_card;
+    combat.player.hp -= estimate.declared_self_hp_loss || 0;
+    const exhausted = new Set(estimate.exhausted_hand_cards?.map(card => card.index));
+    combat.hand = combat.hand.filter(other => other !== original && !exhausted.has(other.index));
+    if (card.id === 'RAGE' && Number.isFinite(card.rage_block_per_attack)) {
+      const power = combat.player.powers.find(power => power.id === 'RAGE_POWER');
+      if (power) power.amount += card.rage_block_per_attack;
+      else combat.player.powers.push({ id: 'RAGE_POWER', amount: card.rage_block_per_attack });
+    }
+    if (!/^(?:Deal [\d.]+ damage\.?|Gain [\d.]+ Block\.?)$/i.test(card.description.trim()) && card.id !== 'RAGE') unresolved.push(`${card.name}: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed`);
+  }
+  const end = combatForecast(combat);
+  return {
+    scope: 'Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, and Second Wind hand exhaustion. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices.',
+    remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
+    block: combat.player.block, hp_after_declared_self_loss: combat.player.hp,
+    hp_if_ending_after_prefix: end.hp_remaining_if_end_turn, incoming_attack_after_prefix: end.displayed_attacks_after_target_depletion,
+    unresolved_effects: [...new Set(unresolved)]
+  };
+}

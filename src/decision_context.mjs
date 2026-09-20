@@ -5,6 +5,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import { previewDamageSum } from './combat_arithmetic.mjs';
 import { buildRuleReference } from './rule_reference.mjs';
 import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
+import { sameTurn, publicTurnPlan, turnGuard, advanceTurnPlan } from './turn_plan_state.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -231,22 +232,35 @@ export class DecisionMemory {
     this.last = clone(state);
     this.persist();
   }
-  begin(request, state) {
+  begin(request, state, { turnPlan, turnStep } = {}) {
     if (this.data.pending) throw new ContextError('An earlier action has an unresolved outcome; inspect the saved memory before continuing.');
+    if (turnPlan && !sameTurn(turnPlan, state)) throw new ContextError('Cannot attach a plan from another turn');
     const matching = state.combat?.hand?.filter(card => card.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.index - b.index);
     this.data.pending = { request: clone(request), floor: state.decision_context?.total_floor, combat_id: state.decision_context?.combat_id || null, round: state.combat?.turn_number, screen: state.screen,
       ...(state.combat ? { combat_frame_before: combatFrame(state) } : {}),
       ...(request.cmd === 'play_card' ? { played_card_at_request: clone(matching?.[request.nth ?? 0]) } : {}) };
     if (request.cmd === 'use_potion') this.data.pending.potion_at_request = clone(state.decision_context?.player?.potions.filter(p => p.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.slot - b.slot)[request.nth ?? 0]);
     if (request.cmd === 'reward_skip_card') this.data.pending.card_reward_key = cardRewardKey(state.rewards?.rewards?.filter(reward => reward.type.toLowerCase() === 'card')[request.nth ?? 0]);
+    if (turnPlan) {
+      this.data.turn_plan = clone(turnPlan);
+    }
+    if (sameTurn(this.data.turn_plan, state)) {
+      this.data.pending.turn_plan_id = this.data.turn_plan.id;
+      this.data.pending.turn_step = turnStep;
+      this.data.pending.turn_guard = turnGuard(state);
+      this.data.pending.turn_card_cost = request.cmd === 'play_card' ? matching?.[request.nth ?? 0]?.cost : 0;
+    }
     this.persist();
   }
   finish(response, after) {
+    advanceTurnPlan(this.data.turn_plan, this.data.pending, response, after);
     const change = response.ok && this.data.pending?.combat_id === after.decision_context?.combat_id
       ? observedCombatChange(this.data.pending?.combat_frame_before, after) : null;
     const recorded = { ...this.data.pending, ok: response.ok, result: clone(response.data ?? response.error ?? null), after_screen: after.screen,
       ...(change ? { observed_combat_change: change } : {}) };
     delete recorded.combat_frame_before;
+    delete recorded.turn_guard;
+    delete recorded.turn_card_cost;
     this.data.actions.push(recorded);
     this.data.pending = !response.ok && ['TIMEOUT', 'EVENT_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? { ...this.data.pending, outcome_unknown: true, error: response.error } : null;
     this.persist();
@@ -266,6 +280,8 @@ export class DecisionMemory {
     for (const action of actions) {
       delete action.card_reward_key; // Local identity bookkeeping; the skip action itself is retained.
       delete action.observed_combat_change; // Recent pairs appear in decision_brief; full engine history is retained.
+      delete action.turn_plan_id; // Full plan/revision evidence stays in step artifacts.
+      delete action.turn_step;
       if (action.floor < state.decision_context.total_floor && action.result?.event_state) {
         const event = action.result.event_state;
         action.result = { event_id: event.event_id, title: event.title, description: event.description, chosen_options: event.options?.filter(option => option.was_chosen) || [] };
@@ -476,6 +492,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     objective: { strategy: 'Win this entire run through all three acts and the final boss. Balance immediate survival, efficient combat, coherent deck/relic synergies, resources, and visible future routes.', execution_checkpoint: 'Continue through ordinary rewards and act transitions until the formal final victory screen.' },
     screen: state.screen, in_combat: Boolean(combat),
     decision_brief: buildDecisionBrief(source, memory),
+    turn_plan: publicTurnPlan(memory.data.turn_plan, source),
     run: context ? { run_id: context.run_id, combat_id: context.combat_id || null, act_index: context.act_index, act_floor: context.act_floor, total_floor: context.total_floor, ascension: context.ascension, game_mode: context.game_mode, modifiers: context.modifiers } : null,
     player: context?.player ?? null,
     resources: context ? { potion_capacity: context.potion_capacity } : null,

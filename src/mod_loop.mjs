@@ -133,6 +133,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       const decision = await decide(state, { memory, prepared,
         onRequest: (payload, metrics) => {
           if (metrics.purpose === 'option_assessment') save(path.join(directory, 'jev-strategy-request.json'), payload);
+          else if (metrics.purpose?.startsWith('turn_')) save(path.join(directory, `jev-${metrics.purpose}-${String(++planningCalls).padStart(4, '0')}.json`), payload);
           else { save(path.join(directory, 'jev-request.json'), payload); save(path.join(directory, 'context-metrics.json'), metrics); }
           if (prepared.selectionPlan) save(path.join(directory, `jev-planning-request-${String(++planningCalls).padStart(4, '0')}.json`), payload);
         },
@@ -156,7 +157,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
         save(path.join(directory, 'result.json'), { executed: false, reason: 'State changed during decision; observe again' });
         continue;
       }
-      memory.begin(decision.request, current);
+      memory.begin(decision.request, current, { turnPlan: decision.turn_plan, turnStep: decision.turn_step });
       let response;
       try { response = await client.request(decision.request); }
       catch (error) {
@@ -201,7 +202,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       if (response.ok && decision.request.cmd === 'end_turn') battle.endedTurns++;
       observeModBattle(battle, after, path.join(directory, 'after-state.json'));
       save(path.join(directory, 'result.json'), { request: decision.request, response, changed, battle: { ...battle } });
-      logger(JSON.stringify({ step, screen: state.screen, request: decision.request, model: decision.model, ok: response.ok, changed, afterScreen: after.screen, act: after.decision_context?.act_index, floor: after.decision_context?.total_floor, hp: after.decision_context?.player?.hp, energy: after.combat?.player?.energy, enemies: after.combat?.enemies?.map(enemy => ({ name: enemy.name, hp: enemy.hp })) }));
+      logger(JSON.stringify({ step, screen: state.screen, request: decision.request, model: decision.model, ...(decision.turn_plan ? { turnObjective: decision.turn_plan.objective?.id, planRevision: decision.turn_plan.revision, plannedStep: decision.turn_step, planningCalls: decision.planning_trace?.length || 0 } : {}), ok: response.ok, changed, afterScreen: after.screen, act: after.decision_context?.act_index, floor: after.decision_context?.total_floor, hp: after.decision_context?.player?.hp, energy: after.combat?.player?.energy, enemies: after.combat?.enemies?.map(enemy => ({ name: enemy.name, hp: enemy.hp })) }));
       save(path.join(artifactDir, 'session.json'), summary);
       if (!response.ok) { summary.stoppedReason = `Mod rejected action: ${response.error}: ${response.message || ''}`; break; }
       unchangedActions = changed ? 0 : unchangedActions + 1;

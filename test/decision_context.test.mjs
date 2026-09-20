@@ -315,7 +315,7 @@ test('long repeated rules can be restored exactly from the same request; oversiz
   assert.equal(calls, 0);
 });
 
-test('every independent API request contains the full JSON context and exactly the offered action IDs', async () => {
+test('every independent atomic action request contains the full JSON context and exactly the offered action IDs', async () => {
   const state = completeCombat(), memory = new DecisionMemory(); memory.observe(state);
   const requests = [];
   const fetchImpl = async (_url, options) => {
@@ -324,9 +324,9 @@ test('every independent API request contains the full JSON context and exactly t
     assert.deepEqual(Object.keys(request.questions.next_action.criteria), request.state.legal_actions.map(a => a.action_id));
     return { ok: true, json: async () => ({ model: 'offline', usage: { input_tokens: 2400 }, answers: { next_action: { type: 'choice', choice: 'end_turn' } } }) };
   };
-  await makeModDecisionWithJev(state, { memory, apiKey: 'test', fetchImpl });
+  await makeModDecisionWithJev(state, { turnPlanning: false, memory, apiKey: 'test', fetchImpl });
   memory.begin({ cmd: 'end_turn' }, state); memory.finish({ ok: true }, state);
-  const result = await makeModDecisionWithJev(state, { memory, apiKey: 'test', fetchImpl });
+  const result = await makeModDecisionWithJev(state, { turnPlanning: false, memory, apiKey: 'test', fetchImpl });
   for (const request of requests) {
     assert.ok(request.state.map.nodes.length);
     assert.ok(request.state.deck.cards.length);
