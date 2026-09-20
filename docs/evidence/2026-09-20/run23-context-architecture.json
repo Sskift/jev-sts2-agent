@@ -1,0 +1,202 @@
+{
+  "run_id": "run-1789896546",
+  "scope": "Actual v2 requests and confirmed commands from one uninterrupted run. Rule retrieval repair is read-only against the saved observation; no game replay or future facts.",
+  "examples": [
+    {
+      "screen": "map",
+      "artifact": "run-artifacts/2026-09-20T09-29-02-305Z-fce8bb60/step-0027/jev-request.json",
+      "phase": "map",
+      "observation_id": "2bf69753a4091f36868b1e55",
+      "strategy_revision": 5,
+      "strategy_run_id": "run-1789896546",
+      "revision_records": 5,
+      "priority": "multiple_enemy_control",
+      "anchor": {
+        "kind": "card",
+        "id": "OMNISLICE",
+        "name": "Omnislice",
+        "confidence": 0.75
+      },
+      "domain_bytes": {
+        "schema_version": 17,
+        "source_schema_version": 18,
+        "decision": 3078,
+        "observation": 7431,
+        "knowledge": 3768,
+        "history": 7897,
+        "intent": 1154,
+        "analysis": 3706,
+        "uncertainty": 505,
+        "text_dictionary": 1736
+      }
+    },
+    {
+      "screen": "reward",
+      "artifact": "run-artifacts/2026-09-20T09-29-02-305Z-fce8bb60/step-0042/jev-request.json",
+      "phase": "reward",
+      "observation_id": "f6d82cc05c81d26df64c1007",
+      "strategy_revision": 7,
+      "strategy_run_id": "run-1789896546",
+      "revision_records": 7,
+      "priority": "multiple_enemy_control",
+      "anchor": {
+        "kind": "card",
+        "id": "OMNISLICE",
+        "name": "Omnislice",
+        "confidence": 0.92
+      },
+      "domain_bytes": {
+        "schema_version": 17,
+        "source_schema_version": 18,
+        "decision": 3081,
+        "observation": 7014,
+        "knowledge": 4597,
+        "history": 9781,
+        "intent": 1154,
+        "analysis": 2469,
+        "uncertainty": 505,
+        "text_dictionary": 962
+      }
+    },
+    {
+      "screen": "combat",
+      "artifact": "run-artifacts/2026-09-20T09-29-02-305Z-fce8bb60/step-0050/jev-turn_objective-0001.json",
+      "phase": "turn_objective",
+      "observation_id": "2de9ae63ace60cfdfd271128",
+      "strategy_revision": 9,
+      "strategy_run_id": "run-1789896546",
+      "revision_records": 9,
+      "priority": "multiple_enemy_control",
+      "anchor": {
+        "kind": "card",
+        "id": "OMNISLICE",
+        "name": "Omnislice",
+        "confidence": 0.26
+      },
+      "domain_bytes": {
+        "schema_version": 17,
+        "source_schema_version": 18,
+        "decision": 3092,
+        "observation": 10458,
+        "knowledge": 5425,
+        "history": 10085,
+        "intent": 1671,
+        "analysis": 6744,
+        "uncertainty": 505,
+        "text_dictionary": 822
+      }
+    },
+    {
+      "screen": "selection",
+      "artifact": "run-artifacts/2026-09-20T09-29-02-305Z-fce8bb60/step-0086/jev-request.json",
+      "phase": "grid_card_select",
+      "observation_id": "b35aadb8eed4f46b30f504a4",
+      "strategy_revision": 14,
+      "strategy_run_id": "run-1789896546",
+      "revision_records": 14,
+      "priority": "multiple_enemy_control",
+      "anchor": {
+        "kind": "card",
+        "id": "STRIKE_IRONCLAD",
+        "name": "Strike",
+        "confidence": 0.36
+      },
+      "domain_bytes": {
+        "schema_version": 17,
+        "source_schema_version": 18,
+        "decision": 3091,
+        "observation": 10795,
+        "knowledge": 5520,
+        "history": 19817,
+        "intent": 3539,
+        "analysis": 2535,
+        "uncertainty": 505,
+        "text_dictionary": 886
+      }
+    }
+  ],
+  "consecutive_plan_steps": [
+    {
+      "step": 50,
+      "request": {
+        "cmd": "play_card",
+        "id": "DEFEND_IRONCLAD",
+        "nth": 0
+      },
+      "strategic_revision": 9,
+      "turn_plan_id": "28fe1012-e9b5-4fbd-b9c9-184d66e03d1c",
+      "planning_calls": 24,
+      "fresh_strategy": true
+    },
+    {
+      "step": 51,
+      "request": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 0,
+        "target": 1
+      },
+      "strategic_revision": 9,
+      "turn_plan_id": "28fe1012-e9b5-4fbd-b9c9-184d66e03d1c",
+      "planning_calls": 0,
+      "fresh_strategy": false
+    },
+    {
+      "step": 52,
+      "request": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 0,
+        "target": 1
+      },
+      "strategic_revision": 9,
+      "turn_plan_id": "28fe1012-e9b5-4fbd-b9c9-184d66e03d1c",
+      "planning_calls": 0,
+      "fresh_strategy": false
+    }
+  ],
+  "retrieval_gap": {
+    "boss": {
+      "id": "VANTOM_BOSS",
+      "name": "Vantom"
+    },
+    "old_link": null,
+    "old_encounters": [],
+    "repaired_encounters": [
+      "VANTOM_BOSS"
+    ],
+    "repaired_monsters": [
+      "NIBBIT",
+      "VANTOM"
+    ],
+    "encounter_rule_links": [
+      "monsters/VANTOM"
+    ]
+  },
+  "limitations": [
+    "Transport and strategy persistence are verified; there is no win-rate comparison.",
+    "Capability ratings and anchors are revisable model judgments, not verified game facts.",
+    "The run has not completed three acts."
+  ],
+  "history_policy_check": {
+    "observation_id": "bcac263e9e37f5dfa1d252b9",
+    "before_preview": "run-artifacts/2026-09-20T09-38-18-387Z-ffd17812",
+    "after_preview": "run-artifacts/2026-09-20T09-39-46-721Z-47529d69",
+    "logical_request_bytes": {
+      "before": 70550,
+      "after": 61260
+    },
+    "history_bytes": {
+      "before": 30456,
+      "after": 21243
+    },
+    "coverage": {
+      "policy": "current_assessment_and_all_intention_changes",
+      "assessments_archived": 29,
+      "intention_changes_included": 4,
+      "scope": "All changes of development priority or anchor are listed. Latest capability scores and confidence are included in full. Superseded numerical model ratings and confidence-only changes are omitted from this request and retained in the local audit archive. They are old model opinions, not missing game observations; no game history is removed by this policy."
+    },
+    "missing_current_rule_links": [],
+    "game_actions_sent": 0
+  }
+}

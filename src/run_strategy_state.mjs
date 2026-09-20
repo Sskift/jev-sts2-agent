@@ -44,6 +44,18 @@ export function publicRunStrategy(state, memory) {
   const current = memory?.data.run_strategy;
   if (!current || current.basis.run_id !== state.decision_context?.run_id) return null;
   const reason = strategyRefreshReason(state, memory);
+  const archive = memory.data.strategy_revisions || [];
+  const revisions = archive.flatMap(entry => {
+    const changes = {}, priority = entry.changes.priority, anchor = entry.changes.anchor;
+    if (priority && priority.before?.choice !== priority.after?.choice) changes.priority = {
+      before: priority.before?.choice ?? null, after: priority.after?.choice ?? null
+    };
+    const anchorIdentity = value => value ? { kind: value.kind, id: value.id } : null;
+    if (anchor && !isDeepStrictEqual(anchorIdentity(anchor.before), anchorIdentity(anchor.after))) changes.anchor = {
+      before: anchorIdentity(anchor.before), after: anchorIdentity(anchor.after)
+    };
+    return Object.keys(changes).length ? [{ revision: entry.revision, act_index: entry.act_index, floor: entry.floor, reason: entry.reason, changes }] : [];
+  });
   return {
     source: 'persisted_jev_judgment', is_observed_fact: false, run_id: current.basis.run_id,
     revision: current.revision, basis: current.basis,
@@ -53,7 +65,12 @@ export function publicRunStrategy(state, memory) {
     capability_assessment: { source: 'jev_judgment', assessed_revision: current.revision, model: current.model,
       scale: '0 absent, 1 weak/unreliable, 2 adequate with limitations, 3 strong/reliable',
       dimensions: strategicCapabilities, ratings: current.capabilities },
-    revisions: memory.data.strategy_revisions || [],
+    revisions,
+    revision_coverage: {
+      policy: 'current_assessment_and_all_intention_changes',
+      assessments_archived: archive.length, intention_changes_included: revisions.length,
+      scope: 'All changes of development priority or anchor are listed. Latest capability scores and confidence are included in full. Superseded numerical model ratings and confidence-only changes are omitted from this request and retained in the local audit archive. They are old model opinions, not missing game observations; no game history is removed by this policy.'
+    },
     scope: 'Advisory judgment of the owned build at the recorded checkpoint, not a fact, card-buying rule or commitment. Current HP, hand, enemies, prices and actual offered options take precedence. Tactical survival may override the development priority. No future random acquisition is assumed; revise after material changes.'
   };
 }

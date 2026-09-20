@@ -34,6 +34,11 @@
           "properties": { "run_id": { "type": "string" }, "act_index": { "type": "integer", "minimum": 0 },
             "floor": { "type": "integer", "minimum": 0 }, "checkpoint": { "type": "string" }, "build_id": { "type": "string", "pattern": "^[a-f0-9]{24}$" } }
         },
+        "revision_coverage": { "type": "object", "additionalProperties": false,
+          "required": ["policy", "assessments_archived", "intention_changes_included", "scope"],
+          "properties": { "policy": { "const": "current_assessment_and_all_intention_changes" },
+            "assessments_archived": { "type": "integer", "minimum": 0 },
+            "intention_changes_included": { "type": "integer", "minimum": 0 }, "scope": { "$ref": "#/$defs/text" } } },
         "freshness": { "type": "object", "additionalProperties": false, "required": ["needs_review", "reason"],
           "properties": { "needs_review": { "type": "boolean" }, "reason": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/text" }] } } },
         "development_priority": { "type": "object", "required": ["id", "meaning", "confidence"],

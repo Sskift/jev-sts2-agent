@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { ContextError, compactRecords, expandRecordTables, validateDecisionPacket } from './decision_context.mjs';
+import { normalizeRuleId as normalize, visitRuleEntities } from './rule_entities.mjs';
 
 export const MODEL_CONTEXT_VERSION = 'sts2.context.v2';
 const checkSchema = new Ajv2020({ allErrors: true, strict: true }).compile(JSON.parse(
@@ -26,6 +27,7 @@ const routes = [
   ['screen_state.selection_planning', 'intent.selection_planning'],
   ['run_strategy.capability_assessment', 'analysis.run_capability_assessment'],
   ['run_strategy.revisions', 'history.strategy_revisions'],
+  ['run_strategy.revision_coverage', 'history.strategy_coverage'],
   ['run_strategy', 'intent.run_strategy'],
   ['objective', 'intent.run_objective'],
   ['turn_plan', 'intent.persisted_turn_plan'],
@@ -72,24 +74,15 @@ function digestObservation(object, dictionary = {}) {
   };
   return createHash('sha256').update(JSON.stringify(stable(expandRecordTables(object)))).digest('hex').slice(0, 24);
 }
-const normalize = id => String(id).replace(/_POWER$/, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
-
 function entityLinks(observation, catalog) {
   const index = new Map();
   for (const [category, table] of Object.entries(catalog || {})) {
     for (const id of table.keys) index.set(`${category}/${normalize(id)}`, `${category}/${id}`);
   }
-  const categories = { cards: 'cards', card: 'cards', hand: 'cards', draw_pile: 'cards', discard_pile: 'cards', exhaust_pile: 'cards', play_pile: 'cards',
-    card_choices: 'cards', selectable_cards: 'cards', relics: 'relics', potions: 'potions', powers: 'powers', enemies: 'monsters',
-    orbs: 'orbs', modifiers: 'modifiers', enchantment: 'enchantments', affliction: 'afflictions', event: 'events', boss: 'encounters' };
   const links = {};
-  const visit = (value, category) => {
-    if (!value || typeof value !== 'object') return;
-    if (Array.isArray(value)) { value.forEach(item => visit(item, category)); return; }
-    if (category && value.id) links[`${category}/${value.id}`] = index.get(`${category}/${normalize(value.id)}`) ?? null;
-    for (const [field, child] of Object.entries(value)) visit(child, categories[field]);
-  };
-  visit(expandRecordTables(observation));
+  visitRuleEntities(expandRecordTables(observation), ({ category, id }) => {
+    if (id) links[`${category}/${id}`] = index.get(`${category}/${normalize(id)}`) ?? null;
+  });
   return links;
 }
 
@@ -159,6 +152,10 @@ export function compileModelRequest(payload, metrics = {}) {
     context_version: MODEL_CONTEXT_VERSION, context_phase: state.decision.phase, observation_id: state.decision.observation_id,
     entity_rule_links: Object.keys(state.knowledge.entity_rules).length,
     entities_without_static_reference: Object.entries(state.knowledge.entity_rules).filter(([, link]) => link === null).map(([id]) => id),
+    domain_bytes: Object.fromEntries(['decision', ...domains, 'uncertainty', 'text_dictionary'].filter(key => state[key] !== undefined)
+      .map(key => [key, Buffer.byteLength(JSON.stringify(state[key]))])),
+    questions_bytes: Buffer.byteLength(JSON.stringify(questions)),
+    rule_counts: Object.fromEntries(Object.entries(state.knowledge.catalog || {}).map(([category, table]) => [category, table.keys.length])),
     source_bytes: Buffer.byteLength(JSON.stringify(payload)), preservation: 'canonical_round_trip_verified'
   } };
 }

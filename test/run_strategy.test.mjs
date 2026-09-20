@@ -91,3 +91,28 @@ test('an incomplete strategic response commits no memory and does not select a g
   assert.equal(memory.data.run_strategy, undefined);
   assert.equal(memory.data.pending, null);
 });
+
+test('request memory keeps current judgments and every intention change without recycling superseded scores', () => {
+  const state = completeCombat(), memory = new DecisionMemory(); memory.observe(state);
+  const initial = assessment(state, memory);
+  rememberRunStrategy(memory, state, structuredClone(initial), 'Initial assessment.');
+  const rerated = structuredClone(initial);
+  rerated.capabilities.sustained_defense.score = 1.8;
+  rerated.priority.confidence = 0.8;
+  rememberRunStrategy(memory, state, rerated, 'Same direction; changed confidence and capability ratings.');
+  const redirected = structuredClone(rerated);
+  redirected.priority.choice = 'sustained_defense';
+  rememberRunStrategy(memory, state, redirected, 'Development direction changed.');
+  const archive = structuredClone(memory.data.strategy_revisions);
+  const view = publicRunStrategy(state, memory);
+  assert.deepEqual(view.revisions.map(entry => entry.revision), [1, 3]);
+  assert.deepEqual(view.revisions[1].changes.priority, { before: 'draw_consistency', after: 'sustained_defense' });
+  assert.equal(view.capability_assessment.ratings.sustained_defense.score, 1.8);
+  assert.equal(view.development_priority.confidence, 0.8);
+  assert.equal(view.revision_coverage.assessments_archived, 3);
+  assert.equal(view.revision_coverage.intention_changes_included, 2);
+  assert.deepEqual(memory.data.strategy_revisions, archive, 'Local audit remains complete and unchanged');
+  const compiled = compileModelRequest(prepareModDecision(state, { memory }).payload).payload.state;
+  assert.equal(compiled.history.strategy_coverage.assessments_archived, 3);
+  assert.equal(compiled.intent.run_strategy.revision_coverage, undefined);
+});

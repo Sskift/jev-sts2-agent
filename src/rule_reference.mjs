@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
+import { normalizeRuleId as normalize, visitRuleEntities } from './rule_entities.mjs';
 
 const directory = new URL('../data/spire-codex/v0.111.0/', import.meta.url);
 const manifest = JSON.parse(fs.readFileSync(new URL('manifest.json', directory), 'utf8'));
 const categories = Object.keys(manifest.files);
-const normalize = value => String(value || '').replace(/_POWER$/, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
 const records = {}, names = new Map();
 for (const category of categories) {
   const body = fs.readFileSync(new URL(category + '.json', directory));
@@ -65,23 +65,7 @@ export function buildRuleReference(state) {
     const matches = (names.get(normalize(value)) || []).filter(([category]) => allowed.includes(category));
     if (matches.length === 1) add(...matches[0]);
   }
-  const arrays = { master_deck: 'cards', hand: 'cards', draw_pile: 'cards', discard_pile: 'cards', exhaust_pile: 'cards', play_pile: 'cards', cards: 'cards', card_choices: 'cards', relics: 'relics', potions: 'potions', powers: 'powers', enemies: 'monsters', orbs: 'orbs', modifiers: 'modifiers', enchantment: 'enchantments', affliction: 'afflictions' };
-  function visit(value, category) {
-    if (!value || typeof value !== 'object') return;
-    if (Array.isArray(value)) { value.forEach(item => visit(item, category)); return; }
-    if (category && value.id) add(category, value.id);
-    for (const [field, type] of Object.entries({ card_id: 'cards', relic_id: 'relics', potion_id: 'potions', event_id: 'events', monster_id: 'monsters', encounter_id: 'encounters' })) if (value[field]) add(type, value[field]);
-    if (typeof value.enchantment === 'string') add('enchantments', value.enchantment);
-    if (typeof value.affliction === 'string') add('afflictions', value.affliction);
-    for (const keyword of value.keywords || []) add('keywords', keyword);
-    for (const [key, item] of Object.entries(value)) {
-      // Current entities and choices only; expired combat history is not another retrieval root.
-      if (['combat_history', 'history', 'glossary'].includes(key)) continue;
-      if (key === 'boss' && item?.name) named(item.name, ['encounters', 'monsters']);
-      visit(item, arrays[key]);
-    }
-  }
-  visit(state);
+  visitRuleEntities(state, ({ category, id, name }) => id ? add(category, id) : named(name, [category]));
   for (let index = 0; index < queue.length; index++) {
     const [category, row] = queue[index];
     relationSource = `${category}/${row.id}`;

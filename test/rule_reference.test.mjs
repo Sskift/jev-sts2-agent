@@ -4,6 +4,7 @@ import { buildRuleReference } from '../src/rule_reference.mjs';
 import { prepareModDecision } from '../src/mod_decision.mjs';
 import { expandRecordTables, compactContext, validateDecisionPacket } from '../src/decision_context.mjs';
 import { completeCombat } from './fixtures/context.mjs';
+import { compileModelRequest } from '../src/context_compiler.mjs';
 
 const stateWith = fields => ({ decision_context: { run_id: 'reference-test', master_deck: [], player: {} }, ...fields });
 
@@ -69,4 +70,29 @@ test('complete requests include local references and compression preserves every
   // Text interning is also self-contained; table expansion must retain IDs/counts.
   assert.deepEqual(expandRecordTables(packed).rule_reference.entries.cards.map(card => card.id), packet.rule_reference.entries.cards.map(card => card.id));
   assert.equal(buildRuleReference({ screen: 'MENU' }), null);
+});
+
+test('typed identities join upcoming encounters and offered entities through the same retrieval registry', () => {
+  const state = completeCombat();
+  state.decision_context.map.boss = { id: 'VANTOM_BOSS', name: 'Vantom' };
+  state.event = { event_id: 'SLIPPERY_BRIDGE' };
+  state.combat.player.powers = [{ id: 'WEAK_POWER', amount: 1, description: 'Deal 25% less attack damage.' }];
+  state.decision_context.player.powers = structuredClone(state.combat.player.powers);
+  const reference = buildRuleReference(state);
+  assert.deepEqual(reference.entries.encounters.map(rule => rule.id), ['VANTOM_BOSS']);
+  assert.ok(reference.entries.monsters.find(rule => rule.id === 'VANTOM')?.attack_pattern);
+  assert.ok(reference.entries.encounters[0].related_rules.includes('monsters/VANTOM'));
+  const compiled = compileModelRequest(prepareModDecision(state).payload);
+  assert.equal(compiled.payload.state.knowledge.entity_rules['encounters/VANTOM_BOSS'], 'encounters/VANTOM_BOSS');
+  assert.equal(compiled.payload.state.knowledge.entity_rules['events/SLIPPERY_BRIDGE'], 'events/SLIPPERY_BRIDGE');
+  assert.equal(compiled.payload.state.knowledge.entity_rules['powers/WEAK_POWER'], 'powers/WEAK');
+  assert.equal(compiled.metrics.domain_bytes.knowledge, Buffer.byteLength(JSON.stringify(compiled.payload.state.knowledge)));
+  // A missing authoritative ID must not silently match an unrelated same-name
+  // entity. A legacy name-only encounter may resolve within its own category.
+  state.decision_context.map.boss.id = 'UNKNOWN_MOD_BOSS';
+  const missing = buildRuleReference(state);
+  assert.ok(missing.missing.includes('encounters/UNKNOWN_MOD_BOSS'));
+  assert.equal(missing.entries.encounters, undefined);
+  delete state.decision_context.map.boss.id;
+  assert.equal(buildRuleReference(state).entries.encounters[0].id, 'VANTOM_BOSS');
 });
