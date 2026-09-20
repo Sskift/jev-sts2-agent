@@ -1,0 +1,31 @@
+{
+  "at": "2026-09-20T17:38:11.342Z",
+  "run_number": 29,
+  "runtime_commit": "9b590b225206ff76e9271af27546415f71a24212",
+  "provider": "openrouter",
+  "model": "typesafe/jev-1.13",
+  "artifact_dir": "run-artifacts/run29-2026-09-20T17-37-00.808Z",
+  "prior_run_review": "docs/run28-review.md",
+  "prior_run_review_commit": "9b590b225206ff76e9271af27546415f71a24212",
+  "records": [
+    {
+      "file": "run-artifacts/run29-2026-09-20T17-37-00.808Z/step-0001/before-state.json",
+      "sha256": "79a74f048c870145a310fc9e96eb6d78969f8e685ce4f49a3c5e70326373e47b",
+      "screen": "MENU",
+      "menu": {
+        "has_run_save": false
+      }
+    },
+    {
+      "file": "run-artifacts/run29-2026-09-20T17-37-00.808Z/step-0004/before-state.json",
+      "sha256": "fbc4f734a2b60b65cf46dc9e38c2f39072ecad9789882b86f2e60968b60f86fa",
+      "screen": "EVENT",
+      "run_id": "run-1789925824",
+      "act": 0,
+      "floor": 1,
+      "hp": 80,
+      "character": "IRONCLAD"
+    }
+  ],
+  "complete": false
+}
