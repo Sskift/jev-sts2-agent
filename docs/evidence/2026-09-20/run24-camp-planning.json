@@ -28,7 +28,7 @@
   },
   "validation": { "command": "node --test test/camp_plan.test.mjs test/history_scope.test.mjs test/context_compiler.test.mjs test/mod_decision.test.mjs test/mod_loop.test.mjs", "passed": 29, "failed": 0 },
   "live_reload": { "commit": "69d7d91", "run_id": "run-1789903049", "started_at_floor": 1,
-    "artifacts": "run-artifacts/2026-09-20T11-17-25-318Z-f7fc1220", "camp_flow_observed": false,
+    "artifacts": "run-artifacts/2026-09-20T11-17-25-318Z-f7fc1220", "camp_flow_observed": true,
     "feishu_revision": 79 },
   "live_camp": {
     "run_id": "run-1789903049", "floor": 8,

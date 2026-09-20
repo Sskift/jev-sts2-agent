@@ -23,5 +23,12 @@
     "context": "Current observation, already-confirmed preceding commands and contemporaneous strategy only. Fresh plan; no future draw or formal outcome supplied."
   },
   "validation": { "passed": 41, "failed": 0, "log": "temp/reaction-checks.log" },
+  "live_reload": {
+    "run_id": "run-1789903049", "loaded_commit": "158de64",
+    "artifacts": "run-artifacts/2026-09-20T11-29-07-739Z-3dd5fd8a",
+    "same_run_resumed_after_confirmed_step": 191, "pending_at_reload": null,
+    "continued_to_act_index": 1, "continued_to_floor": 19, "reaction_scenario_seen": false,
+    "feishu_revision": 83, "full_run_complete": false
+  },
   "limitations": "First reaction adapter covers Thorns on selected/all-enemy targets. It does not simulate reaction prevention, death interruption or all other powers. No win-rate or counterfactual victory claim."
 }

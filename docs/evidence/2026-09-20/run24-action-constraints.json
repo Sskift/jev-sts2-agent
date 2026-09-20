@@ -154,6 +154,14 @@
     },
     "pending": null
   },
+  "live_run25": {
+    "run_id": "run-1789903049", "loaded_commit": "158de64", "round": 7,
+    "source": "run-artifacts/2026-09-20T11-29-07-739Z-3dd5fd8a/step-0069",
+    "active_power": "RINGING_POWER", "affected_hand_cards": 5,
+    "planned_cards": ["DEFEND_IRONCLAD"], "then_end_turn": true,
+    "first_act_victory": "run-artifacts/2026-09-20T11-29-07-739Z-3dd5fd8a/step-0094/after-state.json",
+    "act_two_transition": "run-artifacts/2026-09-20T11-29-07-739Z-3dd5fd8a/step-0109/after-state.json"
+  },
   "limitations": [
     "Only the verified Ringing rule currently has an action-constraint adapter.",
     "The replay still chooses Armaments. It proves the impossible follow-through was removed, not that the chosen single card is best.",
