@@ -85,6 +85,10 @@
     },
     "turn_planning": { "type": "object", "required": ["phase_scope", "energy_reservation"], "properties": {
       "phase_scope": { "$ref": "#/$defs/text" },
+      "comparisons": { "type": "array", "minItems": 1, "maxItems": 16, "items": {
+        "type": "object", "additionalProperties": false, "required": ["plan_a", "plan_b"],
+        "properties": { "plan_a": { "type": "object" }, "plan_b": { "type": "object" } }
+      } },
       "conditional_projection": { "oneOf": [{ "$ref": "#/$defs/turnProjection" }, { "type": "array", "maxItems": 0 }] },
       "energy_reservation": { "type": "object", "additionalProperties": false, "required": ["observed_energy", "remaining_after_printed_costs", "scope", "is_observed", "includes_future_energy_gains", "steps"], "properties": {
         "observed_energy": { "type": "integer", "minimum": 0 },

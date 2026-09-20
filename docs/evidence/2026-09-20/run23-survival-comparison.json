@@ -1,0 +1,306 @@
+{
+  "run_id": "run-1789896546",
+  "formal_result": {
+    "is_victory": false,
+    "floor": 33,
+    "score": 644,
+    "epochs_discovered": 0,
+    "can_return_to_menu": false,
+    "can_continue": false
+  },
+  "terminal_source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0/step-0196/after-state.json",
+  "before_final_handoff": {
+    "hp": 33,
+    "block": 21,
+    "enemy": [
+      {
+        "id": "THE_INSATIABLE",
+        "hp": 67,
+        "powers": [
+          {
+            "id": "SANDPIT_POWER",
+            "name": "Sandpit",
+            "amount": 1,
+            "type": "Buff",
+            "stack_type": "Counter",
+            "description": "When The Insatiable takes its turn, you will be eaten and die."
+          },
+          {
+            "id": "VULNERABLE_POWER",
+            "name": "Vulnerable",
+            "amount": 2,
+            "type": "Debuff",
+            "stack_type": "Counter",
+            "description": "Receive 50% more damage from Attacks for 2 turns."
+          },
+          {
+            "id": "STRENGTH_POWER",
+            "name": "Strength",
+            "amount": 2,
+            "type": "Buff",
+            "stack_type": "Counter",
+            "description": "Increases attack damage by 2."
+          }
+        ]
+      }
+    ]
+  },
+  "history_sample": {
+    "source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0/step-0106/jev-turn_followthrough-0004.json",
+    "available": 130,
+    "included": 12
+  },
+  "single_comparison": {
+    "source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0/step-0182",
+    "game_actions_sent": 0,
+    "future_observations_used": false,
+    "model": "typesafe/jev-1.13-20260917",
+    "logical_bytes": 57429,
+    "usage": {
+      "input_tokens": 17018,
+      "output_tokens": 80,
+      "cost": 0.000714756
+    },
+    "pairs": [
+      [
+        {
+          "value": "original_one_response",
+          "label": {
+            "ordered_sequence": [
+              {
+                "action": "Frantic Escape",
+                "hand_index": 1,
+                "printed_cost": 1,
+                "rules": "Get farther away. Increase Sandpit by 1. Increase the cost of this card by 1.",
+                "energy_after_reserved_costs": 2
+              },
+              {
+                "action": "Bully",
+                "hand_index": 4,
+                "printed_cost": 0,
+                "target": 1,
+                "rules": "Deal 6 damage. Deals 2 additional damage for each Vulnerable on the enemy.",
+                "energy_after_reserved_costs": 2
+              },
+              {
+                "action": "Perfected Strike",
+                "hand_index": 3,
+                "printed_cost": 2,
+                "target": 1,
+                "rules": "Deal 32 damage. Deals 2 additional damage for ALL your cards containing “Strike”.",
+                "energy_after_reserved_costs": 0
+              }
+            ],
+            "then": "End turn, unless a new observation requires a revision.",
+            "energy_left": 0,
+            "energy_spent": 3,
+            "conditional_preview": {
+              "calculation_status": "incomplete",
+              "fully_simulated": false,
+              "known_effects_only": {
+                "block": 0,
+                "hp_if_ending": null,
+                "hp_loss_if_ending": null,
+                "block_including_end_turn_gains": 0,
+                "end_turn_block_gains": [],
+                "incoming_attack": 20,
+                "enemies": [
+                  {
+                    "combat_id": 1,
+                    "hp": 111,
+                    "block": 0,
+                    "hp_removed": 66,
+                    "block_removed": 0
+                  }
+                ]
+              },
+              "omitted_effects": [
+                "Frantic Escape: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed",
+                "Bully: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed",
+                "Perfected Strike: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed",
+                "An active loss countdown coexists with uncomputed effects. Its value after this sequence and resulting survival are not calculated; evaluate the current counter and every proposed rule, including response availability before the next deadline."
+              ],
+              "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+              "scope": "Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, Second Wind hand exhaustion, and active Plating/Orichalcum once at turn end. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices."
+            },
+            "limitation": "Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers."
+          }
+        },
+        {
+          "value": "two_responses",
+          "label": {
+            "ordered_sequence": [
+              {
+                "action": "Frantic Escape",
+                "hand_index": 1,
+                "printed_cost": 1,
+                "rules": "Get farther away. Increase Sandpit by 1. Increase the cost of this card by 1.",
+                "energy_after_reserved_costs": 2
+              },
+              {
+                "action": "Bully",
+                "hand_index": 4,
+                "printed_cost": 0,
+                "target": 1,
+                "rules": "Deal 6 damage. Deals 2 additional damage for each Vulnerable on the enemy.",
+                "energy_after_reserved_costs": 2
+              },
+              {
+                "action": "Frantic Escape",
+                "hand_index": 5,
+                "printed_cost": 1,
+                "rules": "Get farther away. Increase Sandpit by 1. Increase the cost of this card by 1.",
+                "energy_after_reserved_costs": 1
+              },
+              {
+                "action": "Strike",
+                "hand_index": 0,
+                "printed_cost": 1,
+                "target": 1,
+                "rules": "Deal 8 damage.",
+                "energy_after_reserved_costs": 0
+              }
+            ],
+            "then": "End turn, unless a new observation requires a revision.",
+            "energy_left": 0,
+            "energy_spent": 3,
+            "conditional_preview": {
+              "calculation_status": "incomplete",
+              "fully_simulated": false,
+              "known_effects_only": {
+                "block": 0,
+                "hp_if_ending": null,
+                "hp_loss_if_ending": null,
+                "block_including_end_turn_gains": 0,
+                "end_turn_block_gains": [],
+                "incoming_attack": 20,
+                "enemies": [
+                  {
+                    "combat_id": 1,
+                    "hp": 147,
+                    "block": 0,
+                    "hp_removed": 30,
+                    "block_removed": 0
+                  }
+                ]
+              },
+              "omitted_effects": [
+                "Frantic Escape: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed",
+                "Bully: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed",
+                "An active loss countdown coexists with uncomputed effects. Its value after this sequence and resulting survival are not calculated; evaluate the current counter and every proposed rule, including response availability before the next deadline."
+              ],
+              "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+              "scope": "Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, Second Wind hand exhaustion, and active Plating/Orichalcum once at turn end. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices."
+            },
+            "limitation": "Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers."
+          }
+        }
+      ]
+    ],
+    "answers": {
+      "survival_0": {
+        "type": "choice",
+        "choice": "plan_b",
+        "probabilities": {
+          "no_clear_difference": 0.33,
+          "plan_a": 0.1,
+          "plan_b": 0.57
+        },
+        "confidence": 0.36
+      },
+      "comparison_0": {
+        "type": "choice",
+        "choice": "plan_a",
+        "probabilities": {
+          "plan_a": 0.68,
+          "plan_b": 0.32
+        },
+        "confidence": 0.37
+      }
+    },
+    "resolved": [
+      {
+        "selected": "two_responses",
+        "options": {
+          "plan_a": "original_one_response",
+          "plan_b": "two_responses"
+        },
+        "selection_basis": "survival_constraint",
+        "survival_assessment": {
+          "type": "choice",
+          "choice": "plan_b",
+          "probabilities": {
+            "no_clear_difference": 0.33,
+            "plan_a": 0.1,
+            "plan_b": 0.57
+          },
+          "confidence": 0.36
+        },
+        "value_assessment": {
+          "type": "choice",
+          "choice": "plan_a",
+          "probabilities": {
+            "plan_a": 0.68,
+            "plan_b": 0.32
+          },
+          "confidence": 0.37
+        },
+        "probabilities": {
+          "no_clear_difference": 0.33,
+          "plan_a": 0.1,
+          "plan_b": 0.57
+        },
+        "confidence": 0.36
+      }
+    ]
+  },
+  "production_replay": {
+    "source": "run-artifacts/2026-09-20T10-01-25-295Z-cb0dbcb0/step-0182/before-state.json",
+    "game_actions_sent": 0,
+    "future_observations_used": false,
+    "requests": 26,
+    "pairs": 67,
+    "survival_priority": 22,
+    "disagreements": 0,
+    "first_action": {
+      "cmd": "use_potion",
+      "id": "COLORLESS_POTION",
+      "nth": 0,
+      "target": 0
+    },
+    "plan": [
+      {
+        "name": "Colorless Potion",
+        "kind": "use_potion"
+      },
+      {
+        "name": "Frantic Escape",
+        "card_instance_id": "e4acec81cc8c489eaf258792cfc27077",
+        "kind": "play_card"
+      },
+      {
+        "name": "Bully",
+        "card_instance_id": "f02f3600f7bb4143ab3674188fd20e70",
+        "kind": "play_card"
+      },
+      {
+        "kind": "end_turn"
+      }
+    ],
+    "budget": {
+      "initial_energy": 3,
+      "remaining_after_printed_costs": 2,
+      "scope": "Current printed costs plus verified Stomp reductions. Future changes and automatic effects must be confirmed from live observations."
+    },
+    "usage": {
+      "input_tokens": 541689,
+      "output_tokens": 5617
+    },
+    "artifact": "temp/run23-survival-replay/result.json"
+  },
+  "limitations": [
+    "Independent survival judgments can be wrong; probabilities are archived rather than treated as proof.",
+    "The full replay changed the first action to a potion; its random selection and continuation were not executed or invented.",
+    "No paired live run, win-rate claim, or completed three-act victory."
+  ]
+}

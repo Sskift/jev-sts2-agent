@@ -25,6 +25,19 @@ test('uncomputed potion benefits stay distinct from equal numeric baselines', ()
   assert.equal(withPotion.hp_if_ending, undefined, 'A partial baseline is not a top-level outcome');
 });
 
+test('a current lethal countdown cannot prove that an uncomputed sequence remains lethal', () => {
+  const s = state();
+  s.combat.enemies[0].powers = [{ id: 'SANDPIT_POWER', amount: 1 }];
+  assert.equal(describeTurnProjection(s, [strike]).known_effects_only.hp_if_ending, 0);
+  s.combat.hand.push(fixtureCard('RESPONSE_FIXTURE', { index: 2, type: 'Skill', description: 'Increase the loss countdown by 1.' }));
+  const sequence = [{ kind: 'play_card', name: 'Response', card_instance_id: 'RESPONSE_FIXTURE' }, strike];
+  const result = describeTurnProjection(s, sequence);
+  assert.equal(result.known_effects_only.hp_if_ending, null);
+  assert.equal(result.known_effects_only.hp_loss_if_ending, null);
+  assert.match(result.omitted_effects.join(' '), /countdown.*uncomputed/);
+  assert.equal(s.combat.enemies[0].powers[0].amount, 1, 'Observed counters are unchanged');
+});
+
 test('conditional sequence sums never mutate observations or trigger Orichalcum between cards', () => {
   const s = state(); s.combat.player.relics = [{ id: 'ORICHALCUM' }];
   const original = structuredClone(s), projection = projectTurnPrefix(s, [strike, defend]);

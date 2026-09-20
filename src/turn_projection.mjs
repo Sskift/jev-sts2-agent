@@ -87,12 +87,17 @@ export function projectTurnPrefix(state, steps) {
   const positioning = projectPositioning(state.combat, steps, depleted);
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
   if (facingUnresolved) unresolved.push('Player facing changes: current enemy intent damage includes the previous facing; final incoming damage and HP are unknown until new native previews are observed.');
+  // The single-action forecast can know a current loss timer without the
+  // sequence evaluator knowing how an omitted effect changes that timer.
+  // Reusing its old value would falsely declare every such plan fatal.
+  const timedLossUnresolved = end.death_timers?.length > 0 && unresolved.length > 0;
+  if (timedLossUnresolved) unresolved.push('An active loss countdown coexists with uncomputed effects. Its value after this sequence and resulting survival are not calculated; evaluate the current counter and every proposed rule, including response availability before the next deadline.');
   return {
     scope: 'Conditional arithmetic if current previews remain applicable. Not an observed or fully simulated future. Counts known hit caps, printed Block/self-loss, active or newly declared Rage, Second Wind hand exhaustion, and active Plating/Orichalcum once at turn end. Does not predict upgrades, debuffs, changing attack values, draws, potion effects, energy gains, cost changes, death triggers or future enemy choices.',
     remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
     block: combat.player.block, block_including_end_turn_gains: end.block_including_end_turn_gains, end_turn_block_gains: end.end_turn_block_gains,
     hp_after_declared_self_loss: combat.player.hp,
-    hp_if_ending_after_prefix: facingUnresolved ? null : end.hp_remaining_if_end_turn,
+    hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved ? null : end.hp_remaining_if_end_turn,
     incoming_attack_after_prefix: facingUnresolved ? null : end.displayed_attacks_after_target_depletion,
     ...(positioning ? { positioning } : {}),
     unresolved_effects: [...new Set(unresolved)]
