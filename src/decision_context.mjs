@@ -613,7 +613,7 @@ export function recordTable(records) {
   return { encoding: 'record_table_v1', layouts, rows };
 }
 
-function compactRecords(records, nested = true) {
+export function compactRecords(records, nested = true) {
   const layouts = [], lookup = new Map();
   const constantKeys = new Set(['type', 'side', 'actor_id', 'source_id', 'floor', 'combat_id', 'screen', 'ok', 'source', 'cmd', 'field']);
   const isConstantKey = key => constantKeys.has(nested ? key : JSON.parse(key).at(-1));

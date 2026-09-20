@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sts2.model-context.v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_schema_version", "decision", "observation", "knowledge", "history", "intent", "analysis", "uncertainty"],
+  "properties": {
+    "schema_version": { "const": "sts2.context.v2" },
+    "source_schema_version": { "const": "sts2.decision.v1" },
+    "decision": {
+      "type": "object", "additionalProperties": false,
+      "required": ["phase", "horizon", "output_role", "observation_id", "question_keys", "reference_paths", "contract"],
+      "properties": {
+        "phase": { "type": "string", "minLength": 1 },
+        "horizon": { "enum": ["remaining_turn_with_full_run_objective", "current_choice_with_full_run_objective"] },
+        "output_role": { "enum": ["advisory_assessment", "unexecuted_plan_component", "legal_action_selection"] },
+        "observation_id": { "type": "string", "pattern": "^[a-f0-9]{24}$" },
+        "question_keys": { "type": "array", "uniqueItems": true, "minItems": 1, "items": { "type": "string" } },
+        "reference_paths": { "type": "object", "additionalProperties": { "type": "string" } },
+        "contract": { "type": "object", "required": ["authority", "rules", "decision", "completeness"], "additionalProperties": false,
+          "properties": { "authority": { "type": "string" }, "rules": { "type": "string" }, "decision": { "type": "string" }, "completeness": { "type": "string" } }
+        }
+      }
+    },
+    "observation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["screen", "in_combat", "run", "player", "resources", "deck", "map", "combat", "screen_state", "legal_actions"],
+      "properties": {
+        "screen": { "type": "string" }, "in_combat": { "type": "boolean" },
+        "run": {}, "player": {}, "resources": {}, "deck": {}, "map": {}, "combat": {}, "screen_state": {}, "legal_actions": {}
+      }
+    },
+    "knowledge": {
+      "type": "object", "additionalProperties": false, "required": ["reference", "native_glossary", "entity_rules"],
+      "properties": {
+        "reference": {}, "native_glossary": {}, "resolved_potion_effects": {},
+        "entity_rules": { "type": "object", "additionalProperties": { "type": ["string", "null"] } },
+        "catalog": { "type": "object", "additionalProperties": {
+          "type": "object", "additionalProperties": false, "required": ["encoding", "keys", "records"],
+          "properties": {
+            "encoding": { "const": "record_map_v1" },
+            "keys": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }, "records": {}
+          }
+        } }
+      }
+    },
+    "history": { "type": "object" },
+    "intent": { "type": "object" },
+    "analysis": { "type": "object" },
+    "uncertainty": { "type": "object" },
+    "text_dictionary": { "type": "object", "additionalProperties": { "type": "string" } }
+  }
+}

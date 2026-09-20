@@ -2,6 +2,8 @@
 
 更新：2026-09-20。完整上下文已接入真实 Jev 调用与游戏模组，正在持续进行整局测试；最新结果见[整局进展](full-run-progress.md)。本项目直接在 `master` 开发提交；仅外部 CLI 模组的改动考虑上游 PR。
 
+现增加统一的模型上下文编译层。本文原有 `sts2.decision.v1` 是内部规范；实际模型请求使用 [v2 schema](../schemas/model-context.v2.schema.json)，由 [context_compiler.mjs](../src/context_compiler.mjs) 将内容分为 `decision / observation / knowledge / history / intent / analysis / uncertainty`。完整字段、规则、历史、问题和候选均保留；编译后还原必须与内部规范逐字段一致。`decision.reference_paths` 为规划器中的原路径提供明确映射，`knowledge.entity_rules` 和按 ID 索引的 `catalog` 连接当前实体与相关规则。详见[上下文架构](context-architecture.md)。
+
 ## 朝向与背击的状态契约
 
 context.17 在 Surrounded 生效时读取原生 `Facing`，提供 `combat.positioning`：当前朝向、玩家 ID、每个敌人的 Back Attack 方位、是否在玩家背后，以及 1.5 倍机制。没有对应方位能力的敌人标为 `None`，不能据此推断它的画面坐标。状态同时明确：原生敌人意图已经计入当前朝向，禁止重复乘算。

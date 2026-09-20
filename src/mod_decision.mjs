@@ -1,5 +1,6 @@
 import { decisionInstructions } from "./decision_instructions.mjs";
 import { getJevModel, requestJev, JEV_REQUEST_BUDGET } from './jev_client.mjs';
+import { compileModelRequest } from './context_compiler.mjs';
 import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactDecisionRequest, validateDecisionPacket, cardRewardKey, presentCurrentRecords } from './decision_context.mjs';
 import { potionEffectFacts, potionForRequest } from './potion_effects.mjs';
@@ -229,6 +230,7 @@ export function buildModCandidates(state) {
       const target = state.combat.enemies.find(e => e.combat_id === action.target_combat_id);
       const estimate = combatForecast(state.combat, card, target);
       action.combat_estimate = estimate;
+      const observedDescription = action.description;
       const unknownBlock = estimate.block_preview?.amount === null;
       action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn ?? 'unknown'}${estimate.fatal_if_end_turn && !unknownBlock ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
       if (estimate.incoming_attack_preview_valid === false) action.description += ` Facing changes to ${estimate.positioning.facing_after_sequence}; current enemy intent damage is stale for this outcome. Do not reuse it as the final incoming damage.`;
@@ -250,6 +252,8 @@ export function buildModCandidates(state) {
       if (hit?.limits.length) action.description += ` ${hit.limits.join(', ')}: preview HP damage ${hit.hp_loss} across ${hit.hits} counted hits.`;
       const followup = estimate.followup_attacks;
       if (followup?.enough_to_deplete_target && followup.hand_indices.length) action.description += ` Then hand ${followup.hand_indices.join(', ')} has ${followup.hp_damage} damage: enough to finish this target.`;
+      estimate.explanation = action.description.slice(observedDescription.length).trim();
+      action.description = observedDescription;
     }
   }
   // Any-time potions can also be used between rooms. Modal selections must finish first.
@@ -334,7 +338,7 @@ export function prepareModDecision(gameState, options = {}) {
   const shouldPack = originalBytes > Math.min(maxBytes, 30000);
   if (shouldPack) payload = compactDecisionRequest(payload);
   validateDecisionPacket(payload.state);
-  const body = JSON.stringify(payload), requestBytes = Buffer.byteLength(body);
+  const body = JSON.stringify(payload), requestBytes = compileModelRequest(payload).bytes;
   const metrics = { request_bytes: requestBytes, original_bytes: originalBytes, max_request_bytes: maxBytes, compression: shouldPack ? 'lossless_records_and_text' : 'none', candidate_count: candidates.size };
   // Byte length is only a local size guard, not the provider's token limit.
   // Compact JSON state text is sent without provider-side object formatting.
@@ -375,11 +379,20 @@ async function choosePrepared(gameState, options, prepared) {
     return { ...candidate, candidate_id, model: 'forced-single-action', context_metrics: metrics };
   }
   const started = performance.now();
+  const compiled = compileModelRequest(payload, metrics);
+  const availableForSource = metrics.max_request_bytes - compiled.bytes + Buffer.byteLength(JSON.stringify(payload));
   const presentation = options.contextPresentation === 'packed' ? { payload, bytes: Buffer.byteLength(JSON.stringify(payload)), presentation: 'packed', expanded_fields: [] }
-    : presentCurrentRecords(payload, metrics.max_request_bytes);
+    : presentCurrentRecords(payload, availableForSource);
   validateDecisionPacket(presentation.payload.state);
-  metrics = { ...metrics, request_bytes: presentation.bytes, presentation: presentation.presentation, expanded_fields: presentation.expanded_fields };
-  const result = await requestJev(presentation.payload, { ...options, metrics });
+  let emitted = presentation.expanded_fields.length ? compileModelRequest(presentation.payload, metrics) : compiled;
+  // Expansion is only a readability choice; its changed table layouts can have
+  // a different compiler overhead. Fall back to the complete packed source.
+  const useExpanded = emitted.bytes <= metrics.max_request_bytes;
+  if (!useExpanded) emitted = compiled;
+  if (emitted.bytes > metrics.max_request_bytes) throw new ContextError('Complete compiled context exceeds the request budget; no action sent', { request_bytes: emitted.bytes });
+  metrics = { ...metrics, ...emitted.metrics, request_bytes: emitted.bytes,
+    presentation: useExpanded ? presentation.presentation : 'packed', expanded_fields: useExpanded ? presentation.expanded_fields : [] };
+  const result = await requestJev(emitted.payload, { ...options, metrics });
   if (prepared.parseResult) return { ...prepared.parseResult(result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
   if (prepared.assessmentChoices) return { ...parseStrategyAssessment(prepared, result), model: result.model, usage: result.usage, context_metrics: metrics, durationMs: Math.round(performance.now() - started) };
   const answer = result.answers?.next_action;

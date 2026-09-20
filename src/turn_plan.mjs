@@ -5,6 +5,7 @@ import { describeTurnProjection, sequenceEnergyBudget } from './turn_projection.
 import { turnStrategyInstructions } from './decision_instructions.mjs';
 import { refineTurnPlan } from './turn_plan_refinement.mjs';
 import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
+import { compileModelRequest } from './context_compiler.mjs';
 
 export const turnObjectives = {
   remove_threat: 'Focus damage or disruption on a dangerous enemy, prioritizing an achievable kill or disable before its next action.',
@@ -83,7 +84,7 @@ export async function decideTurn(state, options, prepared, choose) {
     const payload = compactPlanningRequest({ model: prepared.payload.model, state: { ...prepared.payload.state, turn_planning: planningState(extra) },
       questions: { next_action: { type: 'choice', instructions: `${instructions} ${['objective', 'payoff', 'review'].includes(stage) ? turnStrategyInstructions(state) : ''} ${wholeTurnValue} ${references}`, criteria: Object.fromEntries(Object.entries(choices).map(([id, value]) => [id, value.label])) } } });
     validateDecisionPacket(payload.state);
-    const body = JSON.stringify(payload), bytes = Buffer.byteLength(body);
+    const body = JSON.stringify(payload), bytes = compileModelRequest(payload, { purpose: `turn_${stage}` }).bytes;
     if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete turn-planning context exceeds the request budget; no game action sent', { request_bytes: bytes });
     const decision = await choose(state, options, { candidates, payload, body, metrics: { ...prepared.metrics, request_bytes: bytes, purpose: `turn_${stage}`, candidate_count: candidates.size } });
     usage.input_tokens += decision.usage?.input_tokens || 0;
@@ -108,7 +109,7 @@ export async function decideTurn(state, options, prepared, choose) {
       if (!batch.length) return;
       const payload = payloadFor(batch), body = JSON.stringify(payload);
       const decision = await choose(state, options, { candidates: prepared.candidates, payload, body,
-        metrics: { ...prepared.metrics, request_bytes: Buffer.byteLength(body), question_count: batch.length, purpose: 'turn_refine_pairs' },
+        metrics: { ...prepared.metrics, request_bytes: compileModelRequest(payload, { purpose: 'turn_refine_pairs' }).bytes, question_count: batch.length, purpose: 'turn_refine_pairs' },
         parseResult(result) {
           const comparisons = batch.map((pair, index) => {
             const answer = result.answers?.[`comparison_${index}`];
@@ -126,8 +127,8 @@ export async function decideTurn(state, options, prepared, choose) {
       batch = [];
     }
     for (const pair of pairs) {
-      if (batch.length && (batch.length >= 32 || Buffer.byteLength(JSON.stringify(payloadFor([...batch, pair]))) > prepared.metrics.max_request_bytes)) await flush();
-      if (Buffer.byteLength(JSON.stringify(payloadFor([pair]))) > prepared.metrics.max_request_bytes) throw new ContextError('Complete pairwise turn context exceeds the request budget; no game action sent');
+      if (batch.length && (batch.length >= 32 || compileModelRequest(payloadFor([...batch, pair]), { purpose: 'turn_refine_pairs' }).bytes > prepared.metrics.max_request_bytes)) await flush();
+      if (compileModelRequest(payloadFor([pair]), { purpose: 'turn_refine_pairs' }).bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete pairwise turn context exceeds the request budget; no game action sent');
       batch.push(pair);
     }
     await flush();
@@ -147,7 +148,7 @@ export async function decideTurn(state, options, prepared, choose) {
         questions: { next_action: { ...prepared.payload.questions.next_action,
           instructions: `The prior planned prefix is complete. Before ending this player turn, check the actual remaining hand, energy, potions and threats. Preserve turn_planning.objective. If a useful continuation exists, select its next action and retain the objective; otherwise choose end_turn. A free draw can reveal playable cards even after planned attacks. ${wholeTurnValue} ${prepared.payload.questions.next_action.instructions}` } } });
       validateDecisionPacket(payload.state);
-      const body = JSON.stringify(payload), bytes = Buffer.byteLength(body);
+      const body = JSON.stringify(payload), bytes = compileModelRequest(payload, { purpose: 'turn_end_check' }).bytes;
       if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete end-turn checkpoint exceeds the request budget; no action sent');
       const checked = await choose(state, options, { ...prepared, payload, body, metrics: { ...prepared.metrics, request_bytes: bytes, purpose: 'turn_end_check' } });
       usage.input_tokens += checked.usage?.input_tokens || 0; usage.output_tokens += checked.usage?.output_tokens || 0;

@@ -196,7 +196,9 @@ test('independent two-plan judgments share full state and a missing result commi
         assert.ok(full.deck && full.map && full.memory && full.rule_reference);
         assert.equal(full.turn_planning.objective.id, 'damage');
         assert.deepEqual(full.turn_planning.proposed_steps, []);
-        assert.ok(Buffer.byteLength(request.body) <= 70000);
+        const wire = JSON.parse(request.body);
+        const logical = { ...wire, state: JSON.parse(wire.state) };
+        assert.ok(Buffer.byteLength(JSON.stringify(logical)) <= 90000, 'Budget covers the actual v2 request before HTTP string escaping');
         sawMultiple ||= entries.length > 1;
         compared += entries.length;
         for (const [, question] of entries) assert.deepEqual(Object.keys(question.criteria), ['plan_a', 'plan_b']);
