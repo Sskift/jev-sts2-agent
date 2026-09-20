@@ -55,7 +55,11 @@ export function describeTurnProjection(state, steps) {
     ...(projection.card_flow ? { card_flow: projection.card_flow } : {}),
     ...(debuffs ? { debuff_dependencies: debuffs } : {}),
     ...(lifecycle ? { effect_lifecycle: lifecycle } : {}),
-    sequence_dependencies: sequence.analysis,
+    sequence_dependencies: { ...sequence.analysis, steps: sequence.analysis.steps.map(step => {
+      const effects = projection.attack_effects.filter(effect => effect.sequence === step.sequence);
+      return { ...step, ...(effects.length ? { after_block_and_hp_loss_caps: effects.map(({ sequence: _sequence, ...effect }) =>
+        affected.has(effect.target_id) ? { ...effect, hp_removed: null, block_removed: null, limitation: 'Changed modifiers or uncomputed depletion hooks invalidate this estimate.' } : effect) } : {}) };
+    }) },
     ...(depletionEffects.length ? { uncomputed_depletion_effects: depletionEffects } : {}),
     encounter_progress: encounterProgress(state.combat, projection.remaining_enemies, [...affected]),
     ...(projection.loss_deadlines.length ? { loss_deadlines: projection.loss_deadlines } : {}),
@@ -70,7 +74,7 @@ export function describeTurnProjection(state, steps) {
 // This is a conditional sum of visible previews, not a game simulator. Keeping
 // it separate from combat prevents planned outcomes from becoming observations.
 export function projectTurnPrefix(state, steps, sequence = inspectSequence(state, steps)) {
-  const combat = structuredClone(state.combat), unresolved = [], reactions = [], cardFlowEffects = [];
+  const combat = structuredClone(state.combat), unresolved = [], reactions = [], cardFlowEffects = [], attackEffects = [];
   for (const entry of sequence.entries) {
     const { sequence: index, step, card } = entry;
     if (step.kind !== 'play_card') { if (!sequence.analysis.steps.find(s => s.sequence === index)?.applies_after_action) unresolved.push(`${step.name}: potion effects are not simulated`); continue; }
@@ -85,6 +89,10 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     const targets = card.target_type === 'AllEnemies' ? combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) : target ? [target] : [];
     for (const enemy of targets) {
       const hit = attackHpLoss(card, enemy);
+      if (card.type === 'Attack') attackEffects.push({ sequence: index, target_id: enemy.combat_id,
+        hits_counted: hit?.hits ?? null, hp_removed: hit ? Math.min(enemy.hp, hit.hp_loss) : null,
+        block_removed: hit ? enemy.block - hit.block_after : null, applied_hp_loss_limits: hit?.limits ?? [],
+        scope: 'Conditional arithmetic for the counted hits, after current target Block and supported HP-loss caps. Other triggers, changed modifiers and death effects may invalidate it. These are not the pre-prevention damage numbers.' });
       if (hit) { enemy.hp = Math.max(0, enemy.hp - hit.hp_loss); enemy.block = hit.block_after; enemy.powers = hit.powers_after; enemy.is_alive = enemy.hp > 0; }
     }
     combat.player.energy = entry.energy_after;
@@ -145,6 +153,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved || reactions.length || sequence.unknown_block || sequence.unknown_targets.length || sequence.checkpoint ? null : end.hp_remaining_if_end_turn,
     incoming_attack_after_prefix: facingUnresolved || reactions.length || sequence.unknown_targets.length || sequence.checkpoint ? null : end.displayed_attacks_after_target_depletion,
     uncomputed_reactions: reactions,
+    attack_effects: attackEffects,
     uncomputed_turn_end_effects: end.uncomputed_turn_end_effects || [],
     end_turn_damage_events: end.end_turn_damage_events || [],
     loss_deadlines: lossDeadlines,

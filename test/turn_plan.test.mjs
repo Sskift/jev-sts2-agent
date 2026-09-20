@@ -40,7 +40,9 @@ function fakeJev(answers, seen = []) {
     const body = parseJevRequest(request.body); seen.push(body);
     if (!body.questions.next_action) {
       return { ok: true, json: async () => ({ model: 'jev-test', usage: { input_tokens: 100 },
-        answers: Object.fromEntries(Object.keys(body.questions).map(id => [id, { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 1 }, confidence: 1 }])) }) };
+        answers: Object.fromEntries(Object.entries(body.questions).map(([id, q]) => [id, q.type === 'score'
+          ? { type: 'score', score: 2, probabilities: { 2: 1 }, confidence: 1 }
+          : { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 1 }, confidence: 1 }])) }) };
     }
     const selected = answers.shift();
     assert.ok(selected, 'Unexpected extra Jev decision');
@@ -79,7 +81,7 @@ test('planning and refinement cannot promise a second affected card after an upg
   for (const request of seen) {
     const full = expandRecordTables(request.state);
     assert.ok(full.turn_planning.action_reservation.valid);
-    for (const pair of full.turn_planning.comparisons || []) for (const option of Object.values(pair)) {
+    for (const pair of full.turn_planning.comparisons || []) for (const option of [pair.plan_a, pair.plan_b]) {
       assert.ok(option.ordered_sequence.length <= 1, 'No illegal two-card alternative reaches Jev');
     }
     if (full.turn_planning.action_reservation.transitions.length) {
@@ -98,7 +100,7 @@ test('complete-plan alternatives can remove redundant Block and show energy avai
   const plan = savedPlan(state, ['card_0', 'card_1', 'end_turn']);
   plan.end_policy = 'end_after_steps_unless_conditions_change'; plan.budget = {};
   let sawDrawWithNoEnergy = false, sawDrawWithEnergy = false, sawRemovedDefense = false;
-  await refineTurnPlan(state, plan, prepareModDecision(state), noModel, async pairs => pairs.map(pair => {
+  await refineTurnPlan(state, plan, prepareModDecision(state), async pairs => pairs.map(pair => {
     for (const option of pair) {
       const sequence = option.label.ordered_sequence, draw = sequence.find(s => s.action === 'Shrug It Off');
       if (draw) {
@@ -109,7 +111,7 @@ test('complete-plan alternatives can remove redundant Block and show energy avai
     }
     return (pair.find(option => option.label.ordered_sequence.length === 1
       && option.label.ordered_sequence[0].action === 'Shrug It Off') || pair[0]).value;
-  }));
+  }), async plans => plans.map(item => ({ value: item.value, score: item.label.ordered_sequence.at(-1)?.action === 'Shrug It Off' ? 3 : 1 })));
   assert.ok(sawDrawWithNoEnergy && sawDrawWithEnergy && sawRemovedDefense);
   assert.deepEqual(plan.steps.map(s => s.card_instance_id).filter(Boolean), ['draw']);
   assert.equal(plan.budget.remaining_after_printed_costs, 1);
@@ -131,11 +133,11 @@ test('complete-plan comparison can replace two separated defenses with one stron
     const actions = option.label.ordered_sequence.map(step => step.action);
     return actions.length === 3 && actions.includes('Expect a Fight') && actions.includes('Anger') && actions.includes('Strike');
   };
-  await refineTurnPlan(state, plan, prepared, noModel, async pairs => pairs.map(pair => {
+  await refineTurnPlan(state, plan, prepared, async pairs => pairs.map(pair => {
     const target = pair.find(isTarget);
     if (target) { offered = true; assert.equal(target.label.energy_spent, 3); assert.equal(target.label.conditional_preview.known_effects_only.block, 25); }
     return (target || pair[0]).value;
-  }));
+  }), async plans => plans.map(item => ({ value: item.value, score: isTarget(item) ? 3 : 1 })));
   assert.ok(offered, 'The model must see the consolidated alternative even though a one-card replacement is unaffordable');
   assert.equal(plan.steps.filter(step => step.kind === 'play_card').length, 3);
   assert.deepEqual(plan.steps.filter(step => ['a1', 'a2'].includes(step.card_instance_id)).map(step => step.card_instance_id).sort(), ['a1', 'a2']);
@@ -235,22 +237,24 @@ test('independent two-plan judgments share full state and a missing result commi
         const full = expandRecordTables(body.state), entries = Object.entries(body.questions);
         assert.equal(full.combat.hand.length, 4);
         assert.ok(full.deck && full.map && full.memory && full.rule_reference);
-        assert.equal(full.turn_planning.objective.id, 'damage');
+        assert.equal(full.turn_planning.objective, null, 'Independent alternatives are not anchored to the seed goal');
         assert.deepEqual(full.turn_planning.proposed_steps, []);
         const wire = JSON.parse(request.body);
         const logical = { ...wire, state: JSON.parse(wire.state) };
         assert.ok(Buffer.byteLength(JSON.stringify(logical)) <= 90000, 'Budget covers the actual v2 request before HTTP string escaping');
         sawMultiple ||= entries.length > 1;
         compared += entries.length;
-        assert.equal(full.turn_planning.comparisons.length * (full.turn_planning.survival_constraints.length ? 2 : 1), entries.length);
-        for (const [id, question] of entries) assert.deepEqual(Object.keys(question.criteria),
-          id.startsWith('survival_') ? ['plan_a', 'plan_b', 'no_clear_difference'] : ['plan_a', 'plan_b']);
-        answers = Object.fromEntries(entries.slice(omitAnswer ? 1 : 0).map(([id]) => [id, { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 0.6, plan_b: 0.4 } }]));
+        const assessment = Boolean(full.turn_planning.assessments);
+        assert.equal(assessment ? full.turn_planning.assessments.length : full.turn_planning.comparisons.length * (full.turn_planning.survival_constraints.length ? 2 : 1), entries.length);
+        for (const [id, question] of entries) assert.deepEqual(Object.keys(question.criteria), assessment ? ['0', '1', '2', '3', '4']
+          : id.startsWith('survival_') ? ['plan_a', 'plan_b', 'no_clear_difference'] : ['plan_a', 'plan_b']);
+        answers = Object.fromEntries(entries.slice(omitAnswer ? 1 : 0).map(([id]) => [id, assessment ? { type: 'score', score: 2 }
+          : { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 0.6, plan_b: 0.4 } }]));
       }
       return { ok: true, json: async () => ({ model: 'jev-test', usage: { input_tokens: 100 }, answers }) };
     };
     const decision = makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl });
-    if (omitAnswer) await assert.rejects(decision, /invalid turn-plan comparison/);
+    if (omitAnswer) await assert.rejects(decision, /invalid turn-plan (comparison|assessment)/);
     else {
       const result = await decision;
       assert.equal(sawMultiple, true);
@@ -386,7 +390,14 @@ test('failed or invented planning answers commit no plan and dispatch no game co
 test('end-turn handoff checks actual remaining options and extends the same objective when a free draw was overlooked', async () => {
   const state = stateWith([card('FINESSE', 'draw', 0, { name: 'Finesse', type: 'Skill', target_type: 'Self', cost: 0, description: 'Gain 4 Block. Draw 1 card.' })], 1);
   const memory = new DecisionMemory(); memory.observe(state); memory.data.turn_plan = savedPlan(state, ['end_turn']);
-  const seen = [], decision = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl: fakeJev(['card_0'], seen) });
+  const seen = [], nominate = fakeJev(['card_0'], seen);
+  const decision = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl: async (url, request) => {
+    const payload = parseJevRequest(request.body);
+    if (payload.questions.next_action) return nominate(url, request);
+    seen.push(payload);
+    return { ok: true, json: async () => ({ answers: Object.fromEntries(Object.keys(payload.questions).map(key => [key,
+      { type: 'choice', choice: key.endsWith('_0') ? 'plan_a' : 'plan_b' }])) }) };
+  } });
   assert.equal(seen.length, 2);
   assert.match(seen[0].state.turn_planning.phase_scope, /ACTUAL/);
   assert.match(seen[1].state.turn_planning.phase_scope, /ACTUAL/);
@@ -415,5 +426,6 @@ test('end-turn nomination cannot bypass the complete-plan comparison or mutate m
   assert.equal(decision.request.cmd, 'end_turn');
   assert.equal(decision.turn_plan.revision, 0);
   assert.deepEqual(memory.data, before);
-  assert.equal(decision.planning_trace.at(-1).comparisons[0].selected, 'end');
+  assert.equal(decision.planning_trace.at(-1).selected, 'end');
+  assert.equal(decision.planning_trace.at(-1).audit.order_disagreements.length, 1, 'Pure display-position preference cannot force an extension');
 });

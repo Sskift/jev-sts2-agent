@@ -1,6 +1,27 @@
 import { combatForecast, intentDamage, previewHitCount } from './combat_arithmetic.mjs';
 import { uncomputedAttackReactions } from './combat_reactions.mjs';
 
+export const planValueLevels = [
+  'A losing or seriously wasteful commitment: an avoidable defeat, failed essential dependency, or sacrifice with no credible compensating benefit.',
+  'Weak use of this situation: substantial avoidable loss or a missed feasible opportunity, even after accounting for its possible continuation.',
+  'A workable compromise: preserves a viable turn, but leaves a meaningful weakness or opportunity compared with available resources.',
+  'A strong use of this situation: coherent timing and resource tradeoffs address current threats and further the run, including useful continuation options.',
+  'An excellent use of this situation: captures the major feasible benefits with justified costs and no apparent important missed opportunity.'
+];
+
+export function planAssessmentQuestions(plans, instructions) {
+  return Object.fromEntries(plans.map((_, index) => [`assessment_${index}`, { type: 'score', criteria: planValueLevels,
+    instructions: `Evaluate the single proposed plan at analysis.plan_assessments[${index}] against the ACTUAL current situation and available resources, using the same absolute levels for every plan. ${instructions} Read continuation: a checkpoint keeps the player turn and permits another decision with remaining energy and the observed new hand; do not score it as if the player ends immediately. Evaluate that opportunity from the known pool and retained choices, accounting for its costs and constraints without assuming a particular draw. Neither more listed actions nor more certain arithmetic is inherently better. This is a quality assessment, not a comparison with a neighboring item or a probability of winning.` }]));
+}
+
+export function resolvePlanAssessments(plans, answers) {
+  return plans.map((plan, index) => {
+    const answer = answers?.[`assessment_${index}`];
+    if (answer?.type !== 'score' || !Number.isFinite(answer.score) || answer.score < 0 || answer.score > planValueLevels.length - 1) throw new Error('Jev returned an invalid turn-plan assessment');
+    return { value: plan.value, score: answer.score, probabilities: answer.probabilities, confidence: answer.confidence };
+  });
+}
+
 // Eligibility is deliberately separate from a model's preference. With no
 // represented lethal exposure, better ordinary mitigation is a value trade,
 // not permission to override the value judgment. This is not a safety proof.

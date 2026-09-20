@@ -151,7 +151,8 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
           if (prepared.selectionPlan) save(path.join(directory, `jev-planning-request-${String(++planningCalls).padStart(4, '0')}.json`), payload);
           return modelCalls;
         },
-        onResponse: (result, metrics, id) => save(path.join(directory, `jev-response-${String(id).padStart(4, '0')}.json`), { purpose: metrics.purpose, ...result }),
+        onResponse: (result, metrics, id) => save(path.join(directory, `jev-response-${String(id).padStart(4, '0')}.json`),
+          { purpose: metrics.purpose, transport: { provider: metrics.provider, requested_model: metrics.requested_model, attempt: metrics.attempt, failover: metrics.failover }, ...result }),
         onPlanningDecision: result => save(path.join(directory, `jev-planning-decision-${String(++planningDecisions).padStart(4, '0')}.json`), result),
         onRunStrategy: result => save(path.join(directory, 'run-strategy-decision.json'), result)
       });

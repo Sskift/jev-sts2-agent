@@ -2,8 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
-import { independentTurnCandidates, compareFinalists } from '../src/turn_candidates.mjs';
+import { independentTurnCandidates, compareFinalists, balancePlanPreference, planAllocation, shortlistPlans } from '../src/turn_candidates.mjs';
 import { inspectSequence } from '../src/turn_sequence.mjs';
+import { describeContinuation, compareContinuationResources } from '../src/card_flow_projection.mjs';
+import { describePlanAlternative } from '../src/turn_plan_refinement.mjs';
+import { planStep } from '../src/turn_plan_state.mjs';
 
 test('independent search offers distinct first actions and orders, preserves identities and stops at draws', () => {
   const state = completeCombat();
@@ -38,4 +41,69 @@ test('a potion next-card trigger is consumed before a later manual action can re
   const result = inspectSequence(state, steps);
   assert.equal(result.checkpoint.after_sequence, 1);
   assert.ok(result.violations.some(v => v.sequence === 2));
+});
+
+test('aligned probabilities preserve a strong preference despite a narrow reversed-order vote', () => {
+  const pair = [{ value: 'a' }, { value: 'b' }];
+  const first = { selected: 'a', value_assessment: { choice: 'plan_a', probabilities: { plan_a: 0.99, plan_b: 0.01 } } };
+  const second = { selected: 'b', value_assessment: { choice: 'plan_a', probabilities: { plan_a: 0.51, plan_b: 0.49 } } };
+  const result = balancePlanPreference(pair, first, second);
+  assert.equal(result.order_disagreement, true);
+  assert.equal(result.preference_support.a, 0.74);
+  assert.deepEqual(balancePlanPreference([...pair].reverse(), second, first).preference_support, result.preference_support);
+  first.survival_assessment = { choice: 'plan_b', probabilities: { plan_a: 0, plan_b: 0.9, no_clear_difference: 0.1 } };
+  second.survival_assessment = { choice: 'plan_a', probabilities: { plan_a: 0.9, plan_b: 0, no_clear_difference: 0.1 } };
+  const survival = balancePlanPreference(pair, first, second);
+  assert.equal(survival.selection_basis, 'balanced_survival_constraint');
+  assert.equal(survival.preference_support.b, 1);
+});
+
+test('draw continuations expose retained choices and pool access without a predicted hand', () => {
+  const state = completeCombat();
+  state.combat.hand.push(fixtureCard('DRAW', { cost: 0, description: 'Draw 3 cards. You cannot draw additional cards this turn.', details: { instance_id: 'draw' } }));
+  state.combat.draw_pile = [fixtureCard('DRAW_POOL', { cost: 2 }), fixtureCard('DRAW_POOL', { cost: 2 })];
+  const before = structuredClone(state);
+  const sequence = inspectSequence(state, [{ kind: 'play_card', card_instance_id: 'draw' }]);
+  const continuation = describeContinuation(state.combat, sequence);
+  assert.equal(continuation.handoff, 'observe_then_continue_same_player_turn');
+  assert.equal(continuation.energy_after_known_payments, state.combat.player.energy);
+  assert.equal(continuation.remaining_hand_before_unresolved_effects.length, 1);
+  assert.equal(continuation.draw_access.declared_count, 3);
+  assert.equal(continuation.draw_access.pool[0].count, 2);
+  assert.equal(continuation.draw_access.pool_cards_within_remaining_energy_at_observed_cost, 2);
+  assert.equal(continuation.draw_access.reshuffle_may_be_needed, true);
+  assert.match(continuation.draw_access.checkpoint_rules, /cannot draw/);
+  assert.deepEqual(state, before);
+  assert.equal(describeContinuation(state.combat, inspectSequence(state, [{ kind: 'end_turn' }])).further_player_choices, false);
+});
+
+test('observation comparisons expose unspent alternatives without promising a post-draw outcome', () => {
+  const state = completeCombat(); state.combat.player.energy = 1;
+  state.combat.hand.push(fixtureCard('DRAW', { index: 1, cost: 0, can_play: true, target_type: 'Self', description: 'Draw 3 cards.', details: { instance_id: 'draw' } }));
+  const candidates = buildModCandidates(state);
+  const draw = planStep(state, candidates.get('card_1')), attack = planStep(state, candidates.get('card_0_target_42'));
+  const early = describePlanAlternative(state, [draw]), late = describePlanAlternative(state, [attack, draw]);
+  const relation = compareContinuationResources(early, late);
+  assert.equal(relation.after_plan_a_observation.total_observed_cost, 1);
+  assert.equal(relation.after_plan_a_observation.fits_remaining_energy_at_observed_cost, true);
+  assert.equal(relation.after_plan_b_observation, null);
+  assert.match(relation.after_plan_a_observation.scope, /no follow-up effect is guaranteed/);
+  assert.deepEqual(compareContinuationResources(late, early).after_plan_b_observation, relation.after_plan_a_observation);
+  early.continuation.remaining_hand_before_unresolved_effects[0].cost = -1;
+  assert.equal(compareContinuationResources(early, late).after_plan_a_observation.fits_remaining_energy_at_observed_cost, null);
+});
+
+test('shortlisting compares different commitments instead of filling its slots with permutations', () => {
+  const step = (id, target = 42) => ({ kind: 'play_card', card_instance_id: id, target });
+  const entry = (value, steps, energy, observe = false) => ({ value, allocation: planAllocation(steps),
+    label: { energy_left: energy, continuation: { handoff: observe ? 'observe' : 'end', further_player_choices: observe } } });
+  const plans = [entry('ab', [step('a'), step('b')], 0), entry('ba', [step('b'), step('a')], 0),
+    entry('other_target', [step('a', 99), step('b', 99)], 0), entry('late_draw', [step('a'), step('draw')], 0, true),
+    entry('early_draw', [step('draw')], 3, true)];
+  const judgments = plans.map((plan, i) => ({ value: plan.value, score: 4 - i * 0.2 }));
+  const result = shortlistPlans(plans, judgments);
+  assert.deepEqual(result.candidates.map(item => item.value), ['ab', 'other_target', 'late_draw', 'early_draw']);
+  assert.equal(result.allocation_count, 4);
+  assert.equal(result.assessments.at(-1).reason, 'preserve_resources_for_observation');
+  assert.throws(() => shortlistPlans(plans, judgments.slice(1)), /coverage/);
 });

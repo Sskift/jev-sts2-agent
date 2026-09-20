@@ -98,8 +98,9 @@
         "properties": { "kind": { "enum": ["potential_lethal_health_loss", "observed_loss_countdown", "explicit_loss_rule"] } } } },
       "comparisons": { "type": "array", "minItems": 1, "maxItems": 32, "items": {
         "type": "object", "additionalProperties": false, "required": ["plan_a", "plan_b"],
-        "properties": { "plan_a": { "type": "object" }, "plan_b": { "type": "object" } }
+        "properties": { "plan_a": { "type": "object" }, "plan_b": { "type": "object" }, "continuation_resources": { "type": "object" } }
       } },
+      "assessments": { "type": "array", "minItems": 1, "maxItems": 32, "items": { "type": "object" } },
       "conditional_projection": { "oneOf": [{ "$ref": "#/$defs/turnProjection" }, { "type": "array", "maxItems": 0 }] },
       "energy_reservation": { "type": "object", "additionalProperties": false, "required": ["observed_energy", "remaining_after_printed_costs", "scope", "is_observed", "includes_future_energy_gains", "steps"], "properties": {
         "observed_energy": { "type": "integer", "minimum": 0 },

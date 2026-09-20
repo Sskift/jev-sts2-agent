@@ -115,17 +115,17 @@ if (mode === 'collect') {
     const summary = { id: fixture.id, cohort: fixture.cohort, label, repeat, input_sha256: source, code_root: codeRoot };
     try {
       const result = await makeModDecisionWithJev(structuredClone(fixture.state), { memory, runStrategy: false,
-        onRequest(payload, metrics) { write(path.join(dir, `request-${++calls}.json`), { purpose: metrics.purpose, ...payload }); },
-        async fetchImpl(...params) {
-          const response = await fetch(...params);
-          if (response.ok) write(path.join(dir, `response-${++responses}.json`), await response.clone().json());
-          return response;
-        }
+        onRequest(payload, metrics) {
+          write(path.join(dir, `request-${++calls}.json`), { purpose: metrics.purpose,
+            transport: { provider: metrics.provider, requested_model: metrics.requested_model, attempt: metrics.attempt, failover: metrics.failover }, ...payload });
+          return calls;
+        },
+        onResponse(result, _metrics, traceId) { responses++; write(path.join(dir, `response-${traceId}.json`), result); }
       });
       write(path.join(dir, 'decision.json'), result);
       Object.assign(summary, { request: result.request, objective: result.turn_plan?.objective, model: result.planning_model || result.model,
         sequence: result.turn_plan?.steps.map(s => ({ kind: s.kind, name: s.name, card_id: s.card_id, target: s.target, slot: s.slot })),
-        candidate_coverage: result.turn_plan?.candidate_coverage, comparison_audit: result.turn_plan?.comparison_audit,
+        candidate_coverage: result.turn_plan?.candidate_coverage, assessment_shortlist: result.turn_plan?.assessment_shortlist, comparison_audit: result.turn_plan?.comparison_audit,
         usage: result.usage, calls, responses, elapsed_ms: Math.round(performance.now() - started) });
     } catch (error) { Object.assign(summary, { error: error.message, details: error.details, calls, responses }); }
     write(path.join(dir, 'summary.json'), summary); console.log(JSON.stringify(summary));

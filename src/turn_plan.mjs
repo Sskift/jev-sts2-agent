@@ -7,8 +7,10 @@ import { turnStrategyInstructions } from './decision_instructions.mjs';
 import { refineTurnPlan, describePlanAlternative } from './turn_plan_refinement.mjs';
 import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
 import { compileModelRequest } from './context_compiler.mjs';
-import { planComparisonQuestions, resolvePlanComparisons, visibleSurvivalConstraints } from './turn_plan_comparison.mjs';
+import { planComparisonQuestions, resolvePlanComparisons, visibleSurvivalConstraints, planAssessmentQuestions, resolvePlanAssessments } from './turn_plan_comparison.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
+import { compareFinalists } from './turn_candidates.mjs';
+import { compareContinuationResources } from './card_flow_projection.mjs';
 
 export const turnObjectives = {
   remove_threat: 'Focus damage or disruption on a dangerous enemy, prioritizing an achievable kill or disable before its next action.',
@@ -104,43 +106,49 @@ export async function decideTurn(state, options, prepared, choose) {
     trace.push(record); options.onPlanningDecision?.(record);
     return decision.planning_value;
   }
-  async function comparePairs(pairs, instructions, extra) {
-    // Questions in one request are independent. Each contains exactly two
-    // complete plans and shares the same full observed context and turn goal.
+  async function judgePlans(items, instructions, extra, assessment = false) {
+    // Questions independently assess one plan or compare two complete plans,
+    // sharing the same full observation and general run objective.
     const constraints = visibleSurvivalConstraints(state), compareSurvival = constraints.length > 0;
-    const questionsPerPair = compareSurvival ? 2 : 1;
+    const questionsPerPair = assessment ? 1 : compareSurvival ? 2 : 1;
+    const purpose = assessment ? 'turn_assess_plans' : 'turn_refine_pairs';
     const comparisonState = { ...prepared.payload.state, turn_planning: planningState({ ...extra, survival_constraints: constraints }) };
     validateDecisionPacket(comparisonState);
-    const winners = [];
+    const judgments = [];
     let batch = [];
     const payloadFor = items => compactPlanningRequest({ model: prepared.payload.model,
       state: { ...comparisonState, turn_planning: { ...comparisonState.turn_planning,
-        comparisons: items.map(pair => ({ plan_a: pair[0].label, plan_b: pair[1].label })) } },
-      questions: planComparisonQuestions(items, `${instructions} ${turnStrategyInstructions(state)} ${wholeTurnValue} ${references}`, compareSurvival) });
+        ...(assessment ? { assessments: items.map(item => item.label) }
+          : { comparisons: items.map(pair => ({ plan_a: pair[0].label, plan_b: pair[1].label,
+            continuation_resources: compareContinuationResources(pair[0].label, pair[1].label) })) }) } },
+      questions: (assessment ? planAssessmentQuestions : planComparisonQuestions)(items, `${instructions} ${turnStrategyInstructions(state)} ${wholeTurnValue} ${references}`, compareSurvival) });
     async function flush() {
       if (!batch.length) return;
       const payload = payloadFor(batch), body = JSON.stringify(payload);
       const decision = await choose(state, options, { candidates: prepared.candidates, payload, body,
-        metrics: { ...prepared.metrics, request_bytes: compileModelRequest(payload, { purpose: 'turn_refine_pairs' }).bytes, question_count: batch.length * questionsPerPair, purpose: 'turn_refine_pairs' },
+        metrics: { ...prepared.metrics, request_bytes: compileModelRequest(payload, { purpose }).bytes, question_count: batch.length * questionsPerPair, purpose },
         parseResult(result) {
-          const comparisons = resolvePlanComparisons(batch, result.answers, compareSurvival);
-          return { action: 'compare_turn_plans', comparisons };
+          return { action: assessment ? 'assess_turn_plans' : 'compare_turn_plans',
+            judgments: (assessment ? resolvePlanAssessments : resolvePlanComparisons)(batch, result.answers, compareSurvival) };
         } });
       usage.input_tokens += decision.usage?.input_tokens || 0;
       usage.output_tokens += decision.usage?.output_tokens || 0;
-      winners.push(...decision.comparisons.map(comparison => comparison.selected));
-      const record = { stage: 'refine_pairs', comparisons: decision.comparisons, model: decision.model, usage: decision.usage };
+      judgments.push(...decision.judgments);
+      const record = { stage: assessment ? 'assess_plans' : 'refine_pairs',
+        [assessment ? 'assessments' : 'comparisons']: decision.judgments, model: decision.model, usage: decision.usage };
       trace.push(record); options.onPlanningDecision?.(record);
       batch = [];
     }
-    for (const pair of pairs) {
-      if (batch.length && (batch.length * questionsPerPair >= 32 || compileModelRequest(payloadFor([...batch, pair]), { purpose: 'turn_refine_pairs' }).bytes > prepared.metrics.max_request_bytes)) await flush();
-      if (compileModelRequest(payloadFor([pair]), { purpose: 'turn_refine_pairs' }).bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete pairwise turn context exceeds the request budget; no game action sent');
-      batch.push(pair);
+    for (const item of items) {
+      if (batch.length && (batch.length * questionsPerPair >= 32 || compileModelRequest(payloadFor([...batch, item]), { purpose }).bytes > prepared.metrics.max_request_bytes)) await flush();
+      if (compileModelRequest(payloadFor([item]), { purpose }).bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete plan judgment context exceeds the request budget; no game action sent');
+      batch.push(item);
     }
     await flush();
-    return winners;
+    return judgments;
   }
+  const comparePairs = (pairs, instructions, extra) => judgePlans(pairs, instructions, extra);
+  const assessPlans = (plans, instructions, extra) => judgePlans(plans, instructions, extra, true);
   async function dispatch(candidate, selectedPlan, cursor) {
     if (!candidate) throw new ContextError('No legal first command in the completed turn plan');
     if (candidate.request.cmd === 'end_turn' && prepared.candidates.size > 1) {
@@ -166,15 +174,17 @@ export async function decideTurn(state, options, prepared, choose) {
         // without the same comparison used to select the original sequence.
         // Both options start from this observation; the old prefix is paid for.
         const finish = planStep(state, candidate);
-        const [extension] = await comparePairs([[
-          { value: 'continue', label: describePlanAlternative(state, [planStep(state, checked), finish]) },
-          { value: 'end', label: describePlanAlternative(state, [finish]) }
-        ]], 'Compare ending the turn now with the proposed remaining action followed by an end-turn checkpoint. Both start from the ACTUAL remaining resources; prior actions are already confirmed. Preserve the current turn objective, comparing the additional benefit and costs of the extension, including reactions and future pile effects. New draws and random outcomes are unknown; after the action they require observation before further planning.',
+        const extension = await compareFinalists([
+          { value: 'continue', label: describePlanAlternative(state, [planStep(state, checked), finish]) }
+        ], { value: 'end', label: describePlanAlternative(state, [finish]) }, comparePairs,
+        'Compare ending the turn now with the proposed remaining action followed by an end-turn checkpoint. Both start from the ACTUAL remaining resources; prior actions are already confirmed. Compare the additional benefit and costs of the extension, including reactions and future pile effects. New draws and random outcomes are unknown; after the action they require observation before further planning.',
         { phase_scope: 'Compare mutually exclusive remaining plans from the ACTUAL current state. The previous prefix is complete. These options have NOT executed.',
-          objective: selectedPlan.objective, proposed_steps: [], retained_cards: [], conditional_projection: describeTurnProjection(state, []),
+          objective: null, proposed_steps: [], retained_cards: [], conditional_projection: describeTurnProjection(state, []),
           energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
             is_observed: true, includes_future_energy_gains: false, steps: [], scope: 'Actual remaining resources; each option reserves only its own unexecuted actions.' } });
-        if (extension !== 'continue') return { ...candidate, model: 'jev-turn-plan', planning_model: trace.find(item => item.model !== 'forced-single-action')?.model || selectedPlan.model,
+        const review = { stage: 'end_comparison', selected: extension.selected, audit: extension.audit };
+        trace.push(review); options.onPlanningDecision?.(review);
+        if (extension.selected !== 'continue') return { ...candidate, model: 'jev-turn-plan', planning_model: trace.find(item => item.model !== 'forced-single-action')?.model || selectedPlan.model,
           turn_plan: selectedPlan, turn_step: cursor, planning_trace: trace, usage, context_metrics: prepared.metrics };
         const remainingEnergy = state.combat.player.energy - printedCost(state, checked, state.combat.player.energy);
         selectedPlan = { ...structuredClone(selectedPlan), id: randomUUID(), revision: selectedPlan.revision + 1,
@@ -309,7 +319,7 @@ export async function decideTurn(state, options, prepared, choose) {
   if (!plan.steps.length) throw new ContextError('Turn planner produced no executable prefix');
   plan.budget = { initial_energy: state.combat.player.energy, remaining_after_printed_costs: energy,
     scope: 'Ordered known costs including inspectable hand upgrades and Stomp reductions. Unresolved gains, automatic effects and other changes require a new native observation.' };
-  if (options.refineTurnPlan !== false) await refineTurnPlan(state, plan, prepared, ask, comparePairs);
+  if (options.refineTurnPlan !== false) await refineTurnPlan(state, plan, prepared, comparePairs, assessPlans);
   const checkpoint = inspectSequence(state, plan.steps).checkpoint;
   if (checkpoint) { plan.steps = plan.steps.slice(0, checkpoint.after_sequence + 1); plan.end_policy = 'review_after_segment'; }
   plan.model = trace.find(item => item.model !== 'forced-single-action')?.model || 'forced-single-action';

@@ -122,7 +122,7 @@ export function inspectSequence(state, steps) {
             : shifted(preview.damage, strength, multiplier * (vulnerable ? 1.5 : 1), !custom && card.id !== 'OMNISLICE');
           preview.damage = exact(range) ?? undefined;
           if (preview.damage === undefined) unknownTargets.add(preview.target_id);
-          return { target_id: preview.target_id, per_hit: range, total_before_block: hits === 0 ? { min: 0, max: 0 }
+          return { target_id: preview.target_id, per_hit_before_block_and_hp_loss_caps: range, total_before_block_and_hp_loss_caps: hits === 0 ? { min: 0, max: 0 }
             : { min: range.min === null || hits === null ? null : range.min * hits, max: range.max === null || hits === null ? null : range.max * hits } };
         });
         attacks++;

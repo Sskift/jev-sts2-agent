@@ -1,0 +1,11 @@
+{
+  "baseline_commit": "198ce720d416dd3e3f78644a75cf01b8f0fb23d2",
+  "purpose": "Offline regression of same-turn continuation context, independent plan assessments and position-balanced preference aggregation. No new games.",
+  "cases": [
+    { "id": "holdout-26-turn-2", "candidate_repetitions": 2, "reason": "Uncertain draw value must include remaining energy, retained choices and current pool, without predicting a draw." },
+    { "id": "holdout-19-turn-4", "candidate_repetitions": 2, "reason": "Preserve the observed leader-progress improvement while changing ranking and comparison aggregation." },
+    { "id": "holdout-24-turn-2", "candidate_repetitions": 1, "reason": "Same-turn checkpoints, Tender and resource order remain valid." }
+  ],
+  "disclosure": "Previously exposed historical snapshots, now regression cases only. Same fixture hashes as knowledge-regression; existing original baseline outputs retained. Intermediate variants are preserved, not overwritten. Primary-provider changes are recorded and cannot be attributed to harness changes alone.",
+  "live_game_commands": false
+}

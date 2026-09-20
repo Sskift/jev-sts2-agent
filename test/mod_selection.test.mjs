@@ -79,11 +79,11 @@ test('failure during selection planning preserves evidence and sends no game act
   const state = selection(), artifactDir = artifacts(t);
   let calls = 0, writes = 0;
   const client = { async state() { return structuredClone(state); }, async request() { writes++; throw new Error('Unexpected game action'); } };
-  const result = await runModLoop({ client, artifactDir, maxSteps: 1, logger() {}, decide: (s, options) => makeModDecisionWithJev(s, { ...options, apiKey: 'offline', fetchImpl: async (...args) => {
+  const result = await runModLoop({ client, artifactDir, maxSteps: 1, logger() {}, decide: (s, options) => makeModDecisionWithJev(s, { ...options, apiKey: 'offline', fallbackProvider: '', fetchImpl: async (...args) => {
     if (++calls === 2) throw new Error('Offline second-stage failure');
     return mockModel(['plan_card_0'])(...args);
   } }) });
-  assert.match(result.error, /second-stage failure/);
+  assert.match(result.error, /Jev network or timeout error/);
   assert.equal(writes, 0);
   assert.equal(JSON.parse(fs.readFileSync(path.join(artifactDir, 'memory.json'))).pending, null);
   assert.ok(fs.existsSync(path.join(artifactDir, 'step-0001', 'jev-planning-request-0002.json')));

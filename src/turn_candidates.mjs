@@ -6,6 +6,37 @@ import { reserveActionSequence } from './turn_action_constraints.mjs';
 
 export const planSignature = steps => JSON.stringify(steps.map(s => [s.kind, s.card_instance_id, s.potion_id, s.slot, s.target, s.beneficiary_instance_id, s.next_card_instance_id]));
 
+// Used only for shortlist diversity. All orders are still assessed, and the
+// best assessed order represents its allocation of physical cards and targets.
+export const planAllocation = steps => JSON.stringify(JSON.parse(planSignature(steps)).map(item => JSON.stringify(item)).sort());
+
+export function shortlistPlans(candidates, judgments) {
+  if (judgments.length !== candidates.length || judgments.some((j, index) => j.value !== candidates[index].value || !Number.isFinite(j.score))) throw new Error('Invalid turn-plan assessment coverage');
+  const scores = new Map(judgments.map(j => [j.value, j]));
+  const ranked = candidates.toSorted((a, b) => scores.get(b.value).score - scores.get(a.value).score || a.value.localeCompare(b.value));
+  const allocations = new Map();
+  for (const item of ranked) if (!allocations.has(item.allocation)) allocations.set(item.allocation, item);
+  const selected = new Map();
+  const add = (item, reason) => {
+    if (!selected.has(item.value)) selected.set(item.value, { item, reason });
+  };
+  for (const item of [...allocations.values()].slice(0, 3)) add(item, 'best_assessed_distinct_allocation');
+  // A short observation segment is a different resource commitment, not a
+  // failed attempt at a long end-turn plan. Keep the best of each horizon and
+  // a maximal-energy observation option for explicit comparison, not priority.
+  for (const handoff of new Set(ranked.map(item => item.label.continuation.handoff))) {
+    add(ranked.find(item => item.label.continuation.handoff === handoff), 'best_assessed_handoff');
+  }
+  const observations = ranked.filter(item => item.label.continuation.further_player_choices);
+  if (observations.length) {
+    const energy = Math.max(...observations.map(item => item.label.energy_left));
+    add(observations.find(item => item.label.energy_left === energy), 'preserve_resources_for_observation');
+  }
+  return { candidates: [...selected.values()].map(({ item }) => item), allocation_count: allocations.size,
+    assessments: [...selected.values()].map(({ item, reason }) => ({ ...scores.get(item.value), reason,
+      handoff: item.label.continuation.handoff, energy_left: item.label.energy_left })) };
+}
+
 /** Enumerate independent ordered segments, without scoring their tactics.
  * Round-robin DFS across first actions avoids exploring only the greedy seed.
  * Stratify bounded output by first action and length. Unknown results stop the
@@ -82,24 +113,62 @@ export function independentTurnCandidates(state, candidates, { maxInspections = 
     scope: 'Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.' } };
 }
 
-/** Finalists meet directly in both presentation orders. Disagreement is
- * recorded; raw Choice confidence is not treated as probability of correctness.
- * A structural tie uses the incumbent, then a stable signature, not a tactic.
+// Normalize rounding in the provider distribution. Choice-only callers remain
+// supported, but their one-hot votes carry no measured probability information.
+const distribution = answer => {
+  const probabilities = answer?.probabilities || { [answer?.choice]: 1 };
+  const sum = Object.values(probabilities).reduce((n, p) => n + p, 0);
+  if (!(sum > 0) || Object.values(probabilities).some(p => !Number.isFinite(p) || p < 0 || p > 1)) throw new Error('Invalid plan preference distribution');
+  return Object.fromEntries(Object.entries(probabilities).map(([key, p]) => [key, p / sum]));
+};
+
+export function balancePlanPreference(pair, forward, reverse) {
+  const normalize = (result, options) => typeof result === 'string'
+    ? { selected: result, value_assessment: { choice: result === options[0].value ? 'plan_a' : 'plan_b' } } : result;
+  const a = normalize(forward, pair), b = normalize(reverse, [...pair].reverse());
+  if (![a, b].every(r => pair.some(p => p.value === r?.selected))) throw new Error('Invalid finalist comparison');
+  const average = field => {
+    const first = distribution(a[field]), second = distribution(b[field]);
+    return { plan_a: ((first.plan_a || 0) + (second.plan_b || 0)) / 2,
+      plan_b: ((first.plan_b || 0) + (second.plan_a || 0)) / 2,
+      no_clear_difference: ((first.no_clear_difference || 0) + (second.no_clear_difference || 0)) / 2 };
+  };
+  const value = average('value_assessment');
+  const survival = a.survival_assessment && b.survival_assessment ? average('survival_assessment') : null;
+  const survivalAdvantage = survival && Math.abs(survival.plan_a - survival.plan_b) > 1e-9
+    && Math.max(survival.plan_a, survival.plan_b) > survival.no_clear_difference;
+  const chosen = survivalAdvantage ? survival : value;
+  const total = chosen.plan_a + chosen.plan_b;
+  return { candidates: pair.map(p => p.value), preference_support: { [pair[0].value]: total ? chosen.plan_a / total : 0.5,
+    [pair[1].value]: total ? chosen.plan_b / total : 0.5 },
+    selection_basis: survivalAdvantage ? 'balanced_survival_constraint' : 'balanced_overall_value',
+    value_distribution: value, survival_distribution: survival,
+    order_disagreement: a.selected !== b.selected, selected_by_order: [a.selected, b.selected] };
+}
+
+/** Finalists meet in both orders. Average aligned distributions before ranking;
+ * a narrow 51/49 reversal must not cancel an opposing 99/1 preference. This is
+ * preference support among the finalists, never a calibrated correctness score.
  */
 export async function compareFinalists(finalists, incumbent, compare, instruction, context) {
   const unique = [...new Map([...finalists, incumbent].map(item => [item.value, item])).values()];
   const pairs = [];
   for (let i = 0; i < unique.length; i++) for (let j = i + 1; j < unique.length; j++) pairs.push([unique[i], unique[j]], [unique[j], unique[i]]);
   if (!pairs.length) return { selected: unique[0].value, audit: { comparisons: 0, order_disagreements: [] } };
-  const winners = await compare(pairs, instruction, context);
-  if (winners.length !== pairs.length || winners.some((id, index) => !pairs[index].some(p => p.value === id))) throw new Error('Invalid finalist comparison');
-  const wins = new Map(unique.map(item => [item.value, 0])), disagreements = [];
-  for (const id of winners) wins.set(id, wins.get(id) + 1);
-  for (let i = 0; i < pairs.length; i += 2) if (winners[i] !== winners[i + 1]) disagreements.push({ candidates: pairs[i].map(p => p.value), selected_by_order: winners.slice(i, i + 2) });
-  const ranked = unique.toSorted((a, b) => wins.get(b.value) - wins.get(a.value)
-    || Number(b.value === incumbent.value) - Number(a.value === incumbent.value)
-    || a.value.localeCompare(b.value));
-  return { selected: ranked[0].value, audit: { comparisons: pairs.length, wins: Object.fromEntries(wins), order_disagreements: disagreements,
-    tied_at_top: ranked.filter(item => wins.get(item.value) === wins.get(ranked[0].value)).map(item => item.value),
-    interpretation: 'Preference consistency among these finalists only; neither vote count nor confidence proves tactical correctness. Earlier bounded elimination can still omit a better plan.' } };
+  const judgments = await compare(pairs, instruction, context);
+  if (judgments.length !== pairs.length) throw new Error('Invalid finalist comparison');
+  const support = new Map(unique.map(item => [item.value, 0])), balanced = [];
+  for (let i = 0; i < pairs.length; i += 2) {
+    const result = balancePlanPreference(pairs[i], judgments[i], judgments[i + 1]); balanced.push(result);
+    for (const [id, p] of Object.entries(result.preference_support)) support.set(id, support.get(id) + p);
+  }
+  const ranked = unique.toSorted((a, b) => {
+    const difference = support.get(b.value) - support.get(a.value);
+    return Math.abs(difference) > 1e-9 ? difference
+      : Number(b.value === incumbent.value) - Number(a.value === incumbent.value) || a.value.localeCompare(b.value);
+  });
+  return { selected: ranked[0].value, audit: { comparisons: pairs.length, preference_support: Object.fromEntries(support), balanced_pairs: balanced,
+    order_disagreements: balanced.filter(r => r.order_disagreement).map(({ candidates, selected_by_order }) => ({ candidates, selected_by_order })),
+    tied_at_top: ranked.filter(item => Math.abs(support.get(item.value) - support.get(ranked[0].value)) < 1e-9).map(item => item.value),
+    interpretation: 'Position-balanced preference support among these finalists only, not correctness or win probability. Independent quality scores and bounded search can still omit a better plan.' } };
 }

@@ -4,7 +4,8 @@ import { potionEffectFacts } from './potion_effects.mjs';
 import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from './turn_effects.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
-import { independentTurnCandidates, compareFinalists, planSignature } from './turn_candidates.mjs';
+import { independentTurnCandidates, compareFinalists, planSignature, planAllocation, shortlistPlans } from './turn_candidates.mjs';
+import { describeContinuation } from './card_flow_projection.mjs';
 
 const signature = planSignature;
 const bindFollowthrough = (step, following) => {
@@ -50,6 +51,7 @@ export function describePlanAlternative(state, steps) {
           ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
     }),
     then: sequence.checkpoint ? 'Observe the changed native state and replan the remaining turn; no end-turn command is promised.' : 'End turn, unless a new observation requires a revision.',
+    continuation: describeContinuation(state.combat, sequence),
     energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
     conditional_preview: projection,
     ...(actions.constraints.length ? { action_reservation: actions } : {}),
@@ -60,7 +62,7 @@ export function describePlanAlternative(state, steps) {
 // Compare concrete complete plans, not another disconnected next-card choice.
 // These are bounded local alternatives, not an exhaustive solver. Every current
 // legal action remains available in the main planning stages.
-export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
+export async function refineTurnPlan(state, plan, prepared, comparePairs, assessPlans) {
   // An observation segment is also a complete alternative. The trailing end
   // marker is removed before dispatch when the selected sequence checkpoints.
   if (plan.steps.at(-1)?.kind !== 'end_turn') {
@@ -172,31 +174,26 @@ export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
   }
   plan.candidate_coverage.compared_plans = alternatives.size;
   if (alternatives.size === 1) return;
-  // Every candidate enters a balanced pairwise tournament. Similar good
-  // plans cannot split a large Choice distribution and hide one another.
-  // No candidate is pruned by a damage heuristic or a card-specific strategy.
+  // Assess each complete alternative, then compare a diverse small shortlist.
+  // Neither a local damage heuristic nor a card-specific strategy ranks them.
   const keep = { value: 'keep', label: label(plan.steps) };
   const maxLabels = prepared.metrics.max_request_bytes - prepared.metrics.request_bytes - 6000;
   if (maxLabels < Buffer.byteLength(JSON.stringify(keep)) * 2) {
     plan.refinement_limit = 'Optional whole-plan comparisons skipped because the complete state leaves insufficient request space.';
     return;
   }
-  const instruction = 'Compare two mutually exclusive COMPLETE ordered plans starting from the actual current combat state. Choose the greater overall value toward winning the run. The proposed turn objective is advisory, not a requirement to maximize its named resource. Compare HP actually lost, enemy damage and removal, lasting benefits, changed card piles, and persistent resources consumed or preserved. Read resource_consequences with conditional_preview: additional expiring Block is valuable only through damage it prevents or another supported rule interaction. Check preparation before its beneficiaries and actual follow-through. Ignore which plan was proposed earlier. Conditional arithmetic is incomplete; evaluate uncomputed rules without inventing hidden outcomes.';
+  const instruction = 'Compare two mutually exclusive COMPLETE ordered plans starting from the actual current combat state. Choose the greater overall value toward winning the run. Compare HP actually lost, enemy damage and removal, lasting benefits, changed card piles, and persistent resources consumed or preserved. Read resource_consequences with conditional_preview: additional expiring Block is valuable only through damage it prevents or another supported rule interaction. Check preparation before its beneficiaries and actual follow-through. Ignore which plan was proposed earlier. Conditional arithmetic is incomplete; evaluate uncomputed rules without inventing hidden outcomes.';
   const comparisonState = { phase_scope: 'Compare mutually exclusive complete plans from the ACTUAL current state. These proposed steps have NOT happened. Every option replaces the entire unexecuted proposed prefix; do not execute both the old prefix and an option.',
-    proposed_steps: [], conditional_projection: [],
+    objective: null, retained_cards: [], proposed_steps: [], conditional_projection: [],
     energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
       is_observed: false, includes_future_energy_gains: false, steps: [], scope: 'No option has executed. Each option contains its own complete energy reservation and conditional outcome.' } };
-  let remaining = [...alternatives].map(([value, steps]) => ({ value, label: label(steps) }));
-  const compare = comparePairs || ((pairs, instructions, extra) => Promise.all(pairs.map(pair => ask('refine', instructions, { plan_a: pair[0], plan_b: pair[1] }, extra))));
-  while (remaining.length > 3) {
-    const pairs = [];
-    for (let index = 0; index + 1 < remaining.length; index += 2) pairs.push(remaining.slice(index, index + 2));
-    const selected = await compare(pairs, instruction, comparisonState);
-    if (selected.length !== pairs.length || selected.some((id, index) => !pairs[index].some(item => item.value === id))) throw new Error('Invalid turn-plan tournament winner');
-    const byId = new Map(remaining.map(item => [item.value, item]));
-    remaining = selected.map(id => byId.get(id)).concat(remaining.length % 2 ? [remaining.at(-1)] : []);
-  }
-  const final = await compareFinalists(remaining, keep, compare, instruction, comparisonState);
+  const candidates = [...alternatives].map(([value, steps]) => ({ value, allocation: planAllocation(steps), label: label(steps) }));
+  const judgments = await assessPlans(candidates, 'Assess the overall quality of committing this ordered segment toward winning the run. Evaluate the whole remaining turn, including the ability to continue after an observation; use current rules and available resources, not hypothetical favorable draws.', comparisonState);
+  const shortlist = shortlistPlans(candidates, judgments);
+  plan.candidate_coverage.assessed_plans = judgments.length;
+  plan.candidate_coverage.distinct_allocations = shortlist.allocation_count;
+  plan.assessment_shortlist = shortlist.assessments;
+  const final = await compareFinalists(shortlist.candidates, keep, comparePairs, instruction, comparisonState);
   plan.comparison_audit = final.audit;
   const selected = final.selected;
   if (selected === 'keep') return;

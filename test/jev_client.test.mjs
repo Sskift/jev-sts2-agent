@@ -61,3 +61,71 @@ test('provider failures stop without fallback or exposing response secrets', asy
     ok: false, status: 400, json: async () => ({ error: { code: 400, message: 'HTTP 400: {"detail":{"error_type":"max_tokens_exceeded","message":"secret"}}' } })
   }) }), { message: 'Jev API error 400 (max_tokens_exceeded) via openrouter' });
 });
+
+test('Vercel evaluation preserves typed questions and raw confidence while adapting model headers and token usage', async () => {
+  const env = { JEV_PROVIDER: 'vercel', AI_GATEWAY_API_KEY: 'gateway-test' };
+  assert.equal(getJevConfig({ env }).model, 'typesafe-ai/jev');
+  const payload = { state: { energy: 3 }, questions: { value: { type: 'score', instructions: 'Assess', criteria: ['Low', 'High'] } } };
+  const raw = { answers: { value: { type: 'score', score: 0.8, probabilities: { 0: 0.2, 1: 0.8 } }, unknown: { type: 'score', score: 0.5 } },
+    providerMetadata: { typesafe: { confidence: { value: 0 } } }, usage: { inputTokens: 200, outputTokens: 20 } };
+  let logged;
+  const result = await requestJev(payload, { env, onResponse: r => { logged = r; }, fetchImpl: async (url, request) => {
+    assert.equal(url, 'https://ai-gateway.vercel.sh/v4/ai/evaluation-model');
+    assert.equal(request.headers['ai-model-id'], 'typesafe-ai/jev');
+    assert.equal(request.headers['ai-evaluation-model-specification-version'], '4');
+    assert.equal(request.headers.Authorization, 'Bearer gateway-test');
+    assert.deepEqual(JSON.parse(request.body), { ...payload, state: JSON.stringify(payload.state) });
+    return { ok: true, json: async () => raw };
+  } });
+  assert.deepEqual(logged, raw);
+  assert.equal(result.usage.input_tokens, 200);
+  assert.equal(result.answers.value.confidence, 0);
+  assert.equal(result.answers.unknown.confidence, undefined, 'Absent confidence remains absent');
+  assert.equal(raw.answers.value.confidence, undefined, 'The archived raw response stays unchanged');
+  assert.equal(result.model, 'typesafe-ai/jev', 'Do not invent the gateway upstream version');
+});
+
+test('configured transport failover uses a separate credential and model without changing the decision', async () => {
+  const env = { JEV_PROVIDER: 'vercel', AI_GATEWAY_API_KEY: 'gateway-test', OPENROUTER_API_KEY: 'router-test', JEV_FALLBACK_PROVIDER: 'openrouter' };
+  const payload = { model: 'typesafe-ai/jev', state: { energy: 3 }, questions: { q: { type: 'choice', instructions: 'Choose', criteria: { a: 'A' } } } };
+  const logs = [], calls = [];
+  const result = await requestJev(payload, { env, onResponse: r => logs.push(r), fetchImpl: async (url, request) => {
+    calls.push(url);
+    const wire = JSON.parse(request.body); assert.deepEqual(wire.questions, payload.questions); assert.deepEqual(JSON.parse(wire.state), payload.state);
+    if (calls.length === 1) return { ok: false, status: 403, json: async () => ({ error: { type: 'customer_verification_required', message: 'echo gateway-test' } }) };
+    assert.equal(request.headers.Authorization, 'Bearer router-test');
+    assert.equal(wire.model, 'typesafe/jev-1.13');
+    return { ok: true, json: async () => ({ model: 'typesafe/jev-1.13', answers: { q: { type: 'choice', choice: 'a', confidence: 0.01 } } }) };
+  } });
+  assert.equal(calls.length, 2);
+  assert.equal(result.failover.to, 'openrouter');
+  assert.equal(JSON.stringify(logs).includes('gateway-test'), false);
+  assert.equal(result.answers.q.confidence, 0.01, 'Low confidence does not trigger another transport');
+});
+
+test('bad context does not fail over, and an unavailable backup is attempted only once', async () => {
+  const env = { JEV_PROVIDER: 'vercel', AI_GATEWAY_API_KEY: 'gateway-test', OPENROUTER_API_KEY: 'router-test', JEV_FALLBACK_PROVIDER: 'openrouter' };
+  for (const [status, expected] of [[400, 1], [429, 2]]) {
+    let calls = 0;
+    await assert.rejects(requestJev({ state: 'state', questions: {} }, { env, fetchImpl: async () => {
+      calls++; return { ok: false, status, json: async () => ({}) };
+    } }), new RegExp(String(status)));
+    assert.equal(calls, expected);
+  }
+});
+
+test('a rate limit cools the primary transport until Retry-After without delaying the available backup', async () => {
+  const env = { JEV_PROVIDER: 'vercel', AI_GATEWAY_API_KEY: 'limited-test', OPENROUTER_API_KEY: 'backup-test', JEV_FALLBACK_PROVIDER: 'openrouter' };
+  const calls = [], traces = [];
+  const options = { env, onRequest: (_payload, metrics) => traces.push(metrics), fetchImpl: async url => {
+    calls.push(url);
+    return url.includes('vercel') ? { ok: false, status: 429, headers: new Headers({ 'retry-after': '60' }), json: async () => ({}) }
+      : { ok: true, json: async () => ({ answers: {} }) };
+  } };
+  await requestJev({ state: 'first', questions: {} }, options);
+  const result = await requestJev({ state: 'second', questions: {} }, options);
+  assert.equal(calls.length, 3);
+  assert.equal(result.failover.reason, 'provider_cooldown');
+  assert.ok(result.failover.retry_after_ms > 0 && result.failover.retry_after_ms <= 60000);
+  assert.equal(traces.at(-1).failover.reason, 'provider_cooldown');
+});

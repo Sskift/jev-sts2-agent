@@ -7,6 +7,10 @@ import { planStep } from '../src/turn_plan_state.mjs';
 import { prepareModDecision } from '../src/mod_decision.mjs';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 
+const refineWithScores = (state, plan, prepared, score) => refineTurnPlan(state, plan, prepared,
+  async pairs => pairs.map(pair => pair.toSorted((a, b) => score(b) - score(a))[0].value),
+  async items => items.map(item => ({ value: item.value, score: score(item) })));
+
 test('future/random upgrades never invent a current hand-selection promise', () => {
   assert.equal(handUpgradeMode('Gain 5 Block. Upgrade a card in your Hand.'), 'one');
   assert.equal(handUpgradeMode('Gain 5 Block. Upgrade ALL cards in your Hand.'), 'all');
@@ -51,14 +55,12 @@ test('whole-plan alternatives keep their declared next-card binding consistent w
   assert.equal(preservesPlanDependencies([anger, potion, strike, end]), true);
   const plan = { steps: [potion, strike, end], retained_cards: [], end_policy: 'end_after_steps_unless_conditions_change', budget: { remaining_after_printed_costs: 2 } };
   let comparisons = 0;
-  await refineTurnPlan(state, plan, prepared, async (_stage, _instructions, choices) => {
+  await refineWithScores(state, plan, prepared, ({ label }) => {
     comparisons++;
-    for (const { label } of Object.values(choices)) {
-      const names = label.ordered_sequence.map(step => step.action);
-      const trigger = label.ordered_sequence.find(s => s.action === 'Duplicator');
-      if (trigger?.intended_followthrough) assert.equal(names[names.indexOf('Duplicator') + 1], trigger.intended_followthrough);
-    }
-    return Object.values(choices)[0].value;
+    const names = label.ordered_sequence.map(step => step.action);
+    const trigger = label.ordered_sequence.find(s => s.action === 'Duplicator');
+    if (trigger?.intended_followthrough) assert.equal(names[names.indexOf('Duplicator') + 1], trigger.intended_followthrough);
+    return 2;
   });
   assert.ok(comparisons > 0);
   assert.equal(plan.steps.length, 3);
@@ -77,28 +79,24 @@ test('whole-plan substitutions can replace an expensive kill and use released en
   const prepared = prepareModDecision(state), end = planStep(state, prepared.candidates.get('end_turn'), 'finish_turn');
   const plan = { steps: [planStep(state, prepared.candidates.get('card_0_target_42')), planStep(state, prepared.candidates.get('card_2_target_42')), end], retained_cards: [], end_policy: 'end_after_steps_unless_conditions_change', budget: { remaining_after_printed_costs: 0 } };
   let sawCheapKill = false, sawDefense = false;
-  await refineTurnPlan(state, plan, prepared, async (_stage, _instructions, choices) => {
-    let best = Object.values(choices)[0].value, score = -1;
-    for (const choice of Object.values(choices)) {
-      const names = choice.label.ordered_sequence.map(step => step.action);
-      assert.equal(choice.label.energy_spent + choice.label.energy_left, state.combat.player.energy);
-      for (const enemy of choice.label.conditional_preview.known_effects_only.enemies) {
-        if (enemy.hp === null) {
-          assert.equal(enemy.hp_removed, null, 'An uncomputed debuff dependency must not invent a point estimate');
-          continue;
-        }
-        assert.equal(enemy.hp_removed + enemy.hp, state.combat.enemies.find(original => original.combat_id === enemy.combat_id).hp);
-        assert.equal(enemy.block_removed + enemy.block, state.combat.enemies.find(original => original.combat_id === enemy.combat_id).block);
+  await refineWithScores(state, plan, prepared, choice => {
+    const names = choice.label.ordered_sequence.map(step => step.action);
+    assert.equal(choice.label.energy_spent + choice.label.energy_left, state.combat.player.energy);
+    for (const enemy of choice.label.conditional_preview.known_effects_only.enemies) {
+      if (enemy.hp === null) {
+        assert.equal(enemy.hp_removed, null, 'An uncomputed debuff dependency must not invent a point estimate');
+        continue;
       }
-      assert.equal(new Set(names).size, names.length, 'No physical card is planned twice');
-      if (names.includes('Strike A') && names.includes('Strike B') && !names.includes('Bash')) {
-        sawCheapKill = true;
-        if (names.includes('Defend')) sawDefense = true;
-        const value = names.includes('Defend') ? 2 : 1;
-        if (value > score) { best = choice.value; score = value; }
-      }
+      assert.equal(enemy.hp_removed + enemy.hp, state.combat.enemies.find(original => original.combat_id === enemy.combat_id).hp);
+      assert.equal(enemy.block_removed + enemy.block, state.combat.enemies.find(original => original.combat_id === enemy.combat_id).block);
     }
-    return best;
+    assert.equal(new Set(names).size, names.length, 'No physical card is planned twice');
+    if (names.includes('Strike A') && names.includes('Strike B') && !names.includes('Bash')) {
+      sawCheapKill = true;
+      if (names.includes('Defend')) sawDefense = true;
+      return names.includes('Defend') ? 2 : 1;
+    }
+    return 0;
   });
   assert.equal(sawCheapKill, true);
   assert.equal(sawDefense, true);
@@ -120,11 +118,10 @@ test('independent alternatives compare different defenses without needing a seco
   const prepared = prepareModDecision(state), end = planStep(state, prepared.candidates.get('end_turn'), 'finish_turn');
   const plan = { steps: [planStep(state, prepared.candidates.get('card_0_target_42')), planStep(state, prepared.candidates.get('card_2_target_42')), end], retained_cards: [], end_policy: 'end_after_steps_unless_conditions_change', budget: { remaining_after_printed_costs: 0 } };
   const offered = new Set();
-  await refineTurnPlan(state, plan, prepared, async (_stage, _instructions, choices) => {
-    const names = choice => choice.label.ordered_sequence.map(step => step.action).sort().join(',');
-    for (const choice of Object.values(choices)) offered.add(names(choice));
-    const match = Object.values(choices).find(choice => names(choice) === 'Evil Eye,Strike A,Strike B');
-    return match?.value ?? Object.values(choices)[0].value;
+  await refineWithScores(state, plan, prepared, choice => {
+    const names = choice.label.ordered_sequence.map(step => step.action).sort().join(',');
+    offered.add(names);
+    return names === 'Evil Eye,Strike A,Strike B' ? 3 : 1;
   });
   assert.ok(offered.has('Defend,Strike A,Strike B') && offered.has('Evil Eye,Strike A,Strike B'));
   assert.deepEqual(plan.steps.map(step => step.name).filter(Boolean).sort(), ['Evil Eye', 'Strike A', 'Strike B']);

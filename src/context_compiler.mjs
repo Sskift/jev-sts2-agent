@@ -24,6 +24,7 @@ const routes = [
   ['turn_planning.conditional_projection', 'analysis.proposed_sequence'],
   ['turn_planning.energy_reservation', 'analysis.energy_reservation'],
   ['turn_planning.comparisons', 'analysis.plan_alternatives'],
+  ['turn_planning.assessments', 'analysis.plan_assessments'],
   ['turn_planning.survival_constraints', 'analysis.survival_constraints'],
   ['turn_planning.action_reservation', 'analysis.action_reservation'],
   ['screen_state.shop.route_context', 'analysis.shop_route_context'],

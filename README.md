@@ -8,7 +8,7 @@
 
 - Windows、Node.js（本机使用 v25.8.1）、已安装的游戏及兼容 CLI 模组。
 - 当前支持游戏 **v0.111.0**，模组构建 **0.111.0-context.17**。安装与构建步骤见 [模组说明](mods/sts2-cli-compat/README.md)。只有重建模组或使用窗口诊断工具才需要 .NET 开发工具。
-- Jev 的 TypeSafe 或 OpenRouter API key。项目只依赖 Ajv 做 JSON 校验，无 Python 服务、向量数据库或视觉模型依赖。
+- Jev 的 Vercel AI Gateway、OpenRouter 或 TypeSafe API key。项目只依赖 Ajv 做 JSON 校验，无 Python 服务、向量数据库或视觉模型依赖。
 
 ```powershell
 npm ci
@@ -20,10 +20,11 @@ Copy-Item .env.example .env
 ```dotenv
 JEV_PROVIDER=openrouter
 JEV_MODEL=typesafe/jev-1.13
-OPENROUTER_API_KEY=your-key
+OPENROUTER_API_KEY=your-openrouter-key
+JEV_FALLBACK_PROVIDER=
 ```
 
-也可使用 `JEV_PROVIDER=typesafe` 和 `TYPESAFE_API_KEY`。凭据、原始运行记录及临时文件不提交 Git。
+当前运行使用 OpenRouter 原生 Decisions，回退关闭。也支持 TypeSafe 直连，以及 Vercel 原生 [Evaluation API](https://vercel.com/docs/ai-gateway/modalities/evaluation)，配置见 `.env.example`。可选回退只处理传输、额度或服务故障，遵守 `Retry-After` 和短暂故障冷却；上下文错误、低置信度或不理想的选择不触发回退。各次请求记录实际提供方和模型。凭据、原始运行记录及临时文件不提交 Git。
 
 启动已启用模组的游戏后：
 
@@ -44,7 +45,9 @@ npm start                # 会操作游戏，仅在需要开始或继续实战�
 
 Jev 在代码提供的目标与候选空间中选择构筑方向、回合目标、准备动作、顺序和完整方案。回合目标是可修订的意图，服从整局价值。普通连续出牌沿用计划；抽牌、变形、回收／选牌、未计算的费用变化及新能力等，在原生结果可见后继续规划。框架与候选生成由代码定义，模型负责其中的判断；当前没有完整的跨回合战斗求解器。
 
-完整方案包含从不同合法起手独立展开的有序段，也保留模型原提案及局部替换。搜索按起手和长度分配候选，记录搜索与采样上限，不按伤害评分预先筛掉策略。入围方案与原提案直接比较，并交换 A/B 位置复核；分歧和并列保留在日志中。每对方案直接提供完整描述。
+完整方案包含从不同合法起手独立展开的有序段，也保留模型原提案及局部替换。搜索按起手和长度分配候选，记录搜索与采样上限，不按伤害评分预先筛掉策略。Jev 先独立评分，再比较不同卡牌／目标分配、结束边界和保留资源的候选；同一资源安排的多个排列不会占满入围名额。入围方案与原提案交换 A/B 位置比较，按对齐后的概率汇总偏好，记录原始分歧和并列。结束回合前的追加动作也经过双向比较。
+
+观察段明确给出剩余手牌、能量、当前抽牌池及费用范围；比较时列出另一方案所用但本方案尚未消耗的手牌。它们描述继续安排本回合的机会，不保证抽到什么、后续合法性或最终效果。独立方案比较不继承初始提案的局部目标偏好；已执行的准备和当前原生状态仍会保留。
 
 能量预留、候选描述和方案比较共用一次有序状态计算。已核实的升级、属性变化和 X 费支付只影响后续动作；起始牌面不会被当成始终不变的未来数值。完整方案列出消耗／保留的药水、格挡的有效期、已计算的伤害与倒计时、需要重新观察的位置。未计算的状态变化不会凭空生成新牌或确定的结束回合结果。
 
@@ -54,7 +57,7 @@ Jev 在代码提供的目标与候选空间中选择构筑方向、回合目标�
 
 ## 历史回放
 
-最新[知识与规划回归](docs/knowledge-evaluation.md)使用已接触过的旧局面，记录知识接入、目标选择、布局敏感性和实际开销。这不是新的独立测试集。[上一轮划分](eval/sequence-split.json)及[有序依赖结果](docs/sequence-evaluation.md)、[效果时序报告](docs/harness-evaluation.md)继续保留。原始历史存于本机 `run-artifacts/`，不随仓库分发；回放只向 Jev 请求决策，不连接游戏命名管道。冻结同时覆盖代码、schema 与本地 JSON 知识源。
+最新[观察后续接与伤害账目回归](docs/continuation-evaluation.md)使用已接触过的旧局面，记录方案排序、抽牌时的资源与实际开销。这不是新的独立测试集。[知识与规划回归](docs/knowledge-evaluation.md)、[有序依赖结果](docs/sequence-evaluation.md)、[效果时序报告](docs/harness-evaluation.md)继续保留。原始历史存于本机 `run-artifacts/`，不随仓库分发；回放只向 Jev 请求决策，不连接游戏命名管道。冻结同时覆盖代码、schema 与本地 JSON 知识源。
 
 ```powershell
 # 从开发局的某一步提取当时观察与此前已确认的记忆
@@ -66,7 +69,7 @@ npm run replay -- replay --split eval/sequence-split.json --output run-artifacts
 
 可用 `--code <旧版本目录>` 对比旧 harness，用 `--repeat 2` 保留重复结果。快照带有输入哈希；留出集在代码冻结后运行。评估比较具体规则、顺序、资源和后果，不能把“选择变了”或模型高置信度直接当成改善。
 
-主循环和回放保存实际请求及完整响应，包括提供方返回的概率分布与置信度。置信度反映该次选择分布的集中程度，不是通关概率，也不保证选择正确。
+主循环和回放保存实际请求及完整响应，包括提供方返回的概率分布与置信度。Vercel 将 TypeSafe 置信度放在响应元数据中，适配层将其映射到相应判断，原始响应仍完整保存。未返回的置信度或上游具体版本保持未知；评分、偏好与置信度都不是通关概率，也不保证选择正确。
 
 ## 代码结构与检查
 

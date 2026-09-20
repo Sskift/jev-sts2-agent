@@ -1,0 +1,3174 @@
+{
+  "at": "2026-09-20T16:50:04.705Z",
+  "baseline_commit": "198ce720d416dd3e3f78644a75cf01b8f0fb23d2",
+  "scope": "Previously exposed offline regression snapshots only; no game commands. Interrupted mixed-provider results retained; final label openrouter uses OpenRouter only. No claimed win-rate improvement or calibrated correctness.",
+  "provider": {
+    "active": "openrouter",
+    "requested_model": "typesafe/jev-1.13",
+    "fallback": null,
+    "vercel_small_choice_and_score_verified": true,
+    "vercel_large_contexts_verified": true,
+    "vercel_transient_failures": [
+      503,
+      429
+    ],
+    "vercel_rate_headers": {
+      "requests_per_minute": 30,
+      "tokens_per_minute": 250000,
+      "retry_after_seconds": 60
+    },
+    "vercel_disabled_by_user": true
+  },
+  "checks": {
+    "node_tests": 204,
+    "passed": 204
+  },
+  "variants": [
+    {
+      "root": "run-artifacts/knowledge-release",
+      "freeze": "fccfe92924f359c063048a8e4722e23961887b4c47edba30c7c1a51f7290933e",
+      "results": [
+        {
+          "path": "run-artifacts/knowledge-release/results/holdout-19-turn-4/candidate/1/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 929591,
+            "output_tokens": 6278
+          },
+          "calls": 40,
+          "elapsed_ms": 27670,
+          "transport": {
+            "openrouter": {
+              "attempts": 40,
+              "successes": 40,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66
+          },
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 2
+          },
+          "confidence": {
+            "n": 154,
+            "min": 0,
+            "max": 0.95,
+            "mean": 0.4938311688311688
+          }
+        },
+        {
+          "path": "run-artifacts/knowledge-release/results/holdout-19-turn-4/candidate/2/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "candidate",
+          "repeat": 2,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 1
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 929197,
+            "output_tokens": 6279
+          },
+          "calls": 40,
+          "elapsed_ms": 24836,
+          "transport": {
+            "openrouter": {
+              "attempts": 40,
+              "successes": 40,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66
+          },
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 4
+          },
+          "confidence": {
+            "n": 154,
+            "min": 0.01,
+            "max": 0.95,
+            "mean": 0.5074025974025974
+          }
+        },
+        {
+          "path": "run-artifacts/knowledge-release/results/holdout-24-turn-2/candidate/1/summary.json",
+          "id": "holdout-24-turn-2",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Taunt",
+              "card_id": "TAUNT",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Stone Armor+",
+              "card_id": "STONE_ARMOR"
+            }
+          ],
+          "energy_left": 1,
+          "usage": {
+            "input_tokens": 316321,
+            "output_tokens": 1376
+          },
+          "calls": 15,
+          "elapsed_ms": 10280,
+          "transport": {
+            "openrouter": {
+              "attempts": 15,
+              "successes": 15,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 24,
+            "enumerated_plans": 25,
+            "selected_plans": 25,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 25
+          },
+          "comparison": {
+            "pairs": 3,
+            "order_disagreements": 0
+          },
+          "confidence": {
+            "n": 34,
+            "min": 0.01,
+            "max": 0.8,
+            "mean": 0.30411764705882344
+          }
+        },
+        {
+          "path": "run-artifacts/knowledge-release/results/holdout-26-turn-2/candidate/1/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 389872,
+            "output_tokens": 2474
+          },
+          "calls": 20,
+          "elapsed_ms": 12939,
+          "transport": {
+            "openrouter": {
+              "attempts": 20,
+              "successes": 20,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58
+          },
+          "comparison": {
+            "pairs": 3,
+            "order_disagreements": 1
+          },
+          "confidence": {
+            "n": 67,
+            "min": 0.01,
+            "max": 0.82,
+            "mean": 0.2544776119402985
+          }
+        }
+      ]
+    },
+    {
+      "root": "run-artifacts/continuation-evaluation",
+      "freeze": "49ed20f93db7ee6a4a405a449796ffc2ea97a1bb4b6a6b0084d1022cb7bfa824",
+      "results": [
+        {
+          "path": "run-artifacts/continuation-evaluation/results/holdout-19-turn-4/candidate/1/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 2
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 2
+            },
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 634235,
+            "output_tokens": 2338
+          },
+          "calls": 27,
+          "elapsed_ms": 18914,
+          "transport": {
+            "openrouter": {
+              "attempts": 27,
+              "successes": 27,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66
+          },
+          "shortlist": [
+            {
+              "value": "variant_28",
+              "score": 2.46,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.21,
+                "2": 0.16,
+                "3": 0.4,
+                "4": 0.18
+              },
+              "confidence": 0.25,
+              "handoff": "enemy_turn"
+            },
+            {
+              "value": "variant_43",
+              "score": 2.38,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.21,
+                "2": 0.21,
+                "3": 0.4,
+                "4": 0.14
+              },
+              "confidence": 0.25,
+              "handoff": "enemy_turn"
+            },
+            {
+              "value": "variant_54",
+              "score": 2.38,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.22,
+                "2": 0.2,
+                "3": 0.36,
+                "4": 0.17
+              },
+              "confidence": 0.21,
+              "handoff": "enemy_turn"
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 4,
+            "preference_support": {
+              "variant_28": 1.58,
+              "variant_43": 1.545,
+              "variant_54": 1.865,
+              "keep": 1.01
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0,
+            "max": 0.94,
+            "mean": 0.4493617021276596
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-evaluation/results/holdout-19-turn-4/candidate/2/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "candidate",
+          "repeat": 2,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 1
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 634631,
+            "output_tokens": 2336
+          },
+          "calls": 27,
+          "elapsed_ms": 18463,
+          "transport": {
+            "openrouter": {
+              "attempts": 27,
+              "successes": 27,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66
+          },
+          "shortlist": [
+            {
+              "value": "variant_28",
+              "score": 2.59,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.18,
+                "2": 0.14,
+                "3": 0.42,
+                "4": 0.22
+              },
+              "confidence": 0.29,
+              "handoff": "enemy_turn"
+            },
+            {
+              "value": "variant_48",
+              "score": 2.43,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.21,
+                "2": 0.15,
+                "3": 0.41000000000000003,
+                "4": 0.18
+              },
+              "confidence": 0.23,
+              "handoff": "enemy_turn"
+            },
+            {
+              "value": "variant_19",
+              "score": 2.4,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.19,
+                "2": 0.27,
+                "3": 0.42,
+                "4": 0.1
+              },
+              "confidence": 0.33,
+              "handoff": "enemy_turn"
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 3,
+            "preference_support": {
+              "variant_28": 1.625,
+              "variant_48": 1.77,
+              "variant_19": 0.8840875912408759,
+              "keep": 1.720912408759124
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0,
+            "max": 0.96,
+            "mean": 0.42319148936170214
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-evaluation/results/holdout-26-turn-2/candidate/1/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Battle Trance",
+              "card_id": "BATTLE_TRANCE"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 423257,
+            "output_tokens": 1968
+          },
+          "calls": 20,
+          "elapsed_ms": 14869,
+          "transport": {
+            "openrouter": {
+              "attempts": 20,
+              "successes": 20,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58
+          },
+          "shortlist": [
+            {
+              "value": "variant_16",
+              "score": 2.32,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.2,
+                "2": 0.31,
+                "3": 0.41,
+                "4": 0.07
+              },
+              "confidence": 0.32,
+              "handoff": "observe_then_continue_same_player_turn"
+            },
+            {
+              "value": "variant_19",
+              "score": 2.3,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.21,
+                "2": 0.28,
+                "3": 0.42,
+                "4": 0.07
+              },
+              "confidence": 0.31,
+              "handoff": "observe_then_continue_same_player_turn"
+            },
+            {
+              "value": "variant_28",
+              "score": 2.3,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.2,
+                "2": 0.32,
+                "3": 0.41000000000000003,
+                "4": 0.06
+              },
+              "confidence": 0.32,
+              "handoff": "observe_then_continue_same_player_turn"
+            },
+            {
+              "value": "variant_50",
+              "score": 2.17,
+              "probabilities": {
+                "0": 0.03,
+                "1": 0.26,
+                "2": 0.32,
+                "3": 0.28,
+                "4": 0.11
+              },
+              "confidence": 0.33,
+              "handoff": "enemy_turn"
+            }
+          ],
+          "comparison": {
+            "pairs": 10,
+            "order_disagreements": 5,
+            "preference_support": {
+              "variant_16": 1.8199999999999998,
+              "variant_19": 2.185,
+              "variant_28": 2.16,
+              "variant_50": 1.9249999999999998,
+              "keep": 1.9100000000000001
+            }
+          },
+          "confidence": {
+            "n": 83,
+            "min": 0,
+            "max": 0.8,
+            "mean": 0.3383132530120483
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-evaluation/results/holdout-26-turn-2/candidate/2/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "candidate",
+          "repeat": 2,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Battle Trance",
+              "card_id": "BATTLE_TRANCE"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 422998,
+            "output_tokens": 1968
+          },
+          "calls": 20,
+          "elapsed_ms": 13089,
+          "transport": {
+            "openrouter": {
+              "attempts": 20,
+              "successes": 20,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58
+          },
+          "shortlist": [
+            {
+              "value": "variant_19",
+              "score": 2.38,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.19,
+                "2": 0.28,
+                "3": 0.45,
+                "4": 0.07
+              },
+              "confidence": 0.36,
+              "handoff": "observe_then_continue_same_player_turn"
+            },
+            {
+              "value": "variant_28",
+              "score": 2.31,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.2,
+                "2": 0.32,
+                "3": 0.41,
+                "4": 0.06
+              },
+              "confidence": 0.32,
+              "handoff": "observe_then_continue_same_player_turn"
+            },
+            {
+              "value": "variant_56",
+              "score": 2.31,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.19,
+                "2": 0.33,
+                "3": 0.42,
+                "4": 0.05
+              },
+              "confidence": 0.34,
+              "handoff": "observe_then_continue_same_player_turn"
+            },
+            {
+              "value": "variant_50",
+              "score": 2.15,
+              "probabilities": {
+                "0": 0.03,
+                "1": 0.27,
+                "2": 0.33,
+                "3": 0.27,
+                "4": 0.1
+              },
+              "confidence": 0.33,
+              "handoff": "enemy_turn"
+            }
+          ],
+          "comparison": {
+            "pairs": 10,
+            "order_disagreements": 8,
+            "preference_support": {
+              "variant_19": 1.9849999999999999,
+              "variant_28": 2.095,
+              "variant_56": 2.085,
+              "variant_50": 1.98,
+              "keep": 1.855
+            }
+          },
+          "confidence": {
+            "n": 83,
+            "min": 0.01,
+            "max": 0.8,
+            "mean": 0.3420481927710843
+          }
+        }
+      ]
+    },
+    {
+      "root": "run-artifacts/continuation-diversity",
+      "freeze": "26b44790a20c18b943b693d7821c957b67d4839c00f3af6d8989be252d2b5008",
+      "results": [
+        {
+          "path": "run-artifacts/continuation-diversity/results/holdout-19-turn-4/candidate/1/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 2
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 633425,
+            "output_tokens": 2338
+          },
+          "calls": 47,
+          "elapsed_ms": 41171,
+          "transport": {
+            "vercel": {
+              "attempts": 27,
+              "successes": 7,
+              "failures": {
+                "429": 10,
+                "503": 10
+              },
+              "cooldown_routed": 0
+            },
+            "openrouter": {
+              "attempts": 20,
+              "successes": 20,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66,
+            "distinct_allocations": 36
+          },
+          "shortlist": [
+            {
+              "value": "variant_57",
+              "score": 2.61,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.18,
+                "2": 0.13,
+                "3": 0.39999999999999997,
+                "4": 0.24
+              },
+              "confidence": 0.28,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_8",
+              "score": 2.45,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.21,
+                "2": 0.17,
+                "3": 0.39,
+                "4": 0.18
+              },
+              "confidence": 0.23,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_28",
+              "score": 2.42,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.22,
+                "2": 0.17,
+                "3": 0.4,
+                "4": 0.16
+              },
+              "confidence": 0.24,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 3,
+            "preference_support": {
+              "variant_57": 1.56,
+              "variant_8": 1.5300000000000002,
+              "variant_28": 1.9000000000000001,
+              "keep": 1.01
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0,
+            "max": 0.97,
+            "mean": 0.43925531914893645
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-diversity/results/holdout-19-turn-4/candidate/2/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "candidate",
+          "repeat": 2,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 2
+            },
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 633424,
+            "output_tokens": 2338
+          },
+          "calls": 53,
+          "elapsed_ms": 37971,
+          "transport": {
+            "vercel": {
+              "attempts": 27,
+              "successes": 1,
+              "failures": {
+                "429": 23,
+                "503": 3
+              },
+              "cooldown_routed": 0
+            },
+            "openrouter": {
+              "attempts": 26,
+              "successes": 26,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66,
+            "distinct_allocations": 36
+          },
+          "shortlist": [
+            {
+              "value": "variant_48",
+              "score": 2.54,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.19,
+                "2": 0.14,
+                "3": 0.42,
+                "4": 0.2
+              },
+              "confidence": 0.28,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_8",
+              "score": 2.52,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.18,
+                "2": 0.18,
+                "3": 0.41,
+                "4": 0.19
+              },
+              "confidence": 0.29,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_43",
+              "score": 2.42,
+              "probabilities": {
+                "0": 0.03,
+                "1": 0.21,
+                "2": 0.21,
+                "3": 0.4,
+                "4": 0.15
+              },
+              "confidence": 0.27,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 3,
+            "preference_support": {
+              "variant_48": 1.5150000000000001,
+              "variant_8": 1.58,
+              "variant_43": 1.8399999999999999,
+              "keep": 1.065
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0,
+            "max": 0.96,
+            "mean": 0.42468085106382986
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-diversity/results/holdout-26-turn-2/candidate/1/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe-ai/jev",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Battle Trance",
+              "card_id": "BATTLE_TRANCE"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 488021,
+            "output_tokens": 2307
+          },
+          "calls": 38,
+          "elapsed_ms": 35533,
+          "transport": {
+            "vercel": {
+              "attempts": 23,
+              "successes": 8,
+              "failures": {
+                "429": 5,
+                "503": 10
+              },
+              "cooldown_routed": 0
+            },
+            "openrouter": {
+              "attempts": 15,
+              "successes": 15,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58,
+            "distinct_allocations": 31
+          },
+          "shortlist": [
+            {
+              "value": "variant_12",
+              "score": 2.29,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.18,
+                "2": 0.37,
+                "3": 0.37,
+                "4": 0.07
+              },
+              "confidence": 0.3,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_28",
+              "score": 2.25,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.22,
+                "2": 0.32,
+                "3": 0.39,
+                "4": 0.06
+              },
+              "confidence": 0.28,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_29",
+              "score": 2.21,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.23,
+                "2": 0.35,
+                "3": 0.33999999999999997,
+                "4": 0.06
+              },
+              "confidence": 0.4,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_26",
+              "score": 1.88,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.38,
+                "2": 0.3,
+                "3": 0.22,
+                "4": 0.06
+              },
+              "confidence": 0.21,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_5",
+              "score": 2.14,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.24,
+                "2": 0.38,
+                "3": 0.33,
+                "4": 0.04
+              },
+              "confidence": 0.44,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 15,
+            "order_disagreements": 8,
+            "preference_support": {
+              "variant_12": 2.3200000000000003,
+              "variant_28": 2.625,
+              "variant_29": 2.52,
+              "variant_26": 2.535,
+              "variant_5": 2.44,
+              "keep": 2.56
+            }
+          },
+          "confidence": {
+            "n": 93,
+            "min": 0,
+            "max": 0.81,
+            "mean": 0.3303225806451613
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-diversity/results/holdout-26-turn-2/candidate/2/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "candidate",
+          "repeat": 2,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Pommel Strike",
+              "card_id": "POMMEL_STRIKE",
+              "target": 1
+            }
+          ],
+          "energy_left": 1,
+          "usage": {
+            "input_tokens": 487964,
+            "output_tokens": 2307
+          },
+          "calls": 46,
+          "elapsed_ms": 30932,
+          "transport": {
+            "vercel": {
+              "attempts": 23,
+              "successes": 0,
+              "failures": {
+                "429": 20,
+                "503": 3
+              },
+              "cooldown_routed": 0
+            },
+            "openrouter": {
+              "attempts": 23,
+              "successes": 23,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58,
+            "distinct_allocations": 31
+          },
+          "shortlist": [
+            {
+              "value": "variant_31",
+              "score": 2.33,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.2,
+                "2": 0.28,
+                "3": 0.45,
+                "4": 0.06
+              },
+              "confidence": 0.34,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_12",
+              "score": 2.25,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.19,
+                "2": 0.39,
+                "3": 0.36,
+                "4": 0.05
+              },
+              "confidence": 0.43,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_29",
+              "score": 2.23,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.21,
+                "2": 0.38,
+                "3": 0.35,
+                "4": 0.05
+              },
+              "confidence": 0.43,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_53",
+              "score": 1.85,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.35,
+                "2": 0.45,
+                "3": 0.17,
+                "4": 0.02
+              },
+              "confidence": 0.5,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_5",
+              "score": 2.09,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.26,
+                "2": 0.37,
+                "3": 0.31,
+                "4": 0.04
+              },
+              "confidence": 0.43,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 15,
+            "order_disagreements": 7,
+            "preference_support": {
+              "variant_31": 2.6,
+              "variant_12": 2.505,
+              "variant_29": 2.385,
+              "variant_53": 2.395,
+              "variant_5": 2.41,
+              "keep": 2.7049999999999996
+            }
+          },
+          "confidence": {
+            "n": 93,
+            "min": 0,
+            "max": 0.78,
+            "mean": 0.33043010752688184
+          }
+        }
+      ]
+    },
+    {
+      "root": "run-artifacts/continuation-resources",
+      "freeze": "1693631becc4e9d1fec9ab2d8d997f55dab2418c177a3fdb34dde05726147aca",
+      "results": [
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-19-turn-4/candidate/1/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe-ai/jev",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 2
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 633676,
+            "output_tokens": 2338
+          },
+          "calls": 29,
+          "elapsed_ms": 20783,
+          "transport": {
+            "vercel": {
+              "attempts": 5,
+              "successes": 3,
+              "failures": {
+                "429": 1,
+                "503": 1
+              },
+              "cooldown_routed": 0
+            },
+            "openrouter": {
+              "attempts": 24,
+              "successes": 24,
+              "failures": {},
+              "cooldown_routed": 22
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66,
+            "distinct_allocations": 36
+          },
+          "shortlist": [
+            {
+              "value": "variant_48",
+              "score": 2.54,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.2,
+                "2": 0.14,
+                "3": 0.39,
+                "4": 0.22
+              },
+              "confidence": 0.25,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_8",
+              "score": 2.53,
+              "probabilities": {
+                "0": 0.06,
+                "1": 0.18,
+                "2": 0.16,
+                "3": 0.38,
+                "4": 0.22
+              },
+              "confidence": 0.25,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_28",
+              "score": 2.5,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.2,
+                "2": 0.15,
+                "3": 0.4,
+                "4": 0.2
+              },
+              "confidence": 0.25,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 2,
+            "preference_support": {
+              "variant_48": 1.835,
+              "variant_8": 1.6,
+              "variant_28": 1.8450000000000002,
+              "keep": 0.72
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0,
+            "max": 0.98,
+            "mean": 0.4409574468085107
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-19-turn-4/candidate/2/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "candidate",
+          "repeat": 2,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "error": "JEV_MODEL must name a supported Jev model for this provider",
+          "calls": 13,
+          "transport": {
+            "openrouter": {
+              "attempts": 13,
+              "successes": 13,
+              "failures": {},
+              "cooldown_routed": 13
+            }
+          },
+          "comparison": {
+            "pairs": 0,
+            "order_disagreements": 0
+          },
+          "confidence": null
+        },
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-19-turn-4/openrouter/1/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "openrouter",
+          "repeat": 1,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 1
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 633676,
+            "output_tokens": 2338
+          },
+          "calls": 27,
+          "elapsed_ms": 16898,
+          "transport": {
+            "openrouter": {
+              "attempts": 27,
+              "successes": 27,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66,
+            "distinct_allocations": 36
+          },
+          "shortlist": [
+            {
+              "value": "variant_8",
+              "score": 2.52,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.18,
+                "2": 0.16,
+                "3": 0.41000000000000003,
+                "4": 0.2
+              },
+              "confidence": 0.27,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_48",
+              "score": 2.51,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.2,
+                "2": 0.16,
+                "3": 0.4,
+                "4": 0.2
+              },
+              "confidence": 0.25,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_28",
+              "score": 2.36,
+              "probabilities": {
+                "0": 0.06,
+                "1": 0.23,
+                "2": 0.16,
+                "3": 0.39,
+                "4": 0.16
+              },
+              "confidence": 0.2,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 0,
+            "preference_support": {
+              "variant_8": 1.49,
+              "variant_48": 1.955,
+              "variant_28": 1.7650000000000001,
+              "keep": 0.79
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0.02,
+            "max": 0.98,
+            "mean": 0.43851063829787224
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-19-turn-4/openrouter/2/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "openrouter",
+          "repeat": 2,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 1
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 633676,
+            "output_tokens": 2338
+          },
+          "calls": 27,
+          "elapsed_ms": 16584,
+          "transport": {
+            "openrouter": {
+              "attempts": 27,
+              "successes": 27,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66,
+            "distinct_allocations": 36
+          },
+          "shortlist": [
+            {
+              "value": "variant_8",
+              "score": 2.56,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.18,
+                "2": 0.16,
+                "3": 0.39999999999999997,
+                "4": 0.21
+              },
+              "confidence": 0.29,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_48",
+              "score": 2.48,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.21,
+                "2": 0.15,
+                "3": 0.4,
+                "4": 0.19
+              },
+              "confidence": 0.25,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_28",
+              "score": 2.47,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.21,
+                "2": 0.16,
+                "3": 0.38,
+                "4": 0.2
+              },
+              "confidence": 0.23,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 1,
+            "preference_support": {
+              "variant_8": 1.57,
+              "variant_48": 1.8550000000000002,
+              "variant_28": 1.8199999999999998,
+              "keep": 0.755
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0,
+            "max": 0.98,
+            "mean": 0.4363829787234042
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-24-turn-2/openrouter/1/summary.json",
+          "id": "holdout-24-turn-2",
+          "label": "openrouter",
+          "repeat": 1,
+          "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Taunt",
+              "card_id": "TAUNT",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Unrelenting",
+              "card_id": "UNRELENTING",
+              "target": 1
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 402922,
+            "output_tokens": 1469
+          },
+          "calls": 18,
+          "elapsed_ms": 12432,
+          "transport": {
+            "openrouter": {
+              "attempts": 18,
+              "successes": 18,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 24,
+            "enumerated_plans": 25,
+            "selected_plans": 25,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 25,
+            "assessed_plans": 25,
+            "distinct_allocations": 20
+          },
+          "shortlist": [
+            {
+              "value": "variant_14",
+              "score": 2.48,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.18,
+                "2": 0.23,
+                "3": 0.49,
+                "4": 0.09
+              },
+              "confidence": 0.42,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_12",
+              "score": 2.37,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.17,
+                "2": 0.32,
+                "3": 0.45,
+                "4": 0.05
+              },
+              "confidence": 0.39,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "keep",
+              "score": 2.24,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.3,
+                "2": 0.22,
+                "3": 0.36,
+                "4": 0.1
+              },
+              "confidence": 0.19,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_24",
+              "score": 1.75,
+              "probabilities": {
+                "0": 0.03,
+                "1": 0.45,
+                "2": 0.29,
+                "3": 0.2,
+                "4": 0.03
+              },
+              "confidence": 0.32,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_7",
+              "score": 1.72,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.43,
+                "2": 0.37,
+                "3": 0.17,
+                "4": 0.01
+              },
+              "confidence": 0.37,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 10,
+            "order_disagreements": 2,
+            "preference_support": {
+              "variant_14": 2.5300000000000002,
+              "variant_12": 2.13,
+              "keep": 1.93,
+              "variant_24": 1.595,
+              "variant_7": 1.815
+            }
+          },
+          "confidence": {
+            "n": 50,
+            "min": 0.02,
+            "max": 0.8,
+            "mean": 0.3325999999999999
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-26-turn-2/candidate/1/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "candidate",
+          "repeat": 1,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe-ai/jev",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Battle Trance",
+              "card_id": "BATTLE_TRANCE"
+            }
+          ],
+          "energy_left": 2,
+          "usage": {
+            "input_tokens": 524741,
+            "output_tokens": 2314
+          },
+          "calls": 27,
+          "elapsed_ms": 22344,
+          "transport": {
+            "vercel": {
+              "attempts": 7,
+              "successes": 5,
+              "failures": {
+                "503": 2
+              },
+              "cooldown_routed": 0
+            },
+            "openrouter": {
+              "attempts": 20,
+              "successes": 20,
+              "failures": {},
+              "cooldown_routed": 18
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58,
+            "distinct_allocations": 31
+          },
+          "shortlist": [
+            {
+              "value": "variant_18",
+              "score": 2.31,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.2,
+                "2": 0.32,
+                "3": 0.42,
+                "4": 0.05
+              },
+              "confidence": 0.33,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_41",
+              "score": 2.31,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.15,
+                "2": 0.4,
+                "3": 0.41,
+                "4": 0.03
+              },
+              "confidence": 0.37,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_15",
+              "score": 2.27,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.2,
+                "2": 0.35,
+                "3": 0.38,
+                "4": 0.06
+              },
+              "confidence": 0.3,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_42",
+              "score": 1.84,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.35,
+                "2": 0.45,
+                "3": 0.17,
+                "4": 0.02
+              },
+              "confidence": 0.51,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_5",
+              "score": 2.15,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.24,
+                "2": 0.35,
+                "3": 0.34,
+                "4": 0.05
+              },
+              "confidence": 0.41,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 15,
+            "order_disagreements": 5,
+            "preference_support": {
+              "variant_18": 2.47,
+              "variant_41": 2.56,
+              "variant_15": 2.725,
+              "variant_42": 1.9900000000000002,
+              "variant_5": 2.6500000000000004,
+              "keep": 2.6049999999999995
+            }
+          },
+          "confidence": {
+            "n": 93,
+            "min": 0.02,
+            "max": 0.8,
+            "mean": 0.33634408602150545
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-26-turn-2/candidate/2/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "candidate",
+          "repeat": 2,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Battle Trance",
+              "card_id": "BATTLE_TRANCE"
+            }
+          ],
+          "energy_left": 1,
+          "usage": {
+            "input_tokens": 525729,
+            "output_tokens": 2314
+          },
+          "calls": 26,
+          "elapsed_ms": 18920,
+          "transport": {
+            "openrouter": {
+              "attempts": 21,
+              "successes": 21,
+              "failures": {},
+              "cooldown_routed": 20
+            },
+            "vercel": {
+              "attempts": 5,
+              "successes": 4,
+              "failures": {
+                "503": 1
+              },
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58,
+            "distinct_allocations": 31
+          },
+          "shortlist": [
+            {
+              "value": "variant_41",
+              "score": 2.36,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.14,
+                "2": 0.37,
+                "3": 0.45,
+                "4": 0.03
+              },
+              "confidence": 0.41,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_18",
+              "score": 2.3,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.19,
+                "2": 0.34,
+                "3": 0.42,
+                "4": 0.04
+              },
+              "confidence": 0.34,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_56",
+              "score": 2.22,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.21,
+                "2": 0.37,
+                "3": 0.37,
+                "4": 0.04
+              },
+              "confidence": 0.29,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_42",
+              "score": 1.9,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.3,
+                "2": 0.49,
+                "3": 0.18,
+                "4": 0.02
+              },
+              "confidence": 0.54,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_5",
+              "score": 2.16,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.24,
+                "2": 0.35,
+                "3": 0.34,
+                "4": 0.05
+              },
+              "confidence": 0.4,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 15,
+            "order_disagreements": 6,
+            "preference_support": {
+              "variant_41": 2.48,
+              "variant_18": 2.485,
+              "variant_56": 2.845,
+              "variant_42": 1.81,
+              "variant_5": 2.6799999999999997,
+              "keep": 2.7
+            }
+          },
+          "confidence": {
+            "n": 93,
+            "min": 0.01,
+            "max": 0.81,
+            "mean": 0.3418279569892473
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-26-turn-2/openrouter/1/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "openrouter",
+          "repeat": 1,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Battle Trance",
+              "card_id": "BATTLE_TRANCE"
+            }
+          ],
+          "energy_left": 2,
+          "usage": {
+            "input_tokens": 524741,
+            "output_tokens": 2314
+          },
+          "calls": 25,
+          "elapsed_ms": 14747,
+          "transport": {
+            "openrouter": {
+              "attempts": 25,
+              "successes": 25,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58,
+            "distinct_allocations": 31
+          },
+          "shortlist": [
+            {
+              "value": "variant_18",
+              "score": 2.32,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.18,
+                "2": 0.34,
+                "3": 0.43,
+                "4": 0.04
+              },
+              "confidence": 0.36,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_41",
+              "score": 2.3,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.15,
+                "2": 0.4,
+                "3": 0.41,
+                "4": 0.03
+              },
+              "confidence": 0.37,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_15",
+              "score": 2.23,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.22,
+                "2": 0.36,
+                "3": 0.36,
+                "4": 0.05
+              },
+              "confidence": 0.27,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_42",
+              "score": 1.94,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.3,
+                "2": 0.45,
+                "3": 0.21,
+                "4": 0.03
+              },
+              "confidence": 0.51,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_5",
+              "score": 2.17,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.25,
+                "2": 0.34,
+                "3": 0.35,
+                "4": 0.05
+              },
+              "confidence": 0.23,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 15,
+            "order_disagreements": 5,
+            "preference_support": {
+              "variant_18": 2.435,
+              "variant_41": 2.63,
+              "variant_15": 2.695,
+              "variant_42": 2.02,
+              "variant_5": 2.6550000000000002,
+              "keep": 2.5649999999999995
+            }
+          },
+          "confidence": {
+            "n": 93,
+            "min": 0.01,
+            "max": 0.83,
+            "mean": 0.3331182795698927
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-resources/results/holdout-26-turn-2/openrouter/2/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "openrouter",
+          "repeat": 2,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Pommel Strike",
+              "card_id": "POMMEL_STRIKE",
+              "target": 1
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 526755,
+            "output_tokens": 2314
+          },
+          "calls": 25,
+          "elapsed_ms": 14418,
+          "transport": {
+            "openrouter": {
+              "attempts": 25,
+              "successes": 25,
+              "failures": {},
+              "cooldown_routed": 0
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58,
+            "distinct_allocations": 31
+          },
+          "shortlist": [
+            {
+              "value": "variant_16",
+              "score": 2.28,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.21,
+                "2": 0.33,
+                "3": 0.37,
+                "4": 0.07
+              },
+              "confidence": 0.27,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_18",
+              "score": 2.26,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.2,
+                "2": 0.36,
+                "3": 0.39,
+                "4": 0.04
+              },
+              "confidence": 0.31,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_29",
+              "score": 2.25,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.18,
+                "2": 0.41,
+                "3": 0.36,
+                "4": 0.04
+              },
+              "confidence": 0.46,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_42",
+              "score": 1.89,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.32,
+                "2": 0.46,
+                "3": 0.19,
+                "4": 0.02
+              },
+              "confidence": 0.53,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_5",
+              "score": 2.11,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.27,
+                "2": 0.35,
+                "3": 0.32,
+                "4": 0.04
+              },
+              "confidence": 0.41,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 15,
+            "order_disagreements": 8,
+            "preference_support": {
+              "variant_16": 2.505,
+              "variant_18": 2.4450000000000003,
+              "variant_29": 2.77,
+              "variant_42": 1.935,
+              "variant_5": 2.665,
+              "keep": 2.68
+            }
+          },
+          "confidence": {
+            "n": 93,
+            "min": 0.03,
+            "max": 0.81,
+            "mean": 0.34688172043010757
+          }
+        }
+      ]
+    },
+    {
+      "root": "run-artifacts/continuation-damage-stages",
+      "freeze": "c4b2ae5bf1592b67455616f4ec912caa4a7a346da0a654b76379a31b816fdf3b",
+      "results": [
+        {
+          "path": "run-artifacts/continuation-damage-stages/results/holdout-19-turn-4/openrouter/1/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "openrouter",
+          "repeat": 1,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 2
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 643424,
+            "output_tokens": 2338
+          },
+          "calls": 27,
+          "elapsed_ms": 17054,
+          "transport": {
+            "openrouter": {
+              "attempts": 27,
+              "successes": 27,
+              "failures": {}
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66,
+            "distinct_allocations": 36
+          },
+          "shortlist": [
+            {
+              "value": "variant_48",
+              "score": 2.55,
+              "probabilities": {
+                "0": 0.05,
+                "1": 0.21,
+                "2": 0.13,
+                "3": 0.36,
+                "4": 0.25
+              },
+              "confidence": 0.21,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_8",
+              "score": 2.54,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.18,
+                "2": 0.16,
+                "3": 0.43,
+                "4": 0.19
+              },
+              "confidence": 0.3,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_28",
+              "score": 2.48,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.21,
+                "2": 0.17,
+                "3": 0.39,
+                "4": 0.19
+              },
+              "confidence": 0.25,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 2,
+            "preference_support": {
+              "variant_48": 1.76,
+              "variant_8": 1.7,
+              "variant_28": 1.9050000000000002,
+              "keep": 0.635
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0,
+            "max": 0.98,
+            "mean": 0.4493617021276596
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-damage-stages/results/holdout-19-turn-4/openrouter/2/summary.json",
+          "id": "holdout-19-turn-4",
+          "label": "openrouter",
+          "repeat": 2,
+          "input_sha256": "17a3dd71f16db7d9b5105472ac1231348d538d5a80c649a571661d06eb788b1a",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Expect a Fight",
+              "card_id": "EXPECT_A_FIGHT"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Anger",
+              "card_id": "ANGER",
+              "target": 2
+            },
+            {
+              "kind": "end_turn"
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 642010,
+            "output_tokens": 2338
+          },
+          "calls": 27,
+          "elapsed_ms": 17108,
+          "transport": {
+            "openrouter": {
+              "attempts": 27,
+              "successes": 27,
+              "failures": {}
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 487,
+            "enumerated_plans": 234,
+            "selected_plans": 64,
+            "first_action_variants": 7,
+            "search_truncated": false,
+            "candidate_selection_truncated": true,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 66,
+            "assessed_plans": 66,
+            "distinct_allocations": 36
+          },
+          "shortlist": [
+            {
+              "value": "variant_48",
+              "score": 2.56,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.2,
+                "2": 0.15,
+                "3": 0.39,
+                "4": 0.22
+              },
+              "confidence": 0.27,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_28",
+              "score": 2.52,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.21,
+                "2": 0.14,
+                "3": 0.41000000000000003,
+                "4": 0.2
+              },
+              "confidence": 0.26,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_9",
+              "score": 2.38,
+              "probabilities": {
+                "0": 0.04,
+                "1": 0.26,
+                "2": 0.18,
+                "3": 0.31,
+                "4": 0.21
+              },
+              "confidence": 0.14,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            }
+          ],
+          "comparison": {
+            "pairs": 6,
+            "order_disagreements": 1,
+            "preference_support": {
+              "variant_48": 2.02,
+              "variant_28": 2.1900000000000004,
+              "variant_9": 1.07,
+              "keep": 0.72
+            }
+          },
+          "confidence": {
+            "n": 94,
+            "min": 0,
+            "max": 0.96,
+            "mean": 0.46989361702127647
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-damage-stages/results/holdout-24-turn-2/openrouter/1/summary.json",
+          "id": "holdout-24-turn-2",
+          "label": "openrouter",
+          "repeat": 1,
+          "input_sha256": "b6aac3b1a6e0a44d07670e28f8e45a2e653e579980e163dba291b51299f0f2ae",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Taunt",
+              "card_id": "TAUNT",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Unrelenting",
+              "card_id": "UNRELENTING",
+              "target": 1
+            }
+          ],
+          "energy_left": 0,
+          "usage": {
+            "input_tokens": 423691,
+            "output_tokens": 1472
+          },
+          "calls": 19,
+          "elapsed_ms": 11929,
+          "transport": {
+            "openrouter": {
+              "attempts": 19,
+              "successes": 19,
+              "failures": {}
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 24,
+            "enumerated_plans": 25,
+            "selected_plans": 25,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 25,
+            "assessed_plans": 25,
+            "distinct_allocations": 20
+          },
+          "shortlist": [
+            {
+              "value": "variant_12",
+              "score": 2.38,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.18,
+                "2": 0.3,
+                "3": 0.45,
+                "4": 0.06
+              },
+              "confidence": 0.39,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_14",
+              "score": 2.35,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.22,
+                "2": 0.25,
+                "3": 0.44,
+                "4": 0.08
+              },
+              "confidence": 0.32,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "keep",
+              "score": 2.27,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.28,
+                "2": 0.23,
+                "3": 0.37,
+                "4": 0.1
+              },
+              "confidence": 0.23,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_19",
+              "score": 1.86,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.41,
+                "2": 0.31,
+                "3": 0.22,
+                "4": 0.04
+              },
+              "confidence": 0.25,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_7",
+              "score": 1.72,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.45,
+                "2": 0.35,
+                "3": 0.17,
+                "4": 0.01
+              },
+              "confidence": 0.37,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 10,
+            "order_disagreements": 4,
+            "preference_support": {
+              "variant_12": 2.0700000000000003,
+              "variant_14": 2.855,
+              "keep": 1.755,
+              "variant_19": 1.6600000000000001,
+              "variant_7": 1.6600000000000001
+            }
+          },
+          "confidence": {
+            "n": 50,
+            "min": 0.03,
+            "max": 0.86,
+            "mean": 0.3502000000000001
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-damage-stages/results/holdout-26-turn-2/openrouter/1/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "openrouter",
+          "repeat": 1,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Battle Trance",
+              "card_id": "BATTLE_TRANCE"
+            }
+          ],
+          "energy_left": 3,
+          "usage": {
+            "input_tokens": 531889,
+            "output_tokens": 2314
+          },
+          "calls": 25,
+          "elapsed_ms": 14767,
+          "transport": {
+            "openrouter": {
+              "attempts": 25,
+              "successes": 25,
+              "failures": {}
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58,
+            "distinct_allocations": 31
+          },
+          "shortlist": [
+            {
+              "value": "variant_18",
+              "score": 2.29,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.19,
+                "2": 0.35,
+                "3": 0.41,
+                "4": 0.04
+              },
+              "confidence": 0.34,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_15",
+              "score": 2.27,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.22,
+                "2": 0.33,
+                "3": 0.38,
+                "4": 0.06
+              },
+              "confidence": 0.29,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_56",
+              "score": 2.26,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.19,
+                "2": 0.37,
+                "3": 0.39,
+                "4": 0.04
+              },
+              "confidence": 0.31,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_9",
+              "score": 2.14,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.28,
+                "2": 0.34,
+                "3": 0.29,
+                "4": 0.08
+              },
+              "confidence": 0.37,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_5",
+              "score": 2.15,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.25,
+                "2": 0.36,
+                "3": 0.33,
+                "4": 0.05
+              },
+              "confidence": 0.41,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 15,
+            "order_disagreements": 6,
+            "preference_support": {
+              "variant_18": 2.3850000000000002,
+              "variant_15": 2.42,
+              "variant_56": 2.6,
+              "variant_9": 2.535,
+              "variant_5": 2.91,
+              "keep": 2.1500000000000004
+            }
+          },
+          "confidence": {
+            "n": 93,
+            "min": 0,
+            "max": 0.8,
+            "mean": 0.3405376344086022
+          }
+        },
+        {
+          "path": "run-artifacts/continuation-damage-stages/results/holdout-26-turn-2/openrouter/2/summary.json",
+          "id": "holdout-26-turn-2",
+          "label": "openrouter",
+          "repeat": 2,
+          "input_sha256": "393bbf292b99560cf1fdd1c566cce843e2979a0ef6c0f17e804eb1fe3b9956da",
+          "model": "typesafe/jev-1.13-20260917",
+          "sequence": [
+            {
+              "kind": "play_card",
+              "name": "Defend",
+              "card_id": "DEFEND_IRONCLAD"
+            },
+            {
+              "kind": "play_card",
+              "name": "Strike",
+              "card_id": "STRIKE_IRONCLAD",
+              "target": 1
+            },
+            {
+              "kind": "play_card",
+              "name": "Battle Trance",
+              "card_id": "BATTLE_TRANCE"
+            }
+          ],
+          "energy_left": 1,
+          "usage": {
+            "input_tokens": 545605,
+            "output_tokens": 2317
+          },
+          "calls": 26,
+          "elapsed_ms": 15295,
+          "transport": {
+            "openrouter": {
+              "attempts": 26,
+              "successes": 26,
+              "failures": {}
+            }
+          },
+          "candidate_coverage": {
+            "inspected_prefixes": 63,
+            "enumerated_plans": 58,
+            "selected_plans": 58,
+            "first_action_variants": 6,
+            "search_truncated": false,
+            "candidate_selection_truncated": false,
+            "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+            "compared_plans": 58,
+            "assessed_plans": 58,
+            "distinct_allocations": 31
+          },
+          "shortlist": [
+            {
+              "value": "variant_15",
+              "score": 2.22,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.22,
+                "2": 0.35,
+                "3": 0.37,
+                "4": 0.05
+              },
+              "confidence": 0.27,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_18",
+              "score": 2.21,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.22,
+                "2": 0.36,
+                "3": 0.37,
+                "4": 0.04
+              },
+              "confidence": 0.28,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 2
+            },
+            {
+              "value": "variant_56",
+              "score": 2.21,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.21,
+                "2": 0.38,
+                "3": 0.37,
+                "4": 0.03
+              },
+              "confidence": 0.45,
+              "reason": "best_assessed_distinct_allocation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 1
+            },
+            {
+              "value": "variant_9",
+              "score": 2.11,
+              "probabilities": {
+                "0": 0.01,
+                "1": 0.31,
+                "2": 0.31,
+                "3": 0.29,
+                "4": 0.08
+              },
+              "confidence": 0.36,
+              "reason": "best_assessed_handoff",
+              "handoff": "enemy_turn",
+              "energy_left": 0
+            },
+            {
+              "value": "variant_5",
+              "score": 2.03,
+              "probabilities": {
+                "0": 0.02,
+                "1": 0.31,
+                "2": 0.35,
+                "3": 0.27,
+                "4": 0.05
+              },
+              "confidence": 0.41,
+              "reason": "preserve_resources_for_observation",
+              "handoff": "observe_then_continue_same_player_turn",
+              "energy_left": 3
+            }
+          ],
+          "comparison": {
+            "pairs": 15,
+            "order_disagreements": 7,
+            "preference_support": {
+              "variant_15": 2.5149999999999997,
+              "variant_18": 2.385,
+              "variant_56": 2.96,
+              "variant_9": 2.115,
+              "variant_5": 2.58,
+              "keep": 2.445
+            }
+          },
+          "confidence": {
+            "n": 93,
+            "min": 0.01,
+            "max": 0.84,
+            "mean": 0.3424731182795699
+          }
+        }
+      ]
+    }
+  ]
+}

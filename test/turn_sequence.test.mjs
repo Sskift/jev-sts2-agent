@@ -36,6 +36,21 @@ test('potion modifiers apply only to subsequent matching actions, without changi
   assert.deepEqual(s.combat.hand, before.combat.hand);
 });
 
+test('damage before prevention is distinct from sequential HP loss and consumed hit caps', () => {
+  const s = combat();
+  s.combat.enemies[0].powers = [{ id: 'SLIPPERY_POWER', name: 'Slippery', amount: 1 }];
+  s.combat.hand.push(fixtureCard('SECOND_ATTACK', { index: 2, target_previews: [{ target_id: 42, damage: 6 }] }));
+  const before = structuredClone(s);
+  const p = describeTurnProjection(s, [play('STRIKE_IRONCLAD', 42), play('SECOND_ATTACK', 42)]);
+  const [first, second] = p.sequence_dependencies.steps;
+  assert.deepEqual(first.damage_per_target[0].per_hit_before_block_and_hp_loss_caps, { min: 6, max: 6 });
+  assert.equal(first.after_block_and_hp_loss_caps[0].hp_removed, 1);
+  assert.deepEqual(first.after_block_and_hp_loss_caps[0].applied_hp_loss_limits, ['Slippery']);
+  assert.equal(second.after_block_and_hp_loss_caps[0].hp_removed, 6);
+  assert.equal(p.known_effects_only.enemies[0].hp_removed, 7);
+  assert.deepEqual(s, before);
+});
+
 test('inspection uses the intended hand upgrade and rejects a target already played', () => {
   const s = combat();
   s.combat.hand.push(fixtureCard('ARMAMENTS', { index: 2, type: 'Skill', description: 'Gain 5 Block. Upgrade a card in your Hand.', block: 5 }));
