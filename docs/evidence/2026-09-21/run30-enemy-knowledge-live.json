@@ -1,0 +1,83 @@
+{
+  "recorded_at": "2026-09-20T18:45:02.626Z",
+  "run_id": "run-1789929587",
+  "runtime_commit": "86fda8756c85b8fe5dc6e660585516c00f69477a",
+  "step": "step-0036",
+  "floor": 4,
+  "turn": 1,
+  "provider": "openrouter",
+  "requested_model": "typesafe/jev-1.13",
+  "actual_model": "typesafe/jev-1.13-20260917",
+  "request": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run30-2026-09-20T18-39-43.601Z/step-0036/jev-turn_objective-0001.json",
+    "sha256": "6f586c6353672e0a858d51c1abaae1b8bfa28b3487278be85845554f74aee300",
+    "bytes": 59630
+  },
+  "response": {
+    "file": "C:\\Users\\skift\\jevmake\\run-artifacts\\run30-2026-09-20T18-39-43.601Z/step-0036/jev-response-0001.json",
+    "sha256": "879766a3351ecef9fc77a837838e21ffd901a77f4faa6cd82adbdc6c5b7ac5ca"
+  },
+  "native_intent": {
+    "id": "LEAF_SLIME_M",
+    "intents": [
+      {
+        "type": "StatusCard",
+        "description": "This enemy intends to give you 2 Status cards."
+      }
+    ]
+  },
+  "matched_outlook": {
+    "combat_id": 2,
+    "identification": "One static move matches the visible intent shape.",
+    "matching_moves": [
+      {
+        "current_move": "STICKY_SHOT",
+        "generated_cards_if_current_move_resolves": [
+          {
+            "card_id": "SLIMED",
+            "destination": "Discard",
+            "count": 2,
+            "recipients": "move_targets",
+            "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+          }
+        ],
+        "after_current_intent": {
+          "move_id": "CLUMP_SHOT",
+          "then": {
+            "move_id": "STICKY_SHOT",
+            "generated_cards": [
+              {
+                "card_id": "SLIMED",
+                "destination": "Discard",
+                "count": 2,
+                "recipients": "move_targets",
+                "scope": "Per native call if reached while this move resolves. Guards, repetitions, targets, modifiers, interruptions and destination overflow are not simulated. This does not add cards to the observed piles."
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "external_transitions": [],
+    "coverage_gaps": [],
+    "scope": "Conditional on this identification, current intent resolving, survival and no interrupt. Current intent has not executed. Stuns, phase/death powers and other live rules override normal transitions; future damage is not the current intent damage."
+  },
+  "related_card": {
+    "id": "SLIMED",
+    "name": "Slimed",
+    "base_rules": "Draw 1 card.",
+    "type": "Status",
+    "target": "None",
+    "keywords": [
+      "Exhaust"
+    ],
+    "base_energy_cost": 1,
+    "vars": {
+      "Cards": 1
+    },
+    "related_rules": [
+      "keywords/EXHAUST"
+    ]
+  },
+  "interpretation": "A completed live request/response verifies knowledge integration. Future generation remains conditional and does not alter observed piles; this does not establish decision optimality or a run victory."
+}
