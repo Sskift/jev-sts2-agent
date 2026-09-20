@@ -338,5 +338,19 @@
     "The gate identifies represented exposures; it is neither exhaustive mechanic recognition nor proof of safety.",
     "Full observed state, legal choices and rules remain available to ordinary value comparisons.",
     "No full-run victory or demonstrated win-rate improvement."
-  ]
+  ],
+  "live_followup": {
+    "run_id": "run-1789900349",
+    "loaded_commit": "64a373b",
+    "source": "run-artifacts/2026-09-20T10-43-21-626Z-5c0b1377/step-0001/jev-turn_refine_pairs-0005.json",
+    "constraints": [],
+    "pairs": 6,
+    "questions": 6,
+    "question_kind": "overall_value_only",
+    "latest_confirmed_floor": 12,
+    "hp": 72,
+    "max_hp": 80,
+    "feishu_revision": 73,
+    "full_run_complete": false
+  }
 }
