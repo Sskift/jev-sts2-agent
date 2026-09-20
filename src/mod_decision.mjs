@@ -195,11 +195,11 @@ export function buildModCandidates(state) {
         const nth = counts.get(type) || 0;
         counts.set(type, nth + 1);
         if (type === 'card') {
-          for (const card of reward.card_choices || []) add(`reward_${reward.index}_card_${card.index}`, { cmd: 'reward_choose_card', reward_type: 'card', nth, card_id: card.id }, `Add ${card.name} (${card.id}) to the permanent deck: ${card.description}. Energy cost ${card.cost}.`);
-          if (state.rewards.can_skip !== false) add(`skip_card_${nth}`, { cmd: 'reward_skip_card', reward_type: 'card', nth }, 'Skip this card reward; keep the deck consistent and avoid unnecessary dilution.');
+          for (const card of reward.card_choices || []) add(`reward_${reward.index}_card_${card.index}`, { cmd: 'reward_choose_card', reward_type: 'card', nth, card_id: card.id }, `Add ${card.name} (${card.id}) to the permanent deck: ${card.description}. Energy cost ${card.cost}. Other rewards remain available.`);
+          if (state.rewards.can_skip !== false) add(`skip_card_${nth}`, { cmd: 'reward_skip_card', reward_type: 'card', nth }, 'Decline this card reward for now; add no card. Other rewards remain available.');
         } else if (['gold', 'relic', 'potion', 'special_card', 'cardremoval'].includes(type)) {
           if (type === 'potion' && state.decision_context?.player.potions.length >= state.decision_context?.potion_capacity) continue;
-          add(`claim_${reward.index}`, { cmd: 'reward_claim', reward_type: type, nth }, `Claim ${reward.description}. ${reward.relic_description || reward.potion_description || reward.card_description || ''}`);
+          add(`claim_${reward.index}`, { cmd: 'reward_claim', reward_type: type, nth }, `Claim ${reward.description}. ${reward.relic_description || reward.potion_description || reward.card_description || ''}${type === 'gold' ? ' Collect this gold reward without adding a card; other rewards remain available.' : ''}`);
         }
       }
       if (state.screen === 'REWARD' && (state.rewards?.can_skip === true || state.rewards?.rewards.length === 0)) add('proceed', { cmd: 'proceed' }, 'Leave rewards and continue the run; remaining rewards are forfeited.');
