@@ -184,7 +184,6 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       await sleep(intervalMs);
       const after = await client.state({ includePileDetails: true });
       save(path.join(directory, 'after-state.json'), after);
-      await onObservation?.(after);
       await snapshot(directory, 'after');
       if (!response.ok && response.error === 'TIMEOUT' && decision.request.cmd === 'end_turn') {
         const observed = observedEndTurnSelection(memory.data.pending, after);
@@ -200,6 +199,7 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       observeRun(progress, after, path.join(directory, 'after-state.json'));
       memory.data.run_progress = progress;
       memory.persist();
+      await onObservation?.(after);
       const changed = actionFingerprint(after) !== actionFingerprint(state);
       if (response.ok && decision.request.cmd === 'play_card') battle.playedCards++;
       if (response.ok && decision.request.cmd === 'end_turn') battle.endedTurns++;
