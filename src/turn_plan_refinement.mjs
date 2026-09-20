@@ -6,6 +6,7 @@ import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
 import { independentTurnCandidates, compareFinalists, planSignature, planAllocation, shortlistPlans } from './turn_candidates.mjs';
 import { describeContinuation } from './card_flow_projection.mjs';
+import { intentDamage } from './combat_arithmetic.mjs';
 
 const signature = planSignature;
 const bindFollowthrough = (step, following) => {
@@ -28,10 +29,17 @@ export function describePlanAlternative(state, steps) {
   const usedPotions = new Set(sequence.entries.filter(e => e.potion).map(e => e.potion.slot));
   const potions = (state.combat.player.potions || []).map(p => ({ id: p.id, slot: p.slot }));
   const known = projection.known_effects_only;
+  const currentAttack = state.combat.enemies.filter(e => e.is_alive && e.hp > 0).reduce((sum, e) => sum + intentDamage(e), 0);
   const blockable = known.incoming_attack === null ? null : known.incoming_attack + known.end_turn_damage_events.reduce((sum, event) => sum + event.amount, 0);
   let energyAfterPrintedCosts = state.combat.player.energy;
   return {
     resource_consequences: {
+      current_displayed_attack_damage: currentAttack,
+      block_against_current_displayed_attacks: {
+        additional_absorption: known.block === null ? null : Math.max(0, Math.min(currentAttack, known.block) - Math.min(currentAttack, state.combat.player.block)),
+        block_above_displayed_damage: known.block === null ? null : Math.max(0, known.block - currentAttack),
+        scope: 'Arithmetic against the ORIGINAL displayed attacks only, including at observation checkpoints. This does not promise the enemy response: changed intents, reactions, turn-end effects, retention and other Block uses must be evaluated separately.'
+      },
       consumed_potions: potions.filter(p => usedPotions.has(p.slot)),
       potions_still_available: potions.filter(p => !usedPotions.has(p.slot)),
       known_blockable_damage_before_block: blockable,

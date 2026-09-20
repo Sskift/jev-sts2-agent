@@ -48,7 +48,8 @@ test('new Vulnerable propagates through an ordered plan; reversing order or usin
   assert.deepEqual(p.debuff_dependencies.ordered_damage[1].per_hit, { min: 9, max: 10 });
   assert.deepEqual(p.debuff_dependencies.enemies[0].hp_remaining, { min: 0, max: 0 });
   assert.equal(p.debuff_dependencies.enemies[0].depleted_if_all_declared_hits_resolve, true);
-  assert.equal(p.known_effects_only.enemies[0].hp, null, 'No contradictory unchanged-preview point estimate');
+  assert.equal(p.known_effects_only.enemies[0].hp, 0, 'Both ordered bounds agree; publish the reconciled result');
+  assert.equal(p.known_effects_only.incoming_attack, 0);
   assert.equal(describeTurnProjection(s, [plan[1], plan[0], plan[2]]).debuff_dependencies.enemies[0].hp_remaining.max, 3);
   s.combat.hand[0] = { ...s.combat.hand[0], id: 'BASH', description: 'Deal 10 damage. Apply 3 Vulnerable.', target_previews: [{ target_id: 42, damage: 10 }] };
   assert.deepEqual(describeTurnProjection(s, steps(s)).debuff_dependencies.enemies[0].hp_remaining, { min: 2, max: 3 });
@@ -74,7 +75,7 @@ test('Weak uses integer-preview bounds and existing debuffs are not multiplied t
   assert.deepEqual(p.enemies[0].current_attack_after_debuffs, { min: 7, max: 7 });
 });
 
-test('Artifact consumes Weak before Vulnerable; caps and custom multipliers remain unknown', () => {
+test('Artifact consumes Weak before Vulnerable; unknown damage caps and custom multipliers stay unresolved', () => {
   const s = fixture(); s.combat.enemies[0].hp = 50;
   s.combat.enemies[0].powers = [{ id: 'ARTIFACT_POWER', amount: 1 }];
   let p = describeTurnProjection(s, steps(s)).debuff_dependencies;
@@ -84,10 +85,47 @@ test('Artifact consumes Weak before Vulnerable; caps and custom multipliers rema
   s.combat.enemies[0].powers = [{ id: 'ARTIFACT_POWER', amount: 2 }];
   p = describeTurnProjection(s, steps(s)).debuff_dependencies;
   assert.deepEqual(p.ordered_damage[1].per_hit, { min: 6, max: 6 });
-  for (const modifiers of [[{ id: 'SLIPPERY_POWER', amount: 1 }], [{ id: 'DEBILITATE_POWER', amount: 1 }]]) {
+  for (const modifiers of [[{ id: 'INTANGIBLE_POWER', amount: 1 }], [{ id: 'DEBILITATE_POWER', amount: 1 }],
+    [{ id: 'SLIPPERY_POWER', amount: 1 }, { id: 'BUFFER_POWER', amount: 1 }]]) {
     s.combat.enemies[0].powers = modifiers;
     assert.deepEqual(describeTurnProjection(s, steps(s)).debuff_dependencies.enemies[0].hp_remaining, { min: null, max: null });
   }
+});
+
+test('Taunt and sequential attacks expose spent Slippery counters without erasing exact capped outcomes', () => {
+  const s = fixture();
+  s.combat.enemies[0].hp = 50;
+  s.combat.enemies[0].powers = [{ id: 'SLIPPERY_POWER', amount: 2 }];
+  s.combat.hand[0] = { ...s.combat.hand[0], id: 'TAUNT', cost: 1, type: 'Skill', block: 7,
+    description: 'Gain 7 Block. Apply 2 Vulnerable.', target_previews: [{ target_id: 42 }] };
+  s.combat.hand.push({ ...structuredClone(s.combat.hand[1]), index: 2, details: { instance_id: 'second-strike' } });
+  const before = structuredClone(s), candidates = buildModCandidates(s);
+  const plan = ['card_0_target_42', 'card_1_target_42', 'card_2_target_42', 'end_turn'].map(id => planStep(s, candidates.get(id)));
+  const p = describeTurnProjection(s, plan), known = p.known_effects_only;
+  assert.equal(known.enemies[0].hp, 48);
+  assert.equal(known.enemies[0].hp_removed, 2);
+  assert.deepEqual(known.enemies[0].power_changes, [
+    { power_id: 'SLIPPERY_POWER', before: 2, after_declared_actions: { min: 0, max: 0 } },
+    { power_id: 'VULNERABLE_POWER', before: 0, after_declared_actions: { min: 2, max: 2 } }
+  ]);
+  assert.equal(known.incoming_attack, 10);
+  assert.equal(known.hp_if_ending, s.combat.player.hp - 3);
+  assert.equal(p.sequence_dependencies.steps[1].after_block_and_hp_loss_caps[0].hp_removed, 1);
+  assert.deepEqual(p.sequence_dependencies.steps[1].damage_per_target[0].per_hit_before_block_and_hp_loss_caps, { min: 9, max: 10 });
+  assert.deepEqual(s, before);
+  // Once the last stack is consumed, later damage must use the uncapped range.
+  s.combat.enemies[0].powers[0].amount = 1;
+  const depleted = describeTurnProjection(s, plan);
+  assert.deepEqual(depleted.debuff_dependencies.enemies[0].hp_remaining, { min: 39, max: 40 });
+  assert.equal(depleted.known_effects_only.enemies[0].hp, null);
+  // A targeted potion uses the same application/counter path and no energy.
+  s.combat.enemies[0].powers[0].amount = 2;
+  s.combat.player.potions = [{ id: 'VULNERABLE_POTION', slot: 0, target_type: 'AnyEnemy', description: 'Apply 3 Vulnerable.' }];
+  const potion = { kind: 'use_potion', potion_id: 'VULNERABLE_POTION', slot: 0, target: 42, name: 'Vulnerable Potion' };
+  const withPotion = describeTurnProjection(s, [potion, ...plan]);
+  assert.equal(withPotion.known_effects_only.enemies[0].hp, 48);
+  assert.deepEqual(withPotion.known_effects_only.enemies[0].power_changes.find(p => p.power_id === 'VULNERABLE_POWER').after_declared_actions, { min: 5, max: 5 });
+  assert.ok(!withPotion.omitted_effects.some(text => text.includes('potion effects are not simulated')));
 });
 
 test('dependency ranges survive the production context compiler without modifying observations', () => {

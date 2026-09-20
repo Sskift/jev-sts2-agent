@@ -2,7 +2,7 @@
 
 The objective remains one autonomous standard run through all three acts and the formal victory screen. The implemented architecture addresses how the system represents a decision. It does not claim improved win rate before live evidence exists.
 
-The sequence-dependency change has been evaluated against saved observations. The current phase remains offline: see the [knowledge/planning regression](knowledge-evaluation.md), [sequence report](sequence-evaluation.md) and [plan](plan.md). No new live win-rate evidence exists.
+The sequence-dependency change has been evaluated against saved observations and a subsequent standard run. Run 28 failed at the Act 1 boss; its [review](run28-review.md) records both context gaps and remaining model errors. Ordered debuff bounds now reconcile exact HP, Block and prevention-counter results before response arithmetic. Retrieval checkpoints also distinguish earlier completed plays from the still-resolving card. These changes do not establish a win-rate improvement; see the [plan](plan.md).
 
 `knowledge.strategy` now contains sourced, conditional advice for the current character, selected by relevant owned mechanics during combat. `knowledge.catalog.monsters` uses the version-pinned native transition graphs alongside Codex move facts. `analysis.enemy_outlook` links visible intent shapes to conditional next moves without internal move IDs or RNG. Plan `encounter_progress` distinguishes damage, depletion, revival and permanent removal; uncomputed death hooks invalidate affected survival estimates. These additions do not change the source precedence or lossless round-trip contract.
 

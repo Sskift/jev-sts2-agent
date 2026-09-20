@@ -2,7 +2,7 @@ import { attackHpLoss, combatForecast, intentDamage, uncomputedDepletionRules } 
 import { projectPositioning } from './combat_positioning.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { describeCardFlow } from './card_flow_projection.mjs';
-import { projectDebuffDependencies } from './turn_debuff_projection.mjs';
+import { projectDebuffDependencies, modeledPowerChanges } from './turn_debuff_projection.mjs';
 import { describeEffectLifecycle } from './effect_lifecycle.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
 import { encounterProgress } from './strategy_knowledge.mjs';
@@ -24,10 +24,17 @@ export function reserveSequence(state, steps) {
 // equals that of an otherwise identical plan without it.
 export function describeTurnProjection(state, steps) {
   const sequence = inspectSequence(state, steps);
-  const projection = projectTurnPrefix(state, steps, sequence);
   const debuffs = projectDebuffDependencies(state, steps, sequence.entries);
+  const resolved = (debuffs?.enemies || []).filter(result => {
+    const before = state.combat.enemies.find(e => e.combat_id === result.combat_id);
+    return !sequence.unknown_targets.includes(result.combat_id)
+      && [result.hp_remaining, result.block_remaining, result.current_attack_after_debuffs, ...result.power_changes.map(p => p.after_declared_actions)]
+        .every(range => Number.isFinite(range.min) && range.min === range.max)
+      && (result.hp_remaining.max === 0 || result.current_attack_after_debuffs.min === intentDamage(before));
+  });
+  const projection = projectTurnPrefix(state, steps, sequence, { enemies: resolved, applications: debuffs?.transitions || [] });
   const lifecycle = describeEffectLifecycle(state, steps);
-  const affected = new Set([...(debuffs?.affected_target_ids || []), ...sequence.unknown_targets]);
+  const affected = new Set([...(debuffs?.affected_target_ids || []).filter(id => !resolved.some(e => e.combat_id === id)), ...sequence.unknown_targets]);
   const depletionEffects = projection.remaining_enemies.flatMap(enemy => {
     const before = state.combat.enemies.find(e => e.combat_id === enemy.combat_id);
     return enemy.hp <= 0 && before.hp > 0 ? uncomputedDepletionRules(before).map(power => ({ owner_combat_id: enemy.combat_id, source_id: power.id, description: power.description })) : [];
@@ -46,8 +53,11 @@ export function describeTurnProjection(state, steps) {
       incoming_attack: affected.size ? null : projection.incoming_attack_after_prefix,
       enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
         const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
-        if (affected.has(combat_id)) return { combat_id, hp: null, block: null, hp_removed: null, block_removed: null };
-        return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block };
+        const after = projection.remaining_enemies.find(enemy => enemy.combat_id === combat_id);
+        const powerChanges = debuffs?.enemies.find(e => e.combat_id === combat_id)?.power_changes
+          || modeledPowerChanges(before, [after], affected.has(combat_id));
+        if (affected.has(combat_id)) return { combat_id, hp: null, block: null, hp_removed: null, block_removed: null, power_changes: powerChanges };
+        return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block, power_changes: powerChanges };
       })
     },
     ...(projection.positioning ? { positioning: projection.positioning } : {}),
@@ -56,9 +66,23 @@ export function describeTurnProjection(state, steps) {
     ...(debuffs ? { debuff_dependencies: debuffs } : {}),
     ...(lifecycle ? { effect_lifecycle: lifecycle } : {}),
     sequence_dependencies: { ...sequence.analysis, steps: sequence.analysis.steps.map(step => {
-      const effects = projection.attack_effects.filter(effect => effect.sequence === step.sequence);
-      return { ...step, ...(effects.length ? { after_block_and_hp_loss_caps: effects.map(({ sequence: _sequence, ...effect }) =>
-        affected.has(effect.target_id) ? { ...effect, hp_removed: null, block_removed: null, limitation: 'Changed modifiers or uncomputed depletion hooks invalidate this estimate.' } : effect) } : {}) };
+      const ordered = debuffs?.ordered_damage.filter(effect => effect.sequence === step.sequence) || [];
+      const effects = projection.attack_effects.filter(effect => effect.sequence === step.sequence).map(effect => {
+        const updated = ordered.find(e => e.target_id === effect.target_id)?.after_block_and_hp_loss_caps;
+        return updated ? { ...effect,
+          hp_removed: updated.hp_removed.min === updated.hp_removed.max ? updated.hp_removed.min : null,
+          block_removed: updated.block_removed.min === updated.block_removed.max ? updated.block_removed.min : null,
+          applied_hp_loss_limits: updated.applied_hp_loss_limits } : effect;
+      });
+      const damage = step.damage_per_target?.map(effect => {
+        const updated = ordered.find(e => e.target_id === effect.target_id);
+        return updated ? { ...effect, per_hit_before_block_and_hp_loss_caps: updated.per_hit,
+          total_before_block_and_hp_loss_caps: Object.fromEntries(['min', 'max'].map(bound => [bound,
+            updated.per_hit[bound] === null || updated.preview_hits === null ? null : updated.per_hit[bound] * updated.preview_hits])) } : effect;
+      });
+      return { ...step, ...(damage ? { damage_per_target: damage } : {}),
+        ...(effects.length ? { after_block_and_hp_loss_caps: effects.map(({ sequence: _sequence, ...effect }) =>
+          affected.has(effect.target_id) ? { ...effect, hp_removed: null, block_removed: null, limitation: 'Unresolved modifiers or depletion hooks invalidate this point estimate; see dependency ranges.' } : effect) } : {}) };
     }) },
     ...(depletionEffects.length ? { uncomputed_depletion_effects: depletionEffects } : {}),
     encounter_progress: encounterProgress(state.combat, projection.remaining_enemies, [...affected]),
@@ -73,11 +97,13 @@ export function describeTurnProjection(state, steps) {
 
 // This is a conditional sum of visible previews, not a game simulator. Keeping
 // it separate from combat prevents planned outcomes from becoming observations.
-export function projectTurnPrefix(state, steps, sequence = inspectSequence(state, steps)) {
+export function projectTurnPrefix(state, steps, sequence = inspectSequence(state, steps), dependencies = { enemies: [], applications: [] }) {
   const combat = structuredClone(state.combat), unresolved = [], reactions = [], cardFlowEffects = [], attackEffects = [];
   for (const entry of sequence.entries) {
     const { sequence: index, step, card } = entry;
-    if (step.kind !== 'play_card') { if (!sequence.analysis.steps.find(s => s.sequence === index)?.applies_after_action) unresolved.push(`${step.name}: potion effects are not simulated`); continue; }
+    const applications = dependencies.applications.filter(effect => effect.sequence === index);
+    const supportedApplication = applications.length > 0 && applications.every(effect => effect.outcome !== 'unresolved');
+    if (step.kind !== 'play_card') { if (!supportedApplication && !sequence.analysis.steps.find(s => s.sequence === index)?.applies_after_action) unresolved.push(`${step.name}: potion effects are not simulated`); continue; }
     if (!card) { unresolved.push(`${step.name}: card availability is unconfirmed`); continue; }
     if (card.cost < 0 && !card.attack_preview) unresolved.push(`${card.name}: X-cost hit count after earlier spending is unknown`);
     const target = combat.enemies.find(enemy => enemy.combat_id === step.target);
@@ -110,12 +136,24 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     const sandpitOwners = combat.enemies.filter(enemy => enemy.is_alive && enemy.powers?.some(p => p.id === 'SANDPIT_POWER'));
     if (card.id === 'FRANTIC_ESCAPE' && sandpitOwners.length === 1) sandpitOwners[0].powers.find(p => p.id === 'SANDPIT_POWER').amount++;
     const dependency = sequence.analysis.steps.find(s => s.sequence === index);
-    const covered = card.id === 'RAGE' && Number.isFinite(card.rage_block_per_attack)
+    const covered = supportedApplication || card.id === 'RAGE' && Number.isFinite(card.rage_block_per_attack)
       || card.id === 'ARMAMENTS' && dependency?.upgrades_before_later_actions?.every(id => state.combat.hand.find(c => c.details?.instance_id === id)?.upgrade_preview)
       || card.id === 'SETUP_STRIKE' && dependency?.applies_after_action
       || card.id === 'WHIRLWIND' && Number.isFinite(dependency?.damage_instances)
       || card.id === 'FRANTIC_ESCAPE' && sandpitOwners.length === 1;
     if (!covered && !/^(?:Deal [\d.]+ damage\.?|Gain [\d.]+ Block\.?)$/i.test(card.description.trim())) unresolved.push(`${card.name}: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed`);
+  }
+  // Reconcile exact dependency bounds BEFORE calculating incoming damage and
+  // turn-end hooks. A supported debuff must not erase a known HP/counter result
+  // or leave an unchanged-preview value beside a different ordered result.
+  for (const result of dependencies.enemies) {
+    const enemy = combat.enemies.find(e => e.combat_id === result.combat_id);
+    enemy.hp = result.hp_remaining.min; enemy.block = result.block_remaining.min; enemy.is_alive = enemy.hp > 0;
+    for (const change of result.power_changes) {
+      const power = enemy.powers.find(p => p.id === change.power_id);
+      if (power) power.amount = change.after_declared_actions.min;
+      else enemy.powers.push({ id: change.power_id, amount: change.after_declared_actions.min });
+    }
   }
   const end = combatForecast(combat);
   if (sequence.checkpoint) unresolved.push(`Observe after ${sequence.checkpoint.source_id}: ${sequence.checkpoint.reason} No later action or end-turn outcome is promised.`);
@@ -147,7 +185,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
   }));
   return {
     scope: 'Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint.',
-    remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
+    remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, powers: enemy.powers, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
     block: reactions.length || sequence.unknown_block ? null : combat.player.block, block_including_end_turn_gains: reactions.length || sequence.unknown_block || sequence.checkpoint ? null : end.block_including_end_turn_gains, end_turn_block_gains: end.end_turn_block_gains,
     hp_after_declared_self_loss: combat.player.hp,
     hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved || reactions.length || sequence.unknown_block || sequence.unknown_targets.length || sequence.checkpoint ? null : end.hp_remaining_if_end_turn,

@@ -93,6 +93,22 @@ test('observation comparisons expose unspent alternatives without promising a po
   assert.equal(compareContinuationResources(early, late).after_plan_a_observation.fits_remaining_energy_at_observed_cost, null);
 });
 
+test('retrieval checkpoints distinguish earlier completed plays from the still-resolving card', () => {
+  const state = completeCombat();
+  state.combat.hand = [
+    fixtureCard('DEFEND_IRONCLAD', { index: 0, type: 'Skill', cost: 1, block: 8, description: 'Gain 8 Block.', details: { instance_id: 'defend' } }),
+    fixtureCard('HEADBUTT', { index: 1, cost: 1, description: 'Deal 9 damage. Put a card from your Discard Pile on top of your Draw Pile.', details: { instance_id: 'headbutt' } })
+  ];
+  state.combat.discard_pile = [];
+  const before = structuredClone(state);
+  const sequence = inspectSequence(state, [{ kind: 'play_card', card_instance_id: 'defend' }, { kind: 'play_card', card_instance_id: 'headbutt', target: 42 }]);
+  const access = describeContinuation(state.combat, sequence).conditional_pile_access;
+  assert.equal(access.observed_discard_count, 0);
+  assert.deepEqual(access.earlier_completed_plays.map(c => [c.instance_id, c.ordinary_post_play_destination]), [['defend', 'discard_pile']]);
+  assert.equal(access.checkpoint_source_id, 'HEADBUTT');
+  assert.deepEqual(state, before);
+});
+
 test('shortlisting compares different commitments instead of filling its slots with permutations', () => {
   const step = (id, target = 42) => ({ kind: 'play_card', card_instance_id: id, target });
   const entry = (value, steps, energy, observe = false) => ({ value, allocation: planAllocation(steps),

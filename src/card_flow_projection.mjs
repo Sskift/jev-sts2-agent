@@ -56,6 +56,17 @@ export function describeContinuation(combat, sequence) {
     checkpoint: sequence.checkpoint, energy_after_known_payments: sequence.energy_left,
     remaining_hand_before_unresolved_effects: sequence.remaining_hand.map(card => ({ hand_index: card.index,
       id: card.id, name: card.name, cost: card.cost, type: card.type, rules: card.description })),
+    ...(/\b(?:Discard|Exhaust|Draw) Pile\b/.test(text) || Number(draw?.[1]) > combat.draw_pile.length ? {
+      conditional_pile_access: {
+        observed_discard_count: combat.discard_pile.length,
+        earlier_completed_plays: sequence.entries.filter(e => e.card && e.sequence < sequence.checkpoint.after_sequence).map(({ card }) => ({
+          id: card.id, instance_id: card.details?.instance_id, name: card.name, rules: card.description,
+          ordinary_post_play_destination: card.type === 'Power' ? 'active_power' : card.keywords?.includes('Exhaust') ? 'exhaust_pile' : 'discard_pile'
+        })),
+        checkpoint_source_id: entity.id,
+        scope: 'Conditional normal card flow before this checkpoint resolves, separate from the observed piles. Earlier plays can create retrieval or reshuffle candidates; current rules may redirect, exhaust or return them. Do not put the still-resolving checkpoint card in Discard or promise a selected card. Observe the actual modal or draw before continuing.'
+      }
+    } : {}),
     ...(draw ? { draw_access: { declared_count: Number(draw[1]),
       source: 'Currently observed draw pile; its array order is not predictive.', pool: [...groups.values()],
       pool_cards_within_remaining_energy_at_observed_cost: [...groups.values()].filter(row => row.cost_within_remaining_energy === true).reduce((n, row) => n + row.count, 0),

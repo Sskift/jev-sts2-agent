@@ -1,0 +1,345 @@
+{
+  "at": "2026-09-20T17:33:43.330Z",
+  "run_number": 28,
+  "run_id": "run-1789923216",
+  "provider": "openrouter",
+  "requested_model": "typesafe/jev-1.13",
+  "runtime_commit": "dc1d7eb711eb8095c78de360621371c2dc6fc27b",
+  "mode": "Standard",
+  "character": "IRONCLAD",
+  "ascension": 0,
+  "result": {
+    "is_victory": false,
+    "floor": 17,
+    "score": 171,
+    "epochs_discovered": 0,
+    "can_return_to_menu": false,
+    "can_continue": false
+  },
+  "final_enemy_hp": 94,
+  "player_hp_at_boss_start": 54,
+  "boss_initial_enemy_hp": 173,
+  "boss_turns": [
+    {
+      "step": "step-0220",
+      "turn": 1,
+      "hp_before_enemy": 54,
+      "hp_after_enemy": 54,
+      "block": 12,
+      "enemy_hp": 172,
+      "slippery": 7,
+      "incoming": 7
+    },
+    {
+      "step": "step-0225",
+      "turn": 2,
+      "hp_before_enemy": 54,
+      "hp_after_enemy": 54,
+      "block": 16,
+      "enemy_hp": 171,
+      "slippery": 6,
+      "incoming": 12
+    },
+    {
+      "step": "step-0229",
+      "turn": 3,
+      "hp_before_enemy": 54,
+      "hp_after_enemy": 41,
+      "block": 13,
+      "enemy_hp": 170,
+      "slippery": 5,
+      "incoming": 26
+    },
+    {
+      "step": "step-0233",
+      "turn": 4,
+      "hp_before_enemy": 41,
+      "hp_after_enemy": 41,
+      "block": 5,
+      "enemy_hp": 168,
+      "slippery": 3,
+      "incoming": 0
+    },
+    {
+      "step": "step-0237",
+      "turn": 5,
+      "hp_before_enemy": 41,
+      "hp_after_enemy": 41,
+      "block": 16,
+      "enemy_hp": 166,
+      "slippery": 1,
+      "incoming": 9
+    },
+    {
+      "step": "step-0241",
+      "turn": 6,
+      "hp_before_enemy": 41,
+      "hp_after_enemy": 25,
+      "block": 0,
+      "enemy_hp": 147,
+      "slippery": 0,
+      "incoming": 16
+    },
+    {
+      "step": "step-0245",
+      "turn": 7,
+      "hp_before_enemy": 25,
+      "hp_after_enemy": 10,
+      "block": 13,
+      "enemy_hp": 138,
+      "slippery": 0,
+      "incoming": 28
+    },
+    {
+      "step": "step-0250",
+      "turn": 8,
+      "hp_before_enemy": 10,
+      "hp_after_enemy": 10,
+      "block": 8,
+      "enemy_hp": 123,
+      "slippery": 0,
+      "incoming": 0
+    },
+    {
+      "step": "step-0254",
+      "turn": 9,
+      "hp_before_enemy": 10,
+      "hp_after_enemy": 10,
+      "block": 23,
+      "enemy_hp": 123,
+      "slippery": 0,
+      "incoming": 11
+    },
+    {
+      "step": "step-0258",
+      "turn": 10,
+      "hp_before_enemy": 10,
+      "hp_after_enemy": 0,
+      "block": 8,
+      "enemy_hp": 94,
+      "slippery": 0,
+      "incoming": 20
+    }
+  ],
+  "terminal": {
+    "file": "run-artifacts/run28-2026-09-20T16-53-32.435Z/step-0258/after-state.json",
+    "sha256": "a935a1db1cd86348e8047dae49e2e9c878498eb29e57e810d58a17edc8074412"
+  },
+  "session": "run-artifacts/run28-2026-09-20T16-53-32.435Z/session.json",
+  "final_memory": "run-artifacts/run28-2026-09-20T16-53-32.435Z/final-memory.json",
+  "review": {
+    "clear_issues": [
+      "Turn 1: 12 Block versus 7 attack; one capped hit instead of an available two-hit, 7-Block commitment.",
+      "Turn 4: Defend before a draw with no displayed attack spends one energy with no identified immediate benefit."
+    ],
+    "corrected_interpretation": {
+      "turn": 8,
+      "initial_discard_count": 0,
+      "played_defend_instance": "d01bdaebc90c4e4cb86dd631d49fec09",
+      "headbutt_selected_same_defend": true,
+      "meaning": "Defend+ was played before Headbutt and then placed on top for the next turn. Zero current incoming damage does not prove that this preparatory play was wasteful."
+    },
+    "limitations": [
+      "No counterfactual full fight was executed.",
+      "Build, camp and event choices can affect the result; their individual causal contribution is not established.",
+      "Better alternatives reached the shortlist; context completeness alone did not resolve final model preferences."
+    ]
+  },
+  "replay_summaries": [
+    {
+      "id": "run28-boss-turn1",
+      "label": "unified-effects",
+      "input_sha256": "980c439189c0bcaa1d219d19e977a5b4e8388a3ad38968007ff475283bd85ba5",
+      "source_sha256": "f87d52f4551f9aaa9c49e0f5bf0f5fb3b7c51369070f9a5041cff3ac7c948dc3",
+      "model": "typesafe/jev-1.13-20260917",
+      "providers": [
+        "openrouter"
+      ],
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Taunt+",
+          "card_id": "TAUNT",
+          "target": 1
+        },
+        {
+          "kind": "use_potion",
+          "name": "Vulnerable Potion",
+          "target": 1,
+          "slot": 0
+        },
+        {
+          "kind": "play_card",
+          "name": "Thunderclap+",
+          "card_id": "THUNDERCLAP"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 29,
+      "usage": {
+        "input_tokens": 573797,
+        "output_tokens": 2450
+      },
+      "elapsed_ms": 17316,
+      "error": null,
+      "artifact": "run-artifacts/run28-review/results/run28-boss-turn1/unified-effects/1/summary.json"
+    },
+    {
+      "id": "run28-boss-turn4",
+      "label": "unified-effects",
+      "input_sha256": "00f84265191b938c604decf7d82c6fd70a216fe173efd35b9be9f17c308ef6e8",
+      "source_sha256": "f87d52f4551f9aaa9c49e0f5bf0f5fb3b7c51369070f9a5041cff3ac7c948dc3",
+      "model": "typesafe/jev-1.13-20260917",
+      "providers": [
+        "openrouter"
+      ],
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Pommel Strike+",
+          "card_id": "POMMEL_STRIKE",
+          "target": 1
+        }
+      ],
+      "calls": 15,
+      "usage": {
+        "input_tokens": 307042,
+        "output_tokens": 1538
+      },
+      "elapsed_ms": 9041,
+      "error": null,
+      "artifact": "run-artifacts/run28-review/results/run28-boss-turn4/unified-effects/1/summary.json"
+    },
+    {
+      "id": "run28-boss-turn8",
+      "label": "unified-effects",
+      "input_sha256": "522d3d43729056da10ff1c71e4df342f30feba08c08295dfcacb3386529cfccc",
+      "source_sha256": "f87d52f4551f9aaa9c49e0f5bf0f5fb3b7c51369070f9a5041cff3ac7c948dc3",
+      "model": "typesafe/jev-1.13-20260917",
+      "providers": [
+        "openrouter"
+      ],
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend+",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Headbutt",
+          "card_id": "HEADBUTT",
+          "target": 1
+        }
+      ],
+      "calls": 22,
+      "usage": {
+        "input_tokens": 434836,
+        "output_tokens": 2263
+      },
+      "elapsed_ms": 13072,
+      "error": null,
+      "artifact": "run-artifacts/run28-review/results/run28-boss-turn8/unified-effects/1/summary.json"
+    },
+    {
+      "id": "run28-boss-turn1",
+      "label": "unified-potion-effects",
+      "input_sha256": "980c439189c0bcaa1d219d19e977a5b4e8388a3ad38968007ff475283bd85ba5",
+      "source_sha256": "f4c03204e8964c1e56f65d9339791d399e472a453a397b461432ae20ded94cf0",
+      "model": "typesafe/jev-1.13-20260917",
+      "providers": [
+        "openrouter"
+      ],
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Taunt+",
+          "card_id": "TAUNT",
+          "target": 1
+        },
+        {
+          "kind": "use_potion",
+          "name": "Vulnerable Potion",
+          "target": 1,
+          "slot": 0
+        },
+        {
+          "kind": "play_card",
+          "name": "Thunderclap+",
+          "card_id": "THUNDERCLAP"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "calls": 28,
+      "usage": {
+        "input_tokens": 565101,
+        "output_tokens": 2447
+      },
+      "elapsed_ms": 16474,
+      "error": null,
+      "artifact": "run-artifacts/run28-potion-review/results/run28-boss-turn1/unified-potion-effects/1/summary.json"
+    },
+    {
+      "id": "run28-boss-turn8",
+      "label": "checkpoint-block-use",
+      "input_sha256": "522d3d43729056da10ff1c71e4df342f30feba08c08295dfcacb3386529cfccc",
+      "source_sha256": "e946c0c389755b345c8623ddd2e8800ba98fca15ff049161e662b03d45559a1b",
+      "model": "typesafe/jev-1.13-20260917",
+      "providers": [
+        "openrouter"
+      ],
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend+",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "name": "Headbutt",
+          "card_id": "HEADBUTT",
+          "target": 1
+        }
+      ],
+      "calls": 17,
+      "usage": {
+        "input_tokens": 348849,
+        "output_tokens": 1789
+      },
+      "elapsed_ms": 10806,
+      "error": null,
+      "artifact": "run-artifacts/run28-checkpoint-review/results/run28-boss-turn8/checkpoint-block-use/1/summary.json"
+    }
+  ],
+  "release_source_sha256": "a27a5f1c0112a2937e5a25340f297dfd3bdf8ef5ebc08b3709f30fe82b9e1187",
+  "release_validation": {
+    "node_tests_passed": 206,
+    "final_pile_access_field": "Checked against the actual turn-8 Defend+/Headbutt retrieval and a focused fixture; earlier replay variants precede this field."
+  },
+  "disclosures": [
+    "All replay cases are development examples already examined during review, not a held-out test set.",
+    "All intermediate outcomes are retained, including worse or unchanged decisions.",
+    "Replay requests issue no game commands; confidence is model distribution concentration, not win probability."
+  ]
+}
