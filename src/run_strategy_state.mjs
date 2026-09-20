@@ -15,7 +15,8 @@ export const developmentPriorities = { ...strategicCapabilities,
 const sort = values => values.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 
 // Permanent capabilities are reconsidered at room/aftermath boundaries and
-// after material build changes, not whenever a combat counter or hand changes.
+// after structural build changes. Numeric growth within a fight is visible to
+// tactics immediately and coalesced into one strategic review after combat.
 export function strategyBasis(state) {
   const context = state.decision_context;
   if (!context?.run_id || !context.player) return null;
@@ -25,8 +26,12 @@ export function strategyBasis(state) {
       card.details?.enchantment ?? null, card.details?.affliction ?? null])),
     relics: context.player.relics.map(relic => relic.id).sort()
   };
+  const structure = { act: material.act, relics: material.relics,
+    deck: sort(material.deck.map(([id, upgrades, enchantment, affliction]) => [id, upgrades,
+      enchantment?.id ?? enchantment, affliction?.id ?? affliction])) };
   return { run_id: context.run_id, act_index: context.act_index, floor: context.total_floor,
     checkpoint: `${context.total_floor}:${state.combat ? 'combat' : 'between_rooms'}`,
+    structure_id: createHash('sha256').update(JSON.stringify(structure)).digest('hex').slice(0, 24),
     build_id: createHash('sha256').update(JSON.stringify(material)).digest('hex').slice(0, 24) };
 }
 
@@ -35,7 +40,11 @@ export function strategyRefreshReason(state, memory) {
   if (!basis) return null;
   if (!current || current.basis.run_id !== basis.run_id) return 'No strategic assessment exists for this run.';
   if (current.basis.act_index !== basis.act_index) return 'The run entered a different act.';
-  if (current.basis.build_id !== basis.build_id) return 'The permanent deck, owned relics or maximum HP changed.';
+  if (current.basis.build_id !== basis.build_id) {
+    const sameCombatStructure = state.combat && current.basis.checkpoint === basis.checkpoint
+      && current.basis.structure_id === basis.structure_id;
+    if (!sameCombatStructure) return 'The permanent deck, owned relics or maximum HP changed.';
+  }
   if (current.basis.checkpoint !== basis.checkpoint) return 'A new room or its post-combat choices need a strategic review.';
   return null;
 }
@@ -59,7 +68,8 @@ export function publicRunStrategy(state, memory) {
   return {
     source: 'persisted_jev_judgment', is_observed_fact: false, run_id: current.basis.run_id,
     revision: current.revision, basis: current.basis,
-    freshness: { needs_review: Boolean(reason), reason },
+    freshness: { needs_review: Boolean(reason), reason,
+      deferred_until_post_combat: !reason && current.basis.build_id !== strategyBasis(state).build_id },
     development_priority: { id: current.priority.choice, meaning: developmentPriorities[current.priority.choice], confidence: current.priority.confidence },
     anchor: current.anchor,
     capability_assessment: { source: 'jev_judgment', assessed_revision: current.revision, model: current.model,
@@ -71,7 +81,7 @@ export function publicRunStrategy(state, memory) {
       assessments_archived: archive.length, intention_changes_included: revisions.length,
       scope: 'All changes of development priority or anchor are listed. Latest capability scores and confidence are included in full. Superseded numerical model ratings and confidence-only changes are omitted from this request and retained in the local audit archive. They are old model opinions, not missing game observations; no game history is removed by this policy.'
     },
-    scope: 'Advisory judgment of the owned build at the recorded checkpoint, not a fact, card-buying rule or commitment. Current HP, hand, enemies, prices and actual offered options take precedence. Tactical survival may override the development priority. No future random acquisition is assumed; revise after material changes.'
+    scope: 'Advisory judgment of the owned build at the recorded checkpoint, not a fact, card-buying rule or commitment. Current HP, hand, enemies, prices and actual offered options take precedence. Tactical survival may override the development priority. Numeric permanent growth within the same combat is reflected in live facts and reviewed strategically after combat; structural changes are reviewed immediately. No future random acquisition is assumed.'
   };
 }
 

@@ -81,6 +81,27 @@ test('the main decision path reassesses once then carries the same strategy into
   assert.equal(seen[2].intent.run_strategy.revision, 1);
 });
 
+test('permanent numeric growth within combat updates live facts but coalesces strategic review until aftermath', () => {
+  const state = completeCombat(), memory = new DecisionMemory(); memory.observe(state);
+  state.decision_context.master_deck[0].details.enchantment = { id: 'GOOPY', amount: 1, description: 'Permanently grows when played.' };
+  rememberRunStrategy(memory, state, assessment(state, memory), 'Combat entry.');
+  const original = structuredClone(memory.data.run_strategy);
+  state.decision_context.master_deck[0].details.enchantment.amount = 2;
+  state.decision_context.player.max_hp++;
+  state.combat.player.max_hp++;
+  assert.notEqual(strategyBasis(state).build_id, original.basis.build_id);
+  assert.equal(strategyBasis(state).structure_id, original.basis.structure_id);
+  assert.equal(strategyRefreshReason(state, memory), null);
+  assert.equal(publicRunStrategy(state, memory).freshness.deferred_until_post_combat, true);
+  const prepared = prepareModDecision(state, { memory });
+  const compiled = compileModelRequest(prepared.payload).payload.state;
+  assert.equal(expandRecordTables(compiled.observation.deck.cards)[0].card.details.enchantment.amount, 2);
+  assert.deepEqual(memory.data.run_strategy, original, 'Reusing judgment does not silently move its basis forward');
+  delete state.combat; state.screen = 'REWARD';
+  assert.match(strategyRefreshReason(state, memory), /permanent deck/);
+  assert.equal(publicRunStrategy(state, memory).freshness.deferred_until_post_combat, false);
+});
+
 test('an incomplete strategic response commits no memory and does not select a game command', async () => {
   const state = completeCombat(), memory = new DecisionMemory(); memory.observe(state);
   let requests = 0;

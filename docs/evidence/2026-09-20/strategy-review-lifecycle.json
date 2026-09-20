@@ -1,0 +1,22 @@
+{
+  "run_id": "run-1789896546",
+  "scope": "Read-only lifecycle check using two successive saved observations and the old actual strategic response. No game command or model request.",
+  "observed_change": "Owned Defend enchantment amount increased after playing it; card/relic identities and upgrades were unchanged.",
+  "source_before": "run-artifacts/2026-09-20T09-55-20-329Z-43cea2f3/step-0008/before-state.json",
+  "source_after": "run-artifacts/2026-09-20T09-55-20-329Z-43cea2f3/step-0009/before-state.json",
+  "prior_assessment": {
+    "source": "run-artifacts/2026-09-20T09-55-20-329Z-43cea2f3/step-0009/run-strategy-decision.json",
+    "reason": "The permanent deck, owned relics or maximum HP changed.",
+    "usage": {
+      "input_tokens": 16890,
+      "output_tokens": 507,
+      "cost": 0.00070938
+    }
+  },
+  "current_policy": {
+    "full_build_changed": true,
+    "structure_changed": false,
+    "immediate_refresh_reason": null,
+    "post_combat_refresh_reason": "The permanent deck, owned relics or maximum HP changed."
+  }
+}

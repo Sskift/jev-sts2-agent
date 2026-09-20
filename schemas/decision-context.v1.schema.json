@@ -32,7 +32,8 @@
         "basis": {
           "type": "object", "additionalProperties": false, "required": ["run_id", "act_index", "floor", "checkpoint", "build_id"],
           "properties": { "run_id": { "type": "string" }, "act_index": { "type": "integer", "minimum": 0 },
-            "floor": { "type": "integer", "minimum": 0 }, "checkpoint": { "type": "string" }, "build_id": { "type": "string", "pattern": "^[a-f0-9]{24}$" } }
+            "floor": { "type": "integer", "minimum": 0 }, "checkpoint": { "type": "string" }, "build_id": { "type": "string", "pattern": "^[a-f0-9]{24}$" },
+            "structure_id": { "type": "string", "pattern": "^[a-f0-9]{24}$" } }
         },
         "revision_coverage": { "type": "object", "additionalProperties": false,
           "required": ["policy", "assessments_archived", "intention_changes_included", "scope"],
@@ -40,7 +41,8 @@
             "assessments_archived": { "type": "integer", "minimum": 0 },
             "intention_changes_included": { "type": "integer", "minimum": 0 }, "scope": { "$ref": "#/$defs/text" } } },
         "freshness": { "type": "object", "additionalProperties": false, "required": ["needs_review", "reason"],
-          "properties": { "needs_review": { "type": "boolean" }, "reason": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/text" }] } } },
+          "properties": { "needs_review": { "type": "boolean" }, "deferred_until_post_combat": { "type": "boolean" },
+            "reason": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/text" }] } } },
         "development_priority": { "type": "object", "required": ["id", "meaning", "confidence"],
           "properties": { "id": { "enum": ["single_target_damage", "multiple_enemy_control", "sustained_defense", "long_fight_scaling", "draw_consistency", "energy_efficiency", "recovery", "preserve_flexibility"] },
             "meaning": { "$ref": "#/$defs/text" }, "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 } } },
