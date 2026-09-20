@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handUpgradeMode, preservesPlanDependencies } from '../src/turn_effects.mjs';
+import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from '../src/turn_effects.mjs';
 import { reserveSequence } from '../src/turn_projection.mjs';
 import { refineTurnPlan } from '../src/turn_plan_refinement.mjs';
 import { planStep } from '../src/turn_plan_state.mjs';
@@ -13,6 +13,18 @@ test('future/random upgrades never invent a current hand-selection promise', () 
   assert.equal(handUpgradeMode('At the start of your turn, put a random Attack from your Discard Pile into your Hand and Upgrade it.'), null);
   assert.equal(handUpgradeMode('At the start of your turn, Upgrade a card in your Hand.'), null);
   assert.equal(handUpgradeMode('Upgrade a random card in your Hand.'), null);
+});
+
+test('a next-Attack preparation permits intervening skills but rejects a different attacking consumer', () => {
+  assert.equal(nextCardKind('This turn, your next Attack is played an extra time.'), 'Attack');
+  assert.equal(nextCardKind('Next turn, your next Attack is played an extra time.'), null);
+  const prep = { kind: 'play_card', card_type: 'Skill', card_instance_id: 'prep', next_card_instance_id: 'payoff', next_card_type: 'Attack' };
+  const skill = { kind: 'play_card', card_type: 'Skill', card_instance_id: 'block' };
+  const attack = { kind: 'play_card', card_type: 'Attack', card_instance_id: 'strike' };
+  const payoff = { kind: 'play_card', card_type: 'Attack', card_instance_id: 'payoff' };
+  assert.equal(preservesPlanDependencies([prep, skill, payoff, attack]), true);
+  assert.equal(preservesPlanDependencies([prep, attack, skill, payoff]), false);
+  assert.equal(preservesPlanDependencies([prep, skill]), false);
 });
 
 test('two preceding attacks reserve the verified discounted Stomp cost without changing the card', () => {

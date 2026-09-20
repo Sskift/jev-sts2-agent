@@ -85,6 +85,18 @@ test('stable plan survives persistence and resolves duplicate copies against the
   assert.equal(next.planning_trace.length, 0);
 });
 
+test('next-Attack preparation binds the exact payoff instance before the first command', async () => {
+  const prep = card('ONE_TWO_PUNCH', 'prep', 0, { name: 'One-Two Punch', type: 'Skill', target_type: 'Self', description: 'This turn, your next Attack is played an extra time.' });
+  const payoff = card('BASH', 'attack', 1, { name: 'Bash', type: 'Attack', cost: 2 });
+  const state = stateWith([prep, payoff]), memory = new DecisionMemory(); memory.observe(state);
+  const result = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', refineTurnPlan: false,
+    fetchImpl: fakeJev(['damage', 'card_1_target_42', 'card_0', 'manual']) });
+  assert.equal(result.request.id, 'ONE_TWO_PUNCH');
+  assert.equal(result.turn_plan.steps[0].next_card_instance_id, 'attack');
+  assert.equal(result.turn_plan.steps[0].next_card_type, 'Attack');
+  assert.equal(result.turn_plan.steps[1].card_type, 'Attack');
+});
+
 test('upgrade modal follows the beneficiary chosen before preparation and confirms it before reviewing the suffix', async () => {
   const state = stateWith([card('ARMAMENTS', 'arm', 0, { name: 'Armaments', type: 'Skill', target_type: 'Self', description: 'Upgrade a card.' }), card('BASH', 'attack', 1, { name: 'Bash', cost: 2 })]);
   const memory = new DecisionMemory(); memory.observe(state);

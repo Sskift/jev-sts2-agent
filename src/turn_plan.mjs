@@ -4,7 +4,7 @@ import { sameTurn, planStep, resolvePlanStep, inspectTurnPlan, turnFingerprint, 
 import { projectTurnPrefix, reserveSequence } from './turn_projection.mjs';
 import { turnStrategyInstructions } from './decision_instructions.mjs';
 import { refineTurnPlan } from './turn_plan_refinement.mjs';
-import { handUpgradeMode } from './turn_effects.mjs';
+import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
 
 export const turnObjectives = {
   remove_threat: 'Focus damage or disruption on a dangerous enemy, prioritizing an achievable kill or disable before its next action.',
@@ -154,7 +154,10 @@ export async function decideTurn(state, options, prepared, choose) {
     if (beneficiary?.request.cmd === 'play_card') {
       const card = state.combat.hand.find(card => card.index === beneficiary.card_hand_index);
       step.beneficiary_instance_id = cardInstance(card); step.beneficiary_name = card.name;
-      if (/\b(?:your|the) next card\b/i.test(step.rules_at_planning)) step.next_card_instance_id = cardInstance(card);
+      const consumer = nextCardKind(step.rules_at_planning);
+      if (consumer && (consumer === 'Any' || consumer === card.type)) {
+        step.next_card_instance_id = cardInstance(card); step.next_card_type = consumer;
+      }
     }
     step.reserved_energy = printedCost(state, candidate, Math.max(0, energy), plan.steps);
     energy -= step.reserved_energy;

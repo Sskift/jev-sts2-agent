@@ -37,7 +37,7 @@ export function planStep(state, candidate, role = 'payoff') {
     kind: candidate.request.cmd, role,
     description: card ? `Play ${card.name}${candidate.request.target !== undefined ? ` against combat_id ${candidate.request.target}` : ''}.`
       : potion ? `Use ${potion.name}.` : 'End the player turn after the preceding planned steps.',
-    ...(card ? { card_instance_id: cardInstance(card), card_id: card.id, name: card.name, cost_at_planning: card.cost, rules_at_planning: card.description } : {}),
+    ...(card ? { card_instance_id: cardInstance(card), card_id: card.id, card_type: card.type, name: card.name, cost_at_planning: card.cost, rules_at_planning: card.description } : {}),
     ...(potion ? { potion_id: potion.id, slot: potion.slot, name: potion.name, rules_at_planning: potion.description } : {}),
     ...(candidate.request.target !== undefined ? { target: candidate.request.target } : {})
   };

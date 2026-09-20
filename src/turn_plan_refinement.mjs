@@ -1,15 +1,16 @@
 import { planStep, cardInstance } from './turn_plan_state.mjs';
 import { projectTurnPrefix, reserveSequence } from './turn_projection.mjs';
-import { handUpgradeMode, preservesPlanDependencies } from './turn_effects.mjs';
+import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from './turn_effects.mjs';
 
 const signature = steps => JSON.stringify(steps.map(step => [step.kind, step.card_instance_id, step.potion_id, step.slot, step.target]));
 const bindFollowthrough = (step, following) => {
-  const next = following.find(candidate => candidate.kind === 'play_card');
+  const consumer = nextCardKind(step.rules_at_planning);
+  const next = following.find(candidate => candidate.kind === 'play_card'
+    && (!consumer || consumer === 'Any' || candidate.card_type === consumer));
   if (!next) return step;
-  const nextCard = /\b(?:your|the) next card\b/i.test(step.rules_at_planning || '');
-  if (handUpgradeMode(step.rules_at_planning) || nextCard) {
+  if (handUpgradeMode(step.rules_at_planning) || consumer) {
     step.role = 'preparation'; step.beneficiary_instance_id = next.card_instance_id; step.beneficiary_name = next.name;
-    if (nextCard) step.next_card_instance_id = next.card_instance_id;
+    if (consumer) { step.next_card_instance_id = next.card_instance_id; step.next_card_type = consumer; }
   }
   return step;
 };
