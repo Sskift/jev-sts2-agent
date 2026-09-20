@@ -52,5 +52,35 @@
     "Typed references supply related rules, not the guaranteed application, initial amount, destination or outcome of a move. Live counters and piles retain priority.",
     "Only the named move method is inspected. Other helpers, alternative construction forms and conditional execution can remain uncovered.",
     "This establishes context coverage and schema compatibility; no win-rate or decision-quality improvement is claimed."
-  ]
+  ],
+  "same_run_resume": {
+    "runtime_commit": "966c3f67630d875bf1b718907b3e19640b1ae22a",
+    "artifact_dir": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z",
+    "provider": "openrouter",
+    "actual_model": "typesafe/jev-1.13-20260917",
+    "native_file": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/resume-native.json",
+    "native_sha256": "2f1813f9330c3b7ec9ae08fcbf32ebb46e221a3a829fc9b1edd126f674829538",
+    "run_id": "run-1789929587",
+    "act": 1,
+    "floor": 29,
+    "hp": 61,
+    "turn": 2,
+    "first_command": {
+      "cmd": "play_card",
+      "id": "SQUASH",
+      "nth": 0,
+      "target": 2
+    },
+    "first_after_file": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0001/after-state.json",
+    "first_after_sha256": "f167f447830f9dd55de490df69c81198942f945499fe24cf16f93a3b82c66d2b",
+    "first_after_run_id": "run-1789929587",
+    "first_after_hp": 61,
+    "live_request": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0001/jev-turn_review-0001.json",
+    "live_request_sha256": "1199503cab8ee3a11a94c8e9e278ec63471473eb1d08ca931e9e6a4ef2ef747e",
+    "live_response": "run-artifacts/run30-resume-2026-09-20T19-18-28.875Z/step-0001/jev-response-0001.json",
+    "live_response_sha256": "3aae1731b624921ba42efd2b05722581fc3e722ab504f120026a775ff2fc633f",
+    "contains_frantic_escape": true,
+    "contains_sandpit": true,
+    "removed_block_summary_absent": true
+  }
 }

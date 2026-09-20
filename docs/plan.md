@@ -24,9 +24,9 @@
 
 本次修正与[只读回放证据](evidence/2026-09-21/run29-review.json)已作为 `86fda87` 推送。随后正常结算返回无存档菜单，开始第 30 局标准游戏 `run-1789929587`，铁甲战士、进阶 0，[第一层证据](evidence/2026-09-21/run30-start.json)已保存。第 10 回合击败第一幕 Kin Priest，战后 39/85；已进入第二幕第 19 层，恢复为 85/85，[跨幕证据](evidence/2026-09-21/run30-act-one.json)确认相同 run ID。第 4 层[实际请求](evidence/2026-09-21/run30-enemy-knowledge-live.json)也确认生成牌规则完整关联。继续推进同一局，保留正式结算证据；不回退房间，不执行历史反事实。
 
-第一幕 Boss 的第 3 回合暴露了重复摘要的时序问题：立即获得的 5 点格挡被标作额外吸收，却没有在该数值中扣除零格挡时已有的 Orichalcum 6 点收益。完整规则原本已提供。已删除这份重复摘要，保留完整条件结算；14 项相关检查通过。[一次完整只读回放](evidence/2026-09-21/run30-block-summary-review.json)仍选 Defend → Pommel Strike，不能声称改善了模型选择。该修改尚未加载到本局控制器，本局继续使用 `86fda87`。
+第一幕 Boss 的第 3 回合暴露了重复摘要的时序问题：立即获得的 5 点格挡被标作额外吸收，却没有在该数值中扣除零格挡时已有的 Orichalcum 6 点收益。完整规则原本已提供。已删除这份重复摘要，保留完整条件结算；14 项相关检查通过。[一次完整只读回放](evidence/2026-09-21/run30-block-summary-review.json)仍选 Defend → Pommel Strike，不能声称改善了模型选择。该修改作为 `514df0f` 推送，并在后述第 29 层同局重载时生效。
 
-继续到第二幕第 29 层，原生状态为 The Obscura 战第 2 回合、61/85。预先核对地图可见的 The Insatiable，发现旧实际请求缺少 Frantic Escape 与 Sandpit；新增具名招式的规则类型关联，51 项相关检查通过，原行动图、直接生成牌效果和程序集哈希未变。[关联与重载检查点](evidence/2026-09-21/run30-enemy-rule-references.json)保留真实请求、编译验证和原生现场。旧控制器已在第 409 步后正常退出，pending=null；提交修正后从此处继续同一局，加载时一并包含格挡摘要删除。
+继续到第二幕第 29 层，原生状态为 The Obscura 战第 2 回合、61/85。预先核对地图可见的 The Insatiable，发现旧实际请求缺少 Frantic Escape 与 Sandpit；新增具名招式的规则类型关联，51 项相关检查通过，原行动图、直接生成牌效果和程序集哈希未变。[关联与同局恢复证据](evidence/2026-09-21/run30-enemy-rule-references.json)保留真实请求、编译验证和原生现场。旧控制器在第 409 步后正常退出，pending=null；`966c3f6` 推送后从此处恢复同一局，首个 Squash 动作已确认。新请求已包含两项规则，格挡重复摘要也已移除；后续目录为 `run-artifacts/run30-resume-2026-09-20T19-18-28.875Z`，继续通过 OpenRouter 推进。
 
 路线联合示例和准备费用校验已在第 29 局第 22 层恢复时加载，见[路线证据](evidence/2026-09-21/joint-route-context.json)及[故障恢复](evidence/2026-09-21/run29-budget-recovery.json)。第 30 局从开始使用这些改动与新的怪物知识关联；不能把此前第一幕进展归因于后加载的修正。
 
