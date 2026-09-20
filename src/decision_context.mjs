@@ -378,6 +378,22 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     // permanent deck change. Instance IDs still join the grouped deck below.
     screenState.rest_site.deck_upgrade_previews = context.deck_upgrade_previews;
   }
+  const selectionScreens = new Set(['HAND_SELECT', 'GRID_CARD_SELECT', 'TRI_SELECT', 'RELIC_SELECT', 'BUNDLE_SELECT']);
+  if (selectionScreens.has(state.screen) && memory.data.run_id === context?.run_id) {
+    const selectionCommands = new Set(['hand_select_card', 'hand_confirm_selection', 'grid_select_card', 'tri_select_card', 'bundle_select']);
+    const prior = memory.data.actions.findLast(action => !selectionCommands.has(action.request.cmd));
+    if (prior?.ok && prior.floor === context.total_floor && (prior.combat_id || null) === (context.combat_id || null) && selectionScreens.has(prior.after_screen)) {
+      const selectedEventOption = prior.request.cmd === 'choose_event'
+        ? prior.result?.event_state?.options?.find(option => option.index === prior.request.args?.[0]) : null;
+      screenState.preceding_observed_action = {
+        note: 'Most recent confirmed action that opened a selection in this room. Its printed effect helps interpret the choice; the current prompt and constraints still apply.',
+        request: clone(prior.request),
+        ...(prior.played_card_at_request ? { card: clone(prior.played_card_at_request) } : {}),
+        ...(prior.potion_at_request ? { potion: clone(prior.potion_at_request) } : {}),
+        ...(selectedEventOption ? { selected_event_option: clone(selectedEventOption) } : {})
+      };
+    }
+  }
   if (selectionPlanning) screenState.selection_planning = clone(selectionPlanning);
   const combat = source.combat ? { ...source.combat } : null;
   if (combat) {

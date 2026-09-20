@@ -877,6 +877,37 @@ index 6f45c8c..4e909f2 100644
 -}
 \ No newline at end of file
 +}
+diff --git a/STS2.Cli.Mod/Models/State/TriSelectStateDto.cs b/STS2.Cli.Mod/Models/State/TriSelectStateDto.cs
+index cb0f34b..154a3e1 100644
+--- a/STS2.Cli.Mod/Models/State/TriSelectStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/TriSelectStateDto.cs
+@@ -14,11 +14,17 @@ namespace STS2.Cli.Mod.Models.State;
+ public class TriSelectStateDto
+ {
+     /// <summary>
+-    ///     Type of selection: choose_from_pool_attack, choose_from_pool_skill, choose_from_pool_power,
+-    ///     choose_from_pool, etc.
++    ///     Native interaction type: choose_card. This screen does not identify the selected
++    ///     card's destination; neither card count nor card types establish its purpose.
+     /// </summary>
+     public required string SelectionType { get; set; }
+ 
++    /// <summary>
++    ///     Current native banner text, falling back to the screen's localized choose-card header.
++    ///     Null if neither can be read. A generic prompt does not specify what happens to the card.
++    /// </summary>
++    public string? Prompt { get; set; }
++
+     /// <summary>
+     ///     Minimum number of cards that must be selected (0 if skippable, 1 if forced).
+     /// </summary>
+@@ -38,4 +44,4 @@ public class TriSelectStateDto
+     ///     List of cards available for selection (up to 3).
+     /// </summary>
+     public List<SelectableCardDto> Cards { get; set; } = [];
+-}
+\ No newline at end of file
++}
 diff --git a/STS2.Cli.Mod/Server/PipeServer.cs b/STS2.Cli.Mod/Server/PipeServer.cs
 index 8e0675c..0f773dc 100644
 --- a/STS2.Cli.Mod/Server/PipeServer.cs
@@ -1453,10 +1484,28 @@ index eac8d59..145d87d 100644
                      IsStocked = entry.IsStocked
                  });
 diff --git a/STS2.Cli.Mod/State/Builders/TriSelectStateBuilder.cs b/STS2.Cli.Mod/State/Builders/TriSelectStateBuilder.cs
-index 024b98a..46d6a4f 100644
+index 024b98a..fc9107e 100644
 --- a/STS2.Cli.Mod/State/Builders/TriSelectStateBuilder.cs
 +++ b/STS2.Cli.Mod/State/Builders/TriSelectStateBuilder.cs
-@@ -58,7 +58,7 @@ public static class TriSelectStateBuilder
+@@ -1,4 +1,6 @@
++using MegaCrit.Sts2.Core.Localization;
+ using MegaCrit.Sts2.Core.Nodes.Cards.Holders;
++using MegaCrit.Sts2.Core.Nodes.CommonUi;
+ using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
+ using STS2.Cli.Mod.Models.State;
+ using STS2.Cli.Mod.Utils;
+@@ -8,8 +10,8 @@ namespace STS2.Cli.Mod.State.Builders;
+ 
+ /// <summary>
+ ///     Builds the tri-select (choose-a-card) state DTO from <see cref="NChooseACardSelectionScreen" />.
+-///     Extracts selectable cards, skip availability, and infers the selection type
+-///     from the card composition (e.g., all attacks → choose_from_pool_attack).
++///     Extracts the native prompt, selectable cards, and skip availability without guessing
++///     the selection's purpose or destination from the card composition.
+ /// </summary>
+ public static class TriSelectStateBuilder
+ {
+@@ -58,13 +60,15 @@ public static class TriSelectStateBuilder
                      CardName = StripGameTags(card.Title),
                      CardType = card.Type.ToString(),
                      Cost = card.EnergyCost.Canonical,
@@ -1465,6 +1514,48 @@ index 024b98a..46d6a4f 100644
                  });
              }
  
+             return new TriSelectStateDto
+             {
+-                SelectionType = InferSelectionType(cards),
++                // The native screen does not retain source or destination metadata.
++                SelectionType = "choose_card",
++                Prompt = ReadPrompt(screen),
+                 MinSelect = canSkip ? 0 : 1,
+                 MaxSelect = 1,
+                 CanSkip = canSkip,
+@@ -78,18 +82,21 @@ public static class TriSelectStateBuilder
+         }
+     }
+ 
+-    /// <summary>
+-    ///     Infers the selection type from the available cards.
+-    ///     If all 3 cards share the same type, returns <c>choose_from_pool_{type}</c>.
+-    /// </summary>
+-    private static string InferSelectionType(List<SelectableCardDto> cards)
++    private static string? ReadPrompt(NChooseACardSelectionScreen screen)
+     {
+-        if (cards.Count == 3)
++        try
++        {
++            var banner = screen.GetNodeOrNull<NCommonBanner>("Banner");
++            var text = StripGameTags(banner?.label?.Text);
++            if (!string.IsNullOrWhiteSpace(text)) return text;
++        }
++        catch (Exception ex)
+         {
+-            var types = cards.Select(c => c.CardType).Distinct().ToList();
+-            return types.Count == 1 ? $"choose_from_pool_{types[0]?.ToLowerInvariant()}" : "choose_from_pool";
++            Logger.Warning($"Failed to read tri-select banner: {ex.Message}");
+         }
+ 
+-        return cards.Count > 3 ? "choose_from_hand" : "unknown";
++        // Use the same localization key as NChooseACardSelectionScreen._Ready when
++        // the label is not initialized. This generic prompt does not imply card destination.
++        return GetLocText(new LocString("gameplay_ui", "CHOOSE_CARD_HEADER"));
+     }
+-}
+\ No newline at end of file
++}
 diff --git a/STS2.Cli.Mod/State/StateHandler.cs b/STS2.Cli.Mod/State/StateHandler.cs
 index 27bedca..16b70b1 100755
 --- a/STS2.Cli.Mod/State/StateHandler.cs

@@ -160,6 +160,23 @@ test('rest upgrade previews match deck instances without recording hypothetical 
   assert.equal(memory.data.observations.length, 0);
 });
 
+test('selection shows its recorded trigger after restart without attributing a different room or run', t => {
+  const file = path.join(temporary(t), 'memory.json'), memory = new DecisionMemory({ file });
+  const option = { index: 0, title: 'Paperweight', description: 'Choose 1 card to add to your Deck.', is_locked: false };
+  const before = withContext({ screen: 'EVENT', event: { options: [option] } });
+  const after = withContext({ screen: 'TRI_SELECT', tri_select: { selection_type: 'choose_card', prompt: 'Choose a Card', min_select: 0, max_select: 1, can_skip: true, cards: [] } });
+  memory.observe(before); memory.begin({ cmd: 'choose_event', args: [0] }, before);
+  memory.finish({ ok: true, data: { event_state: { options: [{ ...option, was_chosen: true }] } } }, after); memory.observe(after);
+  const restored = new DecisionMemory({ file }), result = packet(after, restored);
+  assert.equal(result.screen_state.preceding_observed_action.selected_event_option.description, option.description);
+  for (const change of [state => { state.decision_context.total_floor++; }, state => { state.decision_context.run_id = 'other-run'; }, state => { state.decision_context.combat_id = 'other-combat'; }]) {
+    const unrelated = structuredClone(after); change(unrelated);
+    assert.equal(packet(unrelated, restored).screen_state.preceding_observed_action, undefined);
+  }
+  restored.begin({ cmd: 'proceed' }, after); restored.finish({ ok: true }, { ...after, screen: 'MAP' });
+  assert.equal(packet(after, restored).screen_state.preceding_observed_action, undefined);
+});
+
 test('old mod, missing card rules, missing powers, extraction failures and mismatched counts fail before any API call', async () => {
   for (const alter of [
     s => { delete s.decision_context; },
