@@ -6,5 +6,9 @@ const betweenRooms = 'Early Act 1 needs several effective damage cards or attack
 
 export function decisionInstructions(state) {
   const rewards = ['REWARD', 'CARD_REWARD'].includes(state.screen) ? ' Claim beneficial free rewards, including gold, before leaving; skipping a card does not mean skipping other rewards. Taking a gold reward still lets you proceed afterward.' : '';
-  return `${common} ${state.combat ? combat : betweenRooms}${rewards}`;
+  const enemies = state.combat?.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) || [];
+  const noDisplayedAttack = enemies.length && enemies.every(enemy => enemy.intents?.length && enemy.intents.every(intent => ['Buff', 'Defend', 'Debuff', 'StatusCard'].includes(intent.type) && !(intent.damage > 0)));
+  const setup = state.screen === 'COMBAT' && noDisplayedAttack && state.combat.hand.some(card => card.type === 'Power' && card.can_play)
+    ? ' No living enemy currently displays attack damage. Consider establishing useful lasting Powers now, while their costs fit the available energy. Block normally expires before it helps against a later turn. Spending energy on optional draw first can make a useful Power already in hand unaffordable; compare that opportunity cost before drawing. Check other visible triggers and countdowns.' : '';
+  return `${common} ${state.combat ? combat : betweenRooms}${rewards}${setup}`;
 }
