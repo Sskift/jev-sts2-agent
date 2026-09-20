@@ -3,7 +3,7 @@ import { validateDecisionPacket, ContextError, compactPlanningRequest } from './
 import { sameTurn, planStep, resolvePlanStep, inspectTurnPlan, turnFingerprint, cardInstance } from './turn_plan_state.mjs';
 import { describeTurnProjection, sequenceEnergyBudget } from './turn_projection.mjs';
 import { turnStrategyInstructions } from './decision_instructions.mjs';
-import { refineTurnPlan } from './turn_plan_refinement.mjs';
+import { refineTurnPlan, describePlanAlternative } from './turn_plan_refinement.mjs';
 import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
 import { compileModelRequest } from './context_compiler.mjs';
 import { planComparisonQuestions, resolvePlanComparisons, visibleSurvivalConstraints } from './turn_plan_comparison.mjs';
@@ -160,6 +160,20 @@ export async function decideTurn(state, options, prepared, choose) {
       const record = { stage: 'end_check', selected: checked.candidate_id, probabilities: checked.probabilities, confidence: checked.confidence, model: checked.model, usage: checked.usage };
       trace.push(record); options.onPlanningDecision?.(record);
       if (checked.request.cmd !== 'end_turn') {
+        // A local action nomination cannot override the completed turn plan
+        // without the same comparison used to select the original sequence.
+        // Both options start from this observation; the old prefix is paid for.
+        const finish = planStep(state, candidate);
+        const [extension] = await comparePairs([[
+          { value: 'continue', label: describePlanAlternative(state, [planStep(state, checked), finish]) },
+          { value: 'end', label: describePlanAlternative(state, [finish]) }
+        ]], 'Compare ending the turn now with the proposed remaining action followed by an end-turn checkpoint. Both start from the ACTUAL remaining resources; prior actions are already confirmed. Preserve the current turn objective, comparing the additional benefit and costs of the extension, including reactions and future pile effects. New draws and random outcomes are unknown; after the action they require observation before further planning.',
+        { phase_scope: 'Compare mutually exclusive remaining plans from the ACTUAL current state. The previous prefix is complete. These options have NOT executed.',
+          objective: selectedPlan.objective, proposed_steps: [], retained_cards: [], conditional_projection: describeTurnProjection(state, []),
+          energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
+            is_observed: true, includes_future_energy_gains: false, steps: [], scope: 'Actual remaining resources; each option reserves only its own unexecuted actions.' } });
+        if (extension !== 'continue') return { ...candidate, model: 'jev-turn-plan', planning_model: trace.find(item => item.model !== 'forced-single-action')?.model || selectedPlan.model,
+          turn_plan: selectedPlan, turn_step: cursor, planning_trace: trace, usage, context_metrics: prepared.metrics };
         const remainingEnergy = state.combat.player.energy - printedCost(state, checked, state.combat.player.energy);
         selectedPlan = { ...structuredClone(selectedPlan), id: randomUUID(), revision: selectedPlan.revision + 1,
           steps: [planStep(state, checked)], cursor: 0, retained_cards: [], status: 'active', review_reasons: [],

@@ -328,6 +328,7 @@ export function prepareModDecision(gameState, options = {}) {
             ...(estimate.attack_hp_loss !== undefined ? { target_hp_loss: estimate.attack_hp_loss } : {}),
             ...(estimate.attack_hp_loss_by_target ? { hp_loss_by_target: estimate.attack_hp_loss_by_target } : {}),
             end_now_hp: estimate.hp_remaining_if_end_turn,
+            ...(estimate.card_flow ? { card_flow: estimate.card_flow } : {}),
             ...(estimate.uncomputed_reactions ? { uncomputed_reactions: estimate.uncomputed_reactions, reaction_coverage: estimate.reaction_coverage } : {}),
             ...(estimate.positioning ? { positioning: estimate.positioning } : {}),
             ...(estimate.active_rage_block_gain ? { rage_block_included: estimate.active_rage_block_gain } : {}),

@@ -1,6 +1,7 @@
 import { attackHpLoss, combatForecast, intentDamage } from './combat_arithmetic.mjs';
 import { projectPositioning } from './combat_positioning.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
+import { describeCardFlow } from './card_flow_projection.mjs';
 
 export function sequenceEnergyBudget(state, steps) {
   let energy = state.combat.player.energy, attacks = 0;
@@ -43,6 +44,7 @@ export function describeTurnProjection(state, steps) {
     },
     ...(projection.positioning ? { positioning: projection.positioning } : {}),
     ...(projection.uncomputed_reactions.length ? { uncomputed_reactions: projection.uncomputed_reactions } : {}),
+    ...(projection.card_flow ? { card_flow: projection.card_flow } : {}),
     omitted_effects: projection.unresolved_effects,
     interpretation: 'Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.',
     scope: projection.scope
@@ -52,7 +54,7 @@ export function describeTurnProjection(state, steps) {
 // This is a conditional sum of visible previews, not a game simulator. Keeping
 // it separate from combat prevents planned outcomes from becoming observations.
 export function projectTurnPrefix(state, steps) {
-  const combat = structuredClone(state.combat), unresolved = [], reactions = [];
+  const combat = structuredClone(state.combat), unresolved = [], reactions = [], cardFlowEffects = [];
   for (const [index, step] of steps.entries()) {
     if (step.kind === 'end_turn') break;
     if (step.kind !== 'play_card') { unresolved.push(`${step.name}: potion effects are not simulated`); continue; }
@@ -67,6 +69,7 @@ export function projectTurnPrefix(state, steps) {
     // Keep immediate Block separate from effects due only at turn end.
     const estimate = combatForecast(combat, card, target);
     for (const reaction of estimate.uncomputed_reactions || []) reactions.push({ sequence: index, ...reaction });
+    for (const effect of estimate.card_flow?.effects || []) cardFlowEffects.push({ sequence: index, ...effect });
     if (estimate.block_preview?.amount === null) unresolved.push(`${card.name}: Block contribution is unknown, not zero; HP arithmetic omits it`);
     const targets = card.target_type === 'AllEnemies' ? combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0) : target ? [target] : [];
     for (const enemy of targets) {
@@ -91,6 +94,7 @@ export function projectTurnPrefix(state, steps) {
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
   if (facingUnresolved) unresolved.push('Player facing changes: current enemy intent damage includes the previous facing; final incoming damage and HP are unknown until new native previews are observed.');
   if (reactions.length) unresolved.push('Uncomputed attack reactions affect HP and Block before later actions and turn-end gains. Final HP, Block and remaining attack totals are unknown; enemy HP/removal values are conditional on all proposed attacks resolving. See uncomputed_reactions for source, timing and per-hit exposure.');
+  if (cardFlowEffects.length) unresolved.push('Triggered card generation is listed in card_flow. Random insertion, subsequent draw quality and changes to known top-card placement are not simulated; immediate damage/Block numbers omit these costs.');
   // The single-action forecast can know a current loss timer without the
   // sequence evaluator knowing how an omitted effect changes that timer.
   // Reusing its old value would falsely declare every such plan fatal.
@@ -104,6 +108,7 @@ export function projectTurnPrefix(state, steps) {
     hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved || reactions.length ? null : end.hp_remaining_if_end_turn,
     incoming_attack_after_prefix: facingUnresolved || reactions.length ? null : end.displayed_attacks_after_target_depletion,
     uncomputed_reactions: reactions,
+    card_flow: describeCardFlow(state.combat, cardFlowEffects),
     ...(positioning ? { positioning } : {}),
     unresolved_effects: [...new Set(unresolved)]
   };

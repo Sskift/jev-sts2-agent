@@ -64,7 +64,7 @@ export function decisionHistoryPolicy(state, archive) {
     orderingWindows.push({ round: action.round, rule_id: effect.id });
   }
   if (orderingWindows.length) reasons.push({ kind: 'possible_remaining_order_knowledge',
-    note: 'Only ordering commands and intervening card draws, discards, exhausts or shuffles are retained from these older windows. This is past evidence, not a claim that the order still holds.' });
+    note: 'Only ordering commands and intervening card draws, generation, discards, exhausts or shuffles are retained from these older windows. This is past evidence, not a claim that the order still holds.' });
   return { mode: 'current_turn_and_dependencies', floor: context.total_floor, current_round: round, from_round: fromRound,
     preceding_enemy_round: Math.max(0, round - 1), ordering_windows: orderingWindows,
     reasons: [...new Map(reasons.map(reason => [JSON.stringify(reason), reason])).values()] };
@@ -74,7 +74,7 @@ export function relevantCombatEvent(event, policy) {
   return !Number.isInteger(event.round) || event.round >= policy.from_round
     || (event.round === policy.preceding_enemy_round && event.side === 'Enemy')
     || policy.ordering_windows.some(window => event.round >= window.round
-      && (['CardDrawnEntry', 'CardDiscardedEntry', 'CardExhaustedEntry'].includes(event.type) || /shuffl/i.test(event.type)
+      && (['CardDrawnEntry', 'CardDiscardedEntry', 'CardExhaustedEntry', 'CardGeneratedEntry'].includes(event.type) || /shuffl/i.test(event.type)
         || (event.round === window.round && event.card_id === window.rule_id && /^CardPlay/.test(event.type))));
 }
 
@@ -96,7 +96,7 @@ export function scopeDecisionHistory(packet, state, memory) {
   const before = packet.combat?.history.length ?? 0;
   if (packet.combat) {
     packet.combat.history = packet.combat.history.filter(event => relevantCombatEvent(event, policy));
-    packet.combat.history_coverage += ' Decision view contains this round, the preceding enemy response, and earlier rounds for explicit temporal dependencies. Possible older draw-order knowledge retains only its commands and intervening card-movement events. Unnumbered events are retained conservatively. Earlier ordinary events remain in the local archive; current HP, piles, powers, relics and counters are authoritative.';
+    packet.combat.history_coverage += ' Decision view contains this round, the preceding enemy response, and earlier rounds for explicit temporal dependencies. Possible older draw-order knowledge retains only its commands and intervening card movement/generation events; generated-card insertion may invalidate a known top card. Unnumbered events are retained conservatively. Earlier ordinary events remain in the local archive; current HP, piles, powers, relics and counters are authoritative.';
   }
   const local = packet.memory;
   local.actions = local.actions.filter(action => relevantMemoryAction(action, state, policy));

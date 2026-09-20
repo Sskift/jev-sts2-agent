@@ -745,6 +745,14 @@
           }
         },
         "positioning": { "$ref": "#/$defs/positioningProjection" },
+        "card_flow": { "type": "object", "required": ["is_observed_effect", "observed_draw_pile", "generated_into_draw_pile", "effects", "scope"],
+          "properties": { "is_observed_effect": { "const": false }, "observed_draw_pile": { "type": "object" },
+            "generated_into_draw_pile": { "$ref": "#/$defs/conditionalCount" }, "scope": { "$ref": "#/$defs/text" },
+            "effects": { "type": "array", "items": { "type": "object", "required": ["sequence", "source_id", "owner_combat_ids", "played_card_id", "generated_card_id", "destination", "placement", "preview_hits", "added_if_all_preview_hits_resolve"],
+              "properties": { "sequence": { "type": "integer", "minimum": 0 }, "source_id": { "type": "string" },
+                "owner_combat_ids": { "type": "array", "items": { "type": "integer" } }, "played_card_id": { "type": "string" }, "generated_card_id": { "type": "string" },
+                "destination": { "const": "draw_pile" }, "placement": { "const": "random" }, "preview_hits": { "type": ["integer", "null"], "minimum": 0 },
+                "added_if_all_preview_hits_resolve": { "$ref": "#/$defs/conditionalCount" } } } } } },
         "uncomputed_reactions": { "type": "array", "items": { "type": "object", "required": ["source_id", "owner_combat_id", "sequence", "timing", "damage_per_trigger", "preview_hits", "affected_outputs"],
           "properties": { "source_id": { "type": "string" }, "owner_combat_id": { "type": "integer" }, "sequence": { "type": "integer", "minimum": 0 },
             "timing": { "$ref": "#/$defs/text" }, "damage_per_trigger": { "type": "number", "minimum": 0 }, "preview_hits": { "type": ["integer", "null"], "minimum": 0 },
@@ -753,6 +761,8 @@
         "interpretation": { "$ref": "#/$defs/text" }, "scope": { "$ref": "#/$defs/text" }
       }
     },
+    "conditionalCount": { "type": "object", "additionalProperties": false, "required": ["min", "max"],
+      "properties": { "min": { "type": ["integer", "null"], "minimum": 0 }, "max": { "type": ["integer", "null"], "minimum": 0 } } },
     "potionEffect": {
       "type": "object", "additionalProperties": false,
       "required": ["potion_id", "slot", "power_id", "amount", "duration", "expires_at", "can_be_changed_or_removed", "affected_quantity", "application_unit", "applied_before_multipliers", "affects_prior_actions", "direct_damage", "direct_block", "requires_followup_actions", "unpowered_effects_excluded", "source"],

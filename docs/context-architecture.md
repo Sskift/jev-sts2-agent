@@ -102,3 +102,9 @@ Run 24 round 6 of Ceremonial Beast previously planned Armaments then its upgrade
 Every emitted request logs bytes per domain, question bytes, selected rule counts and missing current rule links. `npm run context:preview` saves both canonical and compiled model context without a model call or game action; its report states that later planning questions and optional readability expansion are not part of that preview. These diagnostics make context pressure and retrieval gaps visible instead of treating a valid JSON shape as proof of semantic completeness.
 
 Run 23 actual map, reward, combat and modal-selection requests contain the same strategic domains. Consecutive actions 50–52 share strategic revision 9 and one turn plan; actions 51–52 make no new planning call. At floor 13, replacing accumulated old model scores with the scoped history policy reduced the same observation's compiled current-choice request from 70,550 to 61,260 bytes. The reference repair also included the previously missing Vantom encounter and monster rules. See [runtime evidence](evidence/2026-09-20/run23-context-architecture.json). These observations verify data flow and capacity, not optimal decisions or a completed run.
+
+## 条件牌堆影响与结束边界
+
+`card_flow_projection.mjs` 将已核实的触发生成规则写入单动作及有序方案分析：规则来源、命中次数及来源、目标范围、生成数量区间、去向和随机性。当前覆盖 Personal Hive；未知次数返回未知，多目标随机命中给条件范围，不假设插入位置、未来手牌或中途死亡后的命中。当前观察与假设账目分开，静态 Dazed 关键词也不能覆盖本局改变关键词效果的规则。
+
+回合结束检查只提名可能的追加动作；`describePlanAlternative` 与主规划共用同一个预算、规则和条件后果格式，再通过已有方案比较在追加与结束间选择。抽牌后仍须重读状态，未承诺未知后续动作。新增分析不要求更多普通历史；生成事件仅在当前窗口或仍有牌序依赖的旧窗口保留。

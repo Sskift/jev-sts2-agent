@@ -387,12 +387,33 @@ test('end-turn handoff checks actual remaining options and extends the same obje
   const state = stateWith([card('FINESSE', 'draw', 0, { name: 'Finesse', type: 'Skill', target_type: 'Self', cost: 0, description: 'Gain 4 Block. Draw 1 card.' })], 1);
   const memory = new DecisionMemory(); memory.observe(state); memory.data.turn_plan = savedPlan(state, ['end_turn']);
   const seen = [], decision = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl: fakeJev(['card_0'], seen) });
-  assert.equal(seen.length, 1);
+  assert.equal(seen.length, 2);
   assert.match(seen[0].state.turn_planning.phase_scope, /ACTUAL/);
+  assert.match(seen[1].state.turn_planning.phase_scope, /ACTUAL/);
+  assert.deepEqual(seen[1].state.turn_planning.proposed_steps, []);
   assert.equal(decision.request.id, 'FINESSE');
   assert.equal(decision.turn_plan.objective.id, 'damage');
   assert.equal(decision.turn_plan.revision, 1);
   assert.equal(decision.turn_plan.end_policy, 'observe_continuation_then_review');
   assert.equal(decision.turn_plan.steps.length, 1);
   assert.equal(memory.data.turn_plan.revision, 0, 'No new plan is committed before freshness validation');
+});
+
+test('end-turn nomination cannot bypass the complete-plan comparison or mutate memory before dispatch', async () => {
+  const state = stateWith([card('STRIKE_IRONCLAD', 'one', 0)], 1);
+  const memory = new DecisionMemory(); memory.observe(state); memory.data.turn_plan = savedPlan(state, ['end_turn']);
+  const before = structuredClone(memory.data), seen = [];
+  const nominate = fakeJev(['card_0_target_42'], seen);
+  const fetchImpl = async (url, options) => {
+    const payload = parseJevRequest(options.body);
+    if (payload.questions.next_action) return nominate(url, options);
+    seen.push(payload);
+    return { ok: true, json: async () => ({ answers: Object.fromEntries(Object.keys(payload.questions).map(key => [key, { type: 'choice', choice: 'plan_b', confidence: 0.9 }])) }) };
+  };
+  const decision = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl });
+  assert.equal(seen.length, 2);
+  assert.equal(decision.request.cmd, 'end_turn');
+  assert.equal(decision.turn_plan.revision, 0);
+  assert.deepEqual(memory.data, before);
+  assert.equal(decision.planning_trace.at(-1).comparisons[0].selected, 'end');
 });

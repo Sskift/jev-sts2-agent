@@ -1,0 +1,188 @@
+{
+  "date": "2026-09-20",
+  "run_id": "run-1789903049",
+  "loaded_run_code": "158de64",
+  "runtime_directory": "run-artifacts/2026-09-20T11-29-07-739Z-3dd5fd8a",
+  "actual_result": {
+    "screen": "GAME_OVER",
+    "is_victory": false,
+    "floor": 31,
+    "encounter": "ENTOMANCER",
+    "score": 555,
+    "hp": 0,
+    "memory": "run-artifacts/2026-09-20T11-29-07-739Z-3dd5fd8a/final-memory.json",
+    "normal_return_to_menu_confirmed": true
+  },
+  "observed_failure_sequence": {
+    "round": 6,
+    "hp": 32,
+    "enemy_hp_at_round_start": 83,
+    "enemy_intent": "Buff",
+    "personal_hive": 2,
+    "actions": [
+      "Armaments",
+      "Upgrade Headbutt",
+      "Headbutt+",
+      "Put Juggernaut+ on draw pile",
+      "Bully",
+      "Sword Boomerang",
+      "End turn"
+    ],
+    "generated_dazed": {
+      "headbutt": 2,
+      "bully": 2,
+      "sword_boomerang": 6,
+      "total": 10
+    },
+    "next_turn": {
+      "hand": [
+        "Juggernaut+",
+        "Dazed",
+        "Dazed",
+        "Dazed",
+        "Dazed",
+        "Dazed"
+      ],
+      "hp": 32,
+      "incoming_attack": 35,
+      "enemy_hp": 58
+    },
+    "limitation": "These are actual past observations, never input as future outcomes in a replay. They do not isolate the cause of the whole-run loss."
+  },
+  "rule_source": {
+    "game": "v0.111.0",
+    "native_types": [
+      "MegaCrit.Sts2.Core.Models.Powers.PersonalHivePower",
+      "MegaCrit.Sts2.Core.Models.Cards.Omnislice"
+    ],
+    "rule": "After powered attack damage to the owner, generate the current amount of Dazed into the draw pile at random positions. Non-attack damage does not qualify. Counts remain conditional on all preview hits resolving with these targets/powers."
+  },
+  "replay": {
+    "state_source": "run-artifacts/2026-09-20T11-29-07-739Z-3dd5fd8a/step-0334/before-state.json",
+    "confirmed_history_before_step": 334,
+    "current_turn": 6,
+    "sword_boomerang_card_flow": {
+      "is_observed_effect": false,
+      "observed_draw_pile": {
+        "count": 6,
+        "status_cards": 5,
+        "unplayable_keyword_cards": 5
+      },
+      "generated_into_draw_pile": {
+        "min": 6,
+        "max": 6
+      },
+      "effects": [
+        {
+          "source_id": "PERSONAL_HIVE_POWER",
+          "owner_combat_ids": [
+            1
+          ],
+          "played_card_id": "SWORD_BOOMERANG",
+          "generated_card_id": "DAZED",
+          "generated_base_keywords": [
+            "Unplayable",
+            "Ethereal"
+          ],
+          "destination": "draw_pile",
+          "placement": "random",
+          "may_displace_known_top": true,
+          "timing": "after_each_powered_attack_damage_instance",
+          "preview_hits": 3,
+          "preview_hits_source": "resolved_live_first_sentence",
+          "added_if_all_preview_hits_resolve": {
+            "min": 6,
+            "max": 6
+          },
+          "target_allocation": "random_enemy_per_hit",
+          "scope": "Native v0.111.0 Personal Hive; each qualifying hit adds the current stack amount, even when blocked. Non-attack damage does not trigger it. Counts assume these powers/targets and all preview hits remain applicable. Unknown hit counts, deaths, future modifiers, draws and random insertion order are not simulated. Base keywords can be affected by current rules."
+        }
+      ],
+      "scope": "Conditional additions only, separate from the unchanged observed piles. Not a next-hand prediction: planned draws, selections, discards, reshuffles and early termination are not simulated. Random insertion may change previously known top-card placement. Compare draw quality and future response availability as well as immediate damage."
+    },
+    "original_actual_request": {
+      "cmd": "play_card",
+      "id": "SWORD_BOOMERANG",
+      "nth": 0
+    },
+    "updated_facts_single_choice_request": {
+      "cmd": "play_card",
+      "id": "SWORD_BOOMERANG",
+      "nth": 0
+    },
+    "shared_plan_comparison_request": {
+      "cmd": "end_turn"
+    },
+    "trace": [
+      {
+        "stage": "end_check",
+        "selected": "card_1",
+        "probabilities": {
+          "card_0": 0.3,
+          "card_1": 0.37,
+          "end_turn": 0.33
+        },
+        "confidence": 0.05,
+        "model": "typesafe/jev-1.13-20260917",
+        "usage": {
+          "input_tokens": 17709,
+          "output_tokens": 46,
+          "cost": 0.000743778
+        }
+      },
+      {
+        "stage": "refine_pairs",
+        "comparisons": [
+          {
+            "selected": "end",
+            "options": {
+              "plan_a": "continue",
+              "plan_b": "end"
+            },
+            "selection_basis": "overall_value",
+            "survival_assessment": null,
+            "value_assessment": {
+              "type": "choice",
+              "choice": "plan_b",
+              "probabilities": {
+                "plan_b": 0.52,
+                "plan_a": 0.48
+              },
+              "confidence": 0.05
+            },
+            "probabilities": {
+              "plan_b": 0.52,
+              "plan_a": 0.48
+            },
+            "confidence": 0.05
+          }
+        ],
+        "model": "typesafe/jev-1.13-20260917",
+        "usage": {
+          "input_tokens": 17605,
+          "output_tokens": 36,
+          "cost": 0.00073941
+        }
+      }
+    ],
+    "total_usage": {
+      "input_tokens": 35314,
+      "output_tokens": 82
+    },
+    "model_calls": 2,
+    "game_commands_sent": 0,
+    "limitation": "The two-plan result is close (end 0.52 / continue 0.48), not proof of reliable improvement, next-hand contents or a win. Existing actual-state Choice alone still nominated Sword Boomerang."
+  },
+  "changes": [
+    "Conditional pile additions shared by action and ordered-plan analysis",
+    "Native hit count first; strict unconditional live first-sentence fallback; unresolved repetition remains unknown",
+    "End-turn action nominations pass the same complete-plan comparison before dispatch",
+    "Older card generation history retained only when relevant to unresolved draw-order evidence"
+  ],
+  "checks": {
+    "passed": 52,
+    "failed": 0,
+    "scope": "Card-flow, reaction, arithmetic, turn projection, history selection, context compiler and turn planning; accepted free draw and rejected extension preserve pre-dispatch memory."
+  },
+  "final_goal_complete": false
+}

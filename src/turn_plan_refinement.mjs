@@ -17,34 +17,37 @@ const bindFollowthrough = (step, following) => {
   return step;
 };
 
+// Share the same resource and consequence accounting at every plan boundary.
+export function describePlanAlternative(state, steps) {
+  const budget = reserveSequence(state, steps);
+  const actions = reserveActionSequence(state, steps);
+  let energyAfterPrintedCosts = state.combat.player.energy;
+  return {
+    ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map((step, index) => {
+      energyAfterPrintedCosts -= budget.costs[index];
+      const beneficiary = state.combat.hand.find(card => cardInstance(card) === step.beneficiary_instance_id);
+      const card = state.combat.hand.find(card => cardInstance(card) === step.card_instance_id);
+      const potionEffect = step.kind === 'use_potion' ? potionEffectFacts(state.combat.player.potions.find(p => p.id === step.potion_id && p.slot === step.slot)) : null;
+      return { action: step.name, ...(card ? { hand_index: card.index, printed_cost: card.cost } : {}), ...(step.target !== undefined ? { target: step.target } : {}), rules: step.rules_at_planning,
+        ...(potionEffect ? { effect_facts: potionEffect } : {}),
+        energy_after_reserved_costs: energyAfterPrintedCosts,
+        ...(beneficiary ? { intended_followthrough: beneficiary.name,
+          ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
+    }),
+    then: 'End turn, unless a new observation requires a revision.',
+    energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
+    conditional_preview: describeTurnProjection(state, steps),
+    ...(actions.constraints.length ? { action_reservation: actions } : {}),
+    limitation: 'Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers.'
+  };
+}
+
 // Compare concrete complete plans, not another disconnected next-card choice.
 // These are bounded local alternatives, not an exhaustive solver. Every current
 // legal action remains available in the main planning stages.
 export async function refineTurnPlan(state, plan, prepared, ask, comparePairs) {
   if (plan.end_policy !== 'end_after_steps_unless_conditions_change') return;
-  const label = steps => {
-    const budget = reserveSequence(state, steps);
-    const actions = reserveActionSequence(state, steps);
-    let energyAfterPrintedCosts = state.combat.player.energy;
-    return {
-      ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map((step, index) => {
-        energyAfterPrintedCosts -= budget.costs[index];
-        const beneficiary = state.combat.hand.find(card => cardInstance(card) === step.beneficiary_instance_id);
-        const card = state.combat.hand.find(card => cardInstance(card) === step.card_instance_id);
-        const potionEffect = step.kind === 'use_potion' ? potionEffectFacts(state.combat.player.potions.find(p => p.id === step.potion_id && p.slot === step.slot)) : null;
-        return { action: step.name, ...(card ? { hand_index: card.index, printed_cost: card.cost } : {}), ...(step.target !== undefined ? { target: step.target } : {}), rules: step.rules_at_planning,
-          ...(potionEffect ? { effect_facts: potionEffect } : {}),
-          energy_after_reserved_costs: energyAfterPrintedCosts,
-          ...(beneficiary ? { intended_followthrough: beneficiary.name,
-            ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
-      }),
-      then: 'End turn, unless a new observation requires a revision.',
-      energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
-      conditional_preview: describeTurnProjection(state, steps),
-      ...(actions.constraints.length ? { action_reservation: actions } : {}),
-      limitation: 'Current-preview arithmetic only; upgrades, debuffs, draws, potions and other changing effects may alter these numbers.'
-    };
-  };
+  const label = steps => describePlanAlternative(state, steps);
   for (let pass = 0; pass < 2; pass++) {
     // A candidate rejected against the old incumbent can improve the newly
     // selected plan. Deduplicate only within a pass, never across baselines.

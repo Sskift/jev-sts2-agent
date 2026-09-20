@@ -1,5 +1,6 @@
 import { projectPositioning } from './combat_positioning.mjs';
 import { uncomputedAttackReactions } from './combat_reactions.mjs';
+import { attackCardFlowEffects, describeCardFlow } from './card_flow_projection.mjs';
 
 // Arithmetic over player-visible facts only. These are single-action estimates,
 // not a combat simulator: draws, general triggered effects and future choices stay unknown.
@@ -9,7 +10,8 @@ export function firstHitHpLoss(card, enemy) {
   // A per-hit preview without a verified count does not establish that X will hit.
   // Zero-energy Whirlwind is playable but can deal no damage; payment modifiers
   // also mean current energy alone cannot establish the number of hits.
-  if (card.attack_preview?.hits === 0 || (card.cost < 0 && !(card.attack_preview?.hits > 0))) return null;
+  const hits = previewHitCount(card);
+  if (hits === 0 || hits === null) return null;
   const damage = card.target_previews?.find(p => p.target_id === enemy.combat_id)?.damage;
   if (!Number.isFinite(damage)) return null;
   let hpLoss = Math.max(0, damage - enemy.block);
@@ -21,10 +23,20 @@ export function firstHitHpLoss(card, enemy) {
   return { damage, hp_loss: hpLoss, limits };
 }
 
-export function previewHitCount(card) {
+export function attackHitPreview(card) {
   const hits = card.attack_preview?.hits;
-  return Number.isSafeInteger(hits) && hits >= 0 ? hits : card.cost < 0 ? null : 1;
+  if (Number.isSafeInteger(hits) && hits >= 0) return { hits, source: 'native_preview' };
+  if (card.cost < 0) return { hits: null, source: 'unknown_x_cost_repetitions' };
+  // A resolved, unconditional first damage sentence can supply a missing
+  // count. Conditional/later repetition clauses are not silently one hit.
+  const description = card.description?.trim() || '';
+  const repeated = description.match(/^Deal [^.]*?\bdamage\b[^.]*?\b(?:(\d+) times|(twice|thrice))\.(?:\s|$)/i);
+  if (repeated) return { hits: repeated[1] ? Number(repeated[1]) : repeated[2].toLowerCase() === 'twice' ? 2 : 3, source: 'resolved_live_first_sentence' };
+  if (/\b(?:times|twice|thrice|hits|repeat)\b/i.test(description)) return { hits: null, source: 'unresolved_repetition_rule' };
+  return { hits: 1, source: 'single_hit_baseline' };
 }
+
+export const previewHitCount = card => attackHitPreview(card).hits;
 
 export function previewDamageSum(card, enemy) {
   const damage = card.target_previews?.find(preview => preview.target_id === enemy.combat_id)?.damage;
@@ -72,6 +84,8 @@ export function immediateBlockPreview(card) {
 export function combatForecast(combat, card = null, target = null) {
   const reactions = uncomputedAttackReactions(combat, card, target, card ? previewHitCount(card) : 0);
   const reactionUnresolved = reactions.length > 0;
+  const hitPreview = card ? attackHitPreview(card) : { hits: 0, source: 'no_card' };
+  const cardFlow = describeCardFlow(combat, attackCardFlowEffects(combat, card, target, hitPreview.hits, hitPreview.source));
   const hit = target && card ? attackHpLoss(card, target) : null;
   const targetDepleted = hit && hit.hp_loss >= target.hp;
   const areaHits = card?.target_type === 'AllEnemies' ? combat.enemies.filter(e => e.is_alive && e.hp > 0).map(enemy => {
@@ -118,6 +132,7 @@ export function combatForecast(combat, card = null, target = null) {
       .map(power => ({ target_id: enemy.combat_id, power_id: power.id, enemy_turns_remaining_after_card: power.amount + Number(card?.id === 'FRANTIC_ESCAPE') })));
   const instantDeath = deathTimers.some(timer => timer.enemy_turns_remaining_after_card <= 1);
   return {
+    ...(cardFlow ? { card_flow: cardFlow } : {}),
     energy_after_printed_cost: card ? card.cost < 0 ? 0 : Math.max(0, combat.player.energy - card.cost) : combat.player.energy,
     first_hit_hp_loss: target && card ? firstHitHpLoss(card, target)?.hp_loss ?? null : null,
     ...(hit ? { attack_hp_loss: hit.hp_loss, preview_hits: hit.hits } : {}),
