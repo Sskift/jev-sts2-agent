@@ -147,7 +147,8 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     const counts = (dependencies.ordered_damage || []).filter(effect => effect.sequence === index).map(effect => effect.preview_hits);
     if (card?.type === 'Attack' && counts.length) card = { ...card,
       _ordered_hit_count: counts.every(hits => hits === counts[0]) ? counts[0] : null };
-    const applications = dependencies.applications.filter(effect => effect.sequence === index);
+    // A passive after-play reaction does not cover the card's own effects.
+    const applications = dependencies.applications.filter(effect => effect.sequence === index && effect.timing !== 'after_card_play');
     const supportedApplication = applications.length > 0 && applications.every(effect => effect.outcome !== 'unresolved');
     if (step.kind !== 'play_card') { if (!supportedApplication && !sequence.analysis.steps.find(s => s.sequence === index)?.applies_after_action) unresolved.push(`${step.name}: potion effects are not simulated`); continue; }
     if (!card) { unresolved.push(`${step.name}: card availability is unconfirmed`); continue; }

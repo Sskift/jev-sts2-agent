@@ -21,6 +21,68 @@ function fixture() {
 }
 const steps = s => ['card_0_target_42', 'card_1_target_42', 'end_turn'].map(id => planStep(s, buildModCandidates(s).get(id)));
 
+function slowFixture() {
+  const s = fixture();
+  s.combat.enemies[0].hp = 100;
+  s.combat.enemies[0].powers = [{ id: 'SLOW_POWER', amount: 0, description: 'Whenever you play a card, this enemy receives 10% more damage from Attacks this turn.' }];
+  s.combat.hand[0] = fixtureCard('DEFEND_IRONCLAD', { index: 0, type: 'Skill', target_type: 'Self', can_play: true,
+    description: 'Gain 5 Block.', block: 5, details: { instance_id: 'defend' } });
+  s.combat.hand[1].target_previews[0].damage = 10;
+  return s;
+}
+const defend = { kind: 'play_card', card_instance_id: 'defend' }, strike = { kind: 'play_card', card_instance_id: 'strike', target: 42 };
+
+test('Slow counts completed cards, benefits later attacks, and preserves hidden rounding bounds', () => {
+  const s = slowFixture(), before = structuredClone(s);
+  const early = describeTurnProjection(s, [strike, defend]).debuff_dependencies;
+  const late = describeTurnProjection(s, [defend, strike]).debuff_dependencies;
+  assert.deepEqual(early.ordered_damage[0].per_hit, { min: 10, max: 10 });
+  assert.deepEqual(late.ordered_damage[0].per_hit, { min: 11, max: 12 });
+  assert.equal(late.ordered_damage[0].includes_ordered_slow, true);
+  assert.deepEqual(late.enemies[0].hp_remaining, { min: 88, max: 89 });
+  assert.deepEqual(late.enemies[0].power_changes, [{ power_id: 'SLOW_POWER', before: 0, after_declared_actions: { min: 20, max: 20 } }]);
+  assert.ok(late.transitions.every(t => t.timing === 'after_card_play' && t.display_unit === 'percent_extra_powered_attack_damage'));
+  assert.deepEqual(s, before);
+});
+
+test('Slow percentages already in native previews combine with stat changes, while potion use does not increment them', () => {
+  const s = slowFixture();
+  s.combat.enemies[0].powers[0].amount = 50;
+  s.combat.hand[1].target_previews[0].damage = 15;
+  s.combat.player.potions = [{ id: 'STRENGTH_POTION', slot: 0, description: 'Gain 2 Strength.' }];
+  const potion = { kind: 'use_potion', potion_id: 'STRENGTH_POTION', slot: 0 };
+  const unshifted = describeTurnProjection(s, [strike]).debuff_dependencies;
+  assert.deepEqual(unshifted.ordered_damage[0].per_hit, { min: 15, max: 15 });
+  const power = describeTurnProjection(s, [potion, strike]).debuff_dependencies;
+  assert.deepEqual(power.ordered_damage[0].per_hit, { min: 18, max: 18 });
+  assert.deepEqual(power.enemies[0].power_changes[0].after_declared_actions, { min: 60, max: 60 });
+  const ordered = describeTurnProjection(s, [potion, defend, strike]).debuff_dependencies;
+  assert.deepEqual(ordered.ordered_damage[0].per_hit, { min: 19, max: 20 });
+  assert.deepEqual(ordered.enemies[0].power_changes[0].after_declared_actions, { min: 70, max: 70 });
+});
+
+test('Slow combines new Vulnerable in one ratio and does not amplify Omnislice', () => {
+  const s = fixture(); s.combat.enemies[0].hp = 100;
+  s.combat.enemies[0].powers = [{ id: 'SLOW_POWER', amount: 0 }];
+  const p = describeTurnProjection(s, steps(s)).debuff_dependencies;
+  assert.deepEqual(p.ordered_damage[0].per_hit, { min: 13, max: 13 });
+  assert.deepEqual(p.ordered_damage[1].per_hit, { min: 9, max: 11 });
+  s.combat.hand[1].id = 'OMNISLICE';
+  assert.deepEqual(describeTurnProjection(s, steps(s)).debuff_dependencies.ordered_damage[1].per_hit, { min: 6, max: 6 });
+});
+
+test('Slow does not turn unknown effects, capped previews or random targets into exact outcomes', () => {
+  const s = slowFixture();
+  s.combat.hand[0].description = 'Gain 5 Block. Some unmodeled effect.';
+  assert.ok(describeTurnProjection(s, [defend, strike]).omitted_effects.some(text => text.includes('other effects are unconfirmed')));
+  s.combat.enemies[0].powers.push({ id: 'INTANGIBLE_POWER', amount: 1 });
+  s.combat.hand[1].target_previews[0].damage = 1;
+  assert.deepEqual(describeTurnProjection(s, [defend, strike]).debuff_dependencies.ordered_damage[0].per_hit, { min: null, max: null });
+  s.combat.enemies[0].powers.pop();
+  s.combat.hand[1].target_type = 'RandomEnemy';
+  assert.deepEqual(describeTurnProjection(s, [{ ...strike, target: undefined }]).debuff_dependencies.enemies[0].hp_remaining, { min: null, max: null });
+});
+
 test('area damage precedes debuffs for each native recipient, with independent Artifact counts', () => {
   const s = fixture(); s.combat.enemies[0].hp = 16;
   s.combat.enemies.push({ ...structuredClone(s.combat.enemies[0]), combat_id: 43, hp: 20, powers: [{ id: 'ARTIFACT_POWER', amount: 1 }] });

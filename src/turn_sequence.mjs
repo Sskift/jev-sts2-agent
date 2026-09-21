@@ -1,5 +1,5 @@
 import { potionEffectFacts } from './potion_effects.mjs';
-import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
+import { handUpgradeMode, nextCardKind, slowPercent } from './turn_effects.mjs';
 import { previewHitCount } from './combat_arithmetic.mjs';
 
 const instance = card => card?.details?.instance_id;
@@ -136,13 +136,14 @@ export function inspectSequence(state, steps) {
         detail.damage_per_target = (card.target_previews || []).map(preview => {
           const enemy = observed.enemies.find(e => e.combat_id === preview.target_id);
           const vulnerable = enemy && amount(enemy, 'VULNERABLE_POWER') > 0;
+          const slow = slowPercent(enemy);
           const custom = unknownStrength || mutableBasis || unusualScaling || repeats
             || (strength !== 0 && enemy && amount(enemy, 'INTANGIBLE_POWER') > 0)
             || (vulnerable && (amount(enemy, 'DEBILITATE_POWER') || amount(observed.player, 'CRUELTY_POWER')
             || observed.player.relics?.some(r => r.id === 'PAPER_PHROG')));
           const range = strength === 0 && !unknownStrength && !mutableBasis && !repeats ? { min: preview.damage ?? null, max: preview.damage ?? null }
-            : shifted(preview.damage, strength, (weak ? 3 : 1) * (vulnerable ? 3 : 1) * (shrink ? 7 : 1),
-              (weak ? 4 : 1) * (vulnerable ? 2 : 1) * (shrink ? 10 : 1), !custom && card.id !== 'OMNISLICE');
+            : shifted(preview.damage, strength, (weak ? 3 : 1) * (vulnerable ? 3 : 1) * (shrink ? 7 : 1) * (100 + (slow ?? 0)),
+              (weak ? 4 : 1) * (vulnerable ? 2 : 1) * (shrink ? 10 : 1) * 100, !custom && slow !== null && card.id !== 'OMNISLICE');
           preview.damage = exact(range) ?? undefined;
           if (preview.damage === undefined) unknownTargets.add(preview.target_id);
           return { target_id: preview.target_id, per_hit_before_block_and_hp_loss_caps: range, total_before_block_and_hp_loss_caps: hits === 0 ? { min: 0, max: 0 }

@@ -1,0 +1,616 @@
+{
+  "version": 1,
+  "date": "2026-09-21",
+  "run_id": "run-1789968641",
+  "baseline_runtime": "60c7bff",
+  "change": "Native Slow percentages enter ordered damage bounds and the shared exact-state continuation check. Passive after-play reactions do not cover the card own unmodeled effects; random attack targets remain unknown.",
+  "provider": "typesafe",
+  "model": "jev-1.13.0",
+  "fallback_enabled": false,
+  "source": [
+    {
+      "source": "src/turn_effects.mjs",
+      "sha256": "a66ccc3c7f1c4aa7e9f1a725e771561afadcb0c69875b4460f2b85fb123fc7f6"
+    },
+    {
+      "source": "src/turn_sequence.mjs",
+      "sha256": "be5b4255aa6da0f7f58d96776f4a81a35ffa77ae5f7bc8fecb1fc7ab1506337b"
+    },
+    {
+      "source": "src/turn_debuff_projection.mjs",
+      "sha256": "1612e4e7ffbb0d9a63058c8fccb2030502a95a5ac0afd48a07f9f6998ad19acd"
+    },
+    {
+      "source": "src/turn_projection.mjs",
+      "sha256": "7ef4859da48a51a47a2edbf1614d453359ef1dfeea66fb5b5311393e637bd3f5"
+    },
+    {
+      "source": "test/turn_debuff_projection.test.mjs",
+      "sha256": "92fcc78702ce7d86578c172f93916f211023d48455c78efacf3b3d46a556b507"
+    }
+  ],
+  "native_source": {
+    "source": "temp/knowledge-research/SlowPower.cs",
+    "sha256": "4b2975d78cf27a8ec3b6902c033716f50b44b6eccefc2ca64a41b592ae2f60d8"
+  },
+  "verified_rule": {
+    "version": "v0.111.0",
+    "displayed_amount": "SlowAmount * 10; percentage points, not stack count",
+    "damage_multiplier": "1 + displayed_amount / 100 for powered Attack damage against the owner",
+    "increment": "10 displayed percentage points after each completed CardPlay; the current card uses the preceding value",
+    "reset": "AfterSideTurnStart when the owner is among the side participants",
+    "boundaries": "Potion use does not increment; a multihit card remains one play. Automatic additional plays and intervening unknown hooks require observation."
+  },
+  "checks": {
+    "passed": 60,
+    "failed": 0,
+    "source": {
+      "source": "temp/run35-slow-checks.log",
+      "sha256": "aab68fa9748d26f2a31c09e253c2694349c22cdff5cbbdea68736e6036be5605"
+    }
+  },
+  "continuation": {
+    "source": "temp/run35-slow-continuation.json",
+    "sha256": "cbb045f92e8a2f91bf7363ce8ec619c3dde4bd5a3f6dfd4296fe3ab6d544244c",
+    "cases": [
+      {
+        "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-2026-09-21T05-30-36.682Z\\step-0111",
+        "before": {
+          "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-2026-09-21T05-30-36.682Z\\step-0111\\before-state.json",
+          "sha256": "9aa56480333f5dc4ba29dfc424beefb87a0a297782b7ca4ef1ab2028b4f93eab"
+        },
+        "after": {
+          "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-2026-09-21T05-30-36.682Z\\step-0111\\after-state.json",
+          "sha256": "495af98d33f8de296486e8ef8a9daf83488a49d27a888b77aa27cff19e44434b"
+        },
+        "request": {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 1
+        },
+        "enemy_before": [
+          {
+            "id": 1,
+            "hp": 92,
+            "block": 0,
+            "powers": [
+              {
+                "id": "SLOW_POWER",
+                "name": "Slow",
+                "amount": 0,
+                "type": "Debuff",
+                "stack_type": "Counter",
+                "description": "Whenever you play a card, this enemy receives 10% more damage from Attacks this turn."
+              },
+              {
+                "id": "STRENGTH_POWER",
+                "name": "Strength",
+                "amount": 10,
+                "type": "Buff",
+                "stack_type": "Counter",
+                "description": "Increases attack damage by 10."
+              }
+            ]
+          }
+        ],
+        "enemy_after": [
+          {
+            "id": 1,
+            "hp": 86,
+            "block": 0,
+            "powers": [
+              {
+                "id": "SLOW_POWER",
+                "name": "Slow",
+                "amount": 10,
+                "type": "Debuff",
+                "stack_type": "Counter",
+                "description": "Whenever you play a card, this enemy receives 10% more damage from Attacks this turn. (Receives 10% more damage)"
+              },
+              {
+                "id": "STRENGTH_POWER",
+                "name": "Strength",
+                "amount": 10,
+                "type": "Buff",
+                "stack_type": "Counter",
+                "description": "Increases attack damage by 10."
+              }
+            ]
+          }
+        ],
+        "expected_enemy_changes": [
+          {
+            "combat_id": 1,
+            "hp_remaining": {
+              "min": 86,
+              "max": 86
+            },
+            "block_remaining": {
+              "min": 0,
+              "max": 0
+            },
+            "power_changes": [
+              {
+                "power_id": "SLOW_POWER",
+                "before": 0,
+                "after_declared_actions": {
+                  "min": 10,
+                  "max": 10
+                }
+              }
+            ],
+            "depleted_if_all_declared_hits_resolve": false,
+            "current_attack_after_debuffs": {
+              "min": 23,
+              "max": 23
+            }
+          }
+        ],
+        "projection": {
+          "block": 0,
+          "hp_if_ending": 55,
+          "hp_loss_if_ending": 23,
+          "block_including_end_turn_gains": 0,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": 23,
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp": 86,
+              "block": 0,
+              "hp_removed": 6,
+              "block_removed": 0,
+              "power_changes": [
+                {
+                  "power_id": "SLOW_POWER",
+                  "before": 0,
+                  "after_declared_actions": {
+                    "min": 10,
+                    "max": 10
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "next": {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        "plan_id_preserved": true,
+        "revision_before": 0,
+        "revision_after": 0,
+        "old_next_model_responses": 17,
+        "new_model_calls": 0
+      },
+      {
+        "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-2026-09-21T05-30-36.682Z\\step-0112",
+        "before": {
+          "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-2026-09-21T05-30-36.682Z\\step-0112\\before-state.json",
+          "sha256": "9a82f50aca1e42cab374b842a3ccfe6256bc0c04faf359cc5fbcb86b854a1ab8"
+        },
+        "after": {
+          "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-2026-09-21T05-30-36.682Z\\step-0112\\after-state.json",
+          "sha256": "4c3610deb911babfb9ddd392e84df2ff21f56b9f88281dfce8e8397aa904d042"
+        },
+        "request": {
+          "cmd": "play_card",
+          "id": "ULTIMATE_DEFEND",
+          "nth": 0
+        },
+        "enemy_before": [
+          {
+            "id": 1,
+            "hp": 86,
+            "block": 0,
+            "powers": [
+              {
+                "id": "SLOW_POWER",
+                "name": "Slow",
+                "amount": 10,
+                "type": "Debuff",
+                "stack_type": "Counter",
+                "description": "Whenever you play a card, this enemy receives 10% more damage from Attacks this turn. (Receives 10% more damage)"
+              },
+              {
+                "id": "STRENGTH_POWER",
+                "name": "Strength",
+                "amount": 10,
+                "type": "Buff",
+                "stack_type": "Counter",
+                "description": "Increases attack damage by 10."
+              }
+            ]
+          }
+        ],
+        "enemy_after": [
+          {
+            "id": 1,
+            "hp": 86,
+            "block": 0,
+            "powers": [
+              {
+                "id": "SLOW_POWER",
+                "name": "Slow",
+                "amount": 20,
+                "type": "Debuff",
+                "stack_type": "Counter",
+                "description": "Whenever you play a card, this enemy receives 10% more damage from Attacks this turn. (Receives 20% more damage)"
+              },
+              {
+                "id": "STRENGTH_POWER",
+                "name": "Strength",
+                "amount": 10,
+                "type": "Buff",
+                "stack_type": "Counter",
+                "description": "Increases attack damage by 10."
+              }
+            ]
+          }
+        ],
+        "expected_enemy_changes": [
+          {
+            "combat_id": 1,
+            "hp_remaining": {
+              "min": 86,
+              "max": 86
+            },
+            "block_remaining": {
+              "min": 0,
+              "max": 0
+            },
+            "power_changes": [
+              {
+                "power_id": "SLOW_POWER",
+                "before": 10,
+                "after_declared_actions": {
+                  "min": 20,
+                  "max": 20
+                }
+              }
+            ],
+            "depleted_if_all_declared_hits_resolve": false,
+            "current_attack_after_debuffs": {
+              "min": 23,
+              "max": 23
+            }
+          }
+        ],
+        "projection": {
+          "block": 13,
+          "hp_if_ending": 68,
+          "hp_loss_if_ending": 10,
+          "block_including_end_turn_gains": 13,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": 23,
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp": 86,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": [
+                {
+                  "power_id": "SLOW_POWER",
+                  "before": 10,
+                  "after_declared_actions": {
+                    "min": 20,
+                    "max": 20
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "next": {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        "plan_id_preserved": true,
+        "revision_before": 1,
+        "revision_after": 1,
+        "old_next_model_responses": 8,
+        "new_model_calls": 0
+      }
+    ],
+    "interpretation": "Two independent historical cutoffs. Zero-call continuation preserves the declared plan. At the first cutoff this continues Defend, whereas the old runtime requested a new judgment and actually selected Ultimate Defend. Do not present both cutoffs as one counterfactual executed trajectory."
+  },
+  "replay": {
+    "input": {
+      "source": "run-artifacts/run35-slow-review/cases/effigy-turn3.json",
+      "sha256": "6675ce1636fe108f2354699147102a056693759babc0368732d8049454059d8b"
+    },
+    "input_sha256": "63156c2d16722f064370b94c323f05301ca3182981eb28c6c6066d440e2ab8d1",
+    "cohort": "development",
+    "freeze": {
+      "source": "run-artifacts/run35-slow-review/freeze.json",
+      "sha256": "97a998cf18dbf6be99f6f28c27b7ed40aed59eef1ec6fa61411d23fb17541acd"
+    },
+    "candidate_sha256": "a1b230449bc8526373f5cf2ec0e6f294543d913e73974a142eb5a4bb84d2d39a",
+    "summary": {
+      "source": "run-artifacts/run35-slow-review/results/effigy-turn3/slow/1/summary.json",
+      "sha256": "0f43eb57974202e360642725e1ca84a9340cfd4a4b0388f6466f3a3a05ad35db"
+    },
+    "emitted_rules": {
+      "source": "run-artifacts/run35-slow-review/results/effigy-turn3/slow/1/request-10.json",
+      "sha256": "d4af5831b536254fdaf0a49490ebd142030e20707e6d31a1c210b8d25ebd82b4"
+    },
+    "calls": 56,
+    "responses": 56,
+    "usage": {
+      "input_tokens": 1157680,
+      "output_tokens": 3086
+    },
+    "cost_usd": null,
+    "candidate_coverage": {
+      "inspected_prefixes": 600,
+      "enumerated_plans": 217,
+      "selected_plans": 64,
+      "first_action_variants": 6,
+      "search_truncated": false,
+      "candidate_selection_truncated": true,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "adjacent_order_review": {
+        "inspected": 111,
+        "added": 65,
+        "truncated": false
+      },
+      "order_grouping": "same_visible_copies; action_order_targets_and_bound_identities_preserved",
+      "eligible_plans": 133,
+      "assessed_plans": 133,
+      "distinct_allocations": 36,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 4
+    },
+    "balanced_pairs": 6,
+    "order_disagreements": 5,
+    "previous_declared_plan": {
+      "sequence": [
+        {
+          "kind": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "id": "ULTIMATE_DEFEND"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "known_effects": {
+        "block": 18,
+        "hp_if_ending": 73,
+        "hp_loss_if_ending": 5,
+        "block_including_end_turn_gains": 18,
+        "end_turn_block_gains": [],
+        "end_turn_damage_events": [],
+        "incoming_attack": 23,
+        "enemies": [
+          {
+            "combat_id": 1,
+            "hp": 86,
+            "block": 0,
+            "hp_removed": 6,
+            "block_removed": 0,
+            "power_changes": [
+              {
+                "power_id": "SLOW_POWER",
+                "before": 0,
+                "after_declared_actions": {
+                  "min": 30,
+                  "max": 30
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "ordered_damage": [
+        {
+          "sequence": 0,
+          "card_id": "STRIKE_IRONCLAD",
+          "target_id": 1,
+          "per_hit": {
+            "min": 6,
+            "max": 6
+          },
+          "preview_hits": 1,
+          "includes_new_vulnerable": false,
+          "after_block_and_hp_loss_caps": {
+            "hp_removed": {
+              "min": 6,
+              "max": 6
+            },
+            "block_removed": {
+              "min": 0,
+              "max": 0
+            },
+            "applied_hp_loss_limits": []
+          }
+        }
+      ],
+      "checkpoint": null
+    },
+    "new_plan": {
+      "sequence": [
+        {
+          "kind": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "play_card",
+          "id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "id": "ULTIMATE_DEFEND"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "known_effects": {
+        "block": 18,
+        "hp_if_ending": 73,
+        "hp_loss_if_ending": 5,
+        "block_including_end_turn_gains": 18,
+        "end_turn_block_gains": [],
+        "end_turn_damage_events": [],
+        "incoming_attack": 23,
+        "enemies": [
+          {
+            "combat_id": 1,
+            "hp": 86,
+            "block": 0,
+            "hp_removed": 6,
+            "block_removed": 0,
+            "power_changes": [
+              {
+                "power_id": "SLOW_POWER",
+                "before": 0,
+                "after_declared_actions": {
+                  "min": 30,
+                  "max": 30
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "ordered_damage": [
+        {
+          "sequence": 0,
+          "card_id": "STRIKE_IRONCLAD",
+          "target_id": 1,
+          "per_hit": {
+            "min": 6,
+            "max": 6
+          },
+          "preview_hits": 1,
+          "includes_new_vulnerable": false,
+          "after_block_and_hp_loss_caps": {
+            "hp_removed": {
+              "min": 6,
+              "max": 6
+            },
+            "block_removed": {
+              "min": 0,
+              "max": 0
+            },
+            "applied_hp_loss_limits": []
+          }
+        }
+      ],
+      "checkpoint": null
+    },
+    "same_cards_attack_later": {
+      "sequence": [
+        {
+          "kind": "play_card",
+          "id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "id": "ULTIMATE_DEFEND"
+        },
+        {
+          "kind": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "target": 1
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "known_effects": {
+        "block": 18,
+        "hp_if_ending": 73,
+        "hp_loss_if_ending": 5,
+        "block_including_end_turn_gains": 18,
+        "end_turn_block_gains": [],
+        "end_turn_damage_events": [],
+        "incoming_attack": 23,
+        "enemies": [
+          {
+            "combat_id": 1,
+            "hp": null,
+            "block": null,
+            "hp_removed": null,
+            "block_removed": null,
+            "power_changes": [
+              {
+                "power_id": "SLOW_POWER",
+                "before": 0,
+                "after_declared_actions": {
+                  "min": 30,
+                  "max": 30
+                }
+              }
+            ],
+            "conditional_bounds": {
+              "hp": {
+                "min": 84,
+                "max": 85
+              },
+              "hp_removed": {
+                "min": 7,
+                "max": 8
+              },
+              "block": {
+                "min": 0,
+                "max": 0
+              }
+            }
+          }
+        ]
+      },
+      "ordered_damage": [
+        {
+          "sequence": 2,
+          "card_id": "STRIKE_IRONCLAD",
+          "target_id": 1,
+          "per_hit": {
+            "min": 7,
+            "max": 8
+          },
+          "preview_hits": 1,
+          "includes_new_vulnerable": false,
+          "includes_ordered_slow": true,
+          "after_block_and_hp_loss_caps": {
+            "hp_removed": {
+              "min": 7,
+              "max": 8
+            },
+            "block_removed": {
+              "min": 0,
+              "max": 0
+            },
+            "applied_hp_loss_limits": []
+          }
+        }
+      ],
+      "checkpoint": null
+    },
+    "finding": "The full replay still selects Strike before the two Skills, despite the declared later-attack damage gain. It does not improve this ordering. New arithmetic and zero-call continuation are supported separately from model preference quality."
+  },
+  "limitations": [
+    "Development snapshots, no held-out outcome or new game command.",
+    "Exact starting previews include existing multipliers. Future shifted integer previews retain rounding intervals, not fabricated exact damage.",
+    "Unknown draw, additional plays, Intangible-capped input, random targets and other hooks remain outside complete simulation.",
+    "Confidence and position-balanced support are not correctness or win probability.",
+    "The live run has not yet loaded this source revision."
+  ]
+}

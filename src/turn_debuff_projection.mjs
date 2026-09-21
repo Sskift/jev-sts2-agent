@@ -1,4 +1,5 @@
 import { attackHpLoss, previewHitCount, intentDamage } from './combat_arithmetic.mjs';
+import { slowPercent } from './turn_effects.mjs';
 
 // These adapters follow verified native v0.111.0 OnPlay ordering. Amounts
 // come from resolved live text, never from a base/upgrade Wiki guess.
@@ -11,7 +12,7 @@ function applicationAmount(card, kind) {
 }
 const power = (entity, id) => (entity.powers || []).find(p => p.id === id && p.amount > 0);
 const caps = entity => ['INTANGIBLE_POWER', 'SLIPPERY_POWER', 'BUFFER_POWER'].some(id => power(entity, id));
-const modeledPowers = ['SLIPPERY_POWER', 'BUFFER_POWER', 'ARTIFACT_POWER', 'WEAK_POWER', 'VULNERABLE_POWER'];
+const modeledPowers = ['SLIPPERY_POWER', 'BUFFER_POWER', 'ARTIFACT_POWER', 'WEAK_POWER', 'VULNERABLE_POWER', 'SLOW_POWER'];
 const bounds = values => values.some(v => !Number.isFinite(v)) ? { min: null, max: null }
   : { min: Math.min(...values), max: Math.max(...values) };
 
@@ -51,7 +52,8 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
     const range = row.per_hit_before_block_and_hp_loss_caps;
     return Number.isFinite(range.min) && Number.isFinite(range.max) && range.min !== range.max;
   }));
-  if (!hasOrderedRanges && !steps.some(step => applications[source(step)?.id])) return null;
+  const hasSlow = observed.enemies.some(enemy => enemy.powers?.some(power => power.id === 'SLOW_POWER'));
+  if (!hasOrderedRanges && !hasSlow && !steps.some(step => applications[source(step)?.id])) return null;
   const affected = new Set(), transitions = [], damage = [];
   const invalid = new Set(), invalidIncoming = new Set();
   const branches = ['min', 'max'].map(bound => ({ bound, enemies: structuredClone(observed.enemies) }));
@@ -73,6 +75,9 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
     // A payment-stage count from the current hand cannot be reused after a
     // hypothetical prefix that may spend/gain energy or alter X payment.
     if (!orderedEntries && card.cost < 0 && sequence > 0) card = { ...card, attack_preview: undefined };
+    if (card.type === 'Attack' && card.target_type === 'RandomEnemy') for (const enemy of observed.enemies.filter(e => e.is_alive)) {
+      affected.add(enemy.combat_id); invalid.add(enemy.combat_id);
+    }
     const ids = card.target_type === 'AllEnemies' ? observed.enemies.map(e => e.combat_id) : [step.target];
     for (const id of ids) {
       const original = observed.enemies.find(e => e.combat_id === id);
@@ -84,7 +89,7 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
       const perHit = {};
       const hitCounts = [];
       const effects = [];
-      let boosted = false;
+      let boosted = false, slowChanged = false;
       for (const { bound, enemies } of branches) {
         const enemy = enemies.find(e => e.combat_id === id);
         if (!enemy.is_alive || enemy.hp <= 0) continue;
@@ -97,12 +102,19 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
             if (range.min !== range.max) affected.add(id);
           }
           if (['INTANGIBLE_POWER', 'SLIPPERY_POWER', 'BUFFER_POWER'].filter(id => power(enemy, id)).length > 1) preview = null;
-          if (newlyVulnerable && card.id !== 'OMNISLICE') {
-            boosted = true; affected.add(id);
-            // Slippery/Buffer act on HP loss AFTER damage and Block; their
-            // counters can be walked by attackHpLoss. Intangible also caps the
-            // native damage preview, so its hidden uncapped value stays unknown.
-            preview = power(original, 'INTANGIBLE_POWER') || customMultiplier(observed, enemy, 'Vulnerable') ? null : scaledPreview(preview, 3, 2, bound);
+          if (card.id !== 'OMNISLICE') {
+            const initialSlow = slowPercent(original), currentSlow = slowPercent(enemy);
+            slowChanged ||= initialSlow !== currentSlow;
+            if (initialSlow === null || currentSlow === null) { affected.add(id); preview = null; }
+            if (newlyVulnerable || slowChanged) {
+              boosted ||= Boolean(newlyVulnerable); affected.add(id);
+              // Slippery/Buffer act on HP loss AFTER damage and Block; their
+              // counters can be walked by attackHpLoss. Intangible also caps the
+              // native damage preview, so its hidden uncapped value stays unknown.
+              preview = power(original, 'INTANGIBLE_POWER') || newlyVulnerable && customMultiplier(observed, enemy, 'Vulnerable')
+                || initialSlow === null || currentSlow === null ? null
+                : scaledPreview(preview, (newlyVulnerable ? 3 : 1) * (100 + currentSlow), (newlyVulnerable ? 2 : 1) * (100 + initialSlow), bound);
+            }
           }
           if ((power(enemy, 'VULNERABLE_POWER')?.amount || 0) !== (power(original, 'VULNERABLE_POWER')?.amount || 0)
             && /\bfor (?:each|every)\b[^.]*\bVulnerable\b/i.test(card.description)) {
@@ -144,11 +156,27 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
       if (card.type === 'Attack') damage.push({ sequence, card_id: card.id, target_id: id,
         per_hit: { min: perHit.min ?? null, max: perHit.max ?? null },
         preview_hits: hitCounts.length === 2 && hitCounts[0] === hitCounts[1] ? hitCounts[0] : null, includes_new_vulnerable: Boolean(boosted),
+        ...(slowChanged ? { includes_ordered_slow: true } : {}),
         after_block_and_hp_loss_caps: {
           hp_removed: effects.length === 2 && !invalid.has(id) ? bounds(effects.map(e => e.hp_removed)) : { min: null, max: null },
           block_removed: effects.length === 2 && !invalid.has(id) ? bounds(effects.map(e => e.block_removed)) : { min: null, max: null },
           applied_hp_loss_limits: [...new Set(effects.flatMap(e => e.limits))]
         } });
+    }
+    // Slow increments after the entire card, on each surviving owner; a
+    // potion does not count. Reset is at the owner's next side turn start.
+    if (step.kind === 'play_card') for (const { bound, enemies } of branches) for (const enemy of enemies) {
+      const slow = enemy.powers?.find(power => power.id === 'SLOW_POWER');
+      if (!slow || !enemy.is_alive) continue;
+      affected.add(enemy.combat_id);
+      const amount = slowPercent(enemy);
+      const unresolved = amount === null || card._uncomputed_repetitions;
+      if (unresolved) invalid.add(enemy.combat_id);
+      else slow.amount = amount + 10;
+      if (bound === 'min') transitions.push({ sequence, source_id: 'SLOW_POWER', card_id: card.id, target_id: enemy.combat_id,
+        power_id: 'SLOW_POWER', amount: unresolved ? null : 10, display_unit: 'percent_extra_powered_attack_damage',
+        timing: 'after_card_play', outcome: unresolved ? 'unresolved' : 'increased',
+        condition: 'Each owned Slow hook receives this completed card play. Current card damage uses the prior percentage; potion use does not increment it. Automatic extra plays are uncomputed. Resets at the owner side turn start.' });
     }
   }
   if (!transitions.length && !hasOrderedRanges) return null;
@@ -172,5 +200,5 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
       current_attack_after_debuffs: attacks.includes(null) ? { min: null, max: null } : { min: Math.min(...attacks), max: Math.max(...attacks) } };
   });
   return { is_observed_effect: false, adapters: [...new Set([...transitions.map(t => t.source_id), ...(hasOrderedRanges ? ['ORDERED_DAMAGE_RANGES'] : [])])], affected_target_ids: [...affected], transitions, ordered_damage: damage, enemies,
-    scope: 'Conditional ordered damage and current-intent bounds for verified native v0.111.0 applications and ordered target previews. Attack-source debuffs apply after damage; Taunt grants Block then Vulnerable; Artifact consumes applications in order. Slippery/Buffer HP-loss counters advance after unblocked hits, including across cards. Area recipients come from native previews. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so new 1.5x/0.75x modifiers yield ranges. Intangible-capped previews, overlapping prevention hooks, custom multipliers and unreadable applications stay unknown. Assumes other hooks remain unchanged and every declared hit resolves; uncomputed potions, automatic plays, reactions, random targets and future moves are not simulated. Counter changes describe the end of the declared segment before enemy-turn duration ticks, not an observation.' };
+    scope: 'Conditional ordered damage and current-intent bounds for verified native v0.111.0 applications and ordered target previews. Attack-source debuffs apply after damage; Taunt grants Block then Vulnerable; Artifact consumes applications in order. Slow adds 10 displayed percentage points after each card, benefiting later powered Attacks; its current displayed percentage is already included in starting previews. Slippery/Buffer HP-loss counters advance after unblocked hits, including across cards. Area recipients come from native previews. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so changed multipliers yield ranges. Intangible-capped previews, overlapping prevention hooks, custom multipliers and unreadable applications stay unknown. Assumes other hooks remain unchanged and every declared hit resolves; uncomputed potions, automatic plays, reactions, random targets and future moves are not simulated. Counter changes describe the end of the declared segment before enemy-turn resets or duration ticks, not an observation.' };
 }

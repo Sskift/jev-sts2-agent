@@ -1,6 +1,13 @@
 // Recognize only explicit, standalone English rules verified in native output.
 // A future/random upgrade (e.g. Aggression) does not promise a hand-selection
 // modal or allow choosing the current payoff. Unrecognized effects stay unknown.
+// Native SlowPower.DisplayAmount is SlowAmount * 10, a percentage, not stacks.
+export function slowPercent(entity) {
+  const slow = entity?.powers?.find(power => power.id === 'SLOW_POWER');
+  if (!slow) return 0;
+  return Number.isSafeInteger(slow.amount) && slow.amount >= 0 && slow.amount % 10 === 0 ? slow.amount : null;
+}
+
 export function handUpgradeMode(description = '') {
   const clauses = description.split(/[.\n]/).map(text => text.trim());
   if (clauses.some(text => /^Upgrade (?:a|1) card in your Hand$/i.test(text))) return 'one';
