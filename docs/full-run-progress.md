@@ -1,5 +1,9 @@
 # 整局实测进展
 
+**最新结果：第 34 局在第二幕第 21 层 The Obscura 普通战第 11 回合正式失败，分数 353。** 第一幕 Vantom 已击败；累计启动并结束 34 局、21 局通过第一幕。最终战 10 次可计算的结束生命全部吻合，瓶中精灵于第 8 回合触发；主敌最后仍有 66 生命。[完整复盘](run34-review.md)与[原生证据](evidence/2026-09-21/run34-review.json)已保存。第 35 局尚未开始，先补足确定性变形的作用范围并回放既有局面。
+
+## 阶段记录
+
 `742c2ff` 已提交推送，并在第二幕第 21 层 The Obscura 第 2 回合、72/80、2 能量的同一确认点加载。原生指纹匹配，pending=null。第 5 回合实战按 Thunderclap → Defend+ → Strike → Primal Force 保持同一计划，后三步零次新增模型调用；[执行证据](evidence/2026-09-21/run34-debuff-continuation.json)已保存。续接目录 `run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z`，继续同局。
 
 第 34 局第二幕第 19 层，Jev 已声明 Bash+ → Dismantle+ → Primal Force。Bash 的已知易伤仍触发新规划，原先用了 20 次请求才继续同一 Dismantle。现复用已有规则账目核对精确的目标生命、格挡和能力层数，其余变化仍复核；同一真实前后状态可保留原计划、零次新增调用。34 项检查通过，[证据](evidence/2026-09-21/run34-debuff-continuation.json)不将调用减少当作胜率改善。继续同局，准备在确认点加载。

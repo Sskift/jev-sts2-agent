@@ -1,0 +1,726 @@
+{
+  "at": "2026-09-21T05:13:27.942Z",
+  "run_id": "run-1789963561",
+  "roots": [
+    "run-artifacts/run34-2026-09-21T04-05-56.584Z",
+    "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z",
+    "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z",
+    "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z"
+  ],
+  "formal_result": {
+    "is_victory": false,
+    "floor": 21,
+    "score": 353,
+    "epochs_discovered": 0,
+    "can_return_to_menu": true,
+    "can_continue": false
+  },
+  "settlement": {
+    "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/settled-game-over.json",
+    "sha256": "1ecc90774df2b5f655d336bc70b15aab56af72b2b32245abcd70b59764f85602"
+  },
+  "final_memory": {
+    "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/final-memory.json",
+    "sha256": "d9e69b44f7d513ec9d4047bfd44536c38da78f5d544e13e5ed61133351898f06"
+  },
+  "pending": null,
+  "started_at_floor": 1,
+  "acts_reached": [
+    0,
+    1
+  ],
+  "act_one": {
+    "source": "docs/evidence/2026-09-21/run34-act-one.json",
+    "sha256": "8c2d106cbe48c78e71baf358dd9cc71acbb3823636d612cc314677eb1e9f9157"
+  },
+  "usage": {
+    "jev-1.13.0": {
+      "responses": 3392,
+      "input_tokens": 69388586,
+      "output_tokens": 246445,
+      "reported_cost_usd": null
+    }
+  },
+  "final_fight": {
+    "floor": 21,
+    "enter_hp": 72,
+    "initial_primary_hp": 123,
+    "final_primary_hp": 66,
+    "turns": [
+      {
+        "turn": 1,
+        "start_hp": 72,
+        "primary_hp": 123,
+        "illusion_hp": null,
+        "actions": [
+          {
+            "name": "Strike",
+            "id": "STRIKE_IRONCLAD",
+            "target": 1,
+            "target_role": "primary",
+            "source": {
+              "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0097/decision.json",
+              "sha256": "412d4e11ea4e8d24b34d35685663e48147884dbd44b38b27ee1405b745f17e2c"
+            }
+          },
+          {
+            "name": "Strike",
+            "id": "STRIKE_IRONCLAD",
+            "target": 1,
+            "target_role": "primary",
+            "source": {
+              "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0098/decision.json",
+              "sha256": "167f1ae35ed53507a362ad208bc59ed0190c305390a8ffae61e3e00d1365599f"
+            }
+          },
+          {
+            "name": "Strike",
+            "id": "STRIKE_IRONCLAD",
+            "target": 1,
+            "target_role": "primary",
+            "source": {
+              "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0099/decision.json",
+              "sha256": "0321fb51aaa032c0b73613bfe8168bf5a413901eb099bf82793ab80fe98a7f03"
+            }
+          },
+          {
+            "name": "Stone Armor",
+            "id": "STONE_ARMOR",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0100/decision.json",
+              "sha256": "c2c3b6081a05f09ab530b800427b519cff2cb7611655d1fb6f47383a219c8f08"
+            }
+          }
+        ],
+        "end_hp": 72,
+        "forecast": 72,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0097/before-state.json",
+          "sha256": "deba874e9e3b440f06f57a65c85bac95f3f097b19eb3e5be900e1940802a579a"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0101/after-state.json",
+          "sha256": "d0768922d5b20a9879fbad5f3c804a4cc54d759c31bc4b4722b3d7ee8594dea8"
+        }
+      },
+      {
+        "turn": 2,
+        "start_hp": 72,
+        "primary_hp": 105,
+        "illusion_hp": 21,
+        "actions": [
+          {
+            "name": "Defend+",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0102/decision.json",
+              "sha256": "cf1864228972167e448890b07bb306b5e5eb895aff7362954338fb3016f02424"
+            }
+          },
+          {
+            "name": "Thunderclap",
+            "id": "THUNDERCLAP",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0001/decision.json",
+              "sha256": "8c54a63a93ad58e65cf0baa38b3f20b34d93083be5b506c2e73317b5fc9a6ae2"
+            }
+          },
+          {
+            "name": "Defend",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0002/decision.json",
+              "sha256": "bbd65a8f5afd7d979b57cf0e361fc9e0c272945176f538f29973d27efce1193e"
+            }
+          },
+          {
+            "name": "Whirlwind",
+            "id": "WHIRLWIND",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0003/decision.json",
+              "sha256": "178e330c1a03f555e3da21ca53ab47150dab6b48ff812b87bfb817a98e110951"
+            }
+          }
+        ],
+        "end_hp": 66,
+        "forecast": 66,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0102/before-state.json",
+          "sha256": "22fdc23ccc199fd30c40cbdacb3b463f504856c513cce3ffeccb6f074e0bba89"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0004/after-state.json",
+          "sha256": "117fa987610578be24f65d11bc821eea6213e944b6968c5c476f9c4ce073e721"
+        }
+      },
+      {
+        "turn": 3,
+        "start_hp": 66,
+        "primary_hp": 101,
+        "illusion_hp": 17,
+        "actions": [
+          {
+            "name": "Dismantle+",
+            "id": "DISMANTLE",
+            "target": 1,
+            "target_role": "primary",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0005/decision.json",
+              "sha256": "331fb88abee1c536cdde1ae0b127e1e8df9c65f3d55c13a7a15d4d65a456b6d6"
+            }
+          },
+          {
+            "name": "Defend",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0006/decision.json",
+              "sha256": "b0e847532c126e79c163ef4c20ad13c3c40833eeaaa3c987255fddcdf1a5ffaa"
+            }
+          },
+          {
+            "name": "Evil Eye",
+            "id": "EVIL_EYE",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0007/decision.json",
+              "sha256": "f4406fe1fdebf19b6c47487b0ba6aee246e9ead6af6f020ab84ce86b2fe582c6"
+            }
+          }
+        ],
+        "end_hp": 55,
+        "forecast": 55,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0005/before-state.json",
+          "sha256": "dcd393ac7e7df586ed69dca6358c73d833dfd1b27c8554250703bb4327348a76"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0008/after-state.json",
+          "sha256": "a988c358e4a3cee62943cd04c45bd3ca9d6fd7d9dd3a60219dae9c1661323f6e"
+        }
+      },
+      {
+        "turn": 4,
+        "start_hp": 55,
+        "primary_hp": 97,
+        "illusion_hp": 17,
+        "actions": [
+          {
+            "name": "Setup Strike",
+            "id": "SETUP_STRIKE",
+            "target": 1,
+            "target_role": "primary",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0009/decision.json",
+              "sha256": "4c204ab1793fc9bbc4160570ba1559a46fd126a58ecb8047608ffb6d957b807f"
+            }
+          },
+          {
+            "name": "Armaments",
+            "id": "ARMAMENTS",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0010/decision.json",
+              "sha256": "9bd5afa1c1c91ed8cc3240e96a90b09afdfef786e65c12913bc66d465a09e65a"
+            }
+          },
+          {
+            "name": "Defend+",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0011/decision.json",
+              "sha256": "09a0ea506eb0458170c102393f71de00a4870c961240db10c88dba25f30f5d81"
+            }
+          }
+        ],
+        "end_hp": 53,
+        "forecast": 53,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0009/before-state.json",
+          "sha256": "ae46306024cbc44b469b1d55a50df416eb6308b114703fc2884fbf1461d626fe"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0012/after-state.json",
+          "sha256": "04bc0b2f0ff013aaf8ea89eba4d8836acd6118e821dee0d6561bb70b58f9107e"
+        }
+      },
+      {
+        "turn": 5,
+        "start_hp": 53,
+        "primary_hp": 90,
+        "illusion_hp": 17,
+        "actions": [
+          {
+            "name": "Thunderclap",
+            "id": "THUNDERCLAP",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0013/decision.json",
+              "sha256": "a0f6ffebdc56aa722676c34583e5b56abe7f7c71b8a21509b236277532d6a195"
+            }
+          },
+          {
+            "name": "Defend+",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0014/decision.json",
+              "sha256": "c0dac9f23481bee1bbd98d7a8bd60e846887141d7aa8d3bd5412749a266563be"
+            }
+          },
+          {
+            "name": "Strike",
+            "id": "STRIKE_IRONCLAD",
+            "target": 2,
+            "target_role": "illusion",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0015/decision.json",
+              "sha256": "0d75987838f7805b0f3dcf55a367247b9381f963fed40ca0e812f36155ff40fd"
+            }
+          },
+          {
+            "name": "Primal Force",
+            "id": "PRIMAL_FORCE",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/decision.json",
+              "sha256": "aa95c83493e1a57c4441eb50e022c057a16c71c5489471402aa4abca3a7324aa"
+            }
+          }
+        ],
+        "end_hp": 33,
+        "forecast": 33,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0013/before-state.json",
+          "sha256": "e91143140f003a711c7afac3d5205e397354567e13db97493d8ba773b40faefa"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0017/after-state.json",
+          "sha256": "5fecaee8da0ed8edf255f3c07ea572ba9682e43605b7dac089cc7c9b1c66388e"
+        }
+      },
+      {
+        "turn": 6,
+        "start_hp": 33,
+        "primary_hp": 86,
+        "illusion_hp": 4,
+        "actions": [
+          {
+            "name": "Defend+",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0018/decision.json",
+              "sha256": "204452eb11d059cba6cb5027f63e43a22c147f73a464560445634424aad9651e"
+            }
+          },
+          {
+            "name": "Dismantle+",
+            "id": "DISMANTLE",
+            "target": 1,
+            "target_role": "primary",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0019/decision.json",
+              "sha256": "e6558062d39acbed689624d0fa6e9e7f57de5018d5b6bead098a7943fc6a2814"
+            }
+          },
+          {
+            "name": "Whirlwind",
+            "id": "WHIRLWIND",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0020/decision.json",
+              "sha256": "ad5621312f549b64f5c694f84eae7b4433db974423389443218d84181208a438"
+            }
+          }
+        ],
+        "end_hp": 28,
+        "forecast": 28,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0018/before-state.json",
+          "sha256": "3e88afb536e1a5a7c240d0e2e6a4152cac42e9cb926394b4adb2ac89336b4c90"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0021/after-state.json",
+          "sha256": "795e8f9bd010afb6af166976bb83afc34531688c34017f5f92febc7aacd77db0"
+        }
+      },
+      {
+        "turn": 7,
+        "start_hp": 28,
+        "primary_hp": 77,
+        "illusion_hp": 21,
+        "actions": [
+          {
+            "name": "Armaments",
+            "id": "ARMAMENTS",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0022/decision.json",
+              "sha256": "2d4bd078730b63a95bdbc9c121ea8bec1932876e9ac369e193bc7f38e26a37b8"
+            }
+          },
+          {
+            "name": "Setup Strike",
+            "id": "SETUP_STRIKE",
+            "target": 1,
+            "target_role": "primary",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0025/decision.json",
+              "sha256": "de0f6be76e87642440881629d3c5e8d1de334e7c0127e6345fa3023763dc8b18"
+            }
+          },
+          {
+            "name": "Defend+",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0026/decision.json",
+              "sha256": "4dc31d455563be363a5d87c109862ba92f39e808f4cabfe699848f0a521ab79a"
+            }
+          }
+        ],
+        "end_hp": 22,
+        "forecast": 22,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0022/before-state.json",
+          "sha256": "c83f5b38349d71a6a609b0d2515a923a66775dc75b349f29df923ca63039ecf9"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0027/after-state.json",
+          "sha256": "686eb59382f01bdbec2267f7a521995707c03e27699c958577e4d3d8aac184a8"
+        }
+      },
+      {
+        "turn": 8,
+        "start_hp": 22,
+        "primary_hp": 70,
+        "illusion_hp": 21,
+        "actions": [
+          {
+            "name": "Strike",
+            "id": "STRIKE_IRONCLAD",
+            "target": 2,
+            "target_role": "illusion",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0028/decision.json",
+              "sha256": "04addc49a13e11310b8b73e7a4cf832b222608aaba520167a597bfac6adc1f55"
+            }
+          },
+          {
+            "name": "Evil Eye",
+            "id": "EVIL_EYE",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0029/decision.json",
+              "sha256": "39d45c8c59cab13f58a5996baa7a27e4bd90b41347da414fa837b0ebdf5aaf7d"
+            }
+          },
+          {
+            "name": "Defend",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0030/decision.json",
+              "sha256": "6c2c362f2b9e86bc4328a15797c3a4a092be000b4f2ad577edc1f5437cc68074"
+            }
+          }
+        ],
+        "end_hp": 24,
+        "forecast": null,
+        "known_forecast_matches": null,
+        "automatic_death_prevention": [
+          {
+            "source_id": "FAIRY_IN_A_BOTTLE",
+            "potion_slot": 0,
+            "description": "When your HP would be reduced to 0, instead this potion is discarded and you heal to 30% of your Max HP.",
+            "base_heal_fraction_of_max_hp": 0.3,
+            "minimum_base_heal": 1,
+            "scope": "Automatic ordinary-death prevention, consumed before healing. Trigger order, heal modifiers, repeated damage and remaining potion inventory are not simulated; do not infer final HP or survival from the damage sum. Forced death bypasses this effect."
+          }
+        ],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0028/before-state.json",
+          "sha256": "f303ed5b409ec169ad955c5b35444ca7a09a96aa730828c295e76e4dcb111f1a"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0031/after-state.json",
+          "sha256": "dd64672475b9fa6cc97d10fd17fbf5eb78aa064be12805ef22b93f39fbb98d09"
+        }
+      },
+      {
+        "turn": 9,
+        "start_hp": 24,
+        "primary_hp": 70,
+        "illusion_hp": 15,
+        "actions": [
+          {
+            "name": "Strike",
+            "id": "STRIKE_IRONCLAD",
+            "target": 2,
+            "target_role": "illusion",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0032/decision.json",
+              "sha256": "d56baa5a5d2122ad4f9ff04086d8c1372f792b98e417955f5ab50a535bc0200f"
+            }
+          },
+          {
+            "name": "Armaments",
+            "id": "ARMAMENTS",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0033/decision.json",
+              "sha256": "634cbb4094b8e4f704aad6d22355e1af13992cc60fb20d0671347c0a1df8ff90"
+            }
+          },
+          {
+            "name": "Defend+",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0036/decision.json",
+              "sha256": "f185545f9e8a1fb67b3de77ffb3aea7a3a75b3a4f9367da0d8e72891a103a670"
+            }
+          }
+        ],
+        "end_hp": 3,
+        "forecast": 3,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0032/before-state.json",
+          "sha256": "4c285b5b714bee8f6e2ee65dca4b9f5d190bed3fd960febf3995eec0b1e40159"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0037/after-state.json",
+          "sha256": "e7372c99363f479ffc88b764f2db74282bb88e9fa97885fcbe392495712b624e"
+        }
+      },
+      {
+        "turn": 10,
+        "start_hp": 3,
+        "primary_hp": 70,
+        "illusion_hp": 9,
+        "actions": [
+          {
+            "name": "Dismantle+",
+            "id": "DISMANTLE",
+            "target": 2,
+            "target_role": "illusion",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0038/decision.json",
+              "sha256": "2b107c15c8c2804f6aa4fb9c7d839035afbdf6e876909f85123336e84b2574a5"
+            }
+          },
+          {
+            "name": "Defend",
+            "id": "DEFEND_IRONCLAD",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0039/decision.json",
+              "sha256": "2cdaf4438974cae011d6e9079bbff246b97a4e207d48daf94240566c9aa87f21"
+            }
+          },
+          {
+            "name": "Stone Armor+",
+            "id": "STONE_ARMOR",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0040/decision.json",
+              "sha256": "71f01b01cf6f76380cf51c00f380fecbf90083e9180ac91cc659017737bc660e"
+            }
+          }
+        ],
+        "end_hp": 3,
+        "forecast": 3,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0038/before-state.json",
+          "sha256": "48da92d9a24467fee97ec158ba74f7ed630c6d8e4afb73ccf0e0f2247655e9b5"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0041/after-state.json",
+          "sha256": "4eee3ef8ccd3a60bc2b5cd3a8f29350538c48414241ba328889e7f9b179bbbc4"
+        }
+      },
+      {
+        "turn": 11,
+        "start_hp": 3,
+        "primary_hp": 70,
+        "illusion_hp": 21,
+        "actions": [
+          {
+            "name": "Thunderclap",
+            "id": "THUNDERCLAP",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0042/decision.json",
+              "sha256": "b575a1efdce6a208673d419a1b954be33d8e133d5b874faa89bf730b244bca42"
+            }
+          },
+          {
+            "name": "Strike",
+            "id": "STRIKE_IRONCLAD",
+            "target": 2,
+            "target_role": "illusion",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0043/decision.json",
+              "sha256": "c54e58e3644b5ff3869361e1eb216ed55f1d111dc18560dee5e636fd400c7d8a"
+            }
+          },
+          {
+            "name": "Strike",
+            "id": "STRIKE_IRONCLAD",
+            "target": 2,
+            "target_role": "illusion",
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0044/decision.json",
+              "sha256": "ae310a6594fd418fff4c7ac973c19b6e3bf39a37b080f9e3eb9a2effcc0b1503"
+            }
+          },
+          {
+            "name": "Whirlwind",
+            "id": "WHIRLWIND",
+            "target_role": null,
+            "source": {
+              "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0045/decision.json",
+              "sha256": "f0afc62f8a79acd79eb888bc53e464a42fd09591b1e18a2c2693ef11689a9974"
+            }
+          }
+        ],
+        "end_hp": 0,
+        "forecast": -7,
+        "known_forecast_matches": true,
+        "automatic_death_prevention": [],
+        "source": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0042/before-state.json",
+          "sha256": "b1265aafecac44fd2304732291530b0378f1211e2c44176f87b9da57d695de98"
+        },
+        "end": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0046/after-state.json",
+          "sha256": "a790011ecf1fc442df3db7b5ba8f3a23147cc045fe10c369b6aede06e8acf5ee"
+        }
+      }
+    ],
+    "known_end_forecasts": 10,
+    "mismatched_end_forecasts": 0,
+    "unique_plans": 18,
+    "paired_comparisons": 155,
+    "pair_order_disagreements": 40
+  },
+  "confirmed_transform_scope_gap": {
+    "before": {
+      "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/before-state.json",
+      "sha256": "27907c1e4341bb955af56f86a74b81a8bab3f1dec5cf51b6316a4adb3e7b9a92"
+    },
+    "response": {
+      "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/response.json",
+      "sha256": "a8249be86a0488b71966a2fe3db08d732ae97e932f2bc2aa02e0d71b833cf943"
+    },
+    "after": {
+      "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/after-state.json",
+      "sha256": "a66838821d9e84571c689c3e280668570873d32ca3af2239c0f07e3dd5ca179d"
+    },
+    "energy": 0,
+    "attacks_in_hand": 0,
+    "remaining_cards": [
+      {
+        "id": "BURNING_PACT",
+        "type": "Skill"
+      }
+    ],
+    "finding": "The declared sequence consumes both hand Attacks before Primal Force. At actual execution no Attack remains, so no card is transformed. The current continuation describes the remaining hand and a generic observation checkpoint but has no explicit transformation-recipient ledger."
+  },
+  "changes_loaded": [
+    {
+      "commit": "530a8d1",
+      "change": "Target-dependent hit counts and unknown propagation"
+    },
+    {
+      "commit": "7781950",
+      "change": "Sampled order coverage and equivalent-copy deduplication"
+    },
+    {
+      "commit": "742c2ff",
+      "change": "Continuation after exact observed enemy effects",
+      "evidence": {
+        "source": "docs/evidence/2026-09-21/run34-debuff-continuation.json",
+        "sha256": "f2339ccf7110df12892ac0fc60764b6a120dd10c3973a80d56ed1f06525bb561"
+      }
+    }
+  ],
+  "next_work": "Before run35, verify native deterministic hand-transformation rules, expose affected and unaffected cards plus linked replacement rules at the declared sequence boundary, and replay the existing turn5 and empty-target snapshots. Do not infer a transformed identity or a successful future sequence before observing native results.",
+  "limitations": [
+    "No Act 3 or formal whole-run victory.",
+    "End-turn arithmetic matched the ten calculable final-fight responses. The Fairy turn correctly remained unknown rather than promising a simulated final HP. This does not establish overall context completeness.",
+    "Repeated Illusion depletion prevented individual attacks but did not remove it permanently. The primary enemy still had 66 HP at defeat.",
+    "The latest continuation fix preserves the already chosen plan and saves calls; it does not establish better strategy.",
+    "The transformation fact gap does not prove that another ordering would win the fight. All further replay snapshots are development cases."
+  ],
+  "transform_rule_research": {
+    "primal_force": {
+      "source": "temp/knowledge-research/PrimalForce.cs",
+      "sha256": "6cc908567a617b5c44d8e196ca92e3f6d25d2a712a35dcce3d11e022d83b3faa"
+    },
+    "giant_rock": {
+      "source": "temp/knowledge-research/GiantRock.cs",
+      "sha256": "d96761fa556d2ba5a8f147ca18be088ee383fbf70d938810c559710c3bc66ede"
+    },
+    "card_model": {
+      "source": "temp/knowledge-research/CardModel.cs",
+      "sha256": "ff36dc654859ed98b643c1dbd688726fc47fc4ab2f89a4ccaca40addaa8d5c32"
+    },
+    "native_rule": "Primal Force iterates hand cards that are non-null, IsTransformable and Attack. CardModel.IsTransformable only rejects an Eternal card while its pile is Deck, so hand cards meet this condition. Each selected card becomes a new Giant Rock, upgraded only when Primal Force itself is upgraded.",
+    "base_replacement": {
+      "id": "GIANT_ROCK",
+      "cost": 1,
+      "base_damage": 20,
+      "upgraded_base_damage": 24
+    },
+    "existing_model_reference": {
+      "source": {
+        "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0013/jev-turn_assess_plans-0006.json",
+        "sha256": "fe3775ed45c775b034f304af5d07dfd2abd38c74f6972da90db09db94ba59723"
+      },
+      "giant_rock_already_present": true
+    },
+    "implementation_scope": "No additional mod field is required for this hand-only selector. Describe recipients after the already-declared prefix and associate the existing replacement rule, while keeping card-play hooks and generated identities conditional until native observation."
+  },
+  "replay_cases": [
+    {
+      "id": "obscura-turn5",
+      "source": "run-artifacts/run34-final-review/cases/obscura-turn5.json",
+      "sha256": "e88401e5c847ba66a613243e45bdd5ce9927120c382368ad9a8a69653b675ebd",
+      "input_sha256": "ab355d5a7f59a5d2633d35002cc19fb3d32aa57af424164725791c34322ca111",
+      "cohort": "development"
+    },
+    {
+      "id": "obscura-empty-transform",
+      "source": "run-artifacts/run34-final-review/cases/obscura-empty-transform.json",
+      "sha256": "fe42be9f48358aa256494039d179fc482c3ff288f0c7a19c4e33b6259503bdcd",
+      "input_sha256": "5b7d2d9165044d9181df0b645def6d2c5cd11768ea7adff74eb0d082d0f4aefe",
+      "cohort": "development"
+    }
+  ]
+}
