@@ -7,6 +7,37 @@ import { inspectSequence } from '../src/turn_sequence.mjs';
 import { describeContinuation, compareContinuationResources } from '../src/card_flow_projection.mjs';
 import { describePlanAlternative } from '../src/turn_plan_refinement.mjs';
 import { planStep } from '../src/turn_plan_state.mjs';
+import { reserveSequence, unavailableTargetsAfterPrefix } from '../src/turn_projection.mjs';
+
+test('ordered candidates cannot spend another card on a certainly depleted target or after combat ends', () => {
+  const state = completeCombat(); state.combat.player.energy = 3;
+  state.combat.enemies[0].hp = 9;
+  state.combat.enemies.push({ ...structuredClone(state.combat.enemies[0]), combat_id: 43, hp: 30 });
+  state.combat.hand = [9, 6].map((damage, index) => fixtureCard('STRIKE_IRONCLAD', { index, damage,
+    description: `Deal ${damage} damage.`, can_play: true, target_type: 'AnyEnemy',
+    target_previews: [42, 43].map(target_id => ({ target_id, damage })), details: { instance_id: `attack${index}` } }));
+  state.combat.hand.push(fixtureCard('DEFEND_IRONCLAD', { index: 2, type: 'Skill', description: 'Gain 5 Block.',
+    block: 5, can_play: true, target_type: 'Self', details: { instance_id: 'defend' } }));
+  const original = structuredClone(state), candidates = buildModCandidates(state);
+  const step = id => planStep(state, candidates.get(id));
+  const kill = step('card_0_target_42'), stale = step('card_1_target_42'), next = step('card_1_target_43'), defend = step('card_2');
+  assert.deepEqual(unavailableTargetsAfterPrefix(state, [kill]), [42]);
+  assert.equal(reserveSequence(state, [kill, stale]), null);
+  assert.ok(reserveSequence(state, [kill, next]), 'The remaining card can still target another enemy');
+  assert.ok(reserveSequence(state, [kill, defend]), 'A surviving enemy leaves a use for other actions');
+  const generated = independentTurnCandidates(state, candidates).plans;
+  assert.ok(generated.some(p => p[0].card_instance_id === kill.card_instance_id && p[0].target === 42 && p[1]?.target === 43));
+  assert.ok(generated.every(p => reserveSequence(state, p)));
+  assert.deepEqual(state, original);
+  state.combat.enemies.pop();
+  assert.equal(reserveSequence(state, [kill, defend]), null, 'Do not promise manual actions after the final kill');
+  assert.ok(reserveSequence(state, [kill, { kind: 'end_turn' }]), 'An end marker can terminate the planned segment');
+  state.combat.enemies[0].powers = [{ id: 'REVIVE_POWER', description: 'Upon death, revive with 10 HP.' }];
+  assert.deepEqual(unavailableTargetsAfterPrefix(state, [kill]), [], 'Unresolved revival does not prove removal');
+  state.combat.enemies[0].powers = [];
+  state.combat.hand[0].description = 'Deal 9 damage. Draw 1 card.';
+  assert.deepEqual(unavailableTargetsAfterPrefix(state, [planStep(state, buildModCandidates(state).get('card_0_target_42'))]), [], 'An observation checkpoint still requires native state');
+});
 
 test('assessment spending cap retains the seed, ending and changed order without editing context or ranking tactics', () => {
   const entry = (value, allocation, names) => ({ value, allocation, label: {

@@ -16,7 +16,26 @@ export function sequenceEnergyBudget(state, steps) {
 
 export function reserveSequence(state, steps) {
   const budget = sequenceEnergyBudget(state, steps);
-  return budget?.affordable && reserveActionSequence(state, steps).valid ? { energy_left: budget.energy_left, costs: budget.costs } : null;
+  if (!budget?.affordable || !reserveActionSequence(state, steps).valid) return null;
+  for (let index = 1; index < steps.length; index++) {
+    if (steps[index].kind === 'end_turn') continue;
+    const unavailable = unavailableTargetsAfterPrefix(state, steps.slice(0, index));
+    if (unavailable.includes(steps[index].target)
+      || unavailable.length && state.combat.enemies.filter(e => e.is_alive && e.hp > 0).every(e => unavailable.includes(e.combat_id))) return null;
+  }
+  return { energy_left: budget.energy_left, costs: budget.costs };
+}
+
+// Reuse the same ordered arithmetic as plan comparison. Only a prefix with
+// no unresolved effects can establish that a later explicit target is gone.
+// Draw checkpoints, revival/death hooks and uncertain modifiers stay unknown.
+export function unavailableTargetsAfterPrefix(state, steps) {
+  if (!steps.length || !steps.some(step => step.kind === 'use_potion'
+    || state.combat.hand.some(card => card.details?.instance_id === step.card_instance_id && card.type === 'Attack'))) return [];
+  const projection = describeTurnProjection(state, steps);
+  if (projection.omitted_effects.length || projection.sequence_dependencies.checkpoint) return [];
+  return projection.known_effects_only.enemies.filter(enemy => enemy.hp === 0
+    && state.combat.enemies.some(current => current.combat_id === enemy.combat_id && current.is_alive && current.hp > 0)).map(enemy => enemy.combat_id);
 }
 
 function checkpointAttackBalance(projection, responseUnresolved, energy) {

@@ -3,6 +3,7 @@ import { planStep, cardInstance } from './turn_plan_state.mjs';
 import { handUpgradeMode, nextCardKind } from './turn_effects.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
+import { unavailableTargetsAfterPrefix } from './turn_projection.mjs';
 
 export const planSignature = steps => JSON.stringify(steps.map(s => [s.kind, s.card_instance_id, s.potion_id, s.slot, s.target, s.beneficiary_instance_id, s.next_card_instance_id]));
 
@@ -125,9 +126,12 @@ export function independentTurnCandidates(state, candidates, { maxInspections = 
     });
     yield [...bound, end];
     if (walked.checkpoint) return;
+    const unavailable = unavailableTargetsAfterPrefix(state, bound);
+    if (unavailable.length && state.combat.enemies.filter(e => e.is_alive && e.hp > 0).every(e => unavailable.includes(e.combat_id))) return;
     const available = new Set(walked.remaining_hand.map(cardInstance));
     const potions = new Set(prefix.filter(s => s.kind === 'use_potion').map(s => s.slot));
     for (const action of actions) {
+      if (unavailable.includes(action.target)) continue;
       if (action.kind === 'play_card' ? !available.has(action.card_instance_id) : potions.has(action.slot)) continue;
       for (const step of variants(action, walked.remaining_hand)) yield* visit([...prefix, step]);
     }
@@ -169,7 +173,7 @@ export function independentTurnCandidates(state, candidates, { maxInspections = 
   return { plans: [...selected.values()], coverage: { inspected_prefixes: inspections, enumerated_plans: all.size + 1,
     selected_plans: selected.size, first_action_variants: roots.length,
     search_truncated: active.length > 0, candidate_selection_truncated: selected.size < all.size + 1,
-    scope: 'Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.' } };
+    scope: 'Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Excludes later targets certainly depleted by a fully calculated prefix, and stops after known combat completion or observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.' } };
 }
 
 // Normalize rounding in the provider distribution. Choice-only callers remain

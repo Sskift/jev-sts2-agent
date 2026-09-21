@@ -1,0 +1,100 @@
+{
+  "date": "2026-09-21",
+  "run_id": "run-1789993715",
+  "source": "run-artifacts/run37-2026-09-21T12-28-29.568Z/step-0081",
+  "observed_problem": {
+    "original_sequence": [
+      {
+        "kind": "play_card",
+        "name": "Taunt",
+        "target": 2
+      },
+      {
+        "kind": "play_card",
+        "name": "Strike+",
+        "target": 4
+      },
+      {
+        "kind": "play_card",
+        "name": "Strike",
+        "target": 4
+      },
+      {
+        "kind": "end_turn"
+      }
+    ],
+    "third_action_target": 4,
+    "target_hp_before": 9,
+    "preceding_attack_preview": 9,
+    "actual_after_attack_targets": [
+      1,
+      2,
+      3
+    ]
+  },
+  "correction": {
+    "unavailable_after_prefix": [
+      4
+    ],
+    "rejects_original_sequence": true,
+    "generated_coverage": {
+      "inspected_prefixes": 4096,
+      "enumerated_plans": 1908,
+      "selected_plans": 64,
+      "first_action_variants": 16,
+      "search_truncated": true,
+      "candidate_selection_truncated": true,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Excludes later targets certainly depleted by a fully calculated prefix, and stops after known combat completion or observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic."
+    },
+    "invalid_generated_plans": 0,
+    "enumeration_and_validation_ms": 1125,
+    "paid_model_calls": 0,
+    "checks_passed": 50
+  },
+  "checkpoint": {
+    "floor": 6,
+    "turn": 3,
+    "hp": 59,
+    "energy": 2,
+    "pending": null
+  },
+  "scope": "Mechanical target availability from the existing ordered prefix calculation. No tactical ranking or mandatory kill preference. Unresolved effects, draw checkpoints and death/revival hooks do not establish target removal. Native execution checks remain unchanged. No model quality or win-rate claim.",
+  "source_files": [
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/step-0081/before-state.json",
+      "sha256": "220d0fe53095bfed68664fdfb0664a0dc25cdf4d98b2d5e760ad7385405bb70e"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/step-0081/decision.json",
+      "sha256": "5459164180c3391022cad5b84cf99225259bd985ea79ae6bc764668af56a8255"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/step-0082/before-state.json",
+      "sha256": "29d22539df7547927a1c8d846136a4c88ab5545ff777522707fe9bbf662614de"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/step-0082/after-state.json",
+      "sha256": "c7b82a1bc4e63d2cb7a74ee7fd0644160d6caa1e69a321f421a1e17299b35756"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/step-0082/response.json",
+      "sha256": "d04b55386a342c9b6d01e5c1c8eb43a8d8d9364b45f3ff2c1c5fe2738da4c9f9"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/continuation-stop-native.json",
+      "sha256": "9173f545dba35c230ac3d43204d5210b78ea2493e220102ecb2d443bf2de3950"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/continuation-stop-memory.json",
+      "sha256": "da83c5aab0bbaab9eef0a973818bcfb1b51917bed4e21586d6b3ea64b0b70818"
+    },
+    {
+      "path": "src/turn_projection.mjs",
+      "sha256": "d2e53a1de82dc848e2e938151dc7dc643eeb0be5fed2605d695792a93d832119"
+    },
+    {
+      "path": "src/turn_candidates.mjs",
+      "sha256": "2ec7da27381815459b4cb42a2d412bb5ab245d56c8d1895a37dc77e68bcdb7ab"
+    }
+  ]
+}
