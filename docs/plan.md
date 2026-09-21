@@ -1,6 +1,6 @@
 # 当前工作计划
 
-更新：2026-09-21。goal 处于 active：从同一局标准新游戏的第一层开始，经过三幕、击败最终 Boss，并进入正式胜利结算。**尚未完成。**
+更新：2026-09-21。goal 因官方接口计费错误处于 blocked。目标仍是从同一局标准新游戏的第一层开始，经过三幕、击败最终 Boss，并进入正式胜利结算。**尚未完成，等待官方调用恢复。**
 
 ## 当前状态
 
@@ -8,7 +8,7 @@
 
 第 34 局在第二幕第 21 层 The Obscura 第 11 回合正式失败；[复盘](run34-review.md)与[结算](evidence/2026-09-21/run34-review.json)已保存。确定性变形的作用范围修正与[回放证据](evidence/2026-09-21/run34-transformation.json)已提交推送，再启动本局；未回退或重打上一局战斗。
 
-两把 TypeSafe 官方 key 当前都返回计费错误。配置仍为第二把、`jev-1.13.0`，OpenRouter、Vercel 和自动回退关闭；凭据仅在忽略提交的本机配置中。已请求用户恢复官方计费／额度或更新本机 key。控制器已结束，当前运行目录 `run-artifacts/run35-resume-2026-09-21T05-54-49.957Z`，内存归档 `billing-stop-memory.json`，恢复快照 `temp/run35-before-billing-resume.json`。
+两把 TypeSafe 官方 key 均已返回计费错误；当前 key 于 06:34 UTC 的最小请求仍为 `402 billing_error`，随后核查配置未更新、控制器进程不存在、原生局面与恢复快照一致。同一阻塞持续三轮后，goal 已标为 blocked。配置仍为第二把、`jev-1.13.0`，OpenRouter、Vercel 和自动回退关闭；凭据仅在忽略提交的本机配置中。已请求用户恢复官方计费／额度或更新本机 key。当前运行目录 `run-artifacts/run35-resume-2026-09-21T05-54-49.957Z`，内存归档 `billing-stop-memory.json`，恢复快照 `temp/run35-before-billing-resume.json`。
 
 ## 本轮已落实的修正
 
