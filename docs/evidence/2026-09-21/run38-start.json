@@ -1,0 +1,46 @@
+{
+  "at": "2026-09-21T13:06:01.134Z",
+  "run_id": "run-1789995870",
+  "started_at_floor": 1,
+  "act_index": 0,
+  "game_mode": "Standard",
+  "ascension": 0,
+  "character": "IRONCLAD",
+  "runtime": {
+    "commit": "a51e371d06f0df1aba4b85966c98e1687b0ed89d",
+    "provider": "openrouter",
+    "model": "typesafe/jev-1.13",
+    "planAssessmentLimit": 24,
+    "cost_at_start": 2.904190841999999,
+    "uncertain_at_start": 0.023500217999999996
+  },
+  "prior_run": "run-1789993715",
+  "prior_result": "Native failure settled with game_over_continue; returned normally to menu with has_run_save=false.",
+  "complete": false,
+  "artifacts": [
+    {
+      "path": "temp/run37-return-menu.json",
+      "sha256": "4eef0da881bd46805751337599f954a0419a809defc396fae9b0e8b456ea9252"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/initial-menu.json",
+      "sha256": "d7a7bcf2104081154846cf8df41b0e15f480926d43b6be0a18044339bde9b44b"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/runtime.json",
+      "sha256": "8f60a572c1a7d09e03bdc29e4b132fb81578bc1c10a4d88a9fad1b6a427c7ea1"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/step-0001/result.json",
+      "sha256": "39fc662b89ecded12ad404ebc590f333caf1aaa5b90dcb9c46ce514199265881"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/step-0002/result.json",
+      "sha256": "c72574b415bd814dd39420755fa1a4ea9010b9f853eebd8fdbfb0ddb6cb5dbcb"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/step-0003/after-state.json",
+      "sha256": "77b66231b284f3274f1ce6c05114df743b364335658b55dc8644c529da01795f"
+    }
+  ]
+}
