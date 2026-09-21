@@ -1,0 +1,46 @@
+{
+  "at": "2026-09-21T12:04:29.128Z",
+  "run_id": "run-1789992163",
+  "started_at_floor": 1,
+  "act_index": 0,
+  "game_mode": "Standard",
+  "ascension": 0,
+  "character": "IRONCLAD",
+  "runtime": {
+    "commit": "46e0b10980079381d1ce18be4e5904b0f31e6b65",
+    "provider": "openrouter",
+    "model": "typesafe/jev-1.13",
+    "planAssessmentLimit": 24,
+    "cost_at_start": 1.1842641300000005,
+    "uncertain_at_start": 0.015792966000000012
+  },
+  "prior_run": "run-1789968641",
+  "prior_result": "Native failure settled after restoring minimized window; returned normally to menu with has_run_save=false.",
+  "complete": false,
+  "artifacts": [
+    {
+      "path": "temp/run35-return-menu.json",
+      "sha256": "d211ba4897791083e0134956e9af4fed4e0c02e2c48a5281b692949e5014255c"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/initial-menu.json",
+      "sha256": "541c91768415fdf5c45a682cfdec83e31e4ddd1c834ea7172d2213b32da20929"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/runtime.json",
+      "sha256": "3f166c7c6212673d1e05bef38839392bc17cbcdf093ac096c2d72c92b258c6fb"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0001/result.json",
+      "sha256": "39fc662b89ecded12ad404ebc590f333caf1aaa5b90dcb9c46ce514199265881"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0002/result.json",
+      "sha256": "c72574b415bd814dd39420755fa1a4ea9010b9f853eebd8fdbfb0ddb6cb5dbcb"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0003/after-state.json",
+      "sha256": "580df784b79d47b4b85a3c34ad06fb2d62e97c35cb4838a3ef4acb4cd59f5401"
+    }
+  ]
+}
