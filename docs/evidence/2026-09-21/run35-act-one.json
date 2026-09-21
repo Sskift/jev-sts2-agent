@@ -1,0 +1,65 @@
+{
+  "at": "2026-09-21T06:11:21.129Z",
+  "run_id": "run-1789968641",
+  "started_at_floor": 1,
+  "start": {
+    "source": "docs/evidence/2026-09-21/run35-start.json",
+    "sha256": "f0d8d63e139e6645477b8dde1a78ffba77260532bf80eee44ccdd520bb327809"
+  },
+  "provider": "typesafe",
+  "model": "jev-1.13.0",
+  "key_slot": "second_official_key",
+  "runtime_commit": "d32984b1c94469ae8ea24a780642e7647ea722f1",
+  "root": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z",
+  "boss": {
+    "encounter": "CEREMONIAL_BEAST_BOSS",
+    "turn": 14,
+    "before_player_hp": 33,
+    "before_enemy_hp": [
+      4
+    ],
+    "before": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0082/before-state.json",
+      "sha256": "364c5af2b4bd1cbb26a60f6148a394626a0d5a3a5bacf10f1e37b089cdf5a4e1"
+    },
+    "command": {
+      "cmd": "play_card",
+      "id": "STRIKE_IRONCLAD",
+      "nth": 0,
+      "target": 1
+    },
+    "confirmation": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0082/result.json",
+      "sha256": "b8a0a2c71b3fc11458b4fdbfbfbd6f617aacc46cffbd69fff1f53327b4d35ba1"
+    },
+    "after": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0082/after-state.json",
+      "sha256": "dd02174fee853a1b95340c4dbb1aa066f35e4e7d132323929b995fa20e19715d"
+    },
+    "reward_screen": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0094/before-state.json",
+      "sha256": "fd35e2b1e2cba686fe270cbf964e62cc1fc682ddef7d114d4957eddcc619caf2"
+    },
+    "post_combat_hp": 39
+  },
+  "next_act": {
+    "index": 1,
+    "floor": 18,
+    "hp": 80,
+    "native": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0097/after-state.json",
+      "sha256": "82674f7d3f6025d9a07b48abec70eae6b24c373b6f00f705ef10c7ea41afb408"
+    },
+    "first_fight": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0100/after-state.json",
+      "sha256": "efacec91a74cbc137ebdf128a9d9fefe5bc6a1b927e38fc27de02ec95d8ed0e7"
+    }
+  },
+  "counts": {
+    "started": 35,
+    "ended": 34,
+    "passed_act_one": 22
+  },
+  "whole_run_victory": false,
+  "scope": "Same standard run continues into Act 2. No battle reset or save rollback. An Act 1 boss defeat is not the required three-act formal victory."
+}
