@@ -29,6 +29,8 @@ const routes = [
   ['turn_planning.survival_constraints', 'analysis.survival_constraints'],
   ['turn_planning.action_reservation', 'analysis.action_reservation'],
   ['screen_state.shop.route_context', 'analysis.shop_route_context'],
+  ['screen_state.shop.economy', 'analysis.shop_economy'],
+  ['screen_state.shop_removal_planning', 'intent.shop_removal_planning'],
   ['screen_state.preceding_observed_action', 'history.selection_trigger'],
   ['screen_state.skipped_card_rewards', 'history.skipped_card_rewards'],
   ['screen_state.selection_planning', 'intent.selection_planning'],

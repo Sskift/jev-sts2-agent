@@ -43,7 +43,7 @@ function snapshot(dir, id, cohort) {
     if (![responseFile, afterFile, decisionFile].every(fs.existsSync)) continue;
     const decision = read(decisionFile), response = read(responseFile);
     if (decision.action !== 'mod_command') continue;
-    memory.begin(decision.request, before, { turnPlan: decision.turn_plan, turnStep: decision.turn_step, campUpgradePlan: decision.camp_upgrade_plan });
+    memory.begin(decision.request, before, { turnPlan: decision.turn_plan, turnStep: decision.turn_step, campUpgradePlan: decision.camp_upgrade_plan, shopRemovalPlan: decision.shop_removal_plan });
     const after = read(afterFile);
     memory.finish(response, after); memory.observe(after);
   }

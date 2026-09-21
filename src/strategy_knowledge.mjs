@@ -17,7 +17,9 @@ export function buildStrategyKnowledge(state) {
     // Between rooms all directions are potential answers to an offered reward.
     // In combat only supported packages are useful; no unrelated class guide.
     .filter(note => !state.combat || note.relevance.current_cards.length || note.relevance.present_mechanics.length);
-  const general = notes.general.filter(note => !state.combat || !note.phases);
+  const phases = [state.screen, ...(!state.combat ? ['between_rooms'] : []),
+    ...(!state.combat && state.screen === 'GRID_CARD_SELECT' && state.grid_card_select?.selection_type === 'remove' ? ['permanent_removal'] : [])];
+  const general = notes.general.filter(note => !note.phases || note.phases.some(phase => phases.includes(phase)));
   const sources = new Set([...general.map(n => n.source), ...(character ? [character.source] : []), ...packages.map(n => n.source).filter(Boolean)]);
   return { rules_version: notes.rules_version, reviewed_at: notes.reviewed_at, authority: notes.authority,
     general, character: character ? { id: context.player.character_id, overview: character.overview, packages } : null,

@@ -10,6 +10,8 @@ import { buildRuleReference } from './rule_reference.mjs';
 import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
 import { sameTurn, publicTurnPlan, turnGuard, advanceTurnPlan } from './turn_plan_state.mjs';
 import { campPlanApplicable, publicCampTarget } from './camp_plan_state.mjs';
+import { shopRemovalApplicable, publicShopRemoval } from './shop_plan_state.mjs';
+import { shopEconomy } from './shop_context.mjs';
 import { potionEffectFacts } from './potion_effects.mjs';
 import { positioningError } from './combat_positioning.mjs';
 import { publicRunStrategy } from './run_strategy_state.mjs';
@@ -309,11 +311,13 @@ export class DecisionMemory {
     this.last = clone(state);
     this.persist();
   }
-  begin(request, state, { turnPlan, turnStep, campUpgradePlan } = {}) {
+  begin(request, state, { turnPlan, turnStep, campUpgradePlan, shopRemovalPlan } = {}) {
     if (this.data.pending) throw new ContextError('An earlier action has an unresolved outcome; inspect the saved memory before continuing.');
     if (turnPlan && !sameTurn(turnPlan, state)) throw new ContextError('Cannot attach a plan from another turn');
     if (campUpgradePlan && (!campPlanApplicable(campUpgradePlan, state) || state.screen !== 'REST_SITE'
       || request.cmd !== 'choose_rest_option' || request.id !== 'SMITH')) throw new ContextError('Cannot attach a stale or unrelated camp plan');
+    if (shopRemovalPlan && (!shopRemovalApplicable(shopRemovalPlan, state) || state.screen !== 'SHOP'
+      || request.cmd !== 'shop_remove_card')) throw new ContextError('Cannot attach a stale or unrelated shop removal plan');
     const matching = state.combat?.hand?.filter(card => card.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.index - b.index);
     this.data.pending = { request: clone(request), floor: state.decision_context?.total_floor, combat_id: state.decision_context?.combat_id || null, round: state.combat?.turn_number, screen: state.screen,
       ...(state.combat ? { combat_frame_before: combatFrame(state) } : {}),
@@ -321,6 +325,7 @@ export class DecisionMemory {
     if (request.cmd === 'use_potion') this.data.pending.potion_at_request = clone(state.decision_context?.player?.potions.filter(p => p.id.toUpperCase() === request.id?.toUpperCase()).sort((a, b) => a.slot - b.slot)[request.nth ?? 0]);
     if (request.cmd === 'reward_skip_card') this.data.pending.card_reward_key = cardRewardKey(state.rewards?.rewards?.filter(reward => reward.type.toLowerCase() === 'card')[request.nth ?? 0]);
     if (campUpgradePlan) this.data.pending.camp_upgrade_plan = clone(campUpgradePlan);
+    if (shopRemovalPlan) this.data.pending.shop_removal_plan = clone(shopRemovalPlan);
     if (turnPlan) {
       this.data.turn_plan = clone(turnPlan);
     }
@@ -338,6 +343,8 @@ export class DecisionMemory {
     // authorize automatic selection; the existing pending guard handles them.
     if (this.data.pending?.camp_upgrade_plan && response.ok) this.data.camp_upgrade_plan = clone(this.data.pending.camp_upgrade_plan);
     else delete this.data.camp_upgrade_plan;
+    if (this.data.pending?.shop_removal_plan && response.ok) this.data.shop_removal_plan = clone(this.data.pending.shop_removal_plan);
+    else delete this.data.shop_removal_plan;
     const change = response.ok && this.data.pending?.combat_id === after.decision_context?.combat_id
       ? observedCombatChange(this.data.pending?.combat_frame_before, after) : null;
     const recorded = { ...this.data.pending, ok: response.ok, result: clone(response.data ?? response.error ?? null), after_screen: after.screen,
@@ -346,6 +353,7 @@ export class DecisionMemory {
     delete recorded.turn_guard;
     delete recorded.turn_card_cost;
     delete recorded.camp_upgrade_plan;
+    delete recorded.shop_removal_plan;
     this.data.actions.push(recorded);
     this.data.pending = !response.ok && ['TIMEOUT', 'EVENT_TIMEOUT', 'PURCHASE_TIMEOUT', 'INTERNAL_ERROR'].includes(response.error) ? { ...this.data.pending, outcome_unknown: true, error: response.error } : null;
     this.persist();
@@ -479,7 +487,7 @@ function mergeObservedCardPlays(combat, memoryContext) {
   }
 }
 
-export function buildDecisionContext(state, { candidates, memory = new DecisionMemory(), selectionPlanning } = {}) {
+export function buildDecisionContext(state, { candidates, memory = new DecisionMemory(), selectionPlanning, shopRemovalPlan } = {}) {
   validateContext(state);
   const source = canonicalObservation(state), context = source.decision_context;
   const screenState = { ...source };
@@ -487,6 +495,8 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
   if (state.screen === 'GRID_CARD_SELECT' && campPlanApplicable(memory.data.camp_upgrade_plan, state)) {
     screenState.camp_planning = publicCampTarget(memory.data.camp_upgrade_plan);
   }
+  const removalPlan = shopRemovalPlan ?? memory.data.shop_removal_plan;
+  if (shopRemovalApplicable(removalPlan, state)) screenState.shop_removal_planning = publicShopRemoval(removalPlan);
   if (state.screen === 'REST_SITE' && screenState.rest_site && context?.deck_upgrade_previews) {
     // Preview-only values must not turn entering/leaving a campfire into a
     // permanent deck change. Instance IDs still join the grouped deck below.
@@ -576,6 +586,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     const ownShop = Number(map.nodes.find(n => keyOf(n) === keyOf(map.current_coord)).type === 'SHOP');
     screenState.shop.route_context = { steps_to_boss: route.nearest_steps_after_chosen_node.BOSS ?? null, future_shops_before_boss: { min: route.counts.SHOP.min - ownShop, max: route.counts.SHOP.max - ownShop }, note: 'Counts follow known map edges; movement relics may add future legal choices.' };
   }
+  if (state.screen === 'SHOP' && screenState.shop) screenState.shop.economy = shopEconomy(source, groupCards(context.master_deck), candidates);
   const memoryContext = memory.context(state);
   mergeObservedCardPlays(combat, memoryContext);
   const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.planning_choice ? { planning_choice: candidate.planning_choice } : {}), ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}), ...(candidate.combat_estimate ? { combat_estimate: candidate.combat_estimate } : {}) }));

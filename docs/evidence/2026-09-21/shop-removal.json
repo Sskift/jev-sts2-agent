@@ -1,0 +1,611 @@
+{
+  "date": "2026-09-21",
+  "game_version": "v0.111.0",
+  "provider": "openrouter",
+  "returned_model": "typesafe/jev-1.13-20260917",
+  "source_run": "run-1789968641",
+  "cohort": "development",
+  "game_commands_sent": 0,
+  "baseline_commit": "c81d856",
+  "methodology": "Three fixed pre-action snapshots with pre-cutoff memory only. One baseline and first-improvement sample per case, then one exploratory final-version sample per case. Conditional budget comparison separately exercised using the preserved earlier preliminary purchase. No outcome labels or later events enter model state; no repeats discarded. This is not a held-out win-rate evaluation.",
+  "native_removal": {
+    "assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
+    "methods": [
+      "OneOffSynchronizer.DoMerchantCardRemoval",
+      "CardSelectCmd.FromDeckForRemoval",
+      "CardModel.IsRemovable"
+    ],
+    "facts": [
+      "Merchant selects one card, loses live-price gold and removes it only after confirmed selection.",
+      "IsRemovable excludes Eternal; the merchant does not supply an additional filter.",
+      "Upgrade/enchantment differences must remain separate targets; exact native modal eligibility is authoritative."
+    ]
+  },
+  "first_comparison": [
+    {
+      "id": "act1-entry",
+      "source": "run-artifacts/run35-2026-09-21T05-30-36.682Z/step-0058",
+      "input_sha256": "8daa744c172338000553e27127989883d38864eab20884b85d1410a316af81db",
+      "floor": 4,
+      "gold": 130,
+      "deck_count": 13,
+      "original": {
+        "cmd": "shop_buy_card",
+        "id": "COLOSSUS",
+        "nth": 0
+      },
+      "variants": {
+        "baseline": {
+          "request": {
+            "cmd": "shop_buy_card",
+            "id": "COLOSSUS",
+            "nth": 0
+          },
+          "confidence": 0.36,
+          "removal_probability": 0.04,
+          "removal_score": 0.94,
+          "requests": 2,
+          "cost_usd": 0.00120729,
+          "max_request_bytes": 60327,
+          "details": "Full ratings and distributions retained in the hashed local decision and response artifacts."
+        },
+        "improved": {
+          "request": {
+            "cmd": "shop_remove_card"
+          },
+          "confidence": 0.4,
+          "removal_probability": 0.45,
+          "removal_target": {
+            "id": "STRIKE_IRONCLAD",
+            "name": "Strike",
+            "confidence": 0.59
+          },
+          "removal_score": 1.07,
+          "requests": 3,
+          "cost_usd": 0.0019286400000000001,
+          "max_request_bytes": 71122,
+          "details": "Full ratings and distributions retained in the hashed local decision and response artifacts."
+        }
+      }
+    },
+    {
+      "id": "act2-entry",
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0028",
+      "input_sha256": "d9a1124c758682dfb18a7842af90a4d6179f54b1095c8ccf0bd6e259ef335591",
+      "floor": 27,
+      "gold": 343,
+      "deck_count": 23,
+      "original": {
+        "cmd": "shop_buy_card",
+        "id": "BATTLE_TRANCE",
+        "nth": 0
+      },
+      "variants": {
+        "baseline": {
+          "request": {
+            "cmd": "shop_buy_card",
+            "id": "BATTLE_TRANCE",
+            "nth": 0
+          },
+          "confidence": 0.36,
+          "removal_probability": 0.01,
+          "removal_score": 1.05,
+          "requests": 2,
+          "cost_usd": 0.0015097740000000002,
+          "max_request_bytes": 76925,
+          "details": "Full ratings and distributions retained in the hashed local decision and response artifacts."
+        },
+        "improved": {
+          "request": {
+            "cmd": "shop_buy_card",
+            "id": "BATTLE_TRANCE",
+            "nth": 0
+          },
+          "confidence": 0.21,
+          "removal_probability": 0.21000000000000002,
+          "removal_target": {
+            "id": "STRIKE_IRONCLAD",
+            "name": "Strike",
+            "confidence": 0.36
+          },
+          "removal_score": 1.13,
+          "requests": 3,
+          "cost_usd": 0.002439528,
+          "max_request_bytes": 90373,
+          "details": "Full ratings and distributions retained in the hashed local decision and response artifacts."
+        }
+      }
+    },
+    {
+      "id": "act2-removal-budget",
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0031",
+      "input_sha256": "644a0519c600a69db501c9ba9a39ee031fe86021b227ec79b1d6d6c73976e0fc",
+      "floor": 27,
+      "gold": 107,
+      "deck_count": 25,
+      "original": {
+        "cmd": "shop_buy_card",
+        "id": "IRON_WAVE",
+        "nth": 0
+      },
+      "variants": {
+        "baseline": {
+          "request": {
+            "cmd": "shop_buy_card",
+            "id": "IRON_WAVE",
+            "nth": 0
+          },
+          "confidence": 0.4,
+          "removal_probability": 0.05,
+          "removal_score": 0.88,
+          "requests": 2,
+          "cost_usd": 0.0013185480000000001,
+          "max_request_bytes": 61368,
+          "details": "Full ratings and distributions retained in the hashed local decision and response artifacts."
+        },
+        "improved": {
+          "request": {
+            "cmd": "shop_buy_card",
+            "id": "IRON_WAVE",
+            "nth": 0
+          },
+          "confidence": 0.25,
+          "removal_probability": 0.29,
+          "removal_target": {
+            "id": "STRIKE_IRONCLAD",
+            "name": "Strike",
+            "confidence": 0.35
+          },
+          "removal_score": 1.06,
+          "requests": 3,
+          "cost_usd": 0.00218484,
+          "max_request_bytes": 69581,
+          "details": "Full ratings and distributions retained in the hashed local decision and response artifacts."
+        }
+      }
+    }
+  ],
+  "exploratory_final": [
+    {
+      "id": "act1-entry",
+      "input_sha256": "8daa744c172338000553e27127989883d38864eab20884b85d1410a316af81db",
+      "request": {
+        "cmd": "shop_remove_card"
+      },
+      "confidence": 0.45,
+      "probabilities": {
+        "proceed": 0.05,
+        "buy_card_0": 0.11,
+        "buy_card_2": 0.28,
+        "buy_potion_1": 0,
+        "buy_card_1": 0.03,
+        "buy_card_4": 0.01,
+        "buy_card_5": 0,
+        "buy_potion_2": 0,
+        "buy_potion_0": 0.01,
+        "buy_card_3": 0,
+        "remove_card": 0.51
+      },
+      "removal_target": {
+        "id": "STRIKE_IRONCLAD",
+        "confidence": 0.65
+      },
+      "requests": 3,
+      "cost_usd": 0.001928766
+    },
+    {
+      "id": "act2-entry",
+      "input_sha256": "d9a1124c758682dfb18a7842af90a4d6179f54b1095c8ccf0bd6e259ef335591",
+      "request": {
+        "cmd": "shop_buy_card",
+        "id": "BATTLE_TRANCE",
+        "nth": 0
+      },
+      "confidence": 0.25,
+      "probabilities": {
+        "buy_card_3": 0,
+        "buy_card_5": 0.01,
+        "proceed": 0.05,
+        "buy_potion_1": 0.06,
+        "buy_card_4": 0.02,
+        "buy_card_1": 0.01,
+        "buy_card_0": 0.17,
+        "buy_card_2": 0.31,
+        "buy_potion_2": 0,
+        "buy_potion_0": 0.01,
+        "buy_relic_0": 0.02,
+        "buy_relic_1": 0.02,
+        "buy_card_6": 0.07,
+        "remove_card": 0.18,
+        "buy_relic_2": 0.07
+      },
+      "removal_target": {
+        "id": "STRIKE_IRONCLAD",
+        "confidence": 0.31
+      },
+      "requests": 3,
+      "cost_usd": 0.00243873
+    },
+    {
+      "id": "act2-removal-budget",
+      "input_sha256": "644a0519c600a69db501c9ba9a39ee031fe86021b227ec79b1d6d6c73976e0fc",
+      "request": {
+        "cmd": "shop_remove_card"
+      },
+      "confidence": 0.25,
+      "probabilities": {
+        "buy_potion_2": 0.02,
+        "buy_card_1": 0.05,
+        "buy_card_0": 0.33,
+        "remove_card": 0.35,
+        "buy_potion_0": 0.03,
+        "proceed": 0.15,
+        "buy_card_4": 0.07
+      },
+      "removal_target": {
+        "id": "STRIKE_IRONCLAD",
+        "confidence": 0.47
+      },
+      "requests": 3,
+      "cost_usd": 0.002183622
+    }
+  ],
+  "conditional_budget_check": {
+    "input_sha256": "644a0519c600a69db501c9ba9a39ee031fe86021b227ec79b1d6d6c73976e0fc",
+    "source_preliminary_choice": "first_comparison/act2-removal-budget/improved",
+    "decision": {
+      "cmd": "shop_buy_card",
+      "id": "IRON_WAVE",
+      "nth": 0
+    },
+    "judgments": [
+      {
+        "question": "budget_forward",
+        "action_id": "remove_card",
+        "confidence": 0.09,
+        "probabilities": {
+          "second": 0.54,
+          "first": 0.46
+        }
+      },
+      {
+        "question": "budget_reverse",
+        "action_id": "buy_card_0",
+        "confidence": 0.15,
+        "probabilities": {
+          "second": 0.57,
+          "first": 0.43
+        }
+      }
+    ],
+    "consensus_action_id": null,
+    "cost_usd": 0.000680736
+  },
+  "total_cost_usd": 0.017820474000000003,
+  "http_responses": 25,
+  "conclusion": "Concrete removal gains consideration. The final sample chooses removal in two cases, but the 107-gold state fluctuates between buying and removing, and reversed budget comparisons disagree. No win-rate improvement or calibrated correctness is established. Early removal may still sacrifice needed output.",
+  "artifacts": [
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/summary.json",
+      "sha256": "7e18bc01db801597dbdf43002199193744998f0beb82c9d51b2dd95f263a9ed7"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/input.json",
+      "sha256": "b362bebc2be0680a01d43ff7f33ee0570352c335687e8216d1dff017678c632c"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/input.json",
+      "sha256": "31daf3eed7c3d713bdc8a4399b5838912a4f336865cbf1f5e544cab81de2f77e"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/input.json",
+      "sha256": "3877e0995276dead349f1ec6f56c1eab797b892d26b342a5dcea9718c7b15f25"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/baseline/decision.json",
+      "sha256": "c93f230d42f45a68ed96ff98bea4cb9d58d2cbb25c7b2fe89a40aee8269402b5"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/baseline/request-1.json",
+      "sha256": "512baaa97727d3a27c8207246a18ef7ee9c97996342a036501276fb08544feaa"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/baseline/request-2.json",
+      "sha256": "ec4a16b12485ab2d58761d168c1ff4f7030121e3844b6a82ed2b3d2a06f956a9"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/baseline/response-1.json",
+      "sha256": "28903ff2aaa204117ba3851254c36bb34f4bbe7fbec49b448c9acff1bbc4481d"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/baseline/response-2.json",
+      "sha256": "678a52dfcf3d996a959b8229156e80aeb15a843826014277c11c9332f241c9c1"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/improved/decision.json",
+      "sha256": "0ce3f0ac8c60165107c830739ac29a287f80c04ec4e7931f054f26ecbd386421"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/improved/request-1.json",
+      "sha256": "882b96bcb11bdab9ca117b22b0798ba8fd9c80458f55109190a66dff9c2dcefe"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/improved/request-2.json",
+      "sha256": "0c24463eb16c041ca00aaedbb931097efe803521a144cdff31116dd151f82657"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/improved/request-3.json",
+      "sha256": "454a1fd8c3d06446363e4d82a1d4202b41e5fbe63e7c2956175f3020de3520da"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/improved/response-1.json",
+      "sha256": "1a18469dabe0adb96bfddf1b96d74a9d8c11d0466bbd79528e4ba10800933704"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/improved/response-2.json",
+      "sha256": "b0e0c79edc46f842c355136c614e764412d237b605d247727c6e1aa410b6f20d"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/improved/response-3.json",
+      "sha256": "c88bda4a3e779d7b8ea6c2d7b77c86396601910022d921db23367c233d7c789b"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act1-entry/improved/target-decision.json",
+      "sha256": "96ca948c16d8134f980a26bcfae66d40afcfbbd9d928de4c23af790ab806b184"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/baseline/decision.json",
+      "sha256": "710392f1a35090bf19f82ee694d3fc0d9e9af42d8d54d866e5eae821938f62db"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/baseline/request-1.json",
+      "sha256": "59d108fb66d5db68b12120382507fe47310e011322b337805891333f3c1c2130"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/baseline/request-2.json",
+      "sha256": "a148a24d9523caa9e6ec4b9325b8c40a4aae1aac438e8baaed74638c8c74759d"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/baseline/response-1.json",
+      "sha256": "3aaea66afa77b006eb849e60829a9efc52779e78fa6dd08479d83a2fb9248ff5"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/baseline/response-2.json",
+      "sha256": "bcf3e74740bbadb9e22757fd8217f705ba5e78f2d28729c0284a78bfd02cf993"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/improved/decision.json",
+      "sha256": "b10b1671a8e35111a12386c16d5e6f84adef99e0deaa490ac30dfdb91bd1417d"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/improved/request-1.json",
+      "sha256": "eda8a311ca857363d5832386a15461b6dfda898145eb4be0b764a627061f4a05"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/improved/request-2.json",
+      "sha256": "260b8f72f51547898d9cd39a9e06f3ffd9e66f437acae17bb072f1af2e6a0063"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/improved/request-3.json",
+      "sha256": "ab16af39964c2f660439b0cdf1320084cf2bc1dabf9715e3dfe21418f7b5cc71"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/improved/response-1.json",
+      "sha256": "9680a8ce172405ad6a5093f6e668ee0beb76573522f27519a68930c0140aff19"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/improved/response-2.json",
+      "sha256": "5030d384419a0b7b38e65ef78f9328940bdca15fd24ebc42ca129704329ba0a6"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/improved/response-3.json",
+      "sha256": "c46dfdb6ccd36966eff4f6bb9dfc8ad3241027589bc86bf3d9ef8d8a359d0166"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-entry/improved/target-decision.json",
+      "sha256": "75e5943a6c4979bb0bfab2f5ebaef5b3fd2725359a455215f645f18275178088"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/baseline/decision.json",
+      "sha256": "21018a5e4dfc5429e670cb0478a5d98aeafb27854ba07af71b1287ba5565ae62"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/baseline/request-1.json",
+      "sha256": "be19c12941b1b4ee773fdae950f2bd95fddaba3af44c60b74dc0c6e9a7111c86"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/baseline/request-2.json",
+      "sha256": "a7f42bfef470ac279433d60d30948cb095d72676b9fe69352afdf24633827071"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/baseline/response-1.json",
+      "sha256": "a3ef90f24bcd8881d81807c9c0ab9b2b77ee8d54c4a7586be0192c80025e4271"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/baseline/response-2.json",
+      "sha256": "ac87a25fb8e11078b8f0869c5d8d7e63d654e56de6ccf667aaea974d200cd157"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/improved/decision.json",
+      "sha256": "04e9543e8ac15efae664f5d212047632e2edcfaec638e454407a58d511863482"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/improved/request-1.json",
+      "sha256": "828ff52842a8901870aeca3a42895544253106a7cb45a4dca60c871ea5535365"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/improved/request-2.json",
+      "sha256": "32f6c8b2c6fff7c4fc4d0e754a16499b2397b9acf3d461c0c7708df2859927fd"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/improved/request-3.json",
+      "sha256": "be75489ae4b54743d8d44d4a74e1107c28928ed694fd4951ee3357f661828d53"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/improved/response-1.json",
+      "sha256": "ae840abaa0cc4aa034e8d6dd8442e90b39fbb79258ccd9c863a2fab0580f6dd9"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/improved/response-2.json",
+      "sha256": "f8fea7eaec483a40ff9ff05fac1d6d7968e5998d7bcf30f60b2fb39b1242ad40"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/improved/response-3.json",
+      "sha256": "2de8e06d0519d536f112ff0483462a1a605aab894c592caf37856c91b9f05590"
+    },
+    {
+      "path": "run-artifacts/shop-removal-replay-2026-09-21T11-52-57.814Z/act2-removal-budget/improved/target-decision.json",
+      "sha256": "803bcaacb232fdd600441d76de9e39b5e6492921d40da182c325b3c6fa7a4e88"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/conditional-budget-request.json",
+      "sha256": "09516ecc5a190df16017a09f57240744c45c7d538a24e34614b52570f0aec857"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/conditional-budget-response.json",
+      "sha256": "b7960a4d36d40f354bdfdfc826ee2cd7fa96024e352d5d7b8527482262f12de4"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/conditional-budget-result.json",
+      "sha256": "20998a2cf7894a9b90b7b1d05b5d1c06f9f22b13cbb5befc80f13bd74072b865"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/summary.json",
+      "sha256": "da0cc797be428cd35957c92e2b234a9ad66112a6561a0a9b289e75adafa9074c"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act1-entry/decision.json",
+      "sha256": "494d99419fa0285d1011d4233a087dab908ae157b33d0f670f7d3d3e55295d42"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act1-entry/plan_shop_removal.json",
+      "sha256": "a77433a5e415153988282a4160f76c49baf8d880970e2b8cdbee849d88b4d4a0"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act1-entry/request-1.json",
+      "sha256": "d442f94eadf5eea0bcfddbc6cb83e0ba05517cddde564815eef9181f8e2cb77b"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act1-entry/request-2.json",
+      "sha256": "0310bf3b4f156c05870bce7c9f5686bd325d8de222c897ce5d85907d232f6b60"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act1-entry/request-3.json",
+      "sha256": "9582070b92859722f0fb04667de10d061e9b3db3ba7c04c555090cc95da9f683"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act1-entry/response-1.json",
+      "sha256": "7ebaa5cc3529334c4ae2e31c80ced9907b5a5417fcc1bf3afd5aeb2a2a32dd6f"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act1-entry/response-2.json",
+      "sha256": "c98db20b3becb84a416624dddee0494c5d20800ef306a75bc6ade75df5f00616"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act1-entry/response-3.json",
+      "sha256": "ec27bee399dd8b1ae73d66399ff4bc66266ce38aa8c308dd63809cc7b68e95c0"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-entry/decision.json",
+      "sha256": "67a94656f26a1e3b654e506ffd950c3b1af524b57c1f6c8809ca77b88a3ed942"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-entry/plan_shop_removal.json",
+      "sha256": "a6869b8eb04aacb2cdedf1873efacca0e3a8780864c7837597ba5094d658b96f"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-entry/request-1.json",
+      "sha256": "61b10fb117afc26f4fcf1858f8a4cd37a47d07b304740d46099ab4405ba86add"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-entry/request-2.json",
+      "sha256": "f638a8ca76d6a132c45d76f39cd396bffa7c9cc049b3102d012d32d1c6cc6a43"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-entry/request-3.json",
+      "sha256": "6bb6817a800ba4590714b409aa1495948ab72d63a502a5d5cb1161a3f734f82b"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-entry/response-1.json",
+      "sha256": "f817bb103506e3db05c1eeeaa3f4af715f40a844dcc5c3b77950d3102adaa6cf"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-entry/response-2.json",
+      "sha256": "0764254f5df50f0a516a12d4b8799fb4fdc076890b36c0bd53c75e476af3a269"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-entry/response-3.json",
+      "sha256": "e0327b04ed247c962ca0b4bedda66a936c841bf8fdfea558dc537b12f50b25d7"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-removal-budget/decision.json",
+      "sha256": "2ba6817bf044cef6be331c2870c963a785708e223b6d88c2f5f69717ef5c1c5c"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-removal-budget/plan_shop_removal.json",
+      "sha256": "d0dcad18d9ff3e4e0f1bb3ae75e46acfe3d893447d07c56bf9a2806aec6aad66"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-removal-budget/request-1.json",
+      "sha256": "1b376f5c48bcc3a43a13221922ea1e2c14cb877802c5ae25ac97d3547b70da00"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-removal-budget/request-2.json",
+      "sha256": "6e222168bc96c9b7c17f02ac9baffa61b66dd7715135a1bc0a7ce670a78f9d0f"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-removal-budget/request-3.json",
+      "sha256": "19c691e8a5f6542c96db3f63aa9253adfa58bc0c094718cd9000c7ddab64384e"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-removal-budget/response-1.json",
+      "sha256": "0345d060051a2399fb34cc442d395448a2576e5ba33f533b5ce9da822de4c4eb"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-removal-budget/response-2.json",
+      "sha256": "a4e4b2b47ffecc0e9119208e136518b1f25cd4d129f1e13954c2d93bc753afdd"
+    },
+    {
+      "path": "run-artifacts/shop-budget-replay-2026-09-21T11-56-01.423Z/act2-removal-budget/response-3.json",
+      "sha256": "c65d79efb916df49731c2e4726b552c69492a4e22230fc429168472e7932527d"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "src/shop_context.mjs",
+      "sha256": "a117a165898185d8288f631d47a7b1f6c93c5149e2fd13f6770a1d0028c7cfdd"
+    },
+    {
+      "path": "src/shop_plan.mjs",
+      "sha256": "0e9d1f0c80797951dd9bfe34685810736e8b565db11fda2cbc267c1f50360d2f"
+    },
+    {
+      "path": "src/shop_plan_state.mjs",
+      "sha256": "f7941757dfa2b3576665d704219ccb3205d47a804fccc98ec4c665a68f7c7ae2"
+    },
+    {
+      "path": "src/mod_decision.mjs",
+      "sha256": "9948330ff27973fe3d28297a56bb0d1225ae4c2c4dc8af1918b300ac1bbd78b7"
+    },
+    {
+      "path": "src/decision_context.mjs",
+      "sha256": "320d5de57bfe858a3418d79c5cc858e8527e9b49245364374881fb970a7adc59"
+    },
+    {
+      "path": "src/strategy_assessment.mjs",
+      "sha256": "585a047e37eb6cadcec3c744abd23a9af86dd6c92ba7bc9bacef110704bf48ef"
+    },
+    {
+      "path": "src/decision_instructions.mjs",
+      "sha256": "dbf124f3e8e0933df34b2aecb4ef4f145bf3be85abe1891b7e3ca735f6ef25d3"
+    },
+    {
+      "path": "src/context_compiler.mjs",
+      "sha256": "3918c860964d3508a17e26804cafa339ca2201d886fef9ecf01344c8420ed645"
+    },
+    {
+      "path": "data/strategy/v0.111.0/strategy.json",
+      "sha256": "c718c48a9d59caf8ea032f36a29b34df7b4d2e5db8c4c4697607c4bb77352d83"
+    }
+  ]
+}

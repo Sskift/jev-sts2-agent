@@ -1,0 +1,336 @@
+{
+  "date": "2026-09-21",
+  "run_id": "run-1789968641",
+  "runtime_commit": "c81d85694185765f21469bfb6e27e2088ee55b71",
+  "floor": 33,
+  "game_over": {
+    "is_victory": false,
+    "floor": 33,
+    "score": 644,
+    "epochs_discovered": 0,
+    "can_return_to_menu": false,
+    "can_continue": false
+  },
+  "pending": null,
+  "outcome": "failure",
+  "reported_api_cost_before_shop_replays_usd": 1.166443656,
+  "final_response": {
+    "before_hp": 80,
+    "before_block": 43,
+    "boss_hp": 133,
+    "visible_intents": [
+      {
+        "type": "Attack",
+        "damage": 30,
+        "hits": 1,
+        "description": "This enemy intends to Attack for 30 damage."
+      }
+    ],
+    "sandpit": {
+      "id": "SANDPIT_POWER",
+      "name": "Sandpit",
+      "amount": 1,
+      "type": "Buff",
+      "stack_type": "Counter",
+      "description": "When The Insatiable takes its turn, you will be eaten and die."
+    },
+    "command": {
+      "cmd": "end_turn"
+    },
+    "after_hp": 0
+  },
+  "boss_turns": [
+    {
+      "turn": 1,
+      "start_hp": 80,
+      "boss_hp": 320,
+      "actions": [
+        "Battle Trance",
+        "Iron Wave",
+        "Stomp+",
+        "Salvo",
+        "HEART_OF_IRON",
+        "Headbutt",
+        "grid_select_card"
+      ],
+      "end_hp": 80,
+      "block_before_end": 5
+    },
+    {
+      "turn": 2,
+      "start_hp": 80,
+      "boss_hp": 271,
+      "actions": [
+        "Iron Wave",
+        "Defend+",
+        "Strike"
+      ],
+      "end_hp": 80,
+      "block_before_end": 13
+    },
+    {
+      "turn": 3,
+      "start_hp": 80,
+      "boss_hp": 251,
+      "actions": [
+        "Defend+",
+        "Ultimate Defend+",
+        "Bash"
+      ],
+      "end_hp": 80,
+      "block_before_end": 25
+    },
+    {
+      "turn": 4,
+      "start_hp": 80,
+      "boss_hp": 233,
+      "actions": [
+        "Frantic Escape",
+        "Strike",
+        "Anger",
+        "Defend+",
+        "Barricade+"
+      ],
+      "end_hp": 80,
+      "block_before_end": 8
+    },
+    {
+      "turn": 5,
+      "start_hp": 80,
+      "boss_hp": 196,
+      "actions": [
+        "Perfected Strike",
+        "Rage+",
+        "Iron Wave",
+        "Evil Eye"
+      ],
+      "end_hp": 80,
+      "block_before_end": 30
+    },
+    {
+      "turn": 6,
+      "start_hp": 80,
+      "boss_hp": 161,
+      "actions": [
+        "Frantic Escape",
+        "Strike",
+        "Defend+",
+        "True Grit"
+      ],
+      "end_hp": 80,
+      "block_before_end": 28
+    },
+    {
+      "turn": 7,
+      "start_hp": 80,
+      "boss_hp": 142,
+      "actions": [
+        "Defend+",
+        "Ultimate Defend+",
+        "Defend+",
+        "Headbutt",
+        "grid_select_card"
+      ],
+      "end_hp": 0,
+      "block_before_end": 43
+    }
+  ],
+  "shops": [
+    {
+      "source": "run-artifacts/run35-2026-09-21T05-30-36.682Z/step-0058",
+      "floor": 4,
+      "gold": 130,
+      "deck_count": 13,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "shop_buy_card",
+        "id": "COLOSSUS",
+        "nth": 0
+      },
+      "gold_after": 54
+    },
+    {
+      "source": "run-artifacts/run35-2026-09-21T05-30-36.682Z/step-0059",
+      "floor": 4,
+      "gold": 54,
+      "deck_count": 14,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "shop_buy_card",
+        "id": "ANGER",
+        "nth": 0
+      },
+      "gold_after": 30
+    },
+    {
+      "source": "run-artifacts/run35-2026-09-21T05-30-36.682Z/step-0060",
+      "floor": 4,
+      "gold": 30,
+      "deck_count": 15,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "proceed"
+      },
+      "gold_after": 30
+    },
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0018",
+      "floor": 24,
+      "gold": 345,
+      "deck_count": 23,
+      "removal": null,
+      "request": {
+        "cmd": "shop_buy_relic",
+        "id": "FAKE_VENERABLE_TEA_SET",
+        "nth": 0
+      },
+      "gold_after": 301
+    },
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0019",
+      "floor": 24,
+      "gold": 301,
+      "deck_count": 23,
+      "removal": null,
+      "request": {
+        "cmd": "proceed"
+      },
+      "gold_after": 301
+    },
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0028",
+      "floor": 27,
+      "gold": 343,
+      "deck_count": 23,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "shop_buy_card",
+        "id": "BATTLE_TRANCE",
+        "nth": 0
+      },
+      "gold_after": 267
+    },
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0029",
+      "floor": 27,
+      "gold": 267,
+      "deck_count": 24,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "shop_buy_card",
+        "id": "SALVO",
+        "nth": 0
+      },
+      "gold_after": 182
+    },
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0030",
+      "floor": 27,
+      "gold": 182,
+      "deck_count": 25,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "shop_buy_potion",
+        "id": "HEART_OF_IRON",
+        "nth": 0
+      },
+      "gold_after": 107
+    },
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0031",
+      "floor": 27,
+      "gold": 107,
+      "deck_count": 25,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "shop_buy_card",
+        "id": "IRON_WAVE",
+        "nth": 0
+      },
+      "gold_after": 59
+    },
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0032",
+      "floor": 27,
+      "gold": 59,
+      "deck_count": 26,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "shop_buy_card",
+        "id": "STAMPEDE",
+        "nth": 0
+      },
+      "gold_after": 21
+    },
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0033",
+      "floor": 27,
+      "gold": 21,
+      "deck_count": 27,
+      "removal": {
+        "cost": 75,
+        "is_used": false
+      },
+      "request": {
+        "cmd": "proceed"
+      },
+      "gold_after": 21
+    }
+  ],
+  "findings": [
+    "Two real shops offered affordable removal at entry; neither service was used. The floor-24 fake merchant did not offer removal.",
+    "At floor 27, buying a second Iron Wave for 48 from 107 gold left 59, below the 75 removal price. The shop grew the deck from 23 to 27 cards.",
+    "Final turn began with Sandpit 1, six Frantic Escape cards in the unknown-order draw pile and none in hand. Hand contained Decay, two Defend+, Ultimate Defend+ and Headbutt. No draw card in hand. Blocking did not prevent Sandpit death.",
+    "No counterfactual claim that removing a particular card would win this fight. The run failed a deadline/access/output problem despite keeping HP; the final no-escape draw alone cannot identify an earlier guaranteed-winning line."
+  ],
+  "artifacts": [
+    {
+      "path": "run-artifacts/run35-resume7-2026-09-21T11-36-17.354Z/session.json",
+      "sha256": "ebd0c5589fa14364a173bc06875a73f8c1deda92690095b06d600b203808ec93"
+    },
+    {
+      "path": "run-artifacts/run35-resume7-2026-09-21T11-36-17.354Z/step-0017/before-state.json",
+      "sha256": "4bc608d70e6c3e12522cfc02f403a6041a5af4d336da4d217eb54b287cfe60df"
+    },
+    {
+      "path": "run-artifacts/run35-resume7-2026-09-21T11-36-17.354Z/step-0022/before-state.json",
+      "sha256": "140891ed7667024b161347526e364812b23d6b3d2bdc17af539f2da7e8286604"
+    },
+    {
+      "path": "run-artifacts/run35-resume7-2026-09-21T11-36-17.354Z/step-0022/decision.json",
+      "sha256": "900ce5668cbb9e5cfc1055c062a19b8bb6ad909db24f7078cbd03224b4a8c2fb"
+    },
+    {
+      "path": "run-artifacts/run35-resume7-2026-09-21T11-36-17.354Z/step-0022/after-state.json",
+      "sha256": "e9dfce8fdad5a280b0b85c069e942577c3a1c9718a0a76fef64bd333820adb9a"
+    },
+    {
+      "path": "run-artifacts/run35-resume7-2026-09-21T11-36-17.354Z/final-memory.json",
+      "sha256": "0676fe9dd0a9c900f1f6757831d823c899f134c8dd7b21cc03fe750f92278f68"
+    }
+  ]
+}

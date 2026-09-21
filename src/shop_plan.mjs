@@ -1,0 +1,71 @@
+import { ContextError, groupCards } from './decision_context.mjs';
+import { compileModelRequest } from './context_compiler.mjs';
+import { removableCard, shopEconomy } from './shop_context.mjs';
+import { publicShopRemoval, shopRemovalBasis } from './shop_plan_state.mjs';
+
+// One conditional Choice, rather than a paid Score for every removable card.
+// The following existing option assessment compares this concrete cut with buys.
+export async function planShopRemoval(state, options, prepared, choose) {
+  if (state.screen !== 'SHOP' || !prepared.candidates.has('remove_card')) return null;
+  const groups = groupCards(state.decision_context.master_deck);
+  if (groups.some(g => removableCard(g.card) === null)) return null;
+  const choices = new Map(groups.flatMap((group, deck_group_index) => removableCard(group.card)
+    ? [[`remove_${deck_group_index}`, { run_id: state.decision_context.run_id, floor: state.decision_context.total_floor,
+      basis: shopRemovalBasis(state), deck_group_index, card: group.card, instance_ids: group.instance_ids,
+      cost: state.shop.card_removal.cost }]] : []));
+  if (!choices.size) return null;
+  if (choices.size > 255) throw new ContextError('Removal targets exceed model choice limit; none were discarded');
+  const payload = { ...prepared.payload, questions: { removal_target: {
+    type: 'choice',
+    instructions: 'If you pay for ONE permanent card removal here, which owned copy would best improve this run? Compare full deck.cards rules, upgrades and enchantments, existing replacements for its job, draw access to stronger cards, relics, visible boss and route. A weak standalone card can still supply needed damage, defense, exhaust fuel or a supported Strike/curse payoff. Removing a payoff component has a cost. Do not use a fixed Strike-before-Defend rule or target deck size. Each option removes one copy. This is only a conditional target; the subsequent shop decision may instead buy or leave.',
+    criteria: Object.fromEntries([...choices].map(([id, plan]) => [id, publicShopRemoval(plan)]))
+  } } };
+  const metrics = { ...prepared.metrics, purpose: 'shop_removal_target', question_count: 1 };
+  metrics.request_bytes = compileModelRequest(payload, metrics).bytes;
+  if (metrics.request_bytes > metrics.max_request_bytes) throw new ContextError('Complete removal planning context exceeds request budget');
+  const result = await choose(state, options, { ...prepared, payload, metrics, parseResult: result => {
+    const answer = result.answers?.removal_target;
+    if (answer?.type !== 'choice' || !choices.has(answer.choice)) throw new Error('Invalid conditional shop removal target');
+    return { action: 'plan_shop_removal', target: choices.get(answer.choice), confidence: answer.confidence, probabilities: answer.probabilities };
+  } });
+  options.onPlanningDecision?.(result);
+  return result;
+}
+
+// Only when the selected purchase spends the removal budget: compare the two
+// concrete, mutually exclusive uses in both orders. Disagreement preserves the
+// original full-menu choice; there is no hard-coded preference for removal.
+export async function compareShopRemoval(state, options, prepared, decision, choose) {
+  if (!options.shopRemovalPlan || state.screen !== 'SHOP') return decision;
+  const transaction = shopEconomy(state, groupCards(state.decision_context.master_deck), prepared.candidates)
+    .transactions.find(t => t.action_id === decision.candidate_id);
+  if (!transaction?.forecloses_affordable_removal) return decision;
+  const removal = prepared.candidates.get('remove_card');
+  if (!removal) return decision;
+  const buy = { action_id: decision.candidate_id, effect: decision.description, budget: transaction };
+  const cut = { action_id: 'remove_card', effect: removal.description, target: publicShopRemoval(options.shopRemovalPlan),
+    gold_after: state.shop.player_gold - options.shopRemovalPlan.cost };
+  const instructions = 'Compare these two concrete uses of the same current shop budget. Which leaves the run better prepared for its visible route and boss? This purchase makes the specified removal unaffordable, so they cannot both be taken at displayed prices. Weigh the purchased effect and any affordable remaining offers against the exact removed card, better access to retained cards, lost synergies and remaining gold. Necessary damage/defense or a powerful relic/potion can outweigh removal; redundant output can lose to consistency. Use actual rules and current resources, not a universal buy/remove policy. Choose the better complete tradeoff, not the more impressive isolated effect. Prior option ratings are fallible model judgments.';
+  const questions = Object.fromEntries([['budget_forward', buy, cut], ['budget_reverse', cut, buy]].map(([id, first, second]) =>
+    [id, { type: 'choice', instructions, criteria: { first, second } }]));
+  const payload = { ...prepared.payload, questions }, metrics = { ...prepared.metrics, purpose: 'shop_budget_comparison', question_count: 2 };
+  metrics.request_bytes = compileModelRequest(payload, metrics).bytes;
+  if (metrics.request_bytes > metrics.max_request_bytes) throw new ContextError('Complete shop budget comparison exceeds request budget');
+  const comparison = await choose(state, options, { ...prepared, payload, metrics, parseResult: result => {
+    const judgments = Object.entries(questions).map(([id, question]) => {
+      const answer = result.answers?.[id];
+      if (answer?.type !== 'choice' || !Object.hasOwn(question.criteria, answer.choice)) throw new Error('Invalid shop budget comparison');
+      return { question: id, action_id: question.criteria[answer.choice].action_id, confidence: answer.confidence, probabilities: answer.probabilities };
+    });
+    return { action: 'compare_shop_budget', judgments,
+      consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
+  } });
+  options.onPlanningDecision?.(comparison);
+  const changed = comparison.consensus_action_id === 'remove_card';
+  return { ...decision, ...(changed ? { ...removal, candidate_id: 'remove_card', model: comparison.model, confidence: undefined, probabilities: undefined } : {}),
+    initial_shop_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence, probabilities: decision.probabilities },
+    shop_budget_comparison: comparison, usage: {
+      input_tokens: (decision.usage?.input_tokens || 0) + (comparison.usage?.input_tokens || 0),
+      output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0)
+    } };
+}

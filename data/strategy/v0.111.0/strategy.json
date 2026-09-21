@@ -1,9 +1,10 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-09-20",
+  "reviewed_at": "2026-09-21",
   "rules_version": "v0.111.0",
   "authority": "Advisory, paraphrased strategy notes. These are hypotheses to evaluate against the current deck, encounter, route and available choices, not a prescribed build or card tier list. Native rules override all advice. Sources without an explicit patch are not numeric rule authorities.",
   "sources": {
+    "removal_discussion": { "author": "STS2 players, r/slaythespire", "url": "https://www.reddit.com/r/slaythespire/comments/1w0q8ia/in_slay_the_spire_2_on_each_character_what_should/", "retrieved": "2026-09-21", "version": "Qualitative first-hand discussion with conflicting preferences; no fixed removal order, price or deck size is adopted." },
     "jobs": { "author": "Jorbs", "url": "https://sts2.untapped.gg/en/articles/slay-the-spire-deckbuilding-strategy-solving-the-spire-with-jobs", "published": "2026-03-06", "version": "Pre-release general framework; STS1 examples are excluded." },
     "pathing": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/guides/how-to-make-the-best-map-choices-in-slay-the-spire-2", "version": "Unspecified; general tradeoffs only." },
     "ironclad": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/ironclad", "version": "Unspecified; card references checked against local v0.111.0." },
@@ -17,6 +18,8 @@
   "general": [
     { "id": "answer_upcoming_jobs", "source": "jobs", "advice": "Evaluate immediate damage, control of multiple enemies, defense, long-fight scaling and access to the right cards. A rare payoff can lose to an ordinary card that solves the next encounter. An established package does not excuse an unanswered threat; compatible packages can coexist." },
     { "id": "preserve_access", "source": "jobs", "advice": "Draw, removal and manipulation help align useful cards with the turn that needs them. Count draw and energy opportunity costs when adding another damage or setup card. Judge a card's remaining job rather than its isolated strength." },
+    { "id": "remove_obsolete_jobs", "source": "jobs", "phases": ["SHOP", "permanent_removal"], "advice": "Once stronger cards cover a starter's job, removing that starter can make the useful cards recur more reliably. Low-impact early attacks can obstruct later defense and setup. Compare the exact card lost with the retained cards reached more often; early damage that still solves an upcoming fight remains valuable." },
+    { "id": "removal_exceptions", "source": "removal_discussion", "phases": ["SHOP", "permanent_removal"], "advice": "Strike versus Defend is a current-deck comparison, not a character-wide fixed order. Upgrades, enchantments, existing replacements and supported Strike or curse payoffs can change the answer. Compare removal with the actual shop offers and prices; neither removing at every shop nor achieving a fixed small deck size is mandatory." },
     { "id": "route_resources", "source": "pathing", "phases": ["between_rooms"], "advice": "Use the revealed boss and reachable paths to evaluate preparation needs. Elite rewards compete with HP, potions and access to rest or upgrades. Preserve route flexibility where useful. A question-mark node does not guarantee a safe room, and a suggested elite count is not a rule." }
   ],
   "characters": {

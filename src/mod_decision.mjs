@@ -12,6 +12,9 @@ import { decideTurn } from './turn_plan.mjs';
 import { plannedUpgradeSelection } from './turn_plan_state.mjs';
 import { decideCamp } from './camp_plan.mjs';
 import { plannedCampSelection } from './camp_plan_state.mjs';
+import { removableCard } from './shop_context.mjs';
+import { planShopRemoval, compareShopRemoval } from './shop_plan.mjs';
+import { plannedShopRemoval, shopRemovalApplicable } from './shop_plan_state.mjs';
 
 const integer = value => Number.isInteger(value) && value >= 0;
 const hasId = value => typeof value === 'string' && value.length > 0;
@@ -189,7 +192,10 @@ export function buildModCandidates(state) {
           add(`buy_${kind}_${item.index}`, { cmd: `shop_buy_${kind}`, id: item[`${kind}_id`], nth }, `Buy ${item[`${kind}_name`]} for ${item.cost} gold (${shop.player_gold - item.cost} gold left). ${kind === 'card' ? `Card energy cost ${item.energy_cost}. ` : ''}${item.description}`);
         }
       }
-      if (shop.card_removal && !shop.card_removal.is_used && shop.card_removal.cost <= shop.player_gold) add('remove_card', { cmd: 'shop_remove_card' }, `Pay ${shop.card_removal.cost} gold to remove a card; choose the card on the next screen.`);
+      if (shop.card_removal && !shop.card_removal.is_used && shop.card_removal.cost <= shop.player_gold
+        && (state.decision_context?.master_deck ?? [null]).some(card => !card || removableCard(card) !== false)) {
+        add('remove_card', { cmd: 'shop_remove_card' }, `Pay ${shop.card_removal.cost} gold to permanently remove ONE owned card (${shop.player_gold - shop.card_removal.cost} gold left). Compare the concrete target in intent.shop_removal_planning with purchases and keeping gold.`);
+      }
       if (shop.can_proceed === true) add('proceed', { cmd: 'proceed' }, `Leave this shop without further purchases; its stock will no longer be accessible. Carry ${shop.player_gold} gold onward.`);
       break;
     }
@@ -289,7 +295,8 @@ export function prepareModDecision(gameState, options = {}) {
   const stage = selectionPlan ? selectionStage(selectionPlan, options.selectionProgress) : null;
   if (stage) candidates = stage.candidates;
   if (!candidates.size) return { action: 'wait', reason: `No complete supported action in ${gameState?.screen || 'unknown'}` };
-  const context = buildDecisionContext(gameState, { candidates, memory: options.memory, selectionPlanning: stage?.state });
+  if (options.shopRemovalPlan && !shopRemovalApplicable(options.shopRemovalPlan, gameState)) throw new ContextError('Stale shop removal target');
+  const context = buildDecisionContext(gameState, { candidates, memory: options.memory, selectionPlanning: stage?.state, shopRemovalPlan: options.shopRemovalPlan });
   if (skippedCardRewards.length) context.screen_state.skipped_card_rewards = { reward_nths: skippedCardRewards, note: 'Skip closes the card picker but the game keeps this reward available. The earlier skip choice is remembered: duplicate skip commands are omitted, while taking a card to reconsider and claiming other rewards remain available.' };
   if (options.strategyAssessment) context.strategy_assessment = { source: 'Independent Jev judgments of incremental value, advisory rather than verified facts', scale: options.strategyAssessment.scale, options: options.strategyAssessment.options };
   if (gameState.screen === 'MAP') for (const route of context.map?.routes || []) {
@@ -373,6 +380,8 @@ export async function makeModDecisionWithJev(gameState, options = {}) {
 }
 
 async function decidePrepared(gameState, options, prepared) {
+  const shopSelection = plannedShopRemoval(options.memory?.data.shop_removal_plan, gameState, prepared.candidates);
+  if (shopSelection) return { ...shopSelection, model: 'jev-shop-plan-selection', context_metrics: prepared.metrics };
   const campSelection = plannedCampSelection(options.memory?.data.camp_upgrade_plan, gameState, prepared.candidates);
   if (campSelection) return { ...campSelection, model: 'jev-camp-plan-selection', context_metrics: prepared.metrics };
   if (gameState.screen === 'REST_SITE') {
@@ -385,14 +394,27 @@ async function decidePrepared(gameState, options, prepared) {
     if (gameState.screen === 'COMBAT' && prepared.candidates.size > 1) return decideTurn(gameState, options, prepared, choosePrepared);
   }
   let assessment;
+  const removal = await planShopRemoval(gameState, options, prepared, choosePrepared);
+  if (removal) {
+    options = { ...options, shopRemovalPlan: removal.target };
+    prepared = prepareModDecision(gameState, options);
+  }
   if (needsStrategyAssessment(gameState, options, prepared)) {
     assessment = await choosePrepared(gameState, options, prepareStrategyAssessment(prepared, options));
     options = { ...options, strategyAssessment: assessment };
     prepared = prepareModDecision(gameState, options);
   }
   if (prepared.selectionPlan) return assembleSelection(gameState, options, prepared, choosePrepared, prepareModDecision);
-  const decision = await choosePrepared(gameState, options, prepared);
-  return assessment ? { ...decision, strategy_assessment: assessment, action_usage: decision.usage, usage: { input_tokens: (assessment.usage?.input_tokens || 0) + (decision.usage?.input_tokens || 0), output_tokens: (assessment.usage?.output_tokens || 0) + (decision.usage?.output_tokens || 0) } } : decision;
+  const initial = await choosePrepared(gameState, options, prepared);
+  const decision = await compareShopRemoval(gameState, options, prepared, initial, choosePrepared);
+  if (!assessment && !removal) return decision;
+  return { ...decision, ...(assessment ? { strategy_assessment: assessment } : {}),
+    ...(removal ? { shop_target_decision: removal,
+      ...(decision.request?.cmd === 'shop_remove_card' ? { shop_removal_plan: removal.target } : {}) } : {}),
+    action_usage: decision.usage, usage: {
+      input_tokens: (removal?.usage?.input_tokens || 0) + (assessment?.usage?.input_tokens || 0) + (decision.usage?.input_tokens || 0),
+      output_tokens: (removal?.usage?.output_tokens || 0) + (assessment?.usage?.output_tokens || 0) + (decision.usage?.output_tokens || 0)
+    } };
 }
 
 async function choosePrepared(gameState, options, prepared) {
