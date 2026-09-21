@@ -96,5 +96,58 @@
       "path": "src/turn_candidates.mjs",
       "sha256": "2ec7da27381815459b4cb42a2d412bb5ab245d56c8d1895a37dc77e68bcdb7ab"
     }
-  ]
+  ],
+  "loaded": {
+    "commit": "c92fbd86e7113fbb182d0fc9b2628d085a08d9cf",
+    "root": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z",
+    "matching_checkpoint": true,
+    "pending": null,
+    "first_request": {
+      "cmd": "play_card",
+      "id": "SHRUG_IT_OFF",
+      "nth": 0
+    },
+    "confirmed_response": {
+      "ok": true,
+      "data": {
+        "card_index": 0,
+        "card_id": "SHRUG_IT_OFF",
+        "results": [
+          {
+            "type": "block",
+            "target_id": 0,
+            "target_name": "IRONCLAD",
+            "amount": 8
+          }
+        ]
+      }
+    },
+    "first_new_model_calls": 0,
+    "source_files": [
+      {
+        "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/runtime.json",
+        "sha256": "85c0531eee672844ece20ce9594077576fd6c30a8916e67385a549b71f4ea77a"
+      },
+      {
+        "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/resume-native.json",
+        "sha256": "af3237ae74804f73a303424f16fad4504a4592d0dd85081cbd8e4dffafaf1bb0"
+      },
+      {
+        "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/prior-memory.json",
+        "sha256": "da83c5aab0bbaab9eef0a973818bcfb1b51917bed4e21586d6b3ea64b0b70818"
+      },
+      {
+        "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0001/decision.json",
+        "sha256": "06824eba7f1bbb7ad36cda474714660e89991ff44b59a024c598fd81fca0f73c"
+      },
+      {
+        "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0001/response.json",
+        "sha256": "a4649f09a9c1a953cf00b08ceba70ddbd291198e560ca4cffe9224120b8ac050"
+      },
+      {
+        "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0001/after-state.json",
+        "sha256": "0ef2ad1665d42f8b1f783692e9f211a314d6c870d70559cab919263271746cc9"
+      }
+    ]
+  }
 }
