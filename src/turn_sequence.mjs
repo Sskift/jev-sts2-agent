@@ -6,6 +6,10 @@ const instance = card => card?.details?.instance_id;
 const amount = (entity, id) => (entity.powers || []).find(p => p.id === id)?.amount || 0;
 const gain = (text, unit) => Number(text?.match(new RegExp(`(?:^|\\.\\s*)Gain (\\d+) ${unit}\\.(?:\\s|$)`))?.[1]);
 
+// Native Stomp reduces its current cost for each subsequent owned Attack.
+// Planning and confirmation share this rule; other cost changes stay unknown.
+export const costAfterAttacks = (card, attacks) => card.id === 'STOMP' && card.cost >= 0 ? Math.max(0, card.cost - attacks) : card.cost;
+
 // Native v0.111.0 OnPlay directly applies these stats to the owner. Restrict
 // the adapter to the resolved one-clause rule; other powers remain unknown.
 function directStatPower(card) {
@@ -80,7 +84,7 @@ export function inspectSequence(state, steps) {
       violations.push({ sequence, reason: 'Card is absent or was already consumed.' }); break;
     }
     const card = original && structuredClone(original);
-    const cost = card ? card.cost < 0 ? Math.max(0, energy) : card.id === 'STOMP' ? Math.max(0, card.cost - attacks) : card.cost : 0;
+    const cost = card ? card.cost < 0 ? Math.max(0, energy) : costAfterAttacks(card, attacks) : 0;
     const before = energy;
     energy -= cost;
     if (cost > before) violations.push({ sequence, reason: 'Insufficient known energy.' });

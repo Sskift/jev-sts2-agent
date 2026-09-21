@@ -386,6 +386,28 @@ test('draw results invalidate the suffix while retaining the objective and confi
   assert.equal(seen.some(body => Object.hasOwn(body.questions.next_action?.criteria || {}, 'finish_combat')), false);
 });
 
+test('confirmed attack discounts preserve the selected sequence, but unexpected costs or effects require review', async () => {
+  const state = stateWith([card('STRIKE_IRONCLAD', 'strike', 0), card('STOMP', 'stomp', 1, {
+    cost: 3, target_type: 'AllEnemies', description: 'Deal 12 damage to ALL enemies. Costs 1 less 1 Energy for each Attack played this turn.'
+  })]);
+  const plan = savedPlan(state, ['card_0_target_42', 'card_1', 'end_turn']);
+  for (const changed of [false, 'cost', 'effect']) {
+    const memory = new DecisionMemory(); memory.observe(state);
+    memory.begin({ cmd: 'play_card', id: 'STRIKE_IRONCLAD', nth: 0, target: 42 }, state, { turnPlan: structuredClone(plan), turnStep: 0 });
+    const after = structuredClone(state); after.combat.hand.shift(); after.combat.hand[0].index = 0;
+    after.combat.hand[0].cost = changed === 'cost' ? 1 : 2;
+    if (changed === 'effect') after.combat.hand[0].description = 'Deal 15 damage to ALL enemies.';
+    after.combat.player.energy = 2; after.combat.enemies[0].hp -= 6; sync(after);
+    memory.finish({ ok: true }, after); memory.observe(after);
+    if (changed) assert.equal(memory.data.turn_plan.status, 'needs_review');
+    else {
+      assert.equal(memory.data.turn_plan.status, 'active');
+      const decision = await makeModDecisionWithJev(after, { memory, fetchImpl: noModel });
+      assert.deepEqual(decision.request, { cmd: 'play_card', id: 'STOMP', nth: 0 });
+    }
+  }
+});
+
 test('dead targets, missing cards, costs and external changes require review; next turns and runs do not inherit a plan', () => {
   const state = stateWith([card('STRIKE_IRONCLAD', 'one', 0), card('STRIKE_IRONCLAD', 'two', 1)]), plan = savedPlan(state, ['card_0_target_42', 'card_1_target_42', 'end_turn']);
   for (const change of [copy => copy.combat.enemies[0].is_alive = false, copy => copy.combat.hand.shift(), copy => copy.combat.hand[0].cost = 2, copy => copy.combat.player.hp--]) {

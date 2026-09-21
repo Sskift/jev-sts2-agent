@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { costAfterAttacks } from './turn_sequence.mjs';
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export const cardInstance = card => card?.details?.instance_id;
@@ -24,7 +25,7 @@ export function turnGuard(state) {
     energy: combat.player.energy, hp: combat.player.hp, powers: combat.player.powers,
     relics: combat.player.relics, orbs: combat.player.orbs,
     positioning: combat.positioning,
-    hand: combat.hand.map(card => ({ instance_id: cardInstance(card), cost: card.cost, description: card.description, can_play: card.can_play })),
+    hand: combat.hand.map(card => ({ id: card.id, instance_id: cardInstance(card), cost: card.cost, description: card.description, can_play: card.can_play })),
     enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, hp: enemy.hp, is_alive: enemy.is_alive, intents: enemy.intents, powers: enemy.powers }))
   };
 }
@@ -122,7 +123,8 @@ function changesRequiringReview(before, after, step, remaining) {
   for (const card of after.hand) {
     const previous = old.get(card.instance_id);
     if (!previous) reasons.push('A new or returned card entered the hand.');
-    else if (card.cost !== previous.cost || card.description !== previous.description) reasons.push('A card cost or effect changed.');
+    else if (card.id !== previous.id || card.cost !== costAfterAttacks(previous, step?.card_type === 'Attack' ? 1 : 0)
+      || card.description !== previous.description) reasons.push('A card cost or effect changed.');
     else if (card.can_play && !previous.can_play) reasons.push('An additional card became playable.');
   }
   for (const future of remaining) if (future.card_instance_id && !after.hand.some(card => card.instance_id === future.card_instance_id)) reasons.push('A future planned card left the hand.');

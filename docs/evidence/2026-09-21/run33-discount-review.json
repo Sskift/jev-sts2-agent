@@ -234,5 +234,56 @@
     "Calculations describe declared actions and retain omitted triggers; no hypothetical sequence was executed.",
     "Confidence remains distribution concentration, not correctness."
   ],
-  "runtime_loaded": false
+  "runtime_loaded": {
+    "commit": "28350e92a7512fb02a6008f30e146392a874e842",
+    "root": "run-artifacts/run33-resume3-2026-09-21T03-21-33.564Z",
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "run_id": "run-1789958402",
+    "native_fingerprint_matched": true,
+    "prior_pending": null,
+    "first_request_with_sequence_payment": {
+      "source": "run-artifacts/run33-resume3-2026-09-21T03-21-33.564Z/step-0001/jev-turn_assess_plans-0007.json",
+      "sha256": "42e9f93e835ddc3b68c0f8d1ad8311f9b5f05aaf6157dabfde730cebebd48191"
+    },
+    "first_command": {
+      "cmd": "play_card",
+      "id": "RAMPAGE",
+      "nth": 0,
+      "target": 1
+    },
+    "first_after": {
+      "source": "run-artifacts/run33-resume3-2026-09-21T03-21-33.564Z/step-0001/after-state.json",
+      "sha256": "033f4b6bf3a06eb0c77e5e77d52796e508a866ddaa7e1368ae7d0617efd58943"
+    }
+  },
+  "confirmed_continuation": {
+    "source": "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z/step-0008",
+    "original_followup": "step-0009 called Jev seven times to choose the already intended Stomp",
+    "confirmed_action": {
+      "cmd": "play_card",
+      "id": "STRIKE_IRONCLAD",
+      "nth": 0,
+      "target": 3
+    },
+    "native_cost": {
+      "before": 2,
+      "after": 1
+    },
+    "next_request": {
+      "cmd": "play_card",
+      "id": "STOMP",
+      "nth": 0
+    },
+    "status": "active",
+    "reasons": [],
+    "model_calls": 0,
+    "change": "Planning and execution confirmation share the native attack-count cost rule. A matching observed discount preserves the already selected suffix; unexpected costs, effects, newly playable cards and other state changes still require review.",
+    "validation": {
+      "targeted_checks": 41,
+      "failures": 0,
+      "log": "temp/run33-plan-continuation-checks.log"
+    },
+    "runtime_loaded": false
+  }
 }
