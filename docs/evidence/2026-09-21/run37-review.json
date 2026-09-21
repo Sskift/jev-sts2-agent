@@ -1,0 +1,2456 @@
+{
+  "date": "2026-09-21",
+  "run_id": "run-1789993715",
+  "character": "IRONCLAD",
+  "ascension": 0,
+  "mode": "standard",
+  "started_at_floor": 1,
+  "result": {
+    "is_victory": false,
+    "floor": 17,
+    "score": 222,
+    "epochs_discovered": 0,
+    "can_return_to_menu": false,
+    "can_continue": false
+  },
+  "pending": null,
+  "run_cost_usd": 1.060710672,
+  "cost_segments": [
+    {
+      "root": "run-artifacts/run37-2026-09-21T12-28-29.568Z",
+      "cost_usd": 0.433180608,
+      "calls": 560
+    },
+    {
+      "root": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z",
+      "cost_usd": 0.5613717479999999,
+      "calls": 720
+    },
+    {
+      "root": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z",
+      "cost_usd": 0.066158316,
+      "calls": 88
+    }
+  ],
+  "cost_scope": "Gameplay response costs only. Separate incomplete potion replay cost 0.00896364 is excluded.",
+  "boss_turns": [
+    {
+      "turn": 1,
+      "start_hp": 46,
+      "boss_start_hp": 173,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 8,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 8 times Vantom loses HP, it only loses 1 HP instead."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 7,
+          "hits": 1,
+          "description": "This enemy intends to Attack for 7 damage."
+        }
+      ],
+      "hand": [
+        {
+          "id": "ARMAMENTS",
+          "name": "Armaments",
+          "cost": 1
+        },
+        {
+          "id": "PILLAGE",
+          "name": "Pillage",
+          "cost": 1
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        },
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend+",
+          "cost": 1
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike+",
+          "cost": 1
+        },
+        {
+          "id": "EVIL_EYE",
+          "name": "Evil Eye",
+          "cost": 1
+        },
+        {
+          "id": "TREMBLE",
+          "name": "Tremble",
+          "cost": 1
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0153",
+          "request": {
+            "cmd": "play_card",
+            "id": "ARMAMENTS",
+            "nth": 0
+          },
+          "card": "Armaments",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Armaments",
+            "Evil Eye",
+            "Strike+"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 25
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0154",
+          "request": {
+            "cmd": "hand_select_card",
+            "card_ids": [
+              "PILLAGE"
+            ],
+            "nth_values": [
+              0
+            ]
+          },
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Armaments",
+            "Evil Eye",
+            "Strike+"
+          ],
+          "continuation": "jev-turn-plan-selection",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0155",
+          "request": {
+            "cmd": "hand_confirm_selection"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0156",
+          "request": {
+            "cmd": "play_card",
+            "id": "TREMBLE",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Tremble",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Tremble",
+            "Evil Eye",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 22
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0157",
+          "request": {
+            "cmd": "play_card",
+            "id": "EVIL_EYE",
+            "nth": 0
+          },
+          "card": "Evil Eye",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Tremble",
+            "Evil Eye",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0158",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 21,
+      "estimate_hp": 46,
+      "actual_hp": 46,
+      "boss_hp_before_end": 173,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 2,
+      "start_hp": 46,
+      "boss_start_hp": 173,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 8,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 8 times Vantom loses HP, it only loses 1 HP instead."
+        },
+        {
+          "id": "VULNERABLE_POWER",
+          "name": "Vulnerable",
+          "amount": 2,
+          "type": "Debuff",
+          "stack_type": "Counter",
+          "description": "Receive 50% more damage from Attacks for 2 turns."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 6,
+          "hits": 2,
+          "description": "This enemy intends to Attack for 6 damage 2 times."
+        }
+      ],
+      "hand": [
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        },
+        {
+          "id": "NOT_YET",
+          "name": "Not Yet",
+          "cost": 2
+        },
+        {
+          "id": "SHRUG_IT_OFF",
+          "name": "Shrug It Off",
+          "cost": 1
+        },
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend",
+          "cost": 1
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0159",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "card": "Defend",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend",
+            "Shrug It Off"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 12
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0160",
+          "request": {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          "card": "Shrug It Off",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend",
+            "Shrug It Off"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0161",
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Strike",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Strike"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 5
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0162",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 13,
+      "estimate_hp": 46,
+      "actual_hp": 46,
+      "boss_hp_before_end": 172,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 3,
+      "start_hp": 46,
+      "boss_start_hp": 172,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 7,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 7 times Vantom loses HP, it only loses 1 HP instead."
+        },
+        {
+          "id": "VULNERABLE_POWER",
+          "name": "Vulnerable",
+          "amount": 1,
+          "type": "Debuff",
+          "stack_type": "Counter",
+          "description": "Receive 50% more damage from Attacks for 1 turn."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 26,
+          "hits": 1,
+          "description": "This enemy intends to Attack for 26 damage."
+        },
+        {
+          "type": "StatusCard",
+          "description": "This enemy intends to give you 3 Status cards."
+        }
+      ],
+      "hand": [
+        {
+          "id": "TAUNT",
+          "name": "Taunt",
+          "cost": 1
+        },
+        {
+          "id": "BASH",
+          "name": "Bash+",
+          "cost": 2
+        },
+        {
+          "id": "SHRUG_IT_OFF",
+          "name": "Shrug It Off",
+          "cost": 1
+        },
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend",
+          "cost": 1
+        },
+        {
+          "id": "SPOILS_MAP",
+          "name": "Spoils Map",
+          "cost": 0
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0163",
+          "request": {
+            "cmd": "play_card",
+            "id": "TAUNT",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Taunt",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Taunt",
+            "Shrug It Off"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 10
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0164",
+          "request": {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          "card": "Shrug It Off",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Taunt",
+            "Shrug It Off"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0165",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "card": "Defend",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 4
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0166",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 19,
+      "estimate_hp": 39,
+      "actual_hp": 39,
+      "boss_hp_before_end": 172,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 4,
+      "start_hp": 39,
+      "boss_start_hp": 172,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 7,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 7 times Vantom loses HP, it only loses 1 HP instead."
+        },
+        {
+          "id": "VULNERABLE_POWER",
+          "name": "Vulnerable",
+          "amount": 1,
+          "type": "Debuff",
+          "stack_type": "Counter",
+          "description": "Receive 50% more damage from Attacks for 1 turn."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Buff",
+          "description": "This enemy intends to use a Buff."
+        }
+      ],
+      "hand": [
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike+",
+          "cost": 1
+        },
+        {
+          "id": "WOUND",
+          "name": "Wound",
+          "cost": 0
+        },
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend+",
+          "cost": 1
+        },
+        {
+          "id": "SPOILS_MAP",
+          "name": "Spoils Map",
+          "cost": 0
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0167",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "card": "Defend+",
+          "objective": {
+            "id": "damage",
+            "meaning": "Deal efficient damage this turn, preparing attacks before spending energy on them and avoiding unnecessary HP loss."
+          },
+          "plan": [
+            "Defend+",
+            "Strike+",
+            "Strike",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 14
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0168",
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Strike+",
+          "objective": {
+            "id": "damage",
+            "meaning": "Deal efficient damage this turn, preparing attacks before spending energy on them and avoiding unnecessary HP loss."
+          },
+          "plan": [
+            "Defend+",
+            "Strike+",
+            "Strike",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0169",
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Strike",
+          "objective": {
+            "id": "damage",
+            "meaning": "Deal efficient damage this turn, preparing attacks before spending energy on them and avoiding unnecessary HP loss."
+          },
+          "plan": [
+            "Strike",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 4
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0170",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 8,
+      "estimate_hp": 39,
+      "actual_hp": 39,
+      "boss_hp_before_end": 170,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 5,
+      "start_hp": 39,
+      "boss_start_hp": 170,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 5,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 5 times Vantom loses HP, it only loses 1 HP instead."
+        },
+        {
+          "id": "STRENGTH_POWER",
+          "name": "Strength",
+          "amount": 2,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "Increases attack damage by 2."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 9,
+          "hits": 1,
+          "description": "This enemy intends to Attack for 9 damage."
+        }
+      ],
+      "hand": [
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        },
+        {
+          "id": "SHRUG_IT_OFF",
+          "name": "Shrug It Off",
+          "cost": 1
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        },
+        {
+          "id": "SHRUG_IT_OFF",
+          "name": "Shrug It Off",
+          "cost": 1
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0171",
+          "request": {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          "card": "Shrug It Off",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Shrug It Off"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 11
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0172",
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 1,
+            "target": 1
+          },
+          "card": "Strike",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Strike",
+            "Shrug It Off"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 9
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0173",
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Strike",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Strike",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 5
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0174",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 8,
+      "estimate_hp": 38,
+      "actual_hp": 38,
+      "boss_hp_before_end": 168,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 6,
+      "start_hp": 38,
+      "boss_start_hp": 168,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 3,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 3 times Vantom loses HP, it only loses 1 HP instead."
+        },
+        {
+          "id": "STRENGTH_POWER",
+          "name": "Strength",
+          "amount": 2,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "Increases attack damage by 2."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 8,
+          "hits": 2,
+          "description": "This enemy intends to Attack for 8 damage 2 times."
+        }
+      ],
+      "hand": [
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend",
+          "cost": 1
+        },
+        {
+          "id": "WOUND",
+          "name": "Wound",
+          "cost": 0
+        },
+        {
+          "id": "ARMAMENTS",
+          "name": "Armaments",
+          "cost": 1
+        },
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend",
+          "cost": 1
+        },
+        {
+          "id": "WOUND",
+          "name": "Wound",
+          "cost": 0
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0175",
+          "request": {
+            "cmd": "play_card",
+            "id": "ARMAMENTS",
+            "nth": 0
+          },
+          "card": "Armaments",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Armaments",
+            "Defend",
+            "Defend",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 15
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0176",
+          "request": {
+            "cmd": "hand_select_card",
+            "card_ids": [
+              "DEFEND_IRONCLAD"
+            ],
+            "nth_values": [
+              0
+            ]
+          },
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Armaments",
+            "Defend",
+            "Defend",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan-selection",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0177",
+          "request": {
+            "cmd": "hand_confirm_selection"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0178",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 1
+          },
+          "card": "Defend",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend",
+            "Defend+",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 9
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0001",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "card": "Defend+",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend",
+            "Defend+",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0002",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 18,
+      "estimate_hp": 38,
+      "actual_hp": 38,
+      "boss_hp_before_end": 168,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 7,
+      "start_hp": 38,
+      "boss_start_hp": 168,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 3,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 3 times Vantom loses HP, it only loses 1 HP instead."
+        },
+        {
+          "id": "STRENGTH_POWER",
+          "name": "Strength",
+          "amount": 2,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "Increases attack damage by 2."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 28,
+          "hits": 1,
+          "description": "This enemy intends to Attack for 28 damage."
+        },
+        {
+          "type": "StatusCard",
+          "description": "This enemy intends to give you 3 Status cards."
+        }
+      ],
+      "hand": [
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend",
+          "cost": 1
+        },
+        {
+          "id": "PILLAGE",
+          "name": "Pillage+",
+          "cost": 1
+        },
+        {
+          "id": "BASH",
+          "name": "Bash+",
+          "cost": 2
+        },
+        {
+          "id": "TAUNT",
+          "name": "Taunt",
+          "cost": 1
+        },
+        {
+          "id": "EVIL_EYE",
+          "name": "Evil Eye",
+          "cost": 1
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0003",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "card": "Defend",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend",
+            "Evil Eye",
+            "Taunt",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 19
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0004",
+          "request": {
+            "cmd": "play_card",
+            "id": "EVIL_EYE",
+            "nth": 0
+          },
+          "card": "Evil Eye",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend",
+            "Evil Eye",
+            "Taunt",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0005",
+          "request": {
+            "cmd": "play_card",
+            "id": "TAUNT",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Taunt",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend",
+            "Evil Eye",
+            "Taunt",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0006",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 19,
+      "estimate_hp": 29,
+      "actual_hp": 29,
+      "boss_hp_before_end": 168,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 8,
+      "start_hp": 29,
+      "boss_start_hp": 168,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 3,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 3 times Vantom loses HP, it only loses 1 HP instead."
+        },
+        {
+          "id": "STRENGTH_POWER",
+          "name": "Strength",
+          "amount": 2,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "Increases attack damage by 2."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Buff",
+          "description": "This enemy intends to use a Buff."
+        }
+      ],
+      "hand": [
+        {
+          "id": "WOUND",
+          "name": "Wound",
+          "cost": 0
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike+",
+          "cost": 1
+        },
+        {
+          "id": "ARMAMENTS",
+          "name": "Armaments",
+          "cost": 1
+        },
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend",
+          "cost": 1
+        },
+        {
+          "id": "EVIL_EYE",
+          "name": "Evil Eye",
+          "cost": 1
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0007",
+          "request": {
+            "cmd": "play_card",
+            "id": "ARMAMENTS",
+            "nth": 0
+          },
+          "card": "Armaments",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Armaments",
+            "Defend",
+            "Evil Eye",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 16
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0008",
+          "request": {
+            "cmd": "hand_select_card",
+            "card_ids": [
+              "EVIL_EYE"
+            ],
+            "nth_values": [
+              0
+            ]
+          },
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Armaments",
+            "Defend",
+            "Evil Eye",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan-selection",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0009",
+          "request": {
+            "cmd": "hand_confirm_selection"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0010",
+          "request": {
+            "cmd": "play_card",
+            "id": "EVIL_EYE",
+            "nth": 0
+          },
+          "card": "Evil Eye+",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Evil Eye+",
+            "Strike+",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 8
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0011",
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Strike+",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Evil Eye+",
+            "Strike+",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0012",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 16,
+      "estimate_hp": 29,
+      "actual_hp": 29,
+      "boss_hp_before_end": 167,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 9,
+      "start_hp": 29,
+      "boss_start_hp": 167,
+      "powers": [
+        {
+          "id": "SLIPPERY_POWER",
+          "name": "Slippery",
+          "amount": 2,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "The next 2 times Vantom loses HP, it only loses 1 HP instead."
+        },
+        {
+          "id": "STRENGTH_POWER",
+          "name": "Strength",
+          "amount": 4,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "Increases attack damage by 4."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 11,
+          "hits": 1,
+          "description": "This enemy intends to Attack for 11 damage."
+        }
+      ],
+      "hand": [
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        },
+        {
+          "id": "NOT_YET",
+          "name": "Not Yet",
+          "cost": 2
+        },
+        {
+          "id": "SPOILS_MAP",
+          "name": "Spoils Map",
+          "cost": 0
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        },
+        {
+          "id": "TAUNT",
+          "name": "Taunt",
+          "cost": 1
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0013",
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 1,
+            "target": 1
+          },
+          "card": "Strike",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Strike",
+            "Taunt",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 14
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0014",
+          "request": {
+            "cmd": "play_card",
+            "id": "TAUNT",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Taunt",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Taunt",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 9
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0015",
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Strike",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Strike"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 2
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0016",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 6,
+      "estimate_hp": 24,
+      "actual_hp": 24,
+      "boss_hp_before_end": 165,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 10,
+      "start_hp": 24,
+      "boss_start_hp": 165,
+      "powers": [
+        {
+          "id": "STRENGTH_POWER",
+          "name": "Strength",
+          "amount": 4,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "Increases attack damage by 4."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 10,
+          "hits": 2,
+          "description": "This enemy intends to Attack for 10 damage 2 times."
+        }
+      ],
+      "hand": [
+        {
+          "id": "WOUND",
+          "name": "Wound",
+          "cost": 0
+        },
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend+",
+          "cost": 1
+        },
+        {
+          "id": "WOUND",
+          "name": "Wound",
+          "cost": 0
+        },
+        {
+          "id": "WOUND",
+          "name": "Wound",
+          "cost": 0
+        },
+        {
+          "id": "DEFEND_IRONCLAD",
+          "name": "Defend+",
+          "cost": 1
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0017",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "card": "Defend+",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend+",
+            "Defend+",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 7
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0018",
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "card": "Defend+",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Defend+",
+            "Defend+",
+            "end_turn"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0019",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 16,
+      "estimate_hp": 20,
+      "actual_hp": 20,
+      "boss_hp_before_end": 165,
+      "after_screen": "COMBAT"
+    },
+    {
+      "turn": 11,
+      "start_hp": 20,
+      "boss_start_hp": 165,
+      "powers": [
+        {
+          "id": "STRENGTH_POWER",
+          "name": "Strength",
+          "amount": 4,
+          "type": "Buff",
+          "stack_type": "Counter",
+          "description": "Increases attack damage by 4."
+        }
+      ],
+      "intents": [
+        {
+          "type": "Attack",
+          "damage": 30,
+          "hits": 1,
+          "description": "This enemy intends to Attack for 30 damage."
+        },
+        {
+          "type": "StatusCard",
+          "description": "This enemy intends to give you 3 Status cards."
+        }
+      ],
+      "hand": [
+        {
+          "id": "SHRUG_IT_OFF",
+          "name": "Shrug It Off",
+          "cost": 1
+        },
+        {
+          "id": "BASH",
+          "name": "Bash+",
+          "cost": 2
+        },
+        {
+          "id": "STRIKE_IRONCLAD",
+          "name": "Strike",
+          "cost": 1
+        },
+        {
+          "id": "SHRUG_IT_OFF",
+          "name": "Shrug It Off",
+          "cost": 1
+        },
+        {
+          "id": "WOUND",
+          "name": "Wound",
+          "cost": 0
+        }
+      ],
+      "actions": [
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0020",
+          "request": {
+            "cmd": "play_card",
+            "id": "BASH",
+            "nth": 0,
+            "target": 1
+          },
+          "card": "Bash+",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Bash+",
+            "Shrug It Off"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 13
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0021",
+          "request": {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 1
+          },
+          "card": "Shrug It Off",
+          "objective": {
+            "id": "protect_hp",
+            "meaning": "Preserve HP through the enemy turn with efficient Block, debuffs or kills, then use remaining resources well."
+          },
+          "plan": [
+            "Bash+",
+            "Shrug It Off"
+          ],
+          "continuation": "jev-turn-plan",
+          "new_calls": 0
+        },
+        {
+          "source": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0022",
+          "request": {
+            "cmd": "end_turn"
+          },
+          "continuation": "forced-single-action",
+          "new_calls": 0
+        }
+      ],
+      "block": 8,
+      "estimate_hp": -2,
+      "actual_hp": 0,
+      "boss_hp_before_end": 155,
+      "after_screen": "GAME_OVER"
+    }
+  ],
+  "checked_end_turns": 11,
+  "end_turn_mismatches": [],
+  "deck": [
+    {
+      "id": "STRIKE_IRONCLAD",
+      "name": "Strike",
+      "type": "Attack",
+      "cost": 1
+    },
+    {
+      "id": "STRIKE_IRONCLAD",
+      "name": "Strike",
+      "type": "Attack",
+      "cost": 1
+    },
+    {
+      "id": "STRIKE_IRONCLAD",
+      "name": "Strike+",
+      "type": "Attack",
+      "cost": 1
+    },
+    {
+      "id": "STRIKE_IRONCLAD",
+      "name": "Strike",
+      "type": "Attack",
+      "cost": 1
+    },
+    {
+      "id": "STRIKE_IRONCLAD",
+      "name": "Strike",
+      "type": "Attack",
+      "cost": 1
+    },
+    {
+      "id": "DEFEND_IRONCLAD",
+      "name": "Defend",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "DEFEND_IRONCLAD",
+      "name": "Defend+",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "DEFEND_IRONCLAD",
+      "name": "Defend",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "DEFEND_IRONCLAD",
+      "name": "Defend",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "BASH",
+      "name": "Bash+",
+      "type": "Attack",
+      "cost": 2
+    },
+    {
+      "id": "SHRUG_IT_OFF",
+      "name": "Shrug It Off",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "TREMBLE",
+      "name": "Tremble",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "TAUNT",
+      "name": "Taunt",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "PILLAGE",
+      "name": "Pillage",
+      "type": "Attack",
+      "cost": 1
+    },
+    {
+      "id": "SHRUG_IT_OFF",
+      "name": "Shrug It Off",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "NOT_YET",
+      "name": "Not Yet",
+      "type": "Skill",
+      "cost": 2
+    },
+    {
+      "id": "ARMAMENTS",
+      "name": "Armaments",
+      "type": "Skill",
+      "cost": 1
+    },
+    {
+      "id": "SPOILS_MAP",
+      "name": "Spoils Map",
+      "type": "Quest",
+      "cost": 0
+    },
+    {
+      "id": "EVIL_EYE",
+      "name": "Evil Eye",
+      "type": "Skill",
+      "cost": 1
+    }
+  ],
+  "findings": [
+    "Vantom starts at 173 HP with 8 Slippery; 8 capped hits consumed it only by turn 9. Total HP damage was 18.",
+    "Turn 1 spent Armaments upgrading Pillage, then Tremble and Evil Eye: 21 Block against 7 incoming, no Attack. Slippery power changes were already present in plan projections.",
+    "Turn 4 and 8 extra Block had no visible incoming attack, but all available Attack cards were eventually played; do not claim those particular Block plays displaced another attack.",
+    "Final deck has 7 Attacks, 11 Skills, 1 unplayable Quest. No shop visited; gold 328 and no removal evidence.",
+    "The floor 13 Regen Potion was consumed immediately before victory with no healing tick. Combat-completion label fix was loaded in the boss; new potion decision improvement is unproven."
+  ],
+  "source_files": [
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0153/after-state.json",
+      "sha256": "7042ddc21df51dbf9df80d0d3f545eb334c6550427cdf68a263b7654c216754c"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0153/before-state.json",
+      "sha256": "dfb7f1ae0407d11c2550243f56323b492592c0403ccdcd50e27f8e2d05730975"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0153/decision.json",
+      "sha256": "91127be2d668dd880006b840d7ce1ba3dad5857b9dd6599457c0427fc6206143"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0153/response.json",
+      "sha256": "baad7030ef48e3f6844fad34f8a39596a7a362745db3dcb12d2974e12c07f635"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0154/after-state.json",
+      "sha256": "8752bdabf19ef7951437783b70d559e71f378a3d718baddd48d2c2742ac3aaf8"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0154/before-state.json",
+      "sha256": "e4532fd49ad7574fa008e2ff326670ef839ae3228b1edfbc968b26d2f9f2e6c4"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0154/decision.json",
+      "sha256": "59a0cc7b5144e661a33a48184b74e066786a2459707ebe4610b35dd1707c0701"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0154/response.json",
+      "sha256": "3971d4cf8635de1c187064c45d27d7e7478ea2e8838a760a7b0f3670e289dfba"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0155/after-state.json",
+      "sha256": "9bf7cd635302639cc790c0d67a8f0a8006fab21056a6ed6471906f8e4bdcf1bd"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0155/before-state.json",
+      "sha256": "1d2ce7743ffb0752bccd83c91c1bef957e7a6e5c919aec5ab1424ca95e47cf9c"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0155/decision.json",
+      "sha256": "4fb9bdf8b546419ae07c0a003bab5235a136e2cac2b8df8dddf46d74a81905ef"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0155/response.json",
+      "sha256": "8795144c1d2e3abd0ca9c8a4a76625afa003545f976c880ad70c1d77725446fe"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0156/after-state.json",
+      "sha256": "986445ebc957bd9f3779bf3579fc2a927c3efdc2019f0e0e64accd09b88d89a4"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0156/before-state.json",
+      "sha256": "1e2acc15cafeaab95e270489b68a46e1981642048f5f9bbbf98ceceea3eef355"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0156/decision.json",
+      "sha256": "ea2d1c105cb4bff89bf05a2fb06dd3e37396828054ad863c601b5e277470cca6"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0156/response.json",
+      "sha256": "1dc57a3cd1a90d682296a66651e8fc75ad40436c4938da63988aa3a84991a476"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0157/after-state.json",
+      "sha256": "29e04332b4bc57b9f1c9cd7743f4d674635ff29bc4877b5c2660b910b81af5f9"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0157/before-state.json",
+      "sha256": "f144c3dd8e562bb5f7a15df49349c4e014e24e2545b81833ef0667ccebcce1f1"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0157/decision.json",
+      "sha256": "69b27ad49754fce0ec0e6f82cb3c8d9af9827c7ae4f94f3831d76d01a03220be"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0157/response.json",
+      "sha256": "45fc68295c83dc4f2f0fdd3b3aed8b1b9d947d95e7b66231295666d13b529148"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0158/after-state.json",
+      "sha256": "6f4afe11d45487473b64e156a72a5de019fcab8ddb6dc8ce00dd3946c7ebfa72"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0158/before-state.json",
+      "sha256": "7bb09251671ed1ec1171e0daab93237301c1e67d080dbe9e3f05898a48b86247"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0158/decision.json",
+      "sha256": "dbf3092f008b68a68d8201d6df0ca79672f079657d82b579d83e959240d9b04b"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0158/response.json",
+      "sha256": "e0d4403cb29abcb37d26f6e62f42674f0d32cdd419a71a48275db564fcf69773"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0159/after-state.json",
+      "sha256": "2a6a56acd3415683c1c67bd86772ec80c52977fd63de1cd7c34a302fa4ab319e"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0159/before-state.json",
+      "sha256": "80fef69cb73051e3662d730ffc047305d236bd05947bd6ffbfe1ca3aaf46fdb4"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0159/decision.json",
+      "sha256": "23834bca6153b1d3362afbd47309bcbf76806050e9e651719a1f0323fb2b64a0"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0159/response.json",
+      "sha256": "90c6f721acb01b516f706e938b48957094376441be4e6e4ceb615cee7bccaaed"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0160/after-state.json",
+      "sha256": "f1c98d0dde2ab919a4fcc7c9b92bcf6caf1054f206ba464b693d983d55964763"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0160/before-state.json",
+      "sha256": "156f76b2c6681302df6da5c9778a99248f89cf9ba802e6c14213c62c10c037f3"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0160/decision.json",
+      "sha256": "1c300423ff63e8605a4056af5ed46f92db37e1681969a3103ba706f8806092d2"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0160/response.json",
+      "sha256": "4b53941e6adb167533e544261ed56f9697c34a35488881785f92c575d3b47efe"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0161/after-state.json",
+      "sha256": "e7aea224801c2a1aeb08d264ed6ed5fdfd66b9bc6d65d3547faa2b10037a36f0"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0161/before-state.json",
+      "sha256": "37976f55c5fc889706abc4fac7579e383bc58e6493e1e0103b1234f1fc1d9a59"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0161/decision.json",
+      "sha256": "63e00df3716644e97e7cc8337d39120d2ec653f08d5aab87d0bbba24f0c59073"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0161/response.json",
+      "sha256": "0f866a38218b41036ba19ef6ae27806374d68cb64d16232751e24699664e1885"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0162/after-state.json",
+      "sha256": "8011ad6a64470ab15e7de56a77fbc1b52212f7a90cb5f1ea582570f7bc8aece4"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0162/before-state.json",
+      "sha256": "5308a42c6283cd6ba506b7c6b6cce88ef0a7fd11553ae50b1a3c58246114629a"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0162/decision.json",
+      "sha256": "1374a604cfc3d94debbd314b3689fd52b51248836dc9617f623f74a81d1b4024"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0162/response.json",
+      "sha256": "8b9da0de3516704481b15d86fc0e836809f714bccc9d28b560f70e24edabd5af"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0163/after-state.json",
+      "sha256": "fa359d94d877c88dc0672a7ccf6f923da2882c0d2231d93b698e0b87f3165cf4"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0163/before-state.json",
+      "sha256": "b7a16c52e0ad0307404185b72e42be8e9e4e04f61752aa0d3ebefcb3b0c22ef9"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0163/decision.json",
+      "sha256": "2b3f8e5a810c4326192690e163bbfbecfd9da4c3ddd07edd19223ae81f8acd4d"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0163/response.json",
+      "sha256": "f542e367c9cf5473e01065be0334d5525eabd85a2210836e7515d8f8bf9fd50e"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0164/after-state.json",
+      "sha256": "e0a96f243d6c2d0b1d654d227f76a9dcb7d673339109c0179ec7e2b860cbc1e4"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0164/before-state.json",
+      "sha256": "46ea4b689f38321d6c0536f0cf13875382371085467c518dbe255649806f00f2"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0164/decision.json",
+      "sha256": "b8e6b1b28c999ff5738354798fa4e7fd138dcce8e5240b3a8a18606ec1379864"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0164/response.json",
+      "sha256": "1f57f5dfbbc385c96d9c41e3cecab3039c78d87547981116e93a2470de265679"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0165/after-state.json",
+      "sha256": "b907d5fcd765cb496f87a2c20fe397ba92196c6330dbfee38ec23e37849638bc"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0165/before-state.json",
+      "sha256": "e78c5d99efd5769f9111d019381df2c2584af65a45f0027b48f2001695c389ec"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0165/decision.json",
+      "sha256": "8c7aec7c58fc3914550f1be262cbba04a3db5188b0ab8c90f8b5ebc8afea8073"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0165/response.json",
+      "sha256": "d4e647af2569731df8921ebdfa9685a39561eeae8cc34b05efed580a476721b3"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0166/after-state.json",
+      "sha256": "69bf284d3663a7a82004a365ab5bed22ba73b4c67090544a3d308050a6fb0c22"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0166/before-state.json",
+      "sha256": "b9c76f607712e436fc354b0b4aaa6a5120a0879a240945c2487dab452d060f31"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0166/decision.json",
+      "sha256": "746734511119fe14d81deef17de224b707a77fe1d1600f00bd169e74ba233da3"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0166/response.json",
+      "sha256": "b2065010668670185bd71bbc6bd276e16931b2ebc3110d60867f41253ca45934"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0167/after-state.json",
+      "sha256": "dfb3f6f14e50ff918bbc29ecea58446f70685def6520c8a3d2b2baa61528e594"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0167/before-state.json",
+      "sha256": "8a6e7dad923c6d008d0acb060239e582c755921686278929f30f82d00460dc1a"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0167/decision.json",
+      "sha256": "59113a4264fcd79238ab54e46125328baa6dfdd0dc4f2393ceac920f4883a3a8"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0167/response.json",
+      "sha256": "41144604cf7db486fbe8120357b397a5c737762d2b49a76cc8efb4dfe962fbc6"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0168/after-state.json",
+      "sha256": "31bc9a9472422e9f98344ef28039a099642690509eec8eab92b33f898228c0bd"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0168/before-state.json",
+      "sha256": "dbc2f13a21a416aad5f577165547d637ef3fa67b6c9bb7c1c121394089bf8ece"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0168/decision.json",
+      "sha256": "8c449ad2e5ccbe28ca55268406ba4cbc79ea442db19bf2d2df08da8552f3111f"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0168/response.json",
+      "sha256": "e7192aa387edc093eb7297adfa16636ea813a91dc274f242707cec6dc4edae86"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0169/after-state.json",
+      "sha256": "f0a5518f3640a704c961c29781c47aa57db837006c22b7055150c8a9aa8fb3a7"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0169/before-state.json",
+      "sha256": "a3eb28ba3f09eecaccef9857f05ba9d2a02cc23224cb7d9f344a1a3f9da7b5e1"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0169/decision.json",
+      "sha256": "2ff0b83a0d5042f82f5d18d4a7d92024d80a0e8de1ec8301fdfb1b99a25433c6"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0169/response.json",
+      "sha256": "d0d81906b3aec12aaa31e3c5c2861009629c85b170707fdaf556ffc5e3f0f723"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0170/after-state.json",
+      "sha256": "8e454475b390b94f8cdd4844877c90d603428698598a18815b718ad1202c9663"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0170/before-state.json",
+      "sha256": "6d32f397bc35f638c681a0d71d8ba343194c15b132a1d416596574690ecbf134"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0170/decision.json",
+      "sha256": "4dc42307bcbe760907228a8e961f412ce161274a6207582600bab95c439bca5a"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0170/response.json",
+      "sha256": "de7cce8bc8ce871f56b411b02d89c95be76f08b52242a9eb57d3d7180e55bf2f"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0171/after-state.json",
+      "sha256": "28a52fc0b30f58207eb422e18f9594d9b9df4919eee2583711f5d7484c661a3d"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0171/before-state.json",
+      "sha256": "307764350110f4daf10de7a47d6a07a108c89e9adea5097a78653116eaa9610b"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0171/decision.json",
+      "sha256": "67e69771d8d09a7bc07db8b2367ee4952f313f07a1fae132ebbc441f6094ece0"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0171/response.json",
+      "sha256": "1f57f5dfbbc385c96d9c41e3cecab3039c78d87547981116e93a2470de265679"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0172/after-state.json",
+      "sha256": "9ef62ce704dc8de37b35820fc21690603d751b627200bd2c4a00135385478608"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0172/before-state.json",
+      "sha256": "497e04b091adfacb757f7643b8ded3e20d635f656225a8edc490e52eaf5246c3"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0172/decision.json",
+      "sha256": "a1a939b9039219c9ad342b2f0fc0a1f21a92407e97d2eddad321ebdafc29a807"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0172/response.json",
+      "sha256": "6cf03e01673b18000c9dd83f094c59de235f623fed179ed4304cfb883d2dfbfc"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0173/after-state.json",
+      "sha256": "ab1de28ccdc5c3c37c2ccdeb8d35ba0f9e9f8522954aaed196e220e7a627204c"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0173/before-state.json",
+      "sha256": "25cbabaa1967fbbc6e25fe0f026369d03030bdd439ddd316b59709f4778c6c20"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0173/decision.json",
+      "sha256": "8e650b80f493609d15d6687f8aa3d4929d0d29d0dddaa8897dfa2d7e3bb697fb"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0173/response.json",
+      "sha256": "e7192aa387edc093eb7297adfa16636ea813a91dc274f242707cec6dc4edae86"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0174/after-state.json",
+      "sha256": "78cf1b19b002b1250d399e557571bfde1250edf538499084673adfba4e14169a"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0174/before-state.json",
+      "sha256": "ee05dfd45e6325c87a9cae613fc6d24314e03935ffd8a7003a3bc62f34a5802f"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0174/decision.json",
+      "sha256": "565e493766e8ae165fd045255d55a579ca908e2e84933ce4867f0655011039c8"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0174/response.json",
+      "sha256": "31c60ea0c2ef3a80fb25724b0ebb33e095acf57d2141c00dc99884914b9675d2"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0175/after-state.json",
+      "sha256": "ac0ddc82049890f152651ce2d08f3503e2fd629a904337da137c4394d495c48b"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0175/before-state.json",
+      "sha256": "acb3662355f3ef22635b2827ecdbfc02d099b7414ea3fc0cbbdab10965921177"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0175/decision.json",
+      "sha256": "64878f197a59b90904044606ff8a9a9f71c6e8d8724b4aa7d4fb9f32b0274958"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0175/response.json",
+      "sha256": "8e10731ff986bb92b137d1dd0ede6787a2e8a594c04ebc9717d3b029c8647d42"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0176/after-state.json",
+      "sha256": "764f34c3620deb02beb91f7b0284788cdebc5b28f0b44d1edb216f902ed77534"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0176/before-state.json",
+      "sha256": "66a211534915aa93c8e39cbba2c9719b46da63e4571bc9bef94587a88f08856d"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0176/decision.json",
+      "sha256": "22bcc87a6b29cddcd869fad6cf5c0e5ef226c0c2f47e88872a86977372197566"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0176/response.json",
+      "sha256": "d792904fba759fae4a9e5a55a675c5d7f4eaa68cc25e768811b106c66e64baca"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0177/after-state.json",
+      "sha256": "a58929b6db8ce680409795c0c9124b352dd43cea3511e6d67d1d086e456bc211"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0177/before-state.json",
+      "sha256": "f0f6a9c38339f6ec778eca26c03a577ccd3fe8b66d0398adbc6f5c94eae55d1e"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0177/decision.json",
+      "sha256": "1282edbb556e130d54fa5a183a9ec9ab0d17a4c1e22b50f9097e0eb15b1fc7ec"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0177/response.json",
+      "sha256": "8795144c1d2e3abd0ca9c8a4a76625afa003545f976c880ad70c1d77725446fe"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0178/after-state.json",
+      "sha256": "8fceef4e07458c1ac0b65bb79afb97583406a5ddb27ea3528accedc24142c216"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0178/before-state.json",
+      "sha256": "c393635c7699986d125ff34cca545aa1e498d34c0c5873196c5bf330ef0c035c"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0178/decision.json",
+      "sha256": "45b00d5b6144cf7bb84c9443bffa0b634a70949c3258091049622f60b103ec0d"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0178/response.json",
+      "sha256": "34ed885a30928fd51c51042d2ba8b960afe29942129b71316934d15d74cc5209"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/final-memory.json",
+      "sha256": "b226682bb46eb0b985d1fee67e88179609872ebedb37017b83301052c504ff8f"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/settled-failure-native.json",
+      "sha256": "61e7ff92a6c1bccadb69ac12e8a2fb5d1bebe1db6b1d883eacce108507a116c5"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0001/after-state.json",
+      "sha256": "2b6fd26ca2f60e4838d3a626cda15e96c5c1d832682700dac0eb7d5ab5797594"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0001/before-state.json",
+      "sha256": "3e9fd662417252498d0cc29f47f81c5fe69aa18de04393d86988411a3ac3835c"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0001/decision.json",
+      "sha256": "aefd9d0dbc8a47bb30d00b302f7ec88003ac9f1c4f1c129f05f953841991e1f6"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0001/response.json",
+      "sha256": "ed20fe90740411f634fbdffb6af9c9c688dc60662be601917c781941bc29ed89"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0002/after-state.json",
+      "sha256": "71955a8964980c6c427ce96707b3b4d6fc3e2d0c75894956fbb4cde5e08b65df"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0002/before-state.json",
+      "sha256": "d4f9995f20e63c42f5c2311acd05540bac2d5d5ff6dae9bcdab2781c04365c34"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0002/decision.json",
+      "sha256": "a90629244529da07c1c5354f1eaccd3e7c37931b75467243f60b74f510844881"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0002/response.json",
+      "sha256": "6ec0ce6c22b925add626afbd0d6ad7e9b125beb3c64aa3b571df44a95e29328c"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0003/after-state.json",
+      "sha256": "41a07acb17c932eda52bfd5616f9b429336aa8f43ec59e6bb3bbea6a50054144"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0003/before-state.json",
+      "sha256": "53b733173d9e11017b75df0a171d44009b77931aed4ebd8f255a11381c12fa02"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0003/decision.json",
+      "sha256": "f347821859bec8261a7ec47d98b3cce21af140e28df922867d75b2504cc8e960"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0003/response.json",
+      "sha256": "679a39636fc732d410f3118b580ff816bb0e7e26a48aada9f77bab4ecbf52519"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0004/after-state.json",
+      "sha256": "a5cd63a0c1f8e9bac7510ff9c57003c17aa805aaf395f3e164b6ff6829df9a57"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0004/before-state.json",
+      "sha256": "cdea31c2e47c19ca63d7587d7a2a3be0b376a18ab0a9e73c195bec31f814e10d"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0004/decision.json",
+      "sha256": "2149c8ed21612b7d9e0bd24d99cc56735d6af0e8856c2acfd7021a568a2bd0f6"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0004/response.json",
+      "sha256": "422322b9f802b763072b0a7a7fde5ba53063e47d8c698720d681785b5ebde36a"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0005/after-state.json",
+      "sha256": "927e5eb97a822a915d2ca5e4317de3670466f196c3cc00f48cb144eaeb8e1a7d"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0005/before-state.json",
+      "sha256": "9c5a9a186b8b3cf997af46d311ad9b5f45eeed9d0998b6f8ffb98f38fadc330b"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0005/decision.json",
+      "sha256": "f1b4560f4bb4924a08d0b6c08b9303041164674aaa538678f9dfbccb4805dec7"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0005/response.json",
+      "sha256": "c30ef5df64b67d9d107fff952fc37f05f43999fb086d3172dd02687465f73ae7"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0006/after-state.json",
+      "sha256": "6bb04ac9a14ee70d61e4751ba44f4ecd6098300a9f398e7297e017f7a530aa56"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0006/before-state.json",
+      "sha256": "3477dc922c2c7198d08879b60ee0f20808d81ec8fe922e456a867702f88f1501"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0006/decision.json",
+      "sha256": "84da0088ebae322dbb9a0d05c039b0dad635ea0f4a40dd6890a7dbfd74f9239a"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0006/response.json",
+      "sha256": "a5d6874d43f6b95e044fca3990f58542bb5a6271eb841ed153ce1aa03ffab03c"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0007/after-state.json",
+      "sha256": "a652d66d364f92486f2fdcaacd54299c4785d174e4447028376c2639f1032c98"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0007/before-state.json",
+      "sha256": "4ebe6ca37da0a0ceed2d511699bc06bf3f9fd844cb835fa46b996edd320dbdc5"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0007/decision.json",
+      "sha256": "ee9cf05c618caf65cd4a32e83a1edf724a48eb838648611253108cf7663d7ee6"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0007/response.json",
+      "sha256": "3fa0adbd2ae16c8fcbd6824268b778fe987a3a4261ba8853eca895657edbfa6e"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0008/after-state.json",
+      "sha256": "3a9c6f36f758ba68f56b9d6bd83a3d57e27ea7ffb77e4f54ffc9f07a48b020e2"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0008/before-state.json",
+      "sha256": "383047ed299d7213d78b4b7a080a92f30ed8774acae65406719c2e66c9be1982"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0008/decision.json",
+      "sha256": "e2c7816abdddb33bcbd1e353340fb8b748cbf82ea06fc01ec35aa28b24e746aa"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0008/response.json",
+      "sha256": "40d8e4f85a9c772a81a33d4dabc5075260073fc77b5912ced8897fd87c09357f"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0009/after-state.json",
+      "sha256": "4239bec05aaf12cf3d19ee2517ccc50091ad72cfdc8896115b1c5692548a32c7"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0009/before-state.json",
+      "sha256": "6897e03c6d608842fd036c7e397dd26f447d4bf0c78a1853422e12ffee49ba89"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0009/decision.json",
+      "sha256": "54e0da8a02e71c77dec422d267a404c5809e5060dd26c1bb5159d11d96855354"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0009/response.json",
+      "sha256": "8795144c1d2e3abd0ca9c8a4a76625afa003545f976c880ad70c1d77725446fe"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0010/after-state.json",
+      "sha256": "47142c2932b866d3bba8eacea1d4ed0016b1e718d2fdfc516031a35a00a36f73"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0010/before-state.json",
+      "sha256": "e91dc2aa8c5228c9d3ce13f2fe6bc9dcd6df5aa83f07bc4182f675bbb474d320"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0010/decision.json",
+      "sha256": "0b4f3890727f6734936b0de1cfe186a240fc81f1102ef5e3ad6909a73cd9db24"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0010/response.json",
+      "sha256": "78bebd7f13156ddb64d0dc9ef750ee06b60b6a9c2d59fa14b11637472fa45cde"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0011/after-state.json",
+      "sha256": "1f6c65ac1467f42b9608cd48f35e74a857845382792b030cf21d97d9abe2193f"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0011/before-state.json",
+      "sha256": "10dcb2fcaadde8b63e8a3207158630b5af36875453779e1d3e6d65ce27fc25d2"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0011/decision.json",
+      "sha256": "31f8150bae0478b2ea70163a9d0a826fe64580b24d8ae9568de14d9b8eb3fc7f"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0011/response.json",
+      "sha256": "6cf03e01673b18000c9dd83f094c59de235f623fed179ed4304cfb883d2dfbfc"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0012/after-state.json",
+      "sha256": "ae6c279734619a624952a9f2c2af1834bf1f4e2772c891e833f911b7410b4444"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0012/before-state.json",
+      "sha256": "fa233ac730c550838a0be8a0edfec373f48c5c616c2ae44ba70da354906233cf"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0012/decision.json",
+      "sha256": "e79fb1660e42f6ca0df7c47641e929764a8e2c70328aa5383aaa72ac79506fa5"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0012/response.json",
+      "sha256": "0fd8a4f4aa58e20f20a775e7cc44caf6c3cba4895c18530914d7090178de352c"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0013/after-state.json",
+      "sha256": "8efcbb67e9c56e1a2c1c9a9353b6a6e585b0702276764d9fcc9a7689635922e9"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0013/before-state.json",
+      "sha256": "955dd799ab4d685c00f4cce201a1143d2ee33afcba9db89bae72d80cedb12091"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0013/decision.json",
+      "sha256": "4135de9fb2a9787223e215b011bb09334b9fb08c4b270acdd08071a6d14c9092"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0013/response.json",
+      "sha256": "33f7b2ace09d5f05e6e43777ebf62aa8934bfab9e3e821c07ca728f153ad1bb4"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0014/after-state.json",
+      "sha256": "674a965507019efce67f66ff63be0d79d83bfe77c1a702469feae205a5213cf7"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0014/before-state.json",
+      "sha256": "4fbc1c38b37e9ba11dc1eef40fd1a8e2eef21dd2c33bdcd73f67a9caa067a57f"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0014/decision.json",
+      "sha256": "1ad4fc12f07f6214c9d07c51dcdf8a6b54abef77c05a8ed5dbdcfbf08051a43a"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0014/response.json",
+      "sha256": "980e7f88f428b1a1aeb0b0d0e12d06a27c0edacdd6eeae2d676adcbd67ee80a0"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0015/after-state.json",
+      "sha256": "ff054ef586728010dd7c21805b3e2fad9d0d842b2b8352715449e95267fadc6f"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0015/before-state.json",
+      "sha256": "bd939689f0e9cf016486a21661d4eb7085aa262a1fb9c46f203284e4be9cbb60"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0015/decision.json",
+      "sha256": "15fed11b49140ef7c96fb487f03a1f8c000e118fd584cfeaedb66637ac12fe15"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0015/response.json",
+      "sha256": "e7192aa387edc093eb7297adfa16636ea813a91dc274f242707cec6dc4edae86"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0016/after-state.json",
+      "sha256": "39e1d26cde1714e1f764eb27eac59a98d6dc47ff89b98913478014a1879d349c"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0016/before-state.json",
+      "sha256": "8d106c431d522fcce197b3528f69420eceda56c5cd83c7cc999ca4f7d3a26ef8"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0016/decision.json",
+      "sha256": "ed822c11dbbaba767bb24983c1d122c0675cb718987432e4c106b44d75da30f4"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0016/response.json",
+      "sha256": "e90eb45b5b44fae817ecd9bac2ce0ace171fbf8a18e5f7653d15a32e650fbfbc"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0017/after-state.json",
+      "sha256": "aedeb45c2cc89ea0c07b3d5dee733b3b2ee8e5aca44807d67b92f434800a5e72"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0017/before-state.json",
+      "sha256": "c13dd9128e2399e3ee7861c2f1c57c22e5203a70e297627195c7fa348a361f87"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0017/decision.json",
+      "sha256": "5b076c5b1a1e40592c3693e66f283d764cc92b448e53a6a47ee072bc72d12411"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0017/response.json",
+      "sha256": "b6cd40864a6c8a17b11f1c720090f18d796e220d5513315c615fdbc35834065b"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0018/after-state.json",
+      "sha256": "81fd0c98f9347f10b3ab70e8ffac48e60cfbc57bae7c0c28a4454fabb69235ae"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0018/before-state.json",
+      "sha256": "aec4555cf04767d730ab4362920c269907c6151524394987a3d5331045e68ec8"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0018/decision.json",
+      "sha256": "a75ac9a10d828553b1959e5453d316a08a5d1ec153c891e63deccde9af29b497"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0018/response.json",
+      "sha256": "60cf83def0fd66cf8c2ab542445b4f5601da50ee08c0340ed4200fb457a50c5b"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0019/after-state.json",
+      "sha256": "73a35533abcc8edf7fdc4cf19a3648f6c36ef435cda5d06d869726344a176369"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0019/before-state.json",
+      "sha256": "833df2cdef4bbfefdc701f5fc86f40824f546a894a71cd9fe876b6cf58c3f6b4"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0019/decision.json",
+      "sha256": "407e7de83f3d5f436f3dc915d6087e2a2612e12aad67596790bb5652c8b37193"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0019/response.json",
+      "sha256": "9d73577e679d1ee73a44d04617e9a5140443c9758f82abc87364ebead9dfd7fe"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0020/after-state.json",
+      "sha256": "ae5327dbad3e567d3471f4c19880032734aa86e19440a8c10220359d00077693"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0020/before-state.json",
+      "sha256": "6240c46616db177a59e6a18fc49c71d580abaff066b55a66d8c63c8c154fedda"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0020/decision.json",
+      "sha256": "72c1a4fbe975e0269fa66b25892ab7c8512368c8e3faaf3ead9c73d2d45ff24e"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0020/response.json",
+      "sha256": "b80a8878efcffe21912ed29667a654da0f4acda9af8211f667a5745d361c87fc"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0021/after-state.json",
+      "sha256": "86c3043371ecc0d2e8e5489bb337f2d5c98a5f95f45f18d7dd036cba7bd70bdb"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0021/before-state.json",
+      "sha256": "c00468e835fb085384f874f2092704d28201a72334ece858143d7e97318c6b35"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0021/decision.json",
+      "sha256": "b3ef6dccb4dedae7d96ad0909d7878bd55a0fed6695b8169027c9a1b841f1ad0"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0021/response.json",
+      "sha256": "d5a1354e30a73f99067cecd04dcbcf90f293fa88dc8fb33d3482340500167739"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0022/after-state.json",
+      "sha256": "847096fb6a34a4b5a1c9873e2a3aea93f6b04ab349d01d4596e424905007c8dc"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0022/before-state.json",
+      "sha256": "ae21c8fedfaac3cf124a9b534ba78c32af9315a8a90c60925a0c77836aac205a"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0022/decision.json",
+      "sha256": "8b00b464ff6e29c405aa0a2aa31fca983afe068b695d90d6fdf456bf14616dfb"
+    },
+    {
+      "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0022/response.json",
+      "sha256": "c99af41bb1c77c6abe64c88406ea7e8d0cf98cd3fe35bea78127a2ec6a3a4cc7"
+    }
+  ]
+}

@@ -325,5 +325,57 @@
       "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-9.json",
       "sha256": "17aeaf3738dc5a0cd9c1cc0d6b747c2fdf903a8ac09bbd328fcb0b469912995b"
     }
-  ]
+  ],
+  "loaded": {
+    "commit": "90b46000a081aa0342092f02ed20a32c5dd63912",
+    "root": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z",
+    "matching_checkpoint": true,
+    "first_request": {
+      "cmd": "play_card",
+      "id": "DEFEND_IRONCLAD",
+      "nth": 0
+    },
+    "first_new_model_calls": 0,
+    "confirmed_response": {
+      "ok": true,
+      "data": {
+        "card_index": 0,
+        "card_id": "DEFEND_IRONCLAD",
+        "results": [
+          {
+            "type": "block",
+            "target_id": 0,
+            "target_name": "IRONCLAD",
+            "amount": 8
+          }
+        ]
+      }
+    },
+    "source_files": [
+      {
+        "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/runtime.json",
+        "sha256": "6a362675d17623e299e95aed05c64124b7b0b2d17998729c19f66f393ee1a66a"
+      },
+      {
+        "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/resume-native.json",
+        "sha256": "9bf98872864c8f2fc7d2bddd61c3641d67b42f197974ed714ee3754216e9b9cb"
+      },
+      {
+        "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/prior-memory.json",
+        "sha256": "4ad2ff2a73e5546639ff06cea096c6237f7f58c5ad62b2f6b19e96b13f45e11b"
+      },
+      {
+        "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0001/decision.json",
+        "sha256": "aefd9d0dbc8a47bb30d00b302f7ec88003ac9f1c4f1c129f05f953841991e1f6"
+      },
+      {
+        "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0001/response.json",
+        "sha256": "ed20fe90740411f634fbdffb6af9c9c688dc60662be601917c781941bc29ed89"
+      },
+      {
+        "path": "run-artifacts/run37-resume2-2026-09-21T12-57-57.874Z/step-0001/after-state.json",
+        "sha256": "2b6fd26ca2f60e4838d3a626cda15e96c5c1d832682700dac0eb7d5ab5797594"
+      }
+    ]
+  }
 }
