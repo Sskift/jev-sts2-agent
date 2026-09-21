@@ -1,0 +1,76 @@
+{
+  "at": "2026-09-21T07:25:52.753Z",
+  "run_id": "run-1789968641",
+  "provider": "openrouter",
+  "runtime_commit": "be63add5e8ed6b435264f58958345c449f40639b",
+  "controller_result": {
+    "source": "temp/run35-resume3-result.json",
+    "sha256": "51e524b511a1dfc80b65b904d5990fbe8cc56b068879f68b2ed8dc23d3132056"
+  },
+  "preceding_result": {
+    "source": "temp/run35-resume2-result.json",
+    "sha256": "e5e63d78f75e6ff8c71c1a181dd84baa08e3e48907a4da0e3a2cfe7982793915"
+  },
+  "diagnosis": {
+    "source": "temp/run35-openrouter-diagnostic.json",
+    "sha256": "27cab1e9f8d7ef0f0e6ff8b4a03d607ea0627ade8cf947d56cbf45a691de4b89"
+  },
+  "latest_provider_error": "529 system_overloaded",
+  "prior_controller_error": "Jev API error 503 via openrouter",
+  "native": {
+    "source": "temp/run35-before-service-resume.json",
+    "sha256": "322f907f318520ebebb68364e50e630e372ad8aa727d46f8e6bfeb0b166bbb6f"
+  },
+  "memory": {
+    "source": "run-artifacts/run35-resume3-2026-09-21T07-22-03.386Z/server-overload-stop-memory.json",
+    "sha256": "e0fdd926727cdf6749a93ca9e24bd8d27e01919c74e157d35c8164b6c7009b3f"
+  },
+  "fingerprint_matches_failed_pre_command_state": true,
+  "pending": null,
+  "screen": "COMBAT",
+  "act_index": 1,
+  "floor": 22,
+  "turn": 5,
+  "hp": 25,
+  "energy": 2,
+  "spending": {
+    "ledger": {
+      "source": "temp/run35-openrouter-spending.json",
+      "sha256": "f91d5cad6c7e930b4bd6e883843bdc9c73a45b5955a1692d5d7c8ea954b17070"
+    },
+    "max_usd": 1,
+    "reported_usd": 0.24179820000000007,
+    "unreported_reserved_usd": 0.011935266000000002,
+    "allowance_reached": false,
+    "scope": "Includes the saved replay, actual continuation and availability probes. Unreported costs remain reserved, not claimed free or actually charged."
+  },
+  "batching": {
+    "before": {
+      "source": "temp/run35-batch-before.json",
+      "sha256": "a5bb4ecc98b4fac8a65b9fcd2d386dd64f22d707452e8b103b97d30054811125"
+    },
+    "after": {
+      "source": "temp/run35-batch-after.json",
+      "sha256": "82a079533fabbdb025d9bd9198e0785abdc3ef7d5cb5655e81541226e6f1b57e"
+    },
+    "before_requests": 19,
+    "after_requests": 11,
+    "before_bytes": 1589507,
+    "after_bytes": 978616,
+    "questions_each": 34,
+    "selected_in_both": {
+      "cmd": "play_card",
+      "id": "TRUE_GRIT",
+      "nth": 0
+    },
+    "local_checks": {
+      "passed": 49,
+      "log": {
+        "source": "temp/run35-batching-checks.log",
+        "sha256": "660b1bf8b5d79fb7d918eac30410eefec44e82691d7688d7538fd2a7243eb735"
+      }
+    },
+    "scope": "Same local observation and fixed offline answers. No paid model or game commands. The new batching code loaded, but the first live request failed before it could validate a full model planning sequence."
+  },
+  "next": "Wait for Jev service recovery through OpenRouter. Use one small probe, then verify the saved native fingerprint and pending=null before continuing this same run; preserve the same spending ledger."
+}

@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-第 35 局 `run-1789968641` 已在第一幕第 14 回合击败 Ceremonial Beast，战后 39/80，正常进入第二幕恢复 80/80；[连续原生证据](evidence/2026-09-21/run35-act-one.json)已保存。标准模式、铁甲战士、进阶 0，从第一层开始。累计 35 局启动、34 局结束、22 局通过第一幕。官方计费停机后，现已通过 OpenRouter 从第 22 层第 2 回合、59/80、3 能量、pending=null 的相同指纹处加载 `a3e733c`，首个 Anger 已确认。[恢复证据](evidence/2026-09-21/run35-openrouter-recovery.json)与目录 `run-artifacts/run35-resume2-2026-09-21T07-12-13.504Z` 已保存。本局尚未结束，goal 未完成。
+第 35 局 `run-1789968641` 已在第一幕第 14 回合击败 Ceremonial Beast，战后 39/80，正常进入第二幕恢复 80/80；[连续原生证据](evidence/2026-09-21/run35-act-one.json)已保存。累计 35 局启动、34 局结束、22 局通过第一幕。通过 OpenRouter 续接并确认执行 17 条命令后，现停在第二幕第 22 层第 5 回合、25/80、2 能量，pending=null。最新错误为上游 `529 system_overloaded`，控制器已退出，[停机证据](evidence/2026-09-21/run35-openrouter-stop.json)已保存。本局未结束或重开，goal 未完成。
 
 第 34 局在第二幕第 21 层 The Obscura 第 11 回合正式失败；[复盘](run34-review.md)与[结算](evidence/2026-09-21/run34-review.json)已保存。确定性变形的作用范围修正与[回放证据](evidence/2026-09-21/run34-transformation.json)已提交推送，再启动本局；未回退或重打上一局战斗。
 
@@ -26,7 +26,7 @@
 
 ## 接下来的执行
 
-1. 已通过 OpenRouter 完成保存的结束回合回放，新增 1 次调用、费用 $0.000770658；原 402、503 尝试保留。候选代码冻结在 `run-artifacts/run35-budget-review/freeze.json`。核对保存的原生指纹，从第 22 层同局加载最新代码继续；本次新增费用先限制为 $1，额度不足以覆盖下一请求的保守预留时，在发请求前停止。
+1. 等 OpenRouter 的 Jev 上游服务恢复，用一次小请求确认后，核对 `temp/run35-before-service-resume.json` 与当前原生指纹，pending=null 才从第 22 层同局继续。最近目录为 `run-artifacts/run35-resume3-2026-09-21T07-22-03.386Z`，保存 `server-overload-stop-memory.json`。同一费用账目已确认 $0.2417982、未报告预留 $0.011935266；继续保留 $1 的本次额度，不重置计数。当前停机因服务过载，未触及费用上限。
 2. 如出现事实缺项、计算错误或候选遗漏，保存真实请求与原生结果，修复其通用原因。在已确认动作、pending=null、原生指纹匹配的位置加载；结果未知的游戏命令不自动重发，不重置战斗或回退存档。
 3. 今后每局结束后先复盘：核对关键局面、完整候选、概率与置信度、实际执行和结算，区分上下文／计算问题、搜索范围、模型取舍与随机结果。有依据的调整提交推送后，才开始下一局。
 4. 只有同一新局的原生进度经过三个幕索引 `[0,1,2]`，并取得 `GAME_OVER` 的 `is_victory=true`、`can_return_to_menu=true`，才将 goal 标为完成。
