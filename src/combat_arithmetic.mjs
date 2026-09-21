@@ -119,6 +119,7 @@ export function combatForecast(combat, card = null, target = null) {
   const allTargetsDepleted = combat.enemies.length > 0 && living.every(enemy => depleted.has(enemy.combat_id));
   const endTurnDamage = allTargetsDepleted ? [] : knownTurnEndDamage(combat, remainingHand, depleted);
   const timedEffects = allTargetsDepleted ? [] : uncomputedTurnEndHealthEffects(combat, remainingHand, endTurnDamage);
+  const outgoingEndUnresolved = timedEffects.some(effect => effect.enemy_response_dependency);
   const attackUnresolved = card?.type === 'Attack' && (hitPreview.hits === null || target && !hit || areaHits?.some(hit => hit.hp_loss === null));
   const healthUnresolved = reactionUnresolved || attackUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;
   const endTurnHandDamage = endTurnDamage.filter(e => e.hand_index !== undefined).reduce((sum, e) => sum + e.amount, 0);
@@ -181,7 +182,9 @@ export function combatForecast(combat, card = null, target = null) {
     end_turn_block_gains: endTurnBlockGains,
     ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
-    displayed_attacks_after_target_depletion: reactionUnresolved || attackUnresolved || depletionEffects.length ? null : incoming,
+    displayed_attacks_after_target_depletion: reactionUnresolved || attackUnresolved || depletionEffects.length || outgoingEndUnresolved ? null : incoming,
+    ...(outgoingEndUnresolved ? { current_displayed_attacks_before_uncomputed_end_effects: incoming,
+      enemy_response_after_end_effects_known: false } : {}),
     ...(depletionEffects.length ? { uncomputed_depletion_effects: depletionEffects } : {}),
     ...(reactionUnresolved ? { uncomputed_reactions: reactions,
       block_baseline_without_reactions: block,

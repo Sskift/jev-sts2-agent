@@ -1,0 +1,38 @@
+{
+  "at": "2026-09-21T06:24:53.797Z",
+  "run_id": "run-1789968641",
+  "provider": "typesafe",
+  "model": "jev-1.13.0",
+  "runtime_commit": "d32984b1c94469ae8ea24a780642e7647ea722f1",
+  "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-resume-2026-09-21T05-54-49.957Z",
+  "stopped_reason": "error; no automatic action replay",
+  "error": "Jev API error 402 (billing_error) via typesafe",
+  "step": 169,
+  "native": {
+    "source": "temp/run35-before-billing-resume.json",
+    "sha256": "7d3a0a0b5d796e74432a212b929688bad221f50003ccebb9ed4dfc50679c049d"
+  },
+  "memory": {
+    "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-resume-2026-09-21T05-54-49.957Z\\billing-stop-memory.json",
+    "sha256": "c1ab8c7e5ad09b8225c40498b67e379646d0b855fe0a7a8476e52968104deb37"
+  },
+  "result": {
+    "source": "temp/run35-resume-result.json",
+    "sha256": "d031d707dc27cb4716a4af01eddc2786bcac7d693e76e149ef2d3212b1395f7f"
+  },
+  "first_key_probe": {
+    "source": "temp/typesafe-first-current-availability.json",
+    "sha256": "ddb91dbbac53a704b2e61d6afabba97a4b717aaf2d0001ab84e7a41fdf3944e1"
+  },
+  "both_official_keys_currently_report_billing_error": true,
+  "fallback_enabled": false,
+  "screen": "COMBAT",
+  "act_index": 1,
+  "floor": 22,
+  "turn": 2,
+  "hp": 59,
+  "energy": 3,
+  "pending": null,
+  "native_matches_failed_pre_command_snapshot": true,
+  "next": "Restore official TypeSafe billing or update the local official key, finish the saved replay, then verify the saved native fingerprint and resume this same run. Do not start a new game or replay a game command with an unknown outcome."
+}

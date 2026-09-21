@@ -8,6 +8,46 @@ import { prepareModDecision } from '../src/mod_decision.mjs';
 import { compileModelRequest } from '../src/context_compiler.mjs';
 import { describePlanAlternative } from '../src/turn_plan_refinement.mjs';
 
+test('conditional turn-end clauses enter the same timing and endpoint dependency ledgers', () => {
+  const state = completeCombat();
+  for (const clause of ['If you end a turn', 'When you end your turn', 'Whenever you end the turn']) {
+    state.combat.player.relics = [{ id: 'FIXTURE_END_DAMAGE', description: `${clause} with at least 10 Block, deal 6 damage to a random enemy.` }];
+    const effect = describeCombatEffects(state.combat).effects.find(e => e.source_id === 'FIXTURE_END_DAMAGE');
+    assert.equal(effect.active, true);
+    assert.equal(effect.trigger, 'declared_turn_end');
+    const unresolved = uncomputedTurnEndHealthEffects(state.combat);
+    assert.equal(unresolved[0].condition_evaluated, false);
+    assert.equal(unresolved[0].enemy_response_dependency.target_selection_simulated, false);
+    assert.ok(unresolved[0].affected_outputs.includes('enemy_response_after_end_effects'));
+  }
+  state.combat.player.relics[0].description = 'Whenever you play a card, deal 6 damage to a random enemy.';
+  assert.deepEqual(uncomputedTurnEndHealthEffects(state.combat), [], 'An on-play trigger is not an end-turn hook');
+});
+
+test('turn-end enemy damage preserves the current attack baseline without promising the old response through a threshold reaction', () => {
+  const s = completeCombat();
+  s.combat.player.hp = 49; s.combat.player.block = 21;
+  s.combat.player.relics = [{ id: 'PARRYING_SHIELD', description: 'If you end a turn with at least 10 Block, deal 6 damage to a random enemy.' }];
+  const enemy = s.combat.enemies[0]; enemy.hp = 151; enemy.block = 0;
+  enemy.intents = [{ type: 'Attack', damage: 28, hits: 1 }];
+  enemy.powers = [{ id: 'PLOW_POWER', amount: 150, description: 'The first time this enemy HP reaches 150 or below, it becomes Stunned and loses all its Strength.' }];
+  const before = structuredClone(s), forecast = combatForecast(s.combat);
+  assert.equal(forecast.hp_remaining_if_end_turn, null);
+  assert.equal(forecast.displayed_attacks_after_target_depletion, null);
+  assert.equal(forecast.current_displayed_attacks_before_uncomputed_end_effects, 28);
+  const dependency = forecast.uncomputed_turn_end_effects[0].enemy_response_dependency;
+  assert.deepEqual(dependency.enemies_before_unresolved_end_effects, [{ combat_id: 42, hp: 151, block: 0, current_power_ids: ['PLOW_POWER'] }]);
+  const effects = describeCombatEffects(s.combat).effects;
+  assert.equal(effects.find(e => e.source_id === 'PLOW_POWER').current_amount, 150);
+  assert.equal(effects.find(e => e.source_id === 'PARRYING_SHIELD').trigger, 'after_owner_side_turn_end');
+  const plan = describePlanAlternative(s, [{ kind: 'end_turn' }]);
+  assert.equal(plan.conditional_preview.known_effects_only.hp_if_ending, null);
+  assert.equal(plan.conditional_preview.known_effects_only.incoming_attack, null);
+  assert.deepEqual(s, before, 'Do not select a future random target or apply a speculative stun to the observation');
+  s.combat.player.relics = [];
+  assert.equal(combatForecast(s.combat).hp_remaining_if_end_turn, 42);
+});
+
 test('automatic revival is armed while held and invalidates summed lethal damage without overriding forced death', () => {
   const s = completeCombat();
   s.combat.player.hp = 5;

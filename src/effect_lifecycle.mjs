@@ -11,6 +11,8 @@ const timing = {
   PLATING: { trigger: 'owner_turn_end_early', expires: 'decrements_at_owner_turn_start', consequence: 'unpowered_block_to_owner', detail: 'Current stacks grant Block before end-turn damage. The later decrement is not an immediate reduction of this gain.' },
   ORICHALCUM: { trigger: 'player_turn_end_very_early', expires: 'while_owned', consequence: 'unpowered_block_to_player', detail: 'If Block is zero before early end effects, gain 6 Block; this check precedes Plating.' },
   CLOAK_CLASP: { trigger: 'before_player_turn_end', expires: 'while_owned', consequence: 'unpowered_block_per_remaining_hand_card', detail: 'Uses cards still in hand after manual actions. This gain precedes the Orichalcum zero-Block check and is not modified by Dexterity or Frail.' },
+  PARRYING_SHIELD: { trigger: 'after_owner_side_turn_end', expires: 'while_owned', consequence: 'conditional_unpowered_damage_to_random_hittable_enemy', detail: 'Checks the owner Block when this hook resolves. Its damage can trigger enemy HP thresholds, stun or death before enemy actions. Other end effects can change Block and recipients; the starting intent is not a guaranteed response.' },
+  PLOW: { trigger: 'after_positive_unblocked_damage_at_or_below_hp_threshold', expires: 'removed_after_triggering_once', consequence: 'remove_owner_strength_and_stun', detail: 'Current amount is the HP threshold. Any qualifying damage, including unpowered turn-end damage, can trigger it. Native removal includes temporary Strength, then Stun and removal of Plow; do not keep the previous attack intent as a guaranteed outcome.' },
   RAGE: { trigger: 'after_owner_plays_each_attack_card', expires: 'owner_turn_end', consequence: 'unpowered_block_to_owner', detail: 'Once per Attack play, not per hit; establish before the attacks that consume the opportunity.' },
   REATTACH: { trigger: 'owner_death_then_second_enemy_turn', expires: 'all_reattach_owners_defeated', consequence: 'interrupt_current_move_then_conditional_revival', detail: 'A Decimillipede segment loses its current attack when depleted. It revives two enemy turns after that depletion only if another Reattach owner is alive. A segment already showing Heal is closer to revival; its remaining delay is not reset. All segments down together prevents revival.' },
   ONE_TWO_PUNCH: { trigger: 'next_owner_attack_play', expires: 'owner_turn_end_or_consumption', consequence: 'one_extra_play_per_qualifying_attack', detail: 'Current power stacks count qualifying Attack cards. Extra plays and their reactions are not included in unchanged damage previews.' },
@@ -55,7 +57,7 @@ export function describeCombatEffects(combat) {
     const pileTrigger = category === 'cards' ? pileTriggers[id] : null;
     const description = entity.description || '';
     const potion = category === 'potions' ? potionEffectFacts(entity) : null;
-    if (!definition && !potion && !temporal.test(description)) continue;
+    if (!definition && !potion && !temporal.test(description) && !turnEnd.test(description)) continue;
     const expires = potion?.expires_at ?? definition?.expires ?? (pileTrigger ? 'leaves_required_pile' : null);
     effects.push({ source_id: entity.id, category, owner, active,
       ...(entity.details?.instance_id ? { card_instance_id: entity.details.instance_id } : {}),
@@ -64,7 +66,7 @@ export function describeCombatEffects(combat) {
       ...(Number.isFinite(entity.amount) ? { current_amount: entity.amount } : {}),
       live_rule: description, wiki_rule_id: rule ? `${category}/${rule.id}` : null,
       activation: active ? 'already_present' : pileTrigger ? 'enters_required_pile' : category === 'potions' ? 'after_use' : 'after_play',
-      trigger: definition?.trigger ?? (pileTrigger ? 'owner_auto_post_play_phase' : potion ? 'subsequent_matching_card_effects' : null), expires,
+      trigger: definition?.trigger ?? (pileTrigger ? 'owner_auto_post_play_phase' : potion ? 'subsequent_matching_card_effects' : turnEnd.test(description) ? 'declared_turn_end' : null), expires,
       ...(definition?.consequence ? { consequence: definition.consequence } : {}),
       ...(definition?.detail ? { timing_detail: definition.detail } : {}),
       ...(pileTrigger ? { timing_detail: 'This automatic play requires the stated pile condition when the hook resolves. Being in hand or playing the card manually does not establish it. Draw-pile contents do not reveal the top card; automatic-play effects are not simulated.' } : {}),
@@ -79,7 +81,7 @@ export function describeCombatEffects(combat) {
 
 // This is dependency detection, not execution of arbitrary English rules.
 // A match means an endpoint cannot be fully calculated by the current adapter.
-const turnEnd = /\b(?:at|on) (?:the )?end of [^.]{0,28}\bturns?\b/i;
+const turnEnd = /\b(?:(?:at|on) (?:the )?end of [^.]{0,28}\bturns?|(?:if|when|whenever) you end (?:a |your |the )?turn)\b/i;
 const healthChange = /\b(?:damage|Block|HP|health|heal|die|death)\b/i;
 export function knownTurnEndDamage(combat, remainingHand, depleted = new Set()) {
   const events = [];
@@ -111,17 +113,25 @@ export function uncomputedTurnEndHealthEffects(combat, remainingHand = combat.ha
   const knownBlock = source => source.id === 'PLATING_POWER' && Number.isFinite(source.amount) || source.id === 'ORICHALCUM'
     || source.id === 'CLOAK_CLASP' && /gain \d+ Block for each card in your Hand/i.test(source.description || '');
   return sources.filter(s => !knownBlock(s) && !known.some(e => e.source_id === s.id && (s.index === undefined || e.hand_index === s.index))
-    && turnEnd.test(s.description || '') && healthChange.test(s.description || '')).map(s => ({
+    && turnEnd.test(s.description || '') && healthChange.test(s.description || '')).map(s => {
+    const outgoing = /\bdeal\b[^.]*\bdamage\b[^.]*\benem(?:y|ies)\b/i.test(s.description || '');
+    return {
     category: s.category, source_id: s.id, ...(s.category === 'hand_card' && s.index !== undefined ? { hand_index: s.index } : {}),
     ...(s.pile ? { observed_pile: s.pile } : {}),
     ...(s.details?.instance_id ? { card_instance_id: s.details.instance_id } : {}),
     description: s.description, ...(s.amount === undefined ? {} : { amount: s.amount }),
-    timing: pileTriggers[s.id] ? 'owner_auto_post_play_phase' : 'declared_turn_end',
+    timing: timing[idOf(s)]?.trigger ?? (pileTriggers[s.id] ? 'owner_auto_post_play_phase' : 'declared_turn_end'),
     condition_evaluated: pileTriggers[s.id]?.condition_evaluated ?? false,
     ...(pileTriggers[s.id] ? { condition: pileTriggers[s.id].condition } : {}),
-    affected_outputs: ['end_turn_hp', 'end_turn_fatality', 'block_after_turn_end_effects'],
-    scope: 'The current rule mentions turn-end health, damage or Block. Only an explicitly marked pile condition is evaluated; automatic plays, timing order, prevention and healing are not simulated. This does not promise the trigger will remain available after other effects. Use the full current rule; absent calculation is not zero effect.'
-  }));
+    affected_outputs: ['end_turn_hp', 'end_turn_fatality', 'block_after_turn_end_effects', ...(outgoing ? ['enemy_hp', 'enemy_response_after_end_effects'] : [])],
+    ...(outgoing ? { enemy_response_dependency: {
+      order: ['conditional_end_effect', 'enemy_damage_and_prevention', 'enemy_hp_threshold_or_death_reactions', 'remaining_enemy_actions'],
+      enemies_before_unresolved_end_effects: combat.enemies.filter(e => e.is_alive && e.hp > 0).map(e => ({ combat_id: e.combat_id, hp: e.hp, block: e.block,
+        current_power_ids: (e.powers || []).map(p => p.id) })),
+      target_selection_simulated: false,
+      scope: 'Enemy baselines may already include the declared prefix; they are not a new observation, predicted random recipient or future hittable set. Read their powers: damage may interrupt an attack, remove Strength, change phase or end combat. Current intent damage is a baseline before these unresolved effects.' } } : {}),
+    scope: 'The current rule mentions turn-end health, damage or Block. Only an explicitly marked pile condition is evaluated; automatic plays, timing order, prevention, enemy reactions and healing are not simulated. This does not promise the trigger will remain available after other effects. Use the full current rule; absent calculation is not zero effect.'
+  }; });
 }
 
 /** Express the lifetime of a next-card bonus against only the declared suffix.

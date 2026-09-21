@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "date": "2026-09-21",
+  "run_id": "run-1789968641",
+  "baseline_commit": "d32984b",
+  "change": "Use conditional end-turn clauses in both the effect ledger and endpoint coverage. Outgoing end damage explicitly depends on enemy prevention, HP thresholds, phase/death reactions and remaining actions. Preserve visible attack baseline while withholding unsupported final HP/intent predictions.",
+  "source": [
+    {
+      "source": "src/effect_lifecycle.mjs",
+      "sha256": "3a411fd79e8aa834e8c9119048e426a7b86ec1b86d384ee29fd518a3970e8e83"
+    },
+    {
+      "source": "src/combat_arithmetic.mjs",
+      "sha256": "e7aa2124e25a1c1237addfa13ccbd1c65777cc1e5e44a87703f1f14c6ce70d8d"
+    },
+    {
+      "source": "test/effect_lifecycle.test.mjs",
+      "sha256": "c1bea4ec93686a5a5040a50641dcd0985d928065687a205b61492c6ef6ce3881"
+    }
+  ],
+  "native_sources": [
+    {
+      "source": "temp/knowledge-research/ParryingShield.cs",
+      "sha256": "a0239e491362c037e1350c821affbd97b4c8168f3b3062c0f3fc5348ed923404"
+    },
+    {
+      "source": "temp/knowledge-research/PlowPower.cs",
+      "sha256": "e89ca92e44ec1f87a1337686dd117161d9a55c90ce1ce652f543cb12cafef10c"
+    }
+  ],
+  "native_rules": {
+    "shield": "AfterSideTurnEnd for the owner, checks current Block against its 10 Block variable and deals 6 unpowered damage to a random HittableEnemy. Other effects can alter the condition or recipient.",
+    "plow": "After positive unblocked damage, if owner HP is at or below the current power amount, remove temporary Strength and Strength, stun the owner, and remove Plow. Applies to unpowered damage too."
+  },
+  "input": {
+    "source": "run-artifacts/run35-end-reaction-review/cases/beast-turn7-end.json",
+    "sha256": "08091332ef28a5b902eb370b321831ac8c8ab357560120e90aab901359e64c47"
+  },
+  "input_sha256": "0d5da435599ab1e7779acabaa6ca51ac7a0ee9a4bce4ded45d753d1429c8c051",
+  "cohort": "development",
+  "cutoff": {
+    "before": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0056/before-state.json",
+      "sha256": "de44a3f07168e51e5c2a7f414515614224792276a235bc37d9f5b4d3ef98dfa7"
+    },
+    "old_decision": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0056/decision.json",
+      "sha256": "1915a9bf4915833cc28b1d03c8fa973c45c2cdd180f9d68ea386d0bbec50d34b"
+    },
+    "after": {
+      "source": "run-artifacts/run35-resume-2026-09-21T05-54-49.957Z/step-0056/after-state.json",
+      "sha256": "2c912e78f9f3d2d39954059fdbe138de310ad7008e8b7acb3d46c9d1622452ac"
+    },
+    "block_before_end": 21,
+    "hp_before_end": 49,
+    "enemy_hp_before_end": [
+      151
+    ],
+    "old_predicted_player_hp": 42,
+    "actual_player_hp": 49,
+    "enemy_hp_after_end": [
+      145
+    ],
+    "enemy_powers_after_end": [
+      {
+        "combat_id": 1,
+        "powers": [],
+        "intents": [
+          {
+            "type": "Debuff",
+            "description": "This enemy intends to apply a Debuff to you."
+          }
+        ]
+      }
+    ]
+  },
+  "new_forecast": {
+    "energy_after_printed_cost": 0,
+    "first_hit_hp_loss": null,
+    "block_after_card": 21,
+    "block_including_end_turn_gains": null,
+    "end_turn_block_gains": [],
+    "displayed_attacks_after_target_depletion": null,
+    "current_displayed_attacks_before_uncomputed_end_effects": 28,
+    "enemy_response_after_end_effects_known": false,
+    "uncomputed_turn_end_effects": [
+      {
+        "category": "relic",
+        "source_id": "PARRYING_SHIELD",
+        "description": "If you end a turn with at least 10 Block, deal 6 damage to a random enemy.",
+        "timing": "after_owner_side_turn_end",
+        "condition_evaluated": false,
+        "affected_outputs": [
+          "end_turn_hp",
+          "end_turn_fatality",
+          "block_after_turn_end_effects",
+          "enemy_hp",
+          "enemy_response_after_end_effects"
+        ],
+        "enemy_response_dependency": {
+          "order": [
+            "conditional_end_effect",
+            "enemy_damage_and_prevention",
+            "enemy_hp_threshold_or_death_reactions",
+            "remaining_enemy_actions"
+          ],
+          "enemies_before_unresolved_end_effects": [
+            {
+              "combat_id": 1,
+              "hp": 151,
+              "block": 0,
+              "current_power_ids": [
+                "PLOW_POWER",
+                "STRENGTH_POWER"
+              ]
+            }
+          ],
+          "target_selection_simulated": false,
+          "scope": "Enemy baselines may already include the declared prefix; they are not a new observation, predicted random recipient or future hittable set. Read their powers: damage may interrupt an attack, remove Strength, change phase or end combat. Current intent damage is a baseline before these unresolved effects."
+        },
+        "scope": "The current rule mentions turn-end health, damage or Block. Only an explicitly marked pile condition is evaluated; automatic plays, timing order, prevention, enemy reactions and healing are not simulated. This does not promise the trigger will remain available after other effects. Use the full current rule; absent calculation is not zero effect."
+      }
+    ],
+    "hp_loss_if_end_turn": null,
+    "hp_remaining_if_end_turn": null,
+    "fatal_if_end_turn": null
+  },
+  "timing_ledger": [
+    {
+      "source_id": "PLOW_POWER",
+      "category": "powers",
+      "owner": 1,
+      "active": true,
+      "current_amount": 150,
+      "live_rule": "The first time Ceremonial Beast's HP reaches 150 or below, it becomes Stunned and loses all its Strength.",
+      "wiki_rule_id": "powers/PLOW",
+      "activation": "already_present",
+      "trigger": "after_positive_unblocked_damage_at_or_below_hp_threshold",
+      "expires": "removed_after_triggering_once",
+      "consequence": "remove_owner_strength_and_stun",
+      "timing_detail": "Current amount is the HP threshold. Any qualifying damage, including unpowered turn-end damage, can trigger it. Native removal includes temporary Strength, then Stun and removal of Plow; do not keep the previous attack intent as a guaranteed outcome.",
+      "timing_coverage": "versioned_rule_adapter"
+    },
+    {
+      "source_id": "PARRYING_SHIELD",
+      "category": "relics",
+      "owner": "player",
+      "active": true,
+      "live_rule": "If you end a turn with at least 10 Block, deal 6 damage to a random enemy.",
+      "wiki_rule_id": "relics/PARRYING_SHIELD",
+      "activation": "already_present",
+      "trigger": "after_owner_side_turn_end",
+      "expires": "while_owned",
+      "consequence": "conditional_unpowered_damage_to_random_hittable_enemy",
+      "timing_detail": "Checks the owner Block when this hook resolves. Its damage can trigger enemy HP thresholds, stun or death before enemy actions. Other end effects can change Block and recipients; the starting intent is not a guaranteed response.",
+      "timing_coverage": "versioned_rule_adapter"
+    }
+  ],
+  "checks": {
+    "passed": 38,
+    "failed": 0,
+    "log": {
+      "source": "temp/run35-end-reaction-final-checks.log",
+      "sha256": "186b878bbbe9c71d691455fe6fb57883f5d68d1d7c4e7a3ea6e9702d5d1b3f10"
+    }
+  },
+  "final_local_compilation": {
+    "request": {
+      "source": "run-artifacts/run35-end-reaction-final/local-compiled-request.json",
+      "sha256": "406ba72d53a580d2947d6e29bb115f30a11c3634ecf031297be9dd90327a99bc"
+    },
+    "freeze": {
+      "source": "run-artifacts/run35-end-reaction-final/freeze.json",
+      "sha256": "969b992ff08b28c8ebf6f509aae886e9098e1af7d61a5b03e1f6ca5787cdf4d4"
+    },
+    "candidate_sha256": "fc530834e92b31bdaf522744278b7f71795c246368d44c7d8e493a98ed0a4c94",
+    "model_called": false,
+    "end_estimate": {
+      "energy_after_printed_cost": 0,
+      "first_hit_hp_loss": null,
+      "block_after_card": 21,
+      "block_including_end_turn_gains": null,
+      "end_turn_block_gains": [],
+      "displayed_attacks_after_target_depletion": null,
+      "current_displayed_attacks_before_uncomputed_end_effects": 28,
+      "enemy_response_after_end_effects_known": false,
+      "uncomputed_turn_end_effects": [
+        {
+          "category": "relic",
+          "source_id": "PARRYING_SHIELD",
+          "description": {
+            "text_ref": "t6"
+          },
+          "timing": "after_owner_side_turn_end",
+          "condition_evaluated": false,
+          "affected_outputs": [
+            "end_turn_hp",
+            "end_turn_fatality",
+            "block_after_turn_end_effects",
+            "enemy_hp",
+            "enemy_response_after_end_effects"
+          ],
+          "enemy_response_dependency": {
+            "order": [
+              "conditional_end_effect",
+              "enemy_damage_and_prevention",
+              "enemy_hp_threshold_or_death_reactions",
+              "remaining_enemy_actions"
+            ],
+            "enemies_before_unresolved_end_effects": [
+              {
+                "combat_id": 1,
+                "hp": 151,
+                "block": 0,
+                "current_power_ids": [
+                  "PLOW_POWER",
+                  "STRENGTH_POWER"
+                ]
+              }
+            ],
+            "target_selection_simulated": false,
+            "scope": {
+              "text_ref": "t22"
+            }
+          },
+          "scope": {
+            "text_ref": "t23"
+          }
+        }
+      ],
+      "hp_loss_if_end_turn": null,
+      "hp_remaining_if_end_turn": null,
+      "fatal_if_end_turn": null,
+      "explanation": "End-now HP unknown; energy after printed cost 0 (gains excluded)."
+    },
+    "scope": "Final source names enemy baselines as pre-end-effect values, which may include a declared prefix, rather than labeling all of them observations. Full canonical and compiled request validation succeeded locally."
+  },
+  "attempted_replay": {
+    "freeze": {
+      "source": "run-artifacts/run35-end-reaction-review/freeze.json",
+      "sha256": "e35640a106005074381e8eddf790600ed7ee8d791f9c511c9ea37c8064f71a7c"
+    },
+    "candidate_sha256": "ba05c8b37c7486f116449059c560d8eb651a93feb50ddba1eb61e36c7c9fc59a",
+    "request": {
+      "source": "run-artifacts/run35-end-reaction-review/results/beast-turn7-end/end-reaction/1/request-1.json",
+      "sha256": "55d91f789a83bc3fcfda2fd2f88fee55c286ebb034fab5bdc1d9366b76c61404"
+    },
+    "summary": {
+      "source": "run-artifacts/run35-end-reaction-review/results/beast-turn7-end/end-reaction/1/summary.json",
+      "sha256": "8003b6239cad26d40cba7f66bf0a91962ac87d7658a277b808f478d11e4dbf51"
+    },
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "calls": 1,
+    "responses": 1,
+    "error": "Jev API error 402 (billing_error) via typesafe",
+    "status": "provider_billing_error_before_model_judgment",
+    "variant": "Before the final enemy-baseline field-name clarification; its original freeze and failed attempt remain preserved.",
+    "emitted_end_estimate": {
+      "energy_after_printed_cost": 0,
+      "first_hit_hp_loss": null,
+      "block_after_card": 21,
+      "block_including_end_turn_gains": null,
+      "end_turn_block_gains": [],
+      "displayed_attacks_after_target_depletion": null,
+      "current_displayed_attacks_before_uncomputed_end_effects": 28,
+      "enemy_response_after_end_effects_known": false,
+      "uncomputed_turn_end_effects": [
+        {
+          "category": "relic",
+          "source_id": "PARRYING_SHIELD",
+          "description": "If you end a turn with at least 10 Block, deal 6 damage to a random enemy.",
+          "timing": "after_owner_side_turn_end",
+          "condition_evaluated": false,
+          "affected_outputs": [
+            "end_turn_hp",
+            "end_turn_fatality",
+            "block_after_turn_end_effects",
+            "enemy_hp",
+            "enemy_response_after_end_effects"
+          ],
+          "enemy_response_dependency": {
+            "order": [
+              "conditional_end_effect",
+              "enemy_damage_and_prevention",
+              "enemy_hp_threshold_or_death_reactions",
+              "remaining_enemy_actions"
+            ],
+            "observed_living_enemies": [
+              {
+                "combat_id": 1,
+                "hp": 151,
+                "block": 0,
+                "current_power_ids": [
+                  "PLOW_POWER",
+                  "STRENGTH_POWER"
+                ]
+              }
+            ],
+            "target_selection_simulated": false,
+            "scope": "These are observed living enemies, not a predicted random recipient or future hittable set. Read their current powers: damage may interrupt an attack, remove Strength, change phase or end combat. Current intent damage is a baseline before these unresolved effects."
+          },
+          "scope": "The current rule mentions turn-end health, damage or Block. Only an explicitly marked pile condition is evaluated; automatic plays, timing order, prevention, enemy reactions and healing are not simulated. This does not promise the trigger will remain available after other effects. Use the full current rule; absent calculation is not zero effect."
+        }
+      ],
+      "hp_loss_if_end_turn": null,
+      "hp_remaining_if_end_turn": null,
+      "fatal_if_end_turn": null,
+      "explanation": "End-now HP unknown; energy after printed cost 0 (gains excluded)."
+    }
+  },
+  "limitations": [
+    "The updated endpoint is unknown, not a new simulation predicting the observed 49 HP.",
+    "General conditional triggers are recognized but their conditions, exact hook order and random recipients are not fully simulated. This conservatively makes additional endpoints unknown.",
+    "Direct manual attacks crossing non-death HP thresholds are not newly simulated by this change.",
+    "Only this development cutoff is assessed; no held-out result.",
+    "Official provider returned 402 billing_error. Complete request compilation is verified, but no new Jev judgment or decision-quality improvement is claimed.",
+    "No game command was sent by the replay. The live game still uses d32984b and stopped separately before a command because of the same billing error."
+  ]
+}
