@@ -1,0 +1,69 @@
+{
+  "recorded_at": "2026-09-21T02:20:59.673Z",
+  "run_id": "run-1789936871",
+  "runtime_commit": "922d95a3daa7fecd6296118e902b64eeedfc5c4c",
+  "provider": "typesafe",
+  "model": "jev-1.13.0",
+  "fallback_enabled": false,
+  "openrouter_enabled": false,
+  "key_checks": [
+    {
+      "key_slot": 1,
+      "ok": true,
+      "model": "jev-1.13.0"
+    },
+    {
+      "key_slot": 2,
+      "ok": true,
+      "model": "jev-1.13.0"
+    }
+  ],
+  "active_key_slot": 1,
+  "official_model_reference": "https://docs.typesafe.ai/models",
+  "previous_controller": {
+    "file": "temp/run32-resume4-result.json",
+    "sha256": "df8e36d6ee2cf1b5f19e7dd6b71f49df92a39b807655a7a7973d57a369ed7ae1"
+  },
+  "before": {
+    "file": "temp/run32-before-typesafe-resume.json",
+    "sha256": "2b9a4065f7f38fe3c3c7b9cbc3e6e9e6d740e8f64d96e672ad47018bb6e29403"
+  },
+  "resume": {
+    "file": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/resume-native.json",
+    "sha256": "441de8a29f3de6a76237e399d3b5058ae58b6474c8b79bfa973d3cf4d6f8fc6d"
+  },
+  "same_fingerprint": true,
+  "pending": null,
+  "act_index": 1,
+  "floor": 27,
+  "turn": 2,
+  "hp": 45,
+  "energy": 2,
+  "first_new_model_decision": {
+    "model_response": {
+      "file": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0002/jev-planning-decision-0001.json",
+      "sha256": "4697b8e647d2f4d8c59daf9066eecc3903c3e0e5baeedb784e99138e977a8d55"
+    },
+    "decision": {
+      "file": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0002/decision.json",
+      "sha256": "26039ab3d550ee948b2c5c45f97a1c07794d7f20c89ccc14899acffd42b91bb8"
+    },
+    "request": {
+      "cmd": "play_card",
+      "id": "STRIKE_IRONCLAD",
+      "nth": 2,
+      "target": 1
+    },
+    "native_response": {
+      "file": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0002/response.json",
+      "sha256": "e2e465de8917e9be8c72914cc974db12cadfc55fa9d2ec8bc91205794569ff14"
+    }
+  },
+  "following_enemy_turn": {
+    "file": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0005/after-state.json",
+    "sha256": "da07714283daf0186aab36fe570958a9305c5845894c1005d2deeb1d39888cf9"
+  },
+  "hp_after_enemy_turn": 45,
+  "scope": "First resumed action reused the existing Jev plan. The next action followed new TypeSafe direct decisions. Same run and combat; no reset, save edit or replayed game action.",
+  "goal_complete": false
+}

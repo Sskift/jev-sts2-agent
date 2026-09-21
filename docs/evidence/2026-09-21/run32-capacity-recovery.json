@@ -75,7 +75,33 @@
     "log": "temp/run32-capacity-checks.log"
   },
   "scope": "One complete captured payoff request accepted by Jev, not a whole-turn or full-run success. The offline call sent no game action. Resume requires the same native fingerprint and no pending command.",
-  "runtime_loaded": false,
+  "runtime_loaded": {
+    "commit": "922d95a3daa7fecd6296118e902b64eeedfc5c4c",
+    "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run32-resume4-2026-09-21T02-13-16.240Z",
+    "before": {
+      "file": "temp/run32-before-capacity-resume.json",
+      "sha256": "233f5e176c25b515812d2bc67d6d5355311ee7ae43420a2bb9a42776863cdf13"
+    },
+    "resume": {
+      "file": "run-artifacts/run32-resume4-2026-09-21T02-13-16.240Z/resume-native.json",
+      "sha256": "f66065c605fe845ab36fd74659a5ddd329e4116e2d958015bd5ea668064bb6b9"
+    },
+    "same_fingerprint": true,
+    "first_action": {
+      "file": "run-artifacts/run32-resume4-2026-09-21T02-13-16.240Z/step-0001/decision.json",
+      "sha256": "cf366dd9dace7ea9baf9953de8716e6ab5005de8dc2c95144156042afa00a822"
+    },
+    "native_response": {
+      "file": "run-artifacts/run32-resume4-2026-09-21T02-13-16.240Z/step-0001/response.json",
+      "sha256": "f845cda201f4b523686c46a1d7b6e5283a860e18cb91308511cb3882d647d64e"
+    },
+    "request": {
+      "cmd": "play_card",
+      "id": "RAGE",
+      "nth": 0
+    },
+    "ok": true
+  },
   "full_pipeline": {
     "recorded_at": "2026-09-21T02:12:06.865Z",
     "previous_resume": {

@@ -2,9 +2,9 @@
 
 《Slay the Spire 2》游戏 Agent：**C# 模组读取实时状态 → Node.js 组织规则与上下文 → Jev 制定回合计划 → 模组执行 → 重新观察。** 游戏自行结算和渲染，正常循环不要求窗口置顶。
 
-目前是研究原型。已启动 32 局，31 局已结束；含进行中的第 32 局在内，19 局通过第一幕。最远记录仍为第二幕 Boss，尚未通关。第 32 局已击败 The Kin，更新 OpenRouter key 后从第二幕第 19 层原局面恢复，继续推进第二幕。实时记录见[整局进展](docs/full-run-progress.md)。
+目前是研究原型。已启动 32 局，31 局已结束；含进行中的第 32 局在内，19 局通过第一幕。最远记录仍为第二幕 Boss，尚未通关。第 32 局已击败 The Kin，在第二幕第 27 层切换至 TypeSafe 官方直连，继续同一局。实时记录见[整局进展](docs/full-run-progress.md)。
 
-当前只使用 OpenRouter。已接入五个角色的策略参考、115 个怪物的行动图、招式关联规则、独立有序候选和方案比较分歧记录。最新修复补齐直接属性能力的出牌顺序与伤害区间传播，已加载实战；最终版本的历史回放仍先攻击再加力量，不能据此声称决策或胜率改善。
+当前使用 TypeSafe 官方直连，模型固定为 `jev-1.13.0`，自动回退关闭。已接入五个角色的策略参考、115 个怪物的行动图、招式关联规则、独立有序候选和方案比较分歧记录。最新修复补齐直接属性能力的出牌顺序与伤害区间传播，已加载实战；最终版本的历史回放仍先攻击再加力量，不能据此声称决策或胜率改善。
 
 ## 环境与启动
 
@@ -20,13 +20,13 @@ Copy-Item .env.example .env
 在本地 `.env` 填入配置，例如：
 
 ```dotenv
-JEV_PROVIDER=openrouter
-JEV_MODEL=typesafe/jev-1.13
-OPENROUTER_API_KEY=your-openrouter-key
+JEV_PROVIDER=typesafe
+JEV_MODEL=jev-1.13.0
+TYPESAFE_API_KEY=your-typesafe-key
 JEV_FALLBACK_PROVIDER=
 ```
 
-当前运行使用 OpenRouter 原生 Decisions，回退关闭。也支持 TypeSafe 直连，以及 Vercel 原生 [Evaluation API](https://vercel.com/docs/ai-gateway/modalities/evaluation)，配置见 `.env.example`。可选回退只处理传输、额度或服务故障，遵守 `Retry-After` 和短暂故障冷却；上下文错误、低置信度或不理想的选择不触发回退。各次请求记录实际提供方和模型。凭据、原始运行记录及临时文件不提交 Git。
+当前运行使用 TypeSafe 的 [System One API](https://docs.typesafe.ai/api)，回退关闭。也支持 OpenRouter 原生 Decisions，以及 Vercel 原生 [Evaluation API](https://vercel.com/docs/ai-gateway/modalities/evaluation)，配置见 `.env.example`。可选回退只处理传输、额度或服务故障，遵守 `Retry-After` 和短暂故障冷却；上下文错误、低置信度或不理想的选择不触发回退。各次请求记录实际提供方和模型。凭据、原始运行记录及临时文件不提交 Git。
 
 启动已启用模组的游戏后：
 
