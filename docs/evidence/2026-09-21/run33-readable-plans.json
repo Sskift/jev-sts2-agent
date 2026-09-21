@@ -1,0 +1,461 @@
+{
+  "at": "2026-09-21T03:52:27.393Z",
+  "run_id": "run-1789958402",
+  "source": {
+    "source": "run-artifacts/run33-payment-review/results/boss-opening/explicit-sequence-payment/1/request-24.json",
+    "sha256": "0ad368aa08e63fd268d1911b51022fd2de34c9f83437bf0f52bf5e6bc2d12d4a"
+  },
+  "change": "Keep current plan assessments and comparisons as directly named JSON with full text. Split using measured compiled bytes. Use lossless packing only when one complete judgment does not fit. No strategy weights, candidate limits, game facts or game commands changed by this formatting work.",
+  "probes": [
+    {
+      "variant": "comparison",
+      "request": {
+        "source": "run-artifacts/run33-comparison-probe/request.json",
+        "sha256": "a89c2b472558fdb4be66552dc660b593648dc82b80f29dd81c01427a08bbcaa0"
+      },
+      "response": {
+        "source": "run-artifacts/run33-comparison-probe/response.json",
+        "sha256": "fcc5a7b084c31ee2641e0ee683d9e5517b40e8eb3249c0648154a25efbfc5cc1"
+      },
+      "usage": {
+        "input_tokens": 19467,
+        "output_tokens": 88
+      },
+      "judgments": [
+        {
+          "selected": "three_attacks",
+          "options": {
+            "plan_a": "stomp_only",
+            "plan_b": "three_attacks"
+          },
+          "selection_basis": "overall_value",
+          "survival_assessment": null,
+          "value_assessment": {
+            "type": "choice",
+            "choice": "plan_b",
+            "confidence": 0.13,
+            "probabilities": {
+              "plan_b": 0.42,
+              "no_clear_difference": 0.38,
+              "plan_a": 0.2
+            }
+          },
+          "probabilities": {
+            "plan_b": 0.42,
+            "no_clear_difference": 0.38,
+            "plan_a": 0.2
+          },
+          "confidence": 0.13
+        },
+        {
+          "selected": null,
+          "options": {
+            "plan_a": "three_attacks",
+            "plan_b": "stomp_only"
+          },
+          "selection_basis": "overall_value",
+          "survival_assessment": null,
+          "value_assessment": {
+            "type": "choice",
+            "choice": "no_clear_difference",
+            "confidence": 0.18,
+            "probabilities": {
+              "plan_b": 0.32,
+              "no_clear_difference": 0.45,
+              "plan_a": 0.23
+            }
+          },
+          "probabilities": {
+            "plan_b": 0.32,
+            "no_clear_difference": 0.45,
+            "plan_a": 0.23
+          },
+          "confidence": 0.18
+        }
+      ],
+      "audit": {
+        "candidates": [
+          "stomp_only",
+          "three_attacks"
+        ],
+        "preference_support": {
+          "stomp_only": 0.5,
+          "three_attacks": 0.5
+        },
+        "selection_basis": "no_supported_difference",
+        "value_distribution": {
+          "plan_a": 0.26,
+          "plan_b": 0.325,
+          "no_clear_difference": 0.41500000000000004
+        },
+        "survival_distribution": null,
+        "order_disagreement": true,
+        "selected_by_order": [
+          "three_attacks",
+          null
+        ]
+      }
+    },
+    {
+      "variant": "differences",
+      "request": {
+        "source": "run-artifacts/run33-differences-probe/request.json",
+        "sha256": "ece9f921df5a6d1786cbe41ec9db45c16fdfff88087dc1583c3868b4608f7df7"
+      },
+      "response": {
+        "source": "run-artifacts/run33-differences-probe/response.json",
+        "sha256": "977c43dc9feb2e76bbf93fca81bb4513c5f00f2402b05e148971fc25f7385675"
+      },
+      "usage": {
+        "input_tokens": 19871,
+        "output_tokens": 88
+      },
+      "judgments": [
+        {
+          "selected": "three_attacks",
+          "options": {
+            "plan_a": "stomp_only",
+            "plan_b": "three_attacks"
+          },
+          "selection_basis": "overall_value",
+          "survival_assessment": null,
+          "value_assessment": {
+            "type": "choice",
+            "choice": "plan_b",
+            "confidence": 0.28,
+            "probabilities": {
+              "plan_a": 0.11,
+              "plan_b": 0.52,
+              "no_clear_difference": 0.37
+            }
+          },
+          "probabilities": {
+            "plan_a": 0.11,
+            "plan_b": 0.52,
+            "no_clear_difference": 0.37
+          },
+          "confidence": 0.28
+        },
+        {
+          "selected": null,
+          "options": {
+            "plan_a": "three_attacks",
+            "plan_b": "stomp_only"
+          },
+          "selection_basis": "overall_value",
+          "survival_assessment": null,
+          "value_assessment": {
+            "type": "choice",
+            "choice": "no_clear_difference",
+            "confidence": 0.17,
+            "probabilities": {
+              "plan_a": 0.2,
+              "plan_b": 0.36,
+              "no_clear_difference": 0.44
+            }
+          },
+          "probabilities": {
+            "plan_a": 0.2,
+            "plan_b": 0.36,
+            "no_clear_difference": 0.44
+          },
+          "confidence": 0.17
+        }
+      ],
+      "audit": {
+        "candidates": [
+          "stomp_only",
+          "three_attacks"
+        ],
+        "preference_support": {
+          "stomp_only": 0.5,
+          "three_attacks": 0.5
+        },
+        "selection_basis": "no_supported_difference",
+        "value_distribution": {
+          "plan_a": 0.235,
+          "plan_b": 0.36,
+          "no_clear_difference": 0.405
+        },
+        "survival_distribution": null,
+        "order_disagreement": true,
+        "selected_by_order": [
+          "three_attacks",
+          null
+        ]
+      }
+    },
+    {
+      "variant": "readable-plans",
+      "request": {
+        "source": "run-artifacts/run33-readable-plans-probe/request.json",
+        "sha256": "915c1134393766a8fd7d8aaedfef0fc36798221fbe4e399e35b9ef6e6c7a4913"
+      },
+      "response": {
+        "source": "run-artifacts/run33-readable-plans-probe/response.json",
+        "sha256": "de777ead2342a71270bedd6f815914f8968be056e6a206fecf802a021fdbbd42"
+      },
+      "usage": {
+        "input_tokens": 22644,
+        "output_tokens": 87
+      },
+      "judgments": [
+        {
+          "selected": "three_attacks",
+          "options": {
+            "plan_a": "stomp_only",
+            "plan_b": "three_attacks"
+          },
+          "selection_basis": "overall_value",
+          "survival_assessment": null,
+          "value_assessment": {
+            "type": "choice",
+            "choice": "plan_b",
+            "confidence": 0.52,
+            "probabilities": {
+              "no_clear_difference": 0.14,
+              "plan_b": 0.68,
+              "plan_a": 0.18
+            }
+          },
+          "probabilities": {
+            "no_clear_difference": 0.14,
+            "plan_b": 0.68,
+            "plan_a": 0.18
+          },
+          "confidence": 0.52
+        },
+        {
+          "selected": "three_attacks",
+          "options": {
+            "plan_a": "three_attacks",
+            "plan_b": "stomp_only"
+          },
+          "selection_basis": "overall_value",
+          "survival_assessment": null,
+          "value_assessment": {
+            "type": "choice",
+            "choice": "plan_a",
+            "confidence": 0.33,
+            "probabilities": {
+              "no_clear_difference": 0.16,
+              "plan_a": 0.56,
+              "plan_b": 0.28
+            }
+          },
+          "probabilities": {
+            "no_clear_difference": 0.16,
+            "plan_a": 0.56,
+            "plan_b": 0.28
+          },
+          "confidence": 0.33
+        }
+      ],
+      "audit": {
+        "candidates": [
+          "stomp_only",
+          "three_attacks"
+        ],
+        "preference_support": {
+          "stomp_only": 0.27058823529411763,
+          "three_attacks": 0.7294117647058824
+        },
+        "selection_basis": "balanced_overall_value",
+        "value_distribution": {
+          "plan_a": 0.23,
+          "plan_b": 0.6200000000000001,
+          "no_clear_difference": 0.15000000000000002
+        },
+        "survival_distribution": null,
+        "order_disagreement": false,
+        "selected_by_order": [
+          "three_attacks",
+          "three_attacks"
+        ]
+      }
+    },
+    {
+      "variant": "expanded-plans",
+      "request": {
+        "source": "run-artifacts/run33-expanded-plans-probe/request.json",
+        "sha256": "c921b8bda1ccb01093792c1b506c907e3f02b833e3b3d0d4dff9ec6c3399fb50"
+      },
+      "response": {
+        "source": "run-artifacts/run33-expanded-plans-probe/response.json",
+        "sha256": "6ec798462c7f602d358fd1d00f8ab2fb1ec236ab243cc54fa6430f9ad1515a90"
+      },
+      "usage": {
+        "input_tokens": 20545,
+        "output_tokens": 88
+      },
+      "judgments": [
+        {
+          "selected": "three_attacks",
+          "options": {
+            "plan_a": "stomp_only",
+            "plan_b": "three_attacks"
+          },
+          "selection_basis": "overall_value",
+          "survival_assessment": null,
+          "value_assessment": {
+            "type": "choice",
+            "choice": "plan_b",
+            "confidence": 0.26,
+            "probabilities": {
+              "plan_b": 0.51,
+              "no_clear_difference": 0.35,
+              "plan_a": 0.14
+            }
+          },
+          "probabilities": {
+            "plan_b": 0.51,
+            "no_clear_difference": 0.35,
+            "plan_a": 0.14
+          },
+          "confidence": 0.26
+        },
+        {
+          "selected": null,
+          "options": {
+            "plan_a": "three_attacks",
+            "plan_b": "stomp_only"
+          },
+          "selection_basis": "overall_value",
+          "survival_assessment": null,
+          "value_assessment": {
+            "type": "choice",
+            "choice": "no_clear_difference",
+            "confidence": 0.11,
+            "probabilities": {
+              "plan_b": 0.22,
+              "no_clear_difference": 0.41,
+              "plan_a": 0.37
+            }
+          },
+          "probabilities": {
+            "plan_b": 0.22,
+            "no_clear_difference": 0.41,
+            "plan_a": 0.37
+          },
+          "confidence": 0.11
+        }
+      ],
+      "audit": {
+        "candidates": [
+          "stomp_only",
+          "three_attacks"
+        ],
+        "preference_support": {
+          "stomp_only": 0.29032258064516125,
+          "three_attacks": 0.7096774193548387
+        },
+        "selection_basis": "balanced_overall_value",
+        "value_distribution": {
+          "plan_a": 0.18,
+          "plan_b": 0.44,
+          "no_clear_difference": 0.38
+        },
+        "survival_distribution": null,
+        "order_disagreement": true,
+        "selected_by_order": [
+          "three_attacks",
+          null
+        ]
+      }
+    }
+  ],
+  "semantic_request_equivalence": {
+    "readable": true,
+    "expanded": true
+  },
+  "rejected_experiment": "Adding explicit arithmetic outcome differences alone did not improve the balanced comparison and was reverted.",
+  "full_replay": {
+    "root": "run-artifacts/run33-readable-review/results/boss-opening/named-plans/1",
+    "freeze": "f875761824ce4d117ad652bf5c10ac80dd0090f89e5fde74f2240d5b68c8020d",
+    "input_sha256": "c05d74dfd70b73f151c4c7479c54d172603fdb1955bc078de59f15c27c18aa0c",
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "calls": 44,
+    "usage": {
+      "input_tokens": 932871,
+      "output_tokens": 3022
+    },
+    "elapsed_ms": 45940,
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Peck",
+        "card_id": "PECK",
+        "target": 3
+      },
+      {
+        "kind": "play_card",
+        "name": "Stomp+",
+        "card_id": "STOMP"
+      },
+      {
+        "kind": "end_turn"
+      }
+    ],
+    "candidate_coverage": {
+      "inspected_prefixes": 905,
+      "enumerated_plans": 444,
+      "selected_plans": 64,
+      "first_action_variants": 10,
+      "search_truncated": false,
+      "candidate_selection_truncated": true,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "eligible_plans": 92,
+      "assessed_plans": 92,
+      "distinct_allocations": 56,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 5
+    },
+    "comparison_pairs": 10,
+    "order_disagreements": 7,
+    "named_judgments": 38,
+    "judgment_requests": 38,
+    "max_logical_bytes": 89960,
+    "result": {
+      "source": "run-artifacts/run33-readable-review/results/boss-opening/named-plans/1/summary.json",
+      "sha256": "922795d20af5af0c50c64ecf4591e67c7d37aa9d3cfd36e02da1b5660806af08"
+    },
+    "conditional_enemy_hp_removed": {
+      "original": 51,
+      "replay": 63,
+      "available_three_attack_sequence": 75
+    },
+    "conditional_incoming_damage": 13,
+    "energy": 3
+  },
+  "capacity": {
+    "source": {
+      "source": "temp/run33-readable-capacity-audit.json",
+      "sha256": "b702f1272529ffb7980dcf5ec9808b53c8717c8cecbbdbf4e982f4573f1b129b"
+    },
+    "single_judgments": 26,
+    "requires_packed": 20,
+    "packed_over_budget": 0,
+    "largest_example": {
+      "source": "run-artifacts/run32-capacity-review/results/retained-hand/nested-records/1/request-71.json",
+      "purpose": "turn_refine_pairs",
+      "named_bytes": 99573,
+      "packed_bytes": 86520,
+      "fallback_required": true,
+      "complete_fallback_fits": true
+    },
+    "scope": "Offline complete-request construction and roundtrip checks, not live fallback execution."
+  },
+  "validation": {
+    "checks": 37,
+    "failures": 0,
+    "log": "temp/run33-readable-plan-checks.log"
+  },
+  "limitations": [
+    "All inspected cases are development evidence; no holdout or win-rate conclusion.",
+    "The full replay still misses a feasible extra attack and retains pair-position disagreement.",
+    "The replay initial objective changed, so differences in candidate counts are not attributable solely to representation.",
+    "No hypothetical sequence was executed in the game. Unknown effects remain unknown.",
+    "Native API cost is not reported; recorded cost remains null rather than free."
+  ]
+}

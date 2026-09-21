@@ -116,17 +116,23 @@ export async function decideTurn(state, options, prepared, choose) {
     validateDecisionPacket(comparisonState);
     const judgments = [];
     let batch = [];
-    const payloadFor = items => compactPlanningRequest({ model: prepared.payload.model,
+    const payloadFor = items => ({ model: prepared.payload.model,
       state: { ...comparisonState, turn_planning: { ...comparisonState.turn_planning,
         ...(assessment ? { assessments: items.map(item => item.label) }
           : { comparisons: items.map(pair => ({ plan_a: pair[0].label, plan_b: pair[1].label,
             continuation_resources: compareContinuationResources(pair[0].label, pair[1].label) })) }) } },
       questions: (assessment ? planAssessmentQuestions : planComparisonQuestions)(items, `${instructions} ${turnStrategyInstructions(state)} ${wholeTurnValue} ${references}`, compareSurvival) });
-    async function flush() {
+    const batchRequest = (items, presentation = 'named') => {
+      const raw = payloadFor(items), payload = presentation === 'packed' ? compactPlanningRequest(raw) : raw;
+      const metrics = { ...prepared.metrics, purpose, plan_record_presentation: presentation };
+      return { payload, metrics: { ...metrics, request_bytes: compileModelRequest(payload, metrics).bytes,
+        question_count: items.length * questionsPerPair } };
+    };
+    async function flush(presentation = 'named') {
       if (!batch.length) return;
-      const payload = payloadFor(batch), body = JSON.stringify(payload);
+      const { payload, metrics } = batchRequest(batch, presentation), body = JSON.stringify(payload);
       const decision = await choose(state, options, { candidates: prepared.candidates, payload, body,
-        metrics: { ...prepared.metrics, request_bytes: compileModelRequest(payload, { purpose }).bytes, question_count: batch.length * questionsPerPair, purpose },
+        metrics,
         parseResult(result) {
           return { action: assessment ? 'assess_turn_plans' : 'compare_turn_plans',
             judgments: (assessment ? resolvePlanAssessments : resolvePlanComparisons)(batch, result.answers, compareSurvival) };
@@ -140,8 +146,13 @@ export async function decideTurn(state, options, prepared, choose) {
       batch = [];
     }
     for (const item of items) {
-      if (batch.length && (batch.length * questionsPerPair >= 32 || compileModelRequest(payloadFor([...batch, item]), { purpose }).bytes > prepared.metrics.max_request_bytes)) await flush();
-      if (compileModelRequest(payloadFor([item]), { purpose }).bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete plan judgment context exceeds the request budget; no game action sent');
+      if (batch.length && (batch.length * questionsPerPair >= 32 || batchRequest([...batch, item]).metrics.request_bytes > prepared.metrics.max_request_bytes)) await flush();
+      if (!batch.length && batchRequest([item]).metrics.request_bytes > prepared.metrics.max_request_bytes) {
+        if (batchRequest([item], 'packed').metrics.request_bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete plan judgment context exceeds the request budget; no game action sent');
+        batch.push(item);
+        await flush('packed');
+        continue;
+      }
       batch.push(item);
     }
     await flush();

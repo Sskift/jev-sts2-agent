@@ -158,6 +158,14 @@ export function compileModelRequest(payload, metrics = {}) {
   // Current observation readability is selected separately by the caller.
   // Derived/knowledge records can share repeated structure at any depth.
   for (const domain of ['analysis', 'knowledge', 'history', 'intent']) state[domain] = compactNestedRecords(state[domain]);
+  // The objects being judged should be directly readable when the planner's
+  // measured batch fits. Preserve all records; packing is an explicit fallback
+  // for a single complete judgment whose named representation cannot fit.
+  if (metrics.plan_record_presentation === 'named') {
+    for (const key of ['plan_assessments', 'plan_alternatives']) if (state.analysis[key]) {
+      state.analysis[key] = expandRecordTables(state.analysis[key]);
+    }
+  }
   state.decision = decisionFrame(original, payload.questions, metrics, state.observation);
   const questions = Object.fromEntries(Object.entries(payload.questions).map(([id, question]) => [id,
     { ...question, instructions: prefix + question.instructions }]));
@@ -165,6 +173,7 @@ export function compileModelRequest(payload, metrics = {}) {
   validateModelRequest(compiled, payload);
   return { payload: compiled, bytes: Buffer.byteLength(JSON.stringify(compiled)), metrics: {
     context_version: MODEL_CONTEXT_VERSION, context_phase: state.decision.phase, observation_id: state.decision.observation_id,
+    ...(metrics.plan_record_presentation ? { plan_record_presentation: metrics.plan_record_presentation } : {}),
     entity_rule_links: Object.keys(state.knowledge.entity_rules).length,
     entities_without_static_reference: Object.entries(state.knowledge.entity_rules).filter(([, link]) => link === null).map(([id]) => id),
     domain_bytes: Object.fromEntries(['decision', ...domains, 'uncertainty', 'text_dictionary'].filter(key => state[key] !== undefined)

@@ -307,6 +307,109 @@
         "sha256": "6357770fa6833ee3347a5675d1a2c16605e3322ceaaaa3b1cfb525b474f3634d"
       },
       "scope": "The updated controller loaded and continued the same run. The zero-call expected-discount demonstration above is an offline replay of actual prior states, not a newly observed live discount transition."
+    },
+    "live_observed": {
+      "at": "2026-09-21T03:52:27.397Z",
+      "commit": "e9c74ed854bbc72acacd37c092c06af244293572",
+      "root": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z",
+      "run_id": "run-1789958402",
+      "floor": 24,
+      "turn": 4,
+      "steps": [
+        {
+          "step": 8,
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "planning_calls": 45,
+          "decision": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0008/decision.json",
+            "sha256": "2432bba1c73b658bba6993af8b671531bc87ac65a2adea0f6efeca9dd5ff0468"
+          },
+          "after": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0008/after-state.json",
+            "sha256": "231b18913163c6f6bbadfe520d179fd0d214c6e0da19a4970a795687e3681aaf"
+          }
+        },
+        {
+          "step": 9,
+          "request": {
+            "cmd": "play_card",
+            "id": "CONFLAGRATION",
+            "nth": 0
+          },
+          "planning_calls": 0,
+          "decision": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0009/decision.json",
+            "sha256": "bc6e8571896d57d8ab59bf0346410528d911f452761a5d94d10a1be5d0005f5c"
+          },
+          "after": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0009/after-state.json",
+            "sha256": "2a1cfb277d9748e30a14b4db319df82cf6faffdfcd5a90140ecd7c9832438567"
+          }
+        },
+        {
+          "step": 10,
+          "request": {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          "planning_calls": 0,
+          "decision": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0010/decision.json",
+            "sha256": "23c4dcfd1f37b951fd9e17c95a74c2ec021f3380f6b2a4e63092110124170b36"
+          },
+          "after": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0010/after-state.json",
+            "sha256": "3d52f6ce659b5360ee8ec0920f108f2cd4644b0615766e13e61048bb12bb46bc"
+          }
+        },
+        {
+          "step": 11,
+          "request": {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          "planning_calls": 0,
+          "decision": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0011/decision.json",
+            "sha256": "fd7c95d77b51dbc6be1c4434bcf53b9f97f9e5a96edebef5962d81d504f6b705"
+          },
+          "after": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0011/after-state.json",
+            "sha256": "a7da64ca4b6e7e1272816979cb33d9be74523c91ca24c12ece4e933b625405a4"
+          }
+        },
+        {
+          "step": 12,
+          "request": {
+            "cmd": "play_card",
+            "id": "STOMP",
+            "nth": 0
+          },
+          "planning_calls": 0,
+          "decision": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0012/decision.json",
+            "sha256": "2ff790c83ba33146a4402cb3f7871ef1fc9b38a5867b66b0a9efdca1069e19c9"
+          },
+          "after": {
+            "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0012/after-state.json",
+            "sha256": "d38a1ed86c703dd8499aabf5d4ec040d79d2a4940a1b5096a6667245b97d01a9"
+          }
+        }
+      ],
+      "stomp_costs_after_attacks": [
+        2,
+        1,
+        0
+      ],
+      "scope": "The actual controller continued Conflagration, Strike, Defend and Stomp with zero new model calls after the first Strike. Stomp was played for zero energy; later enemy removal correctly triggered review."
     }
   }
 }

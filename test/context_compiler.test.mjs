@@ -81,6 +81,24 @@ test('nested route records preserve ordered targets and existing table cells thr
   assert.equal(compactNestedRecords(existing), existing, 'Existing table cells remain uninterpreted');
 });
 
+test('named plan judgments preserve ordinary nested fields and the complete canonical packet', () => {
+  const canonical = prepareModDecision(completeCombat()).payload;
+  const plan = { energy_left: 0, targets: Array.from({ length: 12 }, (_, index) => ({ combat_id: index,
+    hp_removed: index % 2 ? null : index, scope: 'Conditional known effects only, not an observed future.' })) };
+  canonical.state.turn_planning = { phase_scope: 'Compare unexecuted alternatives.',
+    energy_reservation: { observed_energy: 2, remaining_after_printed_costs: 2, is_observed: false,
+      includes_future_energy_gains: false, steps: [], scope: 'Current resources; no option has executed.' },
+    assessments: [plan, { ...plan, energy_left: 1 }] };
+  const before = structuredClone(canonical);
+  const named = compileModelRequest(canonical, { purpose: 'turn_assess_plans', plan_record_presentation: 'named' });
+  const packed = compileModelRequest(canonical, { purpose: 'turn_assess_plans', plan_record_presentation: 'packed' });
+  assert.deepEqual(named.payload.state.analysis.plan_assessments, canonical.state.turn_planning.assessments);
+  assert.ok(packed.bytes < named.bytes);
+  assert.deepEqual(expandRecordTables(restoreCanonicalContext(named.payload.state)), expandRecordTables(canonical.state));
+  assert.deepEqual(expandRecordTables(restoreCanonicalContext(packed.payload.state)), expandRecordTables(canonical.state));
+  assert.deepEqual(canonical, before);
+});
+
 test('between-room choices and advisory ratings use the same full context boundary', async () => {
   const state = withContext({ screen: 'REWARD', rewards: { rewards: [{ type: 'Card', card_choices: [{
     index: 0, id: 'BASH', name: 'Bash', type: 'Attack', cost: 2, description: 'Deal 8 damage. Apply 2 Vulnerable.'
