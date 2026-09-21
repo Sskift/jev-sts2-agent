@@ -488,5 +488,31 @@
       "sha256": "0e7c187e8ad6d96fb19a70fa73b3fad918638efc20882d99ffd3e140bff2e2f8"
     },
     "following_hp": 14
+  },
+  "additional_review": {
+    "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0099",
+    "input_sha256": "097da39fbb5c3e3e63d9a5d117de9b81e9fd117e29994aa34e41476f93c50dfa",
+    "result": {
+      "source": "run-artifacts/run33-readable-review/results/exoskeleton-after-rage/named-plans/1/summary.json",
+      "sha256": "00b3cde7bf39e2c6cf78d263f1e3ae8173b91254a6986f8e5f69971c6f637c90"
+    },
+    "original_action": {
+      "cmd": "end_turn"
+    },
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Shrug It Off",
+        "card_id": "SHRUG_IT_OFF"
+      }
+    ],
+    "calls": 5,
+    "usage": {
+      "input_tokens": 108850,
+      "output_tokens": 298
+    },
+    "compared_pairs": 1,
+    "order_disagreements": 0,
+    "scope": "The same inspected observation now chooses the affordable Block/draw action with both display orders agreeing. No game commands or future draws were supplied."
   }
 }

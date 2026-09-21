@@ -781,6 +781,17 @@
             } }
           }
         },
+        "checkpoint_attack_balance": {
+          "type": "object", "additionalProperties": false,
+          "required": ["is_end_turn_prediction", "energy_after_known_payments", "hp_after_declared_self_loss", "block_from_known_prefix", "current_attack_after_known_prefix", "attack_damage_not_covered_by_known_block", "hp_margin_against_current_attacks", "additional_attack_mitigation_to_leave_positive_hp", "scope"],
+          "properties": {
+            "is_end_turn_prediction": { "const": false }, "energy_after_known_payments": { "type": "number" },
+            "hp_after_declared_self_loss": { "type": ["number", "null"] }, "block_from_known_prefix": { "type": ["number", "null"] },
+            "current_attack_after_known_prefix": { "type": ["number", "null"] }, "attack_damage_not_covered_by_known_block": { "type": ["number", "null"] },
+            "hp_margin_against_current_attacks": { "type": ["number", "null"] }, "additional_attack_mitigation_to_leave_positive_hp": { "type": ["number", "null"] },
+            "scope": { "$ref": "#/$defs/text" }
+          }
+        },
         "encounter_progress": { "type": "array", "items": { "type": "object" } },
         "uncomputed_depletion_effects": { "type": "array", "items": { "type": "object" } },
         "uncomputed_death_prevention": { "type": "array", "items": { "type": "object" } },

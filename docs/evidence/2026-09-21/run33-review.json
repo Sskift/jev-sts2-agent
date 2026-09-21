@@ -1,0 +1,516 @@
+{
+  "at": "2026-09-21T04:04:36.299Z",
+  "run_id": "run-1789958402",
+  "roots": [
+    "run-artifacts/run33-2026-09-21T02-39-57.865Z",
+    "run-artifacts/run33-resume-2026-09-21T03-00-45.627Z",
+    "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z",
+    "run-artifacts/run33-resume3-2026-09-21T03-21-33.564Z",
+    "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z",
+    "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z"
+  ],
+  "started_at_floor": 1,
+  "acts": [
+    0,
+    1
+  ],
+  "final": {
+    "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/settled-game-over.json",
+    "sha256": "85c793077ee4e3ba77190f2f953a76108f2d180344a18d80adc5126e5756ee79",
+    "is_victory": false,
+    "floor": 31,
+    "score": 554,
+    "epochs_discovered": 0,
+    "can_return_to_menu": true,
+    "can_continue": false
+  },
+  "final_memory": {
+    "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/final-memory.json",
+    "sha256": "021f007a8d4622b5d4b3a0ac52f55d15da3b57a355424d3f41db3fc678b33541",
+    "pending": null
+  },
+  "live_usage": [
+    {
+      "model": "jev-1.13.0",
+      "responses": 3928,
+      "input_tokens": 86986326,
+      "output_tokens": 317640,
+      "reported_cost_usd": null
+    }
+  ],
+  "last_combat": {
+    "floor": 31,
+    "enter_hp": 14,
+    "max_hp": 85,
+    "enemy": "LOUSE_PROGENITOR",
+    "turns": [
+      {
+        "turn": 1,
+        "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0119",
+        "hp": 14,
+        "enemy_hp": [
+          135
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          }
+        ],
+        "end_hp": 14,
+        "hp_balance_before_clamping": 14,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 2,
+        "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/step-0004",
+        "hp": 14,
+        "enemy_hp": [
+          129
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "RAGE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "THUNDERCLAP",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "BATTLE_TRANCE",
+            "nth": 0
+          }
+        ],
+        "end_hp": 14,
+        "hp_balance_before_clamping": 14,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 3,
+        "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/step-0010",
+        "hp": 14,
+        "enemy_hp": [
+          113
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "SALVO",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "WHIRLWIND",
+            "nth": 0
+          }
+        ],
+        "end_hp": 6,
+        "hp_balance_before_clamping": 6,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 4,
+        "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/step-0015",
+        "hp": 6,
+        "enemy_hp": [
+          113
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "RELAX",
+            "nth": 0
+          }
+        ],
+        "end_hp": 6,
+        "hp_balance_before_clamping": 6,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 5,
+        "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/step-0017",
+        "hp": 6,
+        "enemy_hp": [
+          113
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "STOMP",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "WHIRLWIND",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "BATTLE_TRANCE",
+            "nth": 0
+          }
+        ],
+        "end_hp": 6,
+        "hp_balance_before_clamping": 6,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 6,
+        "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/step-0024",
+        "hp": 6,
+        "enemy_hp": [
+          75
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "SALVO",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          }
+        ],
+        "end_hp": 0,
+        "hp_balance_before_clamping": -7,
+        "endpoint_matches": true
+      }
+    ]
+  },
+  "change": {
+    "reason": "An observation checkpoint correctly invalidated a promised end-turn result but also erased the independent current-attack coverage gap. Remaining energy/draw access was already present; the known obligations were not jointly explicit.",
+    "behavior": "Expose an attack-only balance from the declared known prefix at checkpoints, alongside remaining energy. Keep end-turn HP unknown and retain unknown reactions, changed attack previews and depletion effects. No future draw, survival guarantee, tactical priority or candidate filter is invented."
+  },
+  "conditional_examples": {
+    "spent_before_draw": {
+      "steps": [
+        "SALVO",
+        "DEFEND_IRONCLAD",
+        "SHRUG_IT_OFF"
+      ],
+      "energy": 0,
+      "checkpoint_attack_balance": {
+        "is_end_turn_prediction": false,
+        "energy_after_known_payments": 0,
+        "hp_after_declared_self_loss": 6,
+        "block_from_known_prefix": 11,
+        "current_attack_after_known_prefix": 24,
+        "attack_damage_not_covered_by_known_block": 13,
+        "hp_margin_against_current_attacks": -7,
+        "additional_attack_mitigation_to_leave_positive_hp": 8,
+        "scope": "Attack-only balance at an observation checkpoint using the declared known prefix. A negative margin is a remaining exposure, not a promised death or end-turn result. Excludes unresolved draws, healing, reactions, automatic end-turn gains/losses and later actions. Compare the remaining energy, hand and draw pool to judge possible responses; no particular draw or rescue is guaranteed."
+      },
+      "end_turn_hp": null,
+      "draw_pool": {
+        "declared_count": 1,
+        "source": "Currently observed draw pile; its array order is not predictive.",
+        "pool": [
+          {
+            "id": "SHRUG_IT_OFF",
+            "name": "Shrug It Off",
+            "cost": 1,
+            "count": 2,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "TAUNT",
+            "name": "Taunt+",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "RAGE",
+            "name": "Rage+",
+            "cost": 0,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "CONFLAGRATION",
+            "name": "Conflagration",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "HOWL_FROM_BEYOND",
+            "name": "Howl from Beyond",
+            "cost": 3,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "DEFEND_IRONCLAD",
+            "name": "Defend+",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "PECK",
+            "name": "Peck",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "SHRUG_IT_OFF",
+            "name": "Shrug It Off+",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "STRIKE_IRONCLAD",
+            "name": "Strike+",
+            "cost": 1,
+            "count": 2,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "RAMPAGE",
+            "name": "Rampage",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "VICIOUS",
+            "name": "Vicious",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          }
+        ],
+        "pool_cards_within_remaining_energy_at_observed_cost": 1,
+        "observed_pool_size": 13,
+        "reshuffle_may_be_needed": false,
+        "checkpoint_rules": "Gain 8 Block. Draw 1 card.",
+        "current_draw_effects": [],
+        "scope": "Declared draw, not guaranteed arrivals: hand capacity, draw prevention, triggers and reshuffle can change the result. Cost comparisons use observed pile costs and remaining energy only, not future costs, legal playability or a guarantee of drawing any affordable card. No specific card or ordering is assumed."
+      }
+    },
+    "draw_first": {
+      "steps": [
+        "SHRUG_IT_OFF"
+      ],
+      "energy": 2,
+      "checkpoint_attack_balance": {
+        "is_end_turn_prediction": false,
+        "energy_after_known_payments": 2,
+        "hp_after_declared_self_loss": 6,
+        "block_from_known_prefix": 8,
+        "current_attack_after_known_prefix": 24,
+        "attack_damage_not_covered_by_known_block": 16,
+        "hp_margin_against_current_attacks": -10,
+        "additional_attack_mitigation_to_leave_positive_hp": 11,
+        "scope": "Attack-only balance at an observation checkpoint using the declared known prefix. A negative margin is a remaining exposure, not a promised death or end-turn result. Excludes unresolved draws, healing, reactions, automatic end-turn gains/losses and later actions. Compare the remaining energy, hand and draw pool to judge possible responses; no particular draw or rescue is guaranteed."
+      },
+      "end_turn_hp": null,
+      "draw_pool": {
+        "declared_count": 1,
+        "source": "Currently observed draw pile; its array order is not predictive.",
+        "pool": [
+          {
+            "id": "SHRUG_IT_OFF",
+            "name": "Shrug It Off",
+            "cost": 1,
+            "count": 2,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "TAUNT",
+            "name": "Taunt+",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "RAGE",
+            "name": "Rage+",
+            "cost": 0,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "CONFLAGRATION",
+            "name": "Conflagration",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "HOWL_FROM_BEYOND",
+            "name": "Howl from Beyond",
+            "cost": 3,
+            "count": 1,
+            "cost_within_remaining_energy": false
+          },
+          {
+            "id": "DEFEND_IRONCLAD",
+            "name": "Defend+",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "PECK",
+            "name": "Peck",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "SHRUG_IT_OFF",
+            "name": "Shrug It Off+",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "STRIKE_IRONCLAD",
+            "name": "Strike+",
+            "cost": 1,
+            "count": 2,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "RAMPAGE",
+            "name": "Rampage",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          },
+          {
+            "id": "VICIOUS",
+            "name": "Vicious",
+            "cost": 1,
+            "count": 1,
+            "cost_within_remaining_energy": true
+          }
+        ],
+        "pool_cards_within_remaining_energy_at_observed_cost": 12,
+        "observed_pool_size": 13,
+        "reshuffle_may_be_needed": false,
+        "checkpoint_rules": "Gain 8 Block. Draw 1 card.",
+        "current_draw_effects": [],
+        "scope": "Declared draw, not guaranteed arrivals: hand capacity, draw prevention, triggers and reshuffle can change the result. Cost comparisons use observed pile costs and remaining energy only, not future costs, legal playability or a guarantee of drawing any affordable card. No specific card or ordering is assumed."
+      }
+    }
+  },
+  "replay": {
+    "freeze": "a799a760848eb5b1ee37d936f71a4044b3a264726481f9997be3dc668de43514",
+    "result": {
+      "source": "run-artifacts/run33-checkpoint-review/results/louse-turn6/checkpoint-balance/1/summary.json",
+      "sha256": "20afcc05ffd213cd291dce26edd2baeee6779015bf6e565e1f4994ecffa0bd4f"
+    },
+    "input_sha256": "953fbd204b5005e5cb0979ca874f86be6e5beb567ca36b1d0ac940f0d5e84e88",
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "calls": 28,
+    "usage": {
+      "input_tokens": 598950,
+      "output_tokens": 1866
+    },
+    "elapsed_ms": 29710,
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Shrug It Off+",
+        "card_id": "SHRUG_IT_OFF"
+      }
+    ],
+    "coverage": {
+      "inspected_prefixes": 47,
+      "enumerated_plans": 36,
+      "selected_plans": 36,
+      "first_action_variants": 5,
+      "search_truncated": false,
+      "candidate_selection_truncated": false,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "eligible_plans": 36,
+      "assessed_plans": 36,
+      "distinct_allocations": 22,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 4
+    },
+    "pairs": 6,
+    "order_disagreements": 1
+  },
+  "validation": {
+    "checks": 30,
+    "failures": 0,
+    "log": "temp/run33-checkpoint-balance-checks.log"
+  },
+  "limitations": [
+    "Inspected development cases only, not holdout evidence or a win-rate estimate.",
+    "Drawing earlier preserves response resources but does not prove the original fight was winnable. No hypothetical draw or game action was executed.",
+    "The attack-only checkpoint balance excludes unresolved effects and automatic end-turn gains/losses; it is not a complete survival judgment.",
+    "One of six finalist pairs still disagrees by display order; confidence is not correctness.",
+    "Official TypeSafe did not return costs; null is unknown, not free."
+  ]
+}

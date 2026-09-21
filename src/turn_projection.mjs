@@ -19,6 +19,19 @@ export function reserveSequence(state, steps) {
   return budget?.affordable && reserveActionSequence(state, steps).valid ? { energy_left: budget.energy_left, costs: budget.costs } : null;
 }
 
+function checkpointAttackBalance(projection, responseUnresolved, energy) {
+  const hp = projection.uncomputed_reactions.length ? null : projection.hp_after_declared_self_loss;
+  const block = projection.block;
+  const attack = responseUnresolved ? null : projection.current_attack_after_known_prefix;
+  const uncovered = attack === null || block === null ? null : Math.max(0, attack - block);
+  const margin = hp === null || uncovered === null ? null : hp - uncovered;
+  return { is_end_turn_prediction: false, energy_after_known_payments: energy,
+    hp_after_declared_self_loss: hp, block_from_known_prefix: block, current_attack_after_known_prefix: attack,
+    attack_damage_not_covered_by_known_block: uncovered, hp_margin_against_current_attacks: margin,
+    additional_attack_mitigation_to_leave_positive_hp: margin === null ? null : Math.max(0, 1 - margin),
+    scope: 'Attack-only balance at an observation checkpoint using the declared known prefix. A negative margin is a remaining exposure, not a promised death or end-turn result. Excludes unresolved draws, healing, reactions, automatic end-turn gains/losses and later actions. Compare the remaining energy, hand and draw pool to judge possible responses; no particular draw or rescue is guaranteed.' };
+}
+
 // Keep omitted effects next to an explicitly scoped baseline. A plan containing
 // a potion or another unresolved effect must not claim its final HP/damage
 // equals that of an otherwise identical plan without it.
@@ -82,6 +95,7 @@ export function describeTurnProjection(state, steps) {
         return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block, power_changes: powerChanges };
       })
     },
+    ...(sequence.checkpoint ? { checkpoint_attack_balance: checkpointAttackBalance(projection, responseUnresolved, sequence.energy_left) } : {}),
     ...(projection.positioning ? { positioning: projection.positioning } : {}),
     ...(projection.uncomputed_reactions.length ? { uncomputed_reactions: projection.uncomputed_reactions } : {}),
     ...(projection.uncomputed_death_prevention.length ? { uncomputed_death_prevention: projection.uncomputed_death_prevention } : {}),
@@ -213,6 +227,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, powers: enemy.powers, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
     block: reactions.length || sequence.unknown_block ? null : combat.player.block, block_including_end_turn_gains: reactions.length || sequence.unknown_block || sequence.checkpoint ? null : end.block_including_end_turn_gains, end_turn_block_gains: end.end_turn_block_gains,
     hp_after_declared_self_loss: combat.player.hp,
+    current_attack_after_known_prefix: facingUnresolved || reactions.length || sequence.unknown_targets.length ? null : end.displayed_attacks_after_target_depletion,
     hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved || reactions.length || sequence.unknown_block || sequence.unknown_targets.length || sequence.checkpoint ? null : end.hp_remaining_if_end_turn,
     incoming_attack_after_prefix: facingUnresolved || reactions.length || sequence.unknown_targets.length || sequence.checkpoint ? null : end.displayed_attacks_after_target_depletion,
     uncomputed_reactions: reactions,

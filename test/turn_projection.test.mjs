@@ -14,6 +14,36 @@ function state() {
 const strike = { kind: 'play_card', name: 'Strike', card_instance_id: 'STRIKE_IRONCLAD', target: 42 };
 const defend = { kind: 'play_card', name: 'Defend', card_instance_id: 'DEFEND_IRONCLAD' };
 
+test('draw checkpoints retain the attack coverage gap and resources without promising an end-turn outcome', () => {
+  const s = state(); s.combat.player.hp = 6;
+  s.combat.enemies[0].intents = [{ type: 'Attack', damage: 24, hits: 1 }];
+  s.combat.hand[1].block = 3; s.combat.hand[1].description = 'Gain 3 Block.';
+  s.combat.hand.push(fixtureCard('SHRUG_IT_OFF', { index: 2, type: 'Skill', block: 8,
+    target_type: 'Self', description: 'Gain 8 Block. Draw 1 card.' }));
+  const draw = { kind: 'play_card', card_instance_id: 'SHRUG_IT_OFF' }, original = structuredClone(s);
+  const spent = describeTurnProjection(s, [strike, defend, draw]), early = describeTurnProjection(s, [draw]);
+  assert.equal(spent.known_effects_only.hp_if_ending, null);
+  assert.equal(spent.known_effects_only.incoming_attack, null);
+  assert.equal(spent.checkpoint_attack_balance.energy_after_known_payments, 0);
+  assert.equal(spent.checkpoint_attack_balance.current_attack_after_known_prefix, 24);
+  assert.equal(spent.checkpoint_attack_balance.hp_margin_against_current_attacks, -7);
+  assert.equal(spent.checkpoint_attack_balance.additional_attack_mitigation_to_leave_positive_hp, 8);
+  assert.equal(early.checkpoint_attack_balance.energy_after_known_payments, 2);
+  assert.equal(early.checkpoint_attack_balance.hp_margin_against_current_attacks, -10);
+  assert.equal(spent.checkpoint_attack_balance.is_end_turn_prediction, false);
+  assert.deepEqual(s, original);
+});
+
+test('unknown depletion cannot become a numeric checkpoint survival claim', () => {
+  const s = state(); s.combat.enemies[0].hp = 6;
+  s.combat.enemies[0].powers = [{ id: 'ADAPTABLE_POWER', amount: 1, description: 'Revives after death.' }];
+  s.combat.hand.push(fixtureCard('DRAW', { index: 2, type: 'Skill', cost: 0, description: 'Draw 1 card.' }));
+  const p = describeTurnProjection(s, [strike, { kind: 'play_card', card_instance_id: 'DRAW' }]);
+  assert.equal(p.checkpoint_attack_balance.current_attack_after_known_prefix, null);
+  assert.equal(p.checkpoint_attack_balance.hp_margin_against_current_attacks, null);
+  assert.equal(p.known_effects_only.hp_if_ending, null);
+});
+
 function segmentState() {
   const s = state(), base = s.combat.enemies[0];
   s.combat.enemies = ['FRONT', 'MIDDLE', 'BACK'].map((part, index) => ({ ...structuredClone(base),
