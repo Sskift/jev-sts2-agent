@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-21",
+  "run_id": "run-1789993715",
+  "commit": "31bf9d14f7c9da241095157391a66ea41f2d177e",
+  "provider": "openrouter",
+  "model": "typesafe/jev-1.13",
+  "assessment_limit": 24,
+  "plan_presentation": "named_when_complete_judgment_fits",
+  "game_mode": "Standard",
+  "character": "IRONCLAD",
+  "ascension": 0,
+  "first_floor": 1,
+  "previous_run_failure_confirmed": true,
+  "fresh_menu_confirmed": true,
+  "source_files": [
+    {
+      "path": "temp/run36-return-menu.json",
+      "sha256": "b8125c1eb8a8b8ec4bfe8abc30a8b73fb753c2fabf4f91201ecf81caca0ddc53"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/runtime.json",
+      "sha256": "d82cbda99b40129d53dc5028b42e2269f5af74acae271c6429f0499dc6571664"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/initial-menu.json",
+      "sha256": "4e3d1891bde1886a4204289cd0bad8fcee95f1b472dd49f93fae7b5530dc5227"
+    },
+    {
+      "path": "run-artifacts/run37-2026-09-21T12-28-29.568Z/step-0003/after-state.json",
+      "sha256": "bb11c733f09b22754e4bfe900038916efd7747bc47236b9d66ca6d29cb312dbb"
+    }
+  ]
+}
