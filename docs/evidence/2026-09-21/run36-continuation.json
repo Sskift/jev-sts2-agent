@@ -266,5 +266,63 @@
       "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0160/response.json",
       "sha256": "21b0741b2453de90753c51ffd461d7e9556be34f31d8602298a87b9c378d6e2a"
     }
-  ]
+  ],
+  "loaded": {
+    "commit": "e5677a62720d940468709631534672f15bec2b5f",
+    "root": "run-artifacts/run36-resume-2026-09-21T12-16-40.173Z",
+    "matching_checkpoint": true,
+    "first_request": {
+      "cmd": "play_card",
+      "id": "STRIKE_IRONCLAD",
+      "nth": 0,
+      "target": 2
+    },
+    "first_model": "jev-turn-plan",
+    "first_new_model_calls": 0,
+    "confirmed_response": {
+      "ok": true,
+      "data": {
+        "card_index": 2,
+        "card_id": "STRIKE_IRONCLAD",
+        "target": 2,
+        "results": [
+          {
+            "type": "damage",
+            "target_id": 2,
+            "target_name": "LEAF_SLIME_M",
+            "damage": 6,
+            "blocked": 0,
+            "hp_loss": 6,
+            "killed": false
+          }
+        ]
+      }
+    },
+    "source_files": [
+      {
+        "path": "run-artifacts/run36-resume-2026-09-21T12-16-40.173Z/runtime.json",
+        "sha256": "110ed9d6a1ca25601a8edc63aec7990e486b0c77a9b0d017b334b8fa4559b321"
+      },
+      {
+        "path": "run-artifacts/run36-resume-2026-09-21T12-16-40.173Z/resume-native.json",
+        "sha256": "5eb70593fa22af55a3311d589b5e5fafad924be49d45db10ac668dd0a61c8952"
+      },
+      {
+        "path": "run-artifacts/run36-resume-2026-09-21T12-16-40.173Z/prior-memory.json",
+        "sha256": "7879bbc4cba7f4091781b5bb3889dea35f51115934ffa2302ade3bde40dad18b"
+      },
+      {
+        "path": "run-artifacts/run36-resume-2026-09-21T12-16-40.173Z/step-0001/decision.json",
+        "sha256": "00cd9fb2f2d8e7ceec9da993116ceb8c615c6d8f3ec1da76b0369294ee6e8e9b"
+      },
+      {
+        "path": "run-artifacts/run36-resume-2026-09-21T12-16-40.173Z/step-0001/response.json",
+        "sha256": "32ef8bbc44ee2ba68cee9e78121a6762ce0d4bc8c61dd080d9500aac835b5cae"
+      },
+      {
+        "path": "run-artifacts/run36-resume-2026-09-21T12-16-40.173Z/step-0001/after-state.json",
+        "sha256": "1f3d664fff9f056a3a58a54f6ff9f40e57db24d6a42cef2fbc97bb6453df6534"
+      }
+    ]
+  }
 }

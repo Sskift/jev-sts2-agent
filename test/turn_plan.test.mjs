@@ -116,9 +116,18 @@ test('planning and refinement cannot promise a second affected card after an upg
   sync(state);
   const memory = new DecisionMemory(); memory.observe(state);
   const seen = [];
-  const result = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', fetchImpl: fakeJev(['protect_hp', 'card_1'], seen) });
+  const result = await makeModDecisionWithJev(state, { memory, apiKey: 'offline', planAssessmentLimit: 24, fetchImpl: fakeJev(['protect_hp', 'card_1'], seen) });
   assert.deepEqual(result.turn_plan.steps.map(step => step.kind), ['play_card', 'end_turn']);
+  assert.ok(seen.some(request => request.state.turn_planning.assessments));
   for (const request of seen) {
+    const planning = request.state.turn_planning;
+    for (const plans of [planning.assessments, planning.comparisons]) if (plans) {
+      assert.ok(Array.isArray(plans), 'A spending cap must not encode the actual judgments as record tables');
+      for (const item of plans) for (const plan of item.plan_a ? [item.plan_a, item.plan_b] : [item]) {
+        assert.ok(Array.isArray(plan.ordered_sequence));
+        assert.equal(typeof plan.resource_consequences.ordinary_block_reset, 'string');
+      }
+    }
     const full = expandRecordTables(request.state);
     assert.ok(full.turn_planning.action_reservation.valid);
     for (const pair of full.turn_planning.comparisons || []) for (const option of [pair.plan_a, pair.plan_b]) {

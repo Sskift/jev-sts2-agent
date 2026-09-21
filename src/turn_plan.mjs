@@ -111,10 +111,10 @@ export async function decideTurn(state, options, prepared, choose) {
     // sharing the same full observation and general run objective.
     const constraints = visibleSurvivalConstraints(state), compareSurvival = constraints.length > 0;
     const questionsPerPair = assessment ? 1 : compareSurvival ? 2 : 1;
-    // Under a spending cap, intern repeated plan facts before sizing a batch.
-    // Sizing expanded plans first often sends one full observation per plan,
-    // even though several complete judgments fit in the lossless representation.
-    const preferredPresentation = options.planAssessmentLimit == null ? 'named' : 'packed';
+    // Bound the number of assessments independently from their readability.
+    // Keep the plans being judged as named objects even under a spending cap;
+    // packing is only a fallback when one complete judgment cannot fit.
+    const preferredPresentation = 'named';
     const purpose = assessment ? 'turn_assess_plans' : 'turn_refine_pairs';
     const comparisonState = { ...prepared.payload.state, turn_planning: planningState({ ...extra, survival_constraints: constraints }) };
     validateDecisionPacket(comparisonState);
