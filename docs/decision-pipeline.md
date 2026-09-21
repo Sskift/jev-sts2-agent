@@ -56,4 +56,4 @@
 
 第 34 局发现命中次数未知时，方案错误保留了未扣血的敌人生命。现让受影响的生命、攻击中断和回合末结果保持未知，并根据已核实的原生 Dismantle 条件计算目标当时的一次／两次命中；此前的易伤施加、Artifact 阻挡、反伤与生成牌共用次数。54 项相关检查通过，最终完整回放仍未选择可行的最大目标收尾，不能把账目修正等同于最优决策。[证据](evidence/2026-09-21/run34-target-hits.json)
 
-当前运行提供方为 TypeSafe 官方直连。第一把 key 返回计费错误后，第二把通过完整请求并已启用；OpenRouter、Vercel、自动回退与自动轮换关闭。原生版本和实机结果见[模组说明](../mods/sts2-cli-compat/README.md)、[历史战况](full-run-progress.md)与[上下文架构](context-architecture.md)。
+当前按用户要求使用 OpenRouter `typesafe/jev-1.13`，自动回退关闭。`JEV_PLAN_ASSESSMENT_LIMIT=24` 将付费方案评分限制为确定性采样的 24 项，保留原计划、结束回合、同组牌换序及其他资源组合；不截断局面事实，仍记录采样范围并做双向最终比较。原生版本和实机结果见[模组说明](../mods/sts2-cli-compat/README.md)、[历史战况](full-run-progress.md)与[上下文架构](context-architecture.md)。

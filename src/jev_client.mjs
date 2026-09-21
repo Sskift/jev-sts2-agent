@@ -27,12 +27,15 @@ export function getJevConfig(options = {}) {
   const provider = options.provider || env.JEV_PROVIDER || 'typesafe';
   const settings = PROVIDERS[provider];
   if (!settings) throw new Error('JEV_PROVIDER must be typesafe, openrouter or vercel');
+  const assessmentSetting = Object.hasOwn(options, 'planAssessmentLimit') ? options.planAssessmentLimit : env.JEV_PLAN_ASSESSMENT_LIMIT;
+  const planAssessmentLimit = assessmentSetting == null || assessmentSetting === '' ? null : Number(assessmentSetting);
+  if (planAssessmentLimit !== null && (!Number.isSafeInteger(planAssessmentLimit) || planAssessmentLimit < 2)) throw new Error('JEV_PLAN_ASSESSMENT_LIMIT must be an integer of at least 2');
   let model = options.model || env.JEV_MODEL || settings.model;
   if (provider === 'openrouter' && model === 'jev-latest') model = '~typesafe/jev-latest';
   else if (provider === 'openrouter' && /^jev-/.test(model)) model = `typesafe/${model}`;
   else if (provider === 'typesafe') model = model.replace(/^~?typesafe\//, '');
   if (provider === 'vercel' ? model !== 'typesafe-ai/jev' : !/^(?:~?typesafe\/)?jev-[A-Za-z0-9.-]+$/.test(model)) throw new Error('JEV_MODEL must name a supported Jev model for this provider');
-  return { provider, model, url: settings.url, apiKey: options.apiKey ?? env[settings.key] ?? '', keyName: settings.key };
+  return { provider, model, url: settings.url, apiKey: options.apiKey ?? env[settings.key] ?? '', keyName: settings.key, planAssessmentLimit };
 }
 
 export function getJevApiKey(options = {}) { return getJevConfig(options).apiKey; }

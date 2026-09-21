@@ -40,6 +40,35 @@ function planResources(steps, state) {
 export const planOrderSignature = (steps, state) => JSON.stringify(planResources(steps, state));
 export const planAllocation = (steps, state) => JSON.stringify(planResources(steps, state).sort());
 
+// Spend model assessments on distinct resource commitments and their orders.
+// Sampling is deterministic, not a tactical ranking. Always keep the Jev seed
+// and end-now option; then offer another order of the seed and pairs of orders
+// from other allocations. Every current legal action remains in seed planning.
+export function limitPlanAssessments(candidates, limit = null) {
+  if (limit !== null && (!Number.isSafeInteger(limit) || limit < 2)) throw new Error('Invalid plan assessment limit');
+  if (limit === null || candidates.length <= limit) return candidates;
+  const selected = new Map(), groups = new Map();
+  const add = item => { if (item && selected.size < limit) selected.set(item.value, item); };
+  const order = item => createHash('sha256').update(JSON.stringify([item.allocation, item.label.ordered_sequence])).digest('hex');
+  for (const item of candidates) {
+    const group = groups.get(item.allocation) || []; group.push(item); groups.set(item.allocation, group);
+  }
+  const seed = candidates.find(item => item.value === 'keep');
+  add(seed);
+  add(candidates.find(item => item.label.ordered_sequence.length === 0));
+  const sortedGroups = [...groups].map(([allocation, items]) => ({ allocation, items: items.toSorted((a, b) => order(a).localeCompare(order(b))) }))
+    .sort((a, b) => createHash('sha256').update(a.allocation).digest('hex').localeCompare(createHash('sha256').update(b.allocation).digest('hex')));
+  add(sortedGroups.find(group => group.allocation === seed?.allocation)?.items.find(item => item.value !== seed?.value));
+  for (let offset = 0; selected.size < limit; offset += 2) {
+    let added = false;
+    for (const group of sortedGroups) for (const item of group.items.slice(offset, offset + 2)) {
+      if (!selected.has(item.value)) { const before = selected.size; add(item); added ||= selected.size > before; }
+    }
+    if (!added) break;
+  }
+  return [...selected.values()];
+}
+
 export function shortlistPlans(candidates, judgments) {
   if (judgments.length !== candidates.length || judgments.some((j, index) => j.value !== candidates[index].value || !Number.isFinite(j.score))) throw new Error('Invalid turn-plan assessment coverage');
   const scores = new Map(judgments.map(j => [j.value, j]));

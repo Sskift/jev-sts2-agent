@@ -1,0 +1,77 @@
+{
+  "at": "2026-09-21T07:09:58.269Z",
+  "run_id": "run-1789968641",
+  "provider": "openrouter",
+  "requested_model": "typesafe/jev-1.13",
+  "returned_model": "typesafe/jev-1.13-20260917",
+  "fallback_enabled": false,
+  "earlier_official_attempt": {
+    "summary": {
+      "source": "run-artifacts/run35-end-reaction-final/results/beast-turn7-end/official-restored/1/summary.json",
+      "sha256": "a4ef062ed335cf0caf327f7f06e02ff86863d7f0f745c3dbc4a9fb2ecaad2fb0"
+    },
+    "error": "503 after the newly supplied official key had succeeded on a small availability request"
+  },
+  "replay": {
+    "fixture": {
+      "source": "run-artifacts/run35-end-reaction-review/cases/beast-turn7-end.json",
+      "sha256": "08091332ef28a5b902eb370b321831ac8c8ab357560120e90aab901359e64c47"
+    },
+    "freeze": {
+      "source": "run-artifacts/run35-budget-review/freeze.json",
+      "sha256": "db236909a9081a305d27f19272559e3703e09975ca2f5ec98d6f2316dd94deb8"
+    },
+    "candidate_sha256": "9e101af34219ac84074a031ba57bf2c41f6dccbe6257ec2d3eeeb83025448c7c",
+    "summary": {
+      "source": "run-artifacts/run35-budget-review/results/beast-turn7-end/openrouter-budget/1/summary.json",
+      "sha256": "6b9a451daa59f06713c27f6b70c18b1459d9f9fc0a390bbc11722192d821009c"
+    },
+    "request": {
+      "source": "run-artifacts/run35-budget-review/results/beast-turn7-end/openrouter-budget/1/request-1.json",
+      "sha256": "4a5cc92251904fafa40a96fef07d0329b0655e90e31e8f6ac4ac1e01e64b3884"
+    },
+    "response": {
+      "source": "run-artifacts/run35-budget-review/results/beast-turn7-end/openrouter-budget/1/response-1.json",
+      "sha256": "5a15b8b7ac614a14cfa733ef001846a2b69569f1d8204bc9304d8f3f62123659"
+    },
+    "calls": 1,
+    "responses": 1,
+    "selected": {
+      "cmd": "end_turn"
+    },
+    "usage": {
+      "input_tokens": 18349,
+      "output_tokens": 40,
+      "cost": 0.000770658
+    },
+    "scope": "One actual-state end-turn review of a historical completed prefix. The returned multi-step plan and its old coverage are retained history, not new paid assessments or evidence of an improved entire turn."
+  },
+  "economy": {
+    "paid_plan_assessment_limit": 24,
+    "seed_and_end_now_preserved": true,
+    "seed_alternative_order_preserved_when_available": true,
+    "selection": "Deterministic sampling across resource allocations and pairs of orders. Full state, rules, legal seed-planning choices and final balanced comparisons remain.",
+    "limitation": "Limits refinement search breadth and can omit a better alternative; no claim of equal decision quality or increased win rate.",
+    "local_checks": {
+      "passed": 43,
+      "log": {
+        "source": "temp/run35-spending-checks.log",
+        "sha256": "a573882b50ec3feb8e9cf5368d5e253bffd1dbd2d7be7f713bfb591aebd97aee"
+      }
+    },
+    "continuation_allowance_usd": 1,
+    "allowance_scope": "This saved replay and the following continuation together, recorded locally. Separate from shared account balance.",
+    "spending_ledger": "temp/run35-openrouter-spending.json",
+    "priced_input_usd_per_million": 0.042,
+    "price_source": "https://openrouter.ai/typesafe/jev-1.13/api"
+  },
+  "resume_requirement": {
+    "state": {
+      "source": "temp/run35-before-billing-resume.json",
+      "sha256": "7d3a0a0b5d796e74432a212b929688bad221f50003ccebb9ed4dfc50679c049d"
+    },
+    "same_native_fingerprint": true,
+    "pending_must_be_null": true
+  },
+  "live_resumed": false
+}

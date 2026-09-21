@@ -2,11 +2,29 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
-import { independentTurnCandidates, adjacentPlanOrders, compareFinalists, balancePlanPreference, planOrderSignature, planAllocation, shortlistPlans } from '../src/turn_candidates.mjs';
+import { independentTurnCandidates, adjacentPlanOrders, compareFinalists, balancePlanPreference, planOrderSignature, planAllocation, shortlistPlans, limitPlanAssessments } from '../src/turn_candidates.mjs';
 import { inspectSequence } from '../src/turn_sequence.mjs';
 import { describeContinuation, compareContinuationResources } from '../src/card_flow_projection.mjs';
 import { describePlanAlternative } from '../src/turn_plan_refinement.mjs';
 import { planStep } from '../src/turn_plan_state.mjs';
+
+test('assessment spending cap retains the seed, ending and changed order without editing context or ranking tactics', () => {
+  const entry = (value, allocation, names) => ({ value, allocation, label: {
+    ordered_sequence: names.map(action => ({ action, rules: `Complete rule for ${action}` })),
+    conditional_preview: { unresolved: ['full facts remain'] }
+  } });
+  const candidates = [entry('keep', 'ab', ['A', 'B']), entry('reverse', 'ab', ['B', 'A']), entry('end', '', [])];
+  for (let index = 0; index < 30; index++) candidates.push(entry(`x${index}`, `allocation${Math.floor(index / 2)}`, [`X${index}`]));
+  const before = structuredClone(candidates), sampled = limitPlanAssessments(candidates, 12);
+  assert.equal(sampled.length, 12);
+  assert.deepEqual(sampled.slice(0, 3).map(p => p.value), ['keep', 'end', 'reverse']);
+  assert.ok(new Set(sampled.map(p => p.allocation)).size > 3);
+  assert.deepEqual(limitPlanAssessments([...candidates].reverse(), 12), sampled, 'Enumeration order cannot silently become a tactical preference');
+  assert.ok(sampled.every(item => candidates.includes(item)), 'Keep complete existing alternatives instead of shortening their facts');
+  assert.deepEqual(candidates, before);
+  assert.equal(limitPlanAssessments(candidates), candidates);
+  assert.throws(() => limitPlanAssessments(candidates, 1), /limit/);
+});
 
 test('independent search offers distinct first actions and orders, preserves identities and stops at draws', () => {
   const state = completeCombat();

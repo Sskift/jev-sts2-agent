@@ -343,7 +343,7 @@ export async function decideTurn(state, options, prepared, choose) {
   if (!plan.steps.length) throw new ContextError('Turn planner produced no executable prefix');
   plan.budget = { initial_energy: state.combat.player.energy, remaining_after_printed_costs: energy,
     scope: 'Ordered known costs including inspectable hand upgrades and Stomp reductions. Unresolved gains, automatic effects and other changes require a new native observation.' };
-  if (options.refineTurnPlan !== false) await refineTurnPlan(state, plan, prepared, comparePairs, assessPlans);
+  if (options.refineTurnPlan !== false) await refineTurnPlan(state, plan, prepared, comparePairs, assessPlans, options.planAssessmentLimit);
   const checkpoint = inspectSequence(state, plan.steps).checkpoint;
   if (checkpoint) { plan.steps = plan.steps.slice(0, checkpoint.after_sequence + 1); plan.end_policy = 'review_after_segment'; }
   plan.model = trace.find(item => item.model !== 'forced-single-action')?.model || 'forced-single-action';

@@ -4,7 +4,7 @@ import { potionEffectFacts } from './potion_effects.mjs';
 import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from './turn_effects.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
-import { independentTurnCandidates, adjacentPlanOrders, compareFinalists, planSignature, planOrderSignature, planAllocation, shortlistPlans } from './turn_candidates.mjs';
+import { independentTurnCandidates, adjacentPlanOrders, compareFinalists, planSignature, planOrderSignature, planAllocation, shortlistPlans, limitPlanAssessments } from './turn_candidates.mjs';
 import { describeContinuation } from './card_flow_projection.mjs';
 import { intentDamage } from './combat_arithmetic.mjs';
 import { ContextError } from './decision_context.mjs';
@@ -70,7 +70,7 @@ export function describePlanAlternative(state, steps) {
 // Compare concrete complete plans, not another disconnected next-card choice.
 // These are bounded local alternatives, not an exhaustive solver. Every current
 // legal action remains available in the main planning stages.
-export async function refineTurnPlan(state, plan, prepared, comparePairs, assessPlans) {
+export async function refineTurnPlan(state, plan, prepared, comparePairs, assessPlans, assessmentLimit = null) {
   // An observation segment is also a complete alternative. The trailing end
   // marker is removed before dispatch when the selected sequence checkpoints.
   if (plan.steps.at(-1)?.kind !== 'end_turn') {
@@ -201,7 +201,10 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
     objective: null, retained_cards: [], proposed_steps: [], conditional_projection: [],
     energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
       is_observed: false, includes_future_energy_gains: false, steps: [], scope: 'No option has executed. Each option contains its own complete energy reservation and conditional outcome.' } };
-  const candidates = [...alternatives].map(([value, steps]) => ({ value, allocation: planAllocation(steps, state), label: label(steps) }));
+  const eligible = [...alternatives].map(([value, steps]) => ({ value, allocation: planAllocation(steps, state), label: label(steps) }));
+  const candidates = limitPlanAssessments(eligible, assessmentLimit);
+  plan.candidate_coverage.assessment_limit = assessmentLimit;
+  plan.candidate_coverage.assessment_selection_truncated = candidates.length < eligible.length;
   const judgments = await assessPlans(candidates, 'Assess the overall quality of committing this ordered segment toward winning the run. Evaluate the whole remaining turn, including the ability to continue after an observation; use current rules and available resources, not hypothetical favorable draws.', comparisonState);
   const shortlist = shortlistPlans(candidates, judgments);
   plan.candidate_coverage.assessed_plans = judgments.length;

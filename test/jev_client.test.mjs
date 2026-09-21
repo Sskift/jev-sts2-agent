@@ -9,6 +9,9 @@ test('provider configuration keeps credentials separate and resolves Jev aliases
   assert.equal(getJevConfig({ env, provider: 'openrouter', model: 'jev-latest' }).model, '~typesafe/jev-latest');
   assert.throws(() => getJevConfig({ env, provider: 'typo' }), /JEV_PROVIDER/);
   assert.throws(() => getJevConfig({ env, model: 'another-model' }), /JEV_MODEL/);
+  assert.equal(getJevConfig({ env: { ...env, JEV_PLAN_ASSESSMENT_LIMIT: '24' } }).planAssessmentLimit, 24);
+  assert.equal(getJevConfig({ env: { ...env, JEV_PLAN_ASSESSMENT_LIMIT: '24' }, planAssessmentLimit: null }).planAssessmentLimit, null);
+  assert.throws(() => getJevConfig({ env: { ...env, JEV_PLAN_ASSESSMENT_LIMIT: '0' } }), /JEV_PLAN_ASSESSMENT_LIMIT/);
 });
 
 test('OpenRouter native Decisions preserves structured state, batched questions and typed results', async () => {

@@ -4,7 +4,7 @@
 
 目前是研究原型。已启动 35 局，34 局结束，22 局通过第一幕。最远记录仍为第二幕 Boss，尚未通关。第 35 局已击败 Ceremonial Beast 并进入第二幕；[连续原生证据](docs/evidence/2026-09-21/run35-act-one.json)已保存。官方接口随后返回计费错误，控制器在第 22 层第 2 回合、59/80 的[确认局面](docs/evidence/2026-09-21/run35-provider-stop.json)停止，pending=null，未重开游戏。实时记录见[整局进展](docs/full-run-progress.md)。
 
-当前使用 TypeSafe 官方直连，模型固定为 `jev-1.13.0`，自动回退关闭。已接入五个角色的策略参考、115 个怪物的行动图、招式关联规则、独立有序候选和方案比较分歧记录。最新修复覆盖目标相关的命中次数，并将相邻换序扩展到采样方案，避免只评到一组牌的较差顺序；等价副本按实际顺序去重。[同局面回放](docs/evidence/2026-09-21/run34-order-coverage.json)已选出可行收尾，仍有比较分歧，尚不能证明胜率提高。
+当前按用户要求使用 OpenRouter `typesafe/jev-1.13`，自动回退关闭。已接入五个角色的策略参考、115 个怪物的行动图、招式关联规则、独立有序候选和方案比较分歧记录。最新修复覆盖目标相关的命中次数，并将相邻换序扩展到采样方案，避免只评到一组牌的较差顺序；等价副本按实际顺序去重。[同局面回放](docs/evidence/2026-09-21/run34-order-coverage.json)已选出可行收尾，仍有比较分歧，尚不能证明胜率提高。
 
 ## 环境与启动
 
@@ -20,15 +20,18 @@ Copy-Item .env.example .env
 在本地 `.env` 填入配置，例如：
 
 ```dotenv
-JEV_PROVIDER=typesafe
-JEV_MODEL=jev-1.13.0
-TYPESAFE_API_KEY=your-typesafe-key
+JEV_PROVIDER=openrouter
+JEV_MODEL=typesafe/jev-1.13
+OPENROUTER_API_KEY=your-openrouter-key
+JEV_PLAN_ASSESSMENT_LIMIT=24
 JEV_FALLBACK_PROVIDER=
 ```
 
-当前运行使用 TypeSafe 的 [System One API](https://docs.typesafe.ai/api)，回退关闭。也支持 OpenRouter 原生 Decisions，以及 Vercel 原生 [Evaluation API](https://vercel.com/docs/ai-gateway/modalities/evaluation)，配置见 `.env.example`。可选回退只处理传输、额度或服务故障，遵守 `Retry-After` 和短暂故障冷却；上下文错误、低置信度或不理想的选择不触发回退。各次请求记录实际提供方和模型。凭据、原始运行记录及临时文件不提交 Git。
+当前运行使用 OpenRouter 原生 Decisions，回退关闭。也支持 TypeSafe 的 [System One API](https://docs.typesafe.ai/api) 和 Vercel 原生 [Evaluation API](https://vercel.com/docs/ai-gateway/modalities/evaluation)，配置见 `.env.example`。可选回退只处理传输、额度或服务故障，遵守 `Retry-After` 和短暂故障冷却；上下文错误、低置信度或不理想的选择不触发回退。各次请求记录实际提供方和模型。凭据、原始运行记录及临时文件不提交 Git。
 
-两把官方 key 都已通过真实调用；目前两把均返回 `402 billing_error`。本地配置仍保留第二把，未启用跨提供方回退或自动轮换。恢复官方计费或更新本机 key 后，先补完保存的回放，再从确认局面继续。
+先前两把官方 key 返回 402；新提供的官方 key 通过最小请求，但完整回放遇到 503。按最新要求改用 OpenRouter，完整结束回合回放已成功，单次费用约 $0.00077。[恢复记录](docs/evidence/2026-09-21/run35-openrouter-recovery.json)区分旧计划与本次实际调用。
+
+`JEV_PLAN_ASSESSMENT_LIMIT=24` 限制每次规划中付费评分的候选方案数，保留原计划、结束回合与同组牌的换序，并对其他资源组合做确定性采样。状态和规则仍完整，后续方案比较仍双向进行；这是减少搜索范围的费用取舍，可能遗漏更好方案。留空保留全部生成候选。正常计划步骤经过原生核对后直接续接，无需每张牌重新请求。
 
 启动已启用模组的游戏后：
 
@@ -61,7 +64,7 @@ Jev 在代码提供的目标与候选空间中选择构筑方向、回合目标�
 
 观察节点还保留已知前缀的攻击覆盖账目：当前攻击、格挡、生命余额和仍需缓解的缺口，与剩余能量一起呈现。完整回合末结果继续标为未知；这部分计算不包含未结算的抽牌、自动效果或后续动作，不把保留响应机会等同于保证存活。
 
-回合末检测同时覆盖常规时点和“If you end a turn”这类条件句。向敌人造成的延迟伤害会关联伤害防止、生命阈值、阶段／死亡反应及剩余敌方行动；当前显示攻击保留为基准，未计算的连锁反应不再给出确定的生命或敌方响应。[真实反例](docs/evidence/2026-09-21/run35-end-reaction.json)中，Parrying Shield 触发 Plow，原估算 42 生命、实际 49；修复后明确为未知。条件是否满足、其他钩子顺序及随机目标仍未完整模拟；最后的模型回放因官方计费错误未完成。
+回合末检测同时覆盖常规时点和“If you end a turn”这类条件句。向敌人造成的延迟伤害会关联伤害防止、生命阈值、阶段／死亡反应及剩余敌方行动；当前显示攻击保留为基准，未计算的连锁反应不再给出确定的生命或敌方响应。[真实反例](docs/evidence/2026-09-21/run35-end-reaction.json)中，Parrying Shield 触发 Plow，原估算 42 生命、实际 49；修复后明确为未知。条件是否满足、其他钩子顺序及随机目标仍未完整模拟；补做的 OpenRouter 回放已选择结束回合。
 
 能量预留、候选描述和方案比较共用一次有序状态计算。动作旁区分当前观察费用与序列中的预留支出；单独的费用折扣不再抹掉固定伤害预览。已核实的升级、属性变化和 X 费支付只影响后续动作；例如 Inflame／Footwork 的实时属性增益可以与后续攻击／防御按顺序比较。实际出牌后仍读取原生状态，属性变化会触发计划复核。完整方案列出消耗／保留的药水、格挡的有效期、已计算的伤害与倒计时、需要重新观察的位置。未计算的状态变化不会凭空生成新牌或确定的结束回合结果。
 

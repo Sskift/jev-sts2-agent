@@ -52,6 +52,24 @@ function fakeJev(answers, seen = []) {
 }
 const noModel = () => { throw new Error('A valid turn plan must execute without another independent card choice'); };
 
+test('a refinement assessment cap bounds paid candidates while keeping a legal whole-turn plan and reporting omitted coverage', async () => {
+  const state = stateWith(['A', 'B', 'C', 'D'].map((id, index) => card(id, id, index, { cost: 0 })));
+  const original = structuredClone(state), plan = savedPlan(state, ['card_0_target_42', 'card_1_target_42', 'end_turn']);
+  plan.budget = {};
+  let assessed = [];
+  await refineTurnPlan(state, plan, prepareModDecision(state), async pairs => pairs.map(pair => (pair.find(p => p.value === 'keep') || pair[0]).value),
+    async plans => { assessed = plans; return plans.map(p => ({ value: p.value, score: p.value === 'keep' ? 4 : 1 })); }, 8);
+  assert.equal(assessed.length, 8);
+  assert.ok(assessed.some(p => p.value === 'keep'));
+  assert.ok(assessed.some(p => p.label.ordered_sequence.length === 0));
+  assert.ok(plan.candidate_coverage.eligible_plans > 8);
+  assert.equal(plan.candidate_coverage.assessment_selection_truncated, true);
+  assert.equal(plan.candidate_coverage.assessed_plans, 8);
+  assert.equal(plan.candidate_coverage.assessment_limit, 8);
+  assert.ok(reserveActionSequence(state, plan.steps).valid);
+  assert.deepEqual(state, original);
+});
+
 test('card-start restrictions depend on the affected instance, not a blanket per-turn ban', () => {
   const state = stateWith([card('DEFEND_IRONCLAD', 'ringing', 0), card('STRIKE_IRONCLAD', 'other', 1)]);
   state.combat.player.powers.push({ id: 'RINGING_POWER', amount: 1 });

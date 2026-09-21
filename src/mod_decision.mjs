@@ -1,5 +1,5 @@
 import { decisionInstructions } from "./decision_instructions.mjs";
-import { getJevModel, requestJev, JEV_REQUEST_BUDGET } from './jev_client.mjs';
+import { getJevConfig, getJevModel, requestJev, JEV_REQUEST_BUDGET } from './jev_client.mjs';
 import { compileModelRequest } from './context_compiler.mjs';
 import { refreshRunStrategy } from './run_strategy.mjs';
 import { validateModRequest } from './mod_client.mjs';
@@ -358,6 +358,7 @@ export function prepareModDecision(gameState, options = {}) {
 }
 
 export async function makeModDecisionWithJev(gameState, options = {}) {
+  options = { ...options, planAssessmentLimit: getJevConfig(options).planAssessmentLimit };
   let prepared = options.prepared ?? prepareModDecision(gameState, options);
   if (prepared.action === 'wait') return prepared;
   const strategy = await refreshRunStrategy(gameState, options, prepared, choosePrepared);
