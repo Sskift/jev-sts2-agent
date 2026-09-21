@@ -1,5 +1,7 @@
 # 整局实测进展
 
+`742c2ff` 已提交推送，并在第二幕第 21 层 The Obscura 第 2 回合、72/80、2 能量的同一确认点加载。原生指纹匹配，pending=null。第 5 回合实战按 Thunderclap → Defend+ → Strike → Primal Force 保持同一计划，后三步零次新增模型调用；[执行证据](evidence/2026-09-21/run34-debuff-continuation.json)已保存。续接目录 `run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z`，继续同局。
+
 第 34 局第二幕第 19 层，Jev 已声明 Bash+ → Dismantle+ → Primal Force。Bash 的已知易伤仍触发新规划，原先用了 20 次请求才继续同一 Dismantle。现复用已有规则账目核对精确的目标生命、格挡和能力层数，其余变化仍复核；同一真实前后状态可保留原计划、零次新增调用。34 项检查通过，[证据](evidence/2026-09-21/run34-debuff-continuation.json)不将调用减少当作胜率改善。继续同局，准备在确认点加载。
 
 第 34 局在 Vantom 第 14 回合以 Strike 收尾，出牌前 2 生命、Boss 剩 4，战后 8/80；正常跨幕进入第 18 层并恢复 80/80，随后进入第二幕第 19 层。累计 34 局启动、33 局结束、21 局通过第一幕。[连续原生证据](evidence/2026-09-21/run34-act-one.json)确认相同 run ID，三幕正式通关仍未完成。

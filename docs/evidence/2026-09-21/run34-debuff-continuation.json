@@ -164,5 +164,140 @@
     ],
     "source": "temp/run34-before-debuff-resume.json",
     "sha256": "f4ccfbec81fc902885bec8422f99c501a66510bda918ea987bb1b57f55a5798d"
+  },
+  "runtime_loaded": {
+    "at": "2026-09-21T05:05:52.108Z",
+    "commit": "742c2ff1bec5d349f6b992989298a390e0f51f50",
+    "pushed": true,
+    "root": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z",
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "key_slot": "second_official_key",
+    "run_id": "run-1789963561",
+    "load_floor": 21,
+    "load_turn": 2,
+    "load_hp": 72,
+    "load_energy": 2,
+    "pending": null,
+    "fingerprint_matched": true,
+    "native": {
+      "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/resume-native.json",
+      "sha256": "312bbeeaf2a21f2e22d04f8f7a4732e967f806cd399e57334ae701fff891024d"
+    },
+    "observed_sequence": [
+      {
+        "step": 13,
+        "request": {
+          "cmd": "play_card",
+          "id": "THUNDERCLAP",
+          "nth": 0
+        },
+        "ok": true,
+        "plan_id": "97d2684e-1eb6-41ef-b69f-910c1b878754",
+        "revision": 0,
+        "model_calls": 58,
+        "before": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0013/before-state.json",
+          "sha256": "e91143140f003a711c7afac3d5205e397354567e13db97493d8ba773b40faefa"
+        },
+        "after": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0013/after-state.json",
+          "sha256": "60e66b79d4bcd5feb356d528686f808c226ccc0668941821cec561f935d1b92e"
+        },
+        "result": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0013/result.json",
+          "sha256": "06596da309f8236eca490313ff6df0c63deed7307693053b57a855df9c2df483"
+        },
+        "decision": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0013/decision.json",
+          "sha256": "a0f6ffebdc56aa722676c34583e5b56abe7f7c71b8a21509b236277532d6a195"
+        }
+      },
+      {
+        "step": 14,
+        "request": {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        "ok": true,
+        "plan_id": "97d2684e-1eb6-41ef-b69f-910c1b878754",
+        "revision": 0,
+        "model_calls": 0,
+        "before": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0014/before-state.json",
+          "sha256": "f4ec7740de29c515df70a4b50f5f76eb3b8d984ef5179ae6ad352f311825155e"
+        },
+        "after": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0014/after-state.json",
+          "sha256": "27be7ad33ba8695783f10345e3ddfb1f539e9a76d5542aad410c0114f8d8d852"
+        },
+        "result": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0014/result.json",
+          "sha256": "62b52bb55275fbb5d8916f6691726f410dd6212fd7894af5af02241f6f106e44"
+        },
+        "decision": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0014/decision.json",
+          "sha256": "c0dac9f23481bee1bbd98d7a8bd60e846887141d7aa8d3bd5412749a266563be"
+        }
+      },
+      {
+        "step": 15,
+        "request": {
+          "cmd": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "nth": 0,
+          "target": 2
+        },
+        "ok": true,
+        "plan_id": "97d2684e-1eb6-41ef-b69f-910c1b878754",
+        "revision": 0,
+        "model_calls": 0,
+        "before": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0015/before-state.json",
+          "sha256": "fb71271c3d0ee79adcc56226caea49d2ba3e1b456a0a22ee9ff4cd05a7b760fd"
+        },
+        "after": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0015/after-state.json",
+          "sha256": "2846a1832f1a3e5f0454a473084628f53790bba93a7c1e79b9865a2c4894c37d"
+        },
+        "result": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0015/result.json",
+          "sha256": "3f77988bbb30c882609a5b60035bfb5e1cb7972eb06b66539a32b4e9d2c9716d"
+        },
+        "decision": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0015/decision.json",
+          "sha256": "0d75987838f7805b0f3dcf55a367247b9381f963fed40ca0e812f36155ff40fd"
+        }
+      },
+      {
+        "step": 16,
+        "request": {
+          "cmd": "play_card",
+          "id": "PRIMAL_FORCE",
+          "nth": 0
+        },
+        "ok": true,
+        "plan_id": "97d2684e-1eb6-41ef-b69f-910c1b878754",
+        "revision": 0,
+        "model_calls": 0,
+        "before": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/before-state.json",
+          "sha256": "27907c1e4341bb955af56f86a74b81a8bab3f1dec5cf51b6316a4adb3e7b9a92"
+        },
+        "after": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/after-state.json",
+          "sha256": "a66838821d9e84571c689c3e280668570873d32ca3af2239c0f07e3dd5ca179d"
+        },
+        "result": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/result.json",
+          "sha256": "79b671e64e4799887e1d13e7946de72010475804fc2b391007fc97c1be14370c"
+        },
+        "decision": {
+          "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/decision.json",
+          "sha256": "aa95c83493e1a57c4441eb50e022c057a16c71c5489471402aa4abca3a7324aa"
+        }
+      }
+    ]
   }
 }

@@ -6,7 +6,7 @@
 
 第 34 局 `run-1789963561`，铁甲战士、进阶 0，已在 Vantom 第 14 回合以 Strike 收尾。战后 8/80，正常跨幕恢复为 80/80，进入第二幕第 19 层。[第一层记录](evidence/2026-09-21/run34-start.json)与[跨幕证据](evidence/2026-09-21/run34-act-one.json)确认同一 run ID。累计启动 34 局、结束 33 局、21 局通过第一幕。
 
-当前代码 `7781950` 已提交并推送，运行目录 `run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z`。重载前后的原生指纹一致，pending=null，首个 Defend+ 已确认。[加载证据](evidence/2026-09-21/run34-order-coverage.json)包含实际候选覆盖。
+`742c2ff` 已提交推送，并在第二幕第 21 层 The Obscura 第 2 回合、72/80、2 能量的同一确认点加载。原生指纹匹配，pending=null。第 5 回合实战按 Thunderclap → Defend+ → Strike → Primal Force 保持同一计划，后三步零次新增模型调用；[执行证据](evidence/2026-09-21/run34-debuff-continuation.json)已保存。续接目录 `run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z`，继续同局。
 
 TypeSafe 官方直连，固定 `jev-1.13.0`，当前使用用户提供的第二把官方 key。第一把最初调用成功，随后返回 402 计费错误；第二把已通过完整请求及实战。凭据仅在本机忽略提交的配置中，OpenRouter、Vercel 和自动回退关闭。
 
