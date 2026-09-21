@@ -610,7 +610,42 @@
     "Development snapshots, no held-out outcome or new game command.",
     "Exact starting previews include existing multipliers. Future shifted integer previews retain rounding intervals, not fabricated exact damage.",
     "Unknown draw, additional plays, Intangible-capped input, random targets and other hooks remain outside complete simulation.",
-    "Confidence and position-balanced support are not correctness or win probability.",
-    "The live run has not yet loaded this source revision."
-  ]
+    "Confidence and position-balanced support are not correctness or win probability."
+  ],
+  "runtime_loaded": {
+    "commit": "d32984b1c94469ae8ea24a780642e7647ea722f1",
+    "artifact_directory": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-resume-2026-09-21T05-54-49.957Z",
+    "run_id": "run-1789968641",
+    "floor": 14,
+    "turn": 5,
+    "hp": 62,
+    "energy": 2,
+    "expected": {
+      "source": "temp/run35-before-slow-resume.json",
+      "sha256": "803ad6a848737f05f98d47ac9cafc79771c5ec8988daad65dd0ff9308c75b50c"
+    },
+    "native": {
+      "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-resume-2026-09-21T05-54-49.957Z/resume-native.json",
+      "sha256": "ed98210dad295d5fb51d116fbf3ec64cd7b11a354e46866920348caa83f46c94"
+    },
+    "fingerprint_matched": true,
+    "pending_was_null": true,
+    "first_decision": {
+      "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-resume-2026-09-21T05-54-49.957Z/step-0001/decision.json",
+      "sha256": "27cd2b9f135e7c2add84cb52bf6e3aac4945fb3d8ca1fb73c02d2e66ecb7cd12"
+    },
+    "first_response": {
+      "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run35-resume-2026-09-21T05-54-49.957Z/step-0001/response.json",
+      "sha256": "1f4e11370b34bed39eeb3a28831510e154c12efba59ae99a00508f888355eb06"
+    },
+    "request": {
+      "cmd": "play_card",
+      "id": "STRIKE_IRONCLAD",
+      "nth": 0,
+      "target": 2
+    },
+    "ok": true,
+    "new_model_responses": 0,
+    "scope": "Same run resumed with the committed source. This Flyconid encounter has no Slow; exact Slow continuation evidence above is offline from native Effigy snapshots."
+  }
 }
