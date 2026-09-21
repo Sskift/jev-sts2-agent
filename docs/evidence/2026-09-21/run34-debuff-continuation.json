@@ -1,0 +1,168 @@
+{
+  "at": "2026-09-21T04:54:58.752Z",
+  "run_id": "run-1789963561",
+  "source": {
+    "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0049/before-state.json",
+    "sha256": "87313bbb6556ed6c8c2df0b4d69571224194f5d84c53501b6b6851f4a6c1538d"
+  },
+  "confirmed_command": {
+    "request": {
+      "cmd": "play_card",
+      "id": "BASH",
+      "nth": 0,
+      "target": 3
+    },
+    "response": {
+      "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0049/response.json",
+      "sha256": "b3e3d54aac3b08d220bd4c111907dd1c0c8d5b891dfea94ae4e0247866a77373"
+    },
+    "after": {
+      "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0049/after-state.json",
+      "sha256": "28b10629047545c672d3a429a9bd9aeb76236f87341d255674924bb849a407e5"
+    }
+  },
+  "old_followup": {
+    "source": {
+      "source": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z/step-0050/decision.json",
+      "sha256": "8f7eca64d026f9b53148908cc13517400c1292cee0936f2e733680bfc9ee6c0e"
+    },
+    "model_calls": 20,
+    "revision": 1,
+    "request": {
+      "cmd": "play_card",
+      "id": "DISMANTLE",
+      "nth": 0,
+      "target": 3
+    },
+    "review": {
+      "stage": "review",
+      "selected": "revise_remaining",
+      "value": "revise",
+      "probabilities": {
+        "change_objective": 0.09,
+        "revise_remaining": 0.74,
+        "continue_plan": 0.17
+      },
+      "confidence": 0.61,
+      "model": "jev-1.13.0",
+      "usage": {
+        "input_tokens": 17281,
+        "output_tokens": 47
+      }
+    }
+  },
+  "new_followup": {
+    "request": {
+      "cmd": "play_card",
+      "id": "DISMANTLE",
+      "nth": 0,
+      "target": 3
+    },
+    "model_calls": 0,
+    "status": "active",
+    "revision": 0,
+    "plan_id_preserved": true,
+    "pending": null
+  },
+  "expected_enemy_changes": [
+    {
+      "combat_id": 1,
+      "hp_remaining": {
+        "min": 13,
+        "max": 13
+      },
+      "block_remaining": {
+        "min": 0,
+        "max": 0
+      },
+      "power_changes": [],
+      "depleted_if_all_declared_hits_resolve": false,
+      "current_attack_after_debuffs": {
+        "min": 8,
+        "max": 8
+      }
+    },
+    {
+      "combat_id": 2,
+      "hp_remaining": {
+        "min": 21,
+        "max": 21
+      },
+      "block_remaining": {
+        "min": 0,
+        "max": 0
+      },
+      "power_changes": [],
+      "depleted_if_all_declared_hits_resolve": false,
+      "current_attack_after_debuffs": {
+        "min": 0,
+        "max": 0
+      }
+    },
+    {
+      "combat_id": 3,
+      "hp_remaining": {
+        "min": 17,
+        "max": 17
+      },
+      "block_remaining": {
+        "min": 0,
+        "max": 0
+      },
+      "power_changes": [
+        {
+          "power_id": "VULNERABLE_POWER",
+          "before": 0,
+          "after_declared_actions": {
+            "min": 3,
+            "max": 3
+          }
+        }
+      ],
+      "depleted_if_all_declared_hits_resolve": false,
+      "current_attack_after_debuffs": {
+        "min": 10,
+        "max": 10
+      }
+    }
+  ],
+  "change": "Persist only the shared conditional enemy ledger with the pending command. After confirmed execution, exact HP/Block and known power amounts may explain that power change; all other guard conditions still apply. This does not overwrite observations, choose a new action, or predict the next draw.",
+  "validation": {
+    "checks": 34,
+    "failures": 0,
+    "log": "temp/run34-debuff-continuation-checks.log"
+  },
+  "limitations": [
+    "Only exact known enemy-power changes can avoid this review. Unknown effects, mismatched outcomes, changed intents or hand effects, selections and enemy availability changes still require review.",
+    "This offline verification reused the real confirmed before/after snapshots and sent zero game commands.",
+    "The old controller already chose the same Dismantle followup after a new decision; the demonstrated benefit is preserved sequence and fewer calls, not higher win rate."
+  ],
+  "load_checkpoint": {
+    "run_id": "run-1789963561",
+    "root": "run-artifacts/run34-resume2-2026-09-21T04-40-57.798Z",
+    "step": 102,
+    "last_confirmed_command": {
+      "cmd": "play_card",
+      "id": "DEFEND_IRONCLAD",
+      "nth": 0
+    },
+    "pending": null,
+    "fingerprint_matched": true,
+    "floor": 21,
+    "turn": 2,
+    "hp": 72,
+    "energy": 2,
+    "enemy": [
+      {
+        "id": "PARAFRIGHT",
+        "hp": 21
+      },
+      {
+        "id": "THE_OBSCURA",
+        "hp": 105
+      }
+    ],
+    "source": "temp/run34-before-debuff-resume.json",
+    "sha256": "f4ccfbec81fc902885bec8422f99c501a66510bda918ea987bb1b57f55a5798d"
+  }
+}

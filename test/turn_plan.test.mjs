@@ -408,6 +408,33 @@ test('confirmed attack discounts preserve the selected sequence, but unexpected 
   }
 });
 
+test('exact planned debuff changes preserve the sequence while mismatched results and other changes require review', async () => {
+  const state = stateWith([
+    card('BASH', 'bash', 0, { name: 'Bash', cost: 2, damage: 8, description: 'Deal 8 damage. Apply 2 Vulnerable.', target_previews: [{ target_id: 42, damage: 8 }] }),
+    card('DISMANTLE', 'dismantle', 1, { name: 'Dismantle', damage: 8, description: 'Deal 8 damage. If the enemy is Vulnerable, hits twice.' })
+  ]);
+  state.combat.enemies[0].hp = 26; sync(state);
+  const plan = savedPlan(state, ['card_0_target_42', 'card_1_target_42', 'end_turn']);
+  for (const change of [null, 'hp', 'block', 'amount', 'other_power', 'intent', 'hand']) {
+    const memory = new DecisionMemory(); memory.observe(state);
+    memory.begin({ cmd: 'play_card', id: 'BASH', nth: 0, target: 42 }, state, { turnPlan: structuredClone(plan), turnStep: 0 });
+    const after = structuredClone(state); after.combat.hand.shift(); after.combat.hand[0].index = 0;
+    after.combat.player.energy = 1; after.combat.enemies[0].hp = change === 'hp' ? 19 : 18;
+    after.combat.enemies[0].powers = [{ id: 'VULNERABLE_POWER', name: 'Vulnerable', amount: change === 'amount' ? 1 : 2, description: 'Takes 50% more damage from Attacks.' }];
+    if (change === 'block') after.combat.enemies[0].block = 3;
+    if (change === 'other_power') after.combat.enemies[0].powers.push({ id: 'STRENGTH_POWER', amount: 2 });
+    if (change === 'intent') after.combat.enemies[0].intents[0].damage++;
+    if (change === 'hand') after.combat.hand[0].description = 'Deal 10 damage.';
+    sync(after); memory.finish({ ok: true }, after); memory.observe(after);
+    if (change) assert.equal(memory.data.turn_plan.status, 'needs_review', change);
+    else {
+      assert.equal(memory.data.turn_plan.status, 'active');
+      const decision = await makeModDecisionWithJev(after, { memory, fetchImpl: noModel });
+      assert.deepEqual(decision.request, { cmd: 'play_card', id: 'DISMANTLE', nth: 0, target: 42 });
+    }
+  }
+});
+
 test('dead targets, missing cards, costs and external changes require review; next turns and runs do not inherit a plan', () => {
   const state = stateWith([card('STRIKE_IRONCLAD', 'one', 0), card('STRIKE_IRONCLAD', 'two', 1)]), plan = savedPlan(state, ['card_0_target_42', 'card_1_target_42', 'end_turn']);
   for (const change of [copy => copy.combat.enemies[0].is_alive = false, copy => copy.combat.hand.shift(), copy => copy.combat.hand[0].cost = 2, copy => copy.combat.player.hp--]) {

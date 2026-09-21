@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { costAfterAttacks } from './turn_sequence.mjs';
+import { projectDebuffDependencies } from './turn_debuff_projection.mjs';
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export const cardInstance = card => card?.details?.instance_id;
@@ -18,15 +19,17 @@ export function turnFingerprint(state) {
   return createHash('sha256').update(JSON.stringify(copy)).digest('hex');
 }
 
-export function turnGuard(state) {
+export function turnGuard(state, step = null) {
   if (!state.combat) return null;
   const combat = state.combat;
+  const expectedEnemies = step ? projectDebuffDependencies(state, [step])?.enemies : null;
   return {
     energy: combat.player.energy, hp: combat.player.hp, powers: combat.player.powers,
     relics: combat.player.relics, orbs: combat.player.orbs,
     positioning: combat.positioning,
     hand: combat.hand.map(card => ({ id: card.id, instance_id: cardInstance(card), cost: card.cost, description: card.description, can_play: card.can_play })),
-    enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, hp: enemy.hp, is_alive: enemy.is_alive, intents: enemy.intents, powers: enemy.powers }))
+    enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, hp: enemy.hp, block: enemy.block, is_alive: enemy.is_alive, intents: enemy.intents, powers: enemy.powers })),
+    ...(expectedEnemies ? { expected_enemy_changes: expectedEnemies } : {})
   };
 }
 
@@ -113,6 +116,26 @@ export function plannedUpgradeSelection(plan, state, candidates) {
     .find(candidate => candidate.request.cmd === 'hand_select_card' && candidate.card_hand_index === offered[0].index) || null;
 }
 
+// Reuse the same native-rule arithmetic used when choosing the sequence.
+// Only exact HP, Block and known power amounts can explain a power change.
+// Other powers retain their full records; changed intents and hand effects
+// still require review independently. This never substitutes a predicted state.
+function expectedEnemyPowers(before, after, expected) {
+  if (!expected || !expected.power_changes.length) return false;
+  for (const [field, range] of [['hp', expected.hp_remaining], ['block', expected.block_remaining]]) {
+    if (!Number.isFinite(range?.min) || range.min !== range.max || after[field] !== range.min) return false;
+  }
+  if (expected.power_changes.some(p => !Number.isFinite(p.after_declared_actions.min)
+    || p.after_declared_actions.min !== p.after_declared_actions.max)) return false;
+  const changes = new Map(expected.power_changes.map(p => [p.power_id, p.after_declared_actions.min]));
+  const projected = [...before.powers.filter(p => !changes.has(p.id)),
+    ...[...changes].filter(([, amount]) => amount !== 0).map(([id, amount]) => ({ id, amount }))];
+  const observed = after.powers.filter(p => !changes.has(p.id) || p.amount !== 0)
+    .map(p => changes.has(p.id) ? { id: p.id, amount: p.amount } : p);
+  const ordered = powers => powers.toSorted((a, b) => a.id.localeCompare(b.id));
+  return same(ordered(projected), ordered(observed));
+}
+
 function changesRequiringReview(before, after, step, remaining) {
   if (!before || !after) return ['Combat observation became unavailable.'];
   const reasons = [];
@@ -130,8 +153,10 @@ function changesRequiringReview(before, after, step, remaining) {
   for (const future of remaining) if (future.card_instance_id && !after.hand.some(card => card.instance_id === future.card_instance_id)) reasons.push('A future planned card left the hand.');
   for (const enemy of after.enemies) {
     const previous = before.enemies.find(old => old.combat_id === enemy.combat_id);
+    const expected = before.expected_enemy_changes?.find(e => e.combat_id === enemy.combat_id);
     if (!previous || (enemy.hp > 0 && enemy.is_alive) !== (previous.hp > 0 && previous.is_alive)
-      || !same(enemy.intents, previous.intents) || !same(enemy.powers, previous.powers)) reasons.push('Enemy availability, intent or powers changed.');
+      || !same(enemy.intents, previous.intents)
+      || !same(enemy.powers, previous.powers) && !expectedEnemyPowers(previous, enemy, expected)) reasons.push('Enemy availability, intent or powers changed.');
   }
   if (before.enemies.some(enemy => !after.enemies.some(other => other.combat_id === enemy.combat_id))) reasons.push('An enemy left combat.');
   return [...new Set(reasons)];

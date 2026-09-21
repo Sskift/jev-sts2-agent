@@ -333,7 +333,7 @@ export class DecisionMemory {
     if (sameTurn(this.data.turn_plan, state)) {
       this.data.pending.turn_plan_id = this.data.turn_plan.id;
       this.data.pending.turn_step = turnStep;
-      this.data.pending.turn_guard = turnGuard(state);
+      this.data.pending.turn_guard = turnGuard(state, Number.isInteger(turnStep) ? this.data.turn_plan.steps[turnStep] : null);
       this.data.pending.turn_card_cost = request.cmd === 'play_card' ? matching?.[request.nth ?? 0]?.cost : 0;
     }
     this.persist();
