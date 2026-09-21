@@ -457,5 +457,36 @@
     "The replay initial objective changed, so differences in candidate counts are not attributable solely to representation.",
     "No hypothetical sequence was executed in the game. Unknown effects remain unknown.",
     "Native API cost is not reported; recorded cost remains null rather than free."
-  ]
+  ],
+  "runtime_loaded": {
+    "commit": "7fc532d02aa6d12f2dd6d7461825027184a69ea0",
+    "root": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z",
+    "run_id": "run-1789958402",
+    "native_fingerprint_matched": true,
+    "prior_pending": null,
+    "resume_floor": 31,
+    "resume_turn": 1,
+    "hp": 14,
+    "energy": 2,
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "first_named_request": {
+      "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/step-0002/jev-turn_assess_plans-0004.json",
+      "sha256": "2803d14b2c49519794a6593d2ece19fdac765b02a8aab071f68e4f7ae27518d4"
+    },
+    "metrics": {
+      "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/step-0002/context-turn_assess_plans-0004.json",
+      "sha256": "8a3aa3bdb0261e20ac999f6f4c5a1d82c72264b952c4ff346b83e6b4b79de5cc"
+    },
+    "following_confirmed_command": {
+      "cmd": "play_card",
+      "id": "SHRUG_IT_OFF",
+      "nth": 0
+    },
+    "confirmed_after": {
+      "source": "run-artifacts/run33-resume5-2026-09-21T03-53-10.260Z/step-0002/after-state.json",
+      "sha256": "0e7c187e8ad6d96fb19a70fa73b3fad918638efc20882d99ffd3e140bff2e2f8"
+    },
+    "following_hp": 14
+  }
 }
