@@ -14,6 +14,48 @@ function state() {
 const strike = { kind: 'play_card', name: 'Strike', card_instance_id: 'STRIKE_IRONCLAD', target: 42 };
 const defend = { kind: 'play_card', name: 'Defend', card_instance_id: 'DEFEND_IRONCLAD' };
 
+function segmentState() {
+  const s = state(), base = s.combat.enemies[0];
+  s.combat.enemies = ['FRONT', 'MIDDLE', 'BACK'].map((part, index) => ({ ...structuredClone(base),
+    id: `DECIMILLIPEDE_SEGMENT_${part}`, combat_id: 42 + index, hp: index === 1 ? 0 : 6, is_alive: index !== 1,
+    powers: [{ id: 'REATTACH_POWER', amount: 25, description: 'If other segments are still alive, revives in 2 turns with 25 HP.' }],
+    intents: index === 1 ? [{ type: 'Heal' }] : [{ type: 'Attack', damage: 7, hits: 1 }] }));
+  s.combat.hand = [0, 1].map(index => fixtureCard(`ATTACK_${index}`, { index, can_play: true, target_type: 'AnyEnemy',
+    target_previews: [{ target_id: 42, damage: 6 }, { target_id: 44, damage: 6 }] }));
+  return s;
+}
+
+test('segment depletion cancels its attack while revival remains conditional on the other segments', () => {
+  const s = segmentState(), original = structuredClone(s);
+  const action = { ...strike, card_instance_id: 'ATTACK_0' };
+  const single = combatForecast(s.combat, s.combat.hand[0], s.combat.enemies[0]);
+  assert.equal(single.displayed_attacks_after_target_depletion, 7);
+  const partial = describeTurnProjection(s, [action]);
+  assert.equal(partial.known_effects_only.hp_if_ending, s.combat.player.hp - 7);
+  assert.equal(partial.known_effects_only.enemies[0].hp, 0);
+  assert.equal(partial.encounter_progress[0].reattach.all_segments_down_after_declared_actions, false);
+  assert.equal(partial.encounter_progress[0].permanent_removal_established, null);
+  s.combat.hand.push(fixtureCard('TOXIC', { index: 2, type: 'Status', description: 'At the end of your turn, take 3 damage.' }));
+  const finish = describeTurnProjection(s, [action, { ...action, card_instance_id: 'ATTACK_1', target: 44 }]);
+  assert.equal(finish.known_effects_only.hp_if_ending, s.combat.player.hp, 'No enemy or player turn-end after the group is depleted');
+  assert.deepEqual(finish.known_effects_only.end_turn_damage_events, []);
+  assert.ok(finish.encounter_progress.every(enemy => enemy.reattach.revival_prevented_by_group_depletion === true));
+  assert.ok(finish.encounter_progress.every(enemy => enemy.permanent_removal_established === true));
+  s.combat.hand.pop(); assert.deepEqual(s, original);
+});
+
+test('unverified owners and additional death hooks retain unknown depletion outcomes', () => {
+  const s = segmentState(), target = s.combat.enemies[0];
+  target.id = 'UNVERIFIED_REATTACH_OWNER';
+  assert.equal(combatForecast(s.combat, s.combat.hand[0], target).hp_remaining_if_end_turn, null);
+  target.id = 'DECIMILLIPEDE_SEGMENT_FRONT';
+  target.powers.push({ id: 'ADAPTABLE_POWER', amount: 1, description: 'Revives after death.' });
+  const result = describeTurnProjection(s, [{ ...strike, card_instance_id: 'ATTACK_0' }, { ...strike, card_instance_id: 'ATTACK_1', target: 44 }]);
+  assert.equal(result.known_effects_only.hp_if_ending, null);
+  assert.equal(result.encounter_progress[2].reattach.all_segments_down_after_declared_actions, null);
+  assert.equal(result.encounter_progress[2].permanent_removal_established, null);
+});
+
 test('uncomputed revival invalidates post-depletion enemy and survival estimates at both forecast boundaries', () => {
   const s = state(); s.combat.enemies[0].hp = 6;
   s.combat.enemies[0].powers = [{ id: 'ADAPTABLE_POWER', amount: 1, description: 'When this would be defeated, it revives stronger.' }];

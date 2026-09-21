@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { lookupRule } from './rule_reference.mjs';
 import { enemyOutlook } from './enemy_patterns.mjs';
+import { reattachPower, describeReattachProgress, uncomputedDepletionRules } from './combat_depletion.mjs';
 
 const notes = JSON.parse(fs.readFileSync(new URL('../data/strategy/v0.111.0/strategy.json', import.meta.url)));
 export function buildStrategyKnowledge(state) {
@@ -24,7 +25,7 @@ export function buildStrategyKnowledge(state) {
 }
 
 export function describeEnemyOutlook(state) {
-  return state.combat.enemies.filter(e => e.is_alive).map(enemy => enemyOutlook(enemy, lookupRule('monsters', enemy.id)?.moves));
+  return state.combat.enemies.filter(e => e.is_alive || reattachPower(e)).map(enemy => enemyOutlook(enemy, lookupRule('monsters', enemy.id)?.moves));
 }
 
 // Retain compact encounter feedback even when old turn-by-turn history is
@@ -63,12 +64,16 @@ export function encounterProgress(combat, remaining, unknownTargets = []) {
     const minion = illusion || powers.some(p => p.id === 'MINION_POWER');
     const unknown = unknownTargets.includes(enemy.combat_id);
     const loss = !after || unknown ? null : Math.max(0, enemy.hp - after.hp);
+    const reattach = describeReattachProgress(combat, enemy, remaining, unknownTargets);
     return { combat_id: enemy.combat_id, role: minion ? 'minion' : 'not_identified_as_minion',
       hp_removed_if_declared_actions_resolve: loss,
       hp_depleted: loss === null ? null : after.hp <= 0,
       depletion_rules: rules.map(p => ({ id: p.id, rules: p.description || lookupRule('powers', p.id.replace(/_POWER$/, ''))?.description_raw })),
       ...(illusion ? { consequence: 'Illusion replaces death with a revival move at full HP next turn and grants Minion. Partial damage neither cancels its current attack nor defeats it. Depletion interrupts its current attack but does not permanently remove it while a primary enemy remains.' } : {}),
-      permanent_removal_established: loss === null || rules.length ? null : after.hp <= 0,
+      ...(reattach ? { reattach } : {}),
+      permanent_removal_established: loss === null ? null : reattach && !uncomputedDepletionRules(enemy).length
+        ? after.hp <= 0 && reattach.all_segments_down_after_declared_actions === true ? true : null
+        : rules.length ? null : after.hp <= 0,
       scope: 'Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed.' };
   });
 }

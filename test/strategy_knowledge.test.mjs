@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { extractPattern } from '../scripts/extract_enemy_patterns.mjs';
 import { enemyPattern, enemyOutlook } from '../src/enemy_patterns.mjs';
 import { lookupRule } from '../src/rule_reference.mjs';
-import { buildStrategyKnowledge, encounterProgress, describeCombatProgress } from '../src/strategy_knowledge.mjs';
+import { buildStrategyKnowledge, encounterProgress, describeCombatProgress, describeEnemyOutlook } from '../src/strategy_knowledge.mjs';
 import { completeCombat } from './fixtures/context.mjs';
 
 test('native patterns retain optional-weight branches, repeat caps and cooldowns without confusing overloads', () => {
@@ -47,6 +47,19 @@ test('future patterns follow only visible intent and do not consume an internal 
   assert.deepEqual(enemyOutlook({ ...enemy, intents: [{ type: 'Unknown' }] }).matching_moves, []);
   const beast = enemyOutlook({ ...enemy, id: 'CEREMONIAL_BEAST', intents: [{ type: 'Attack', hits: 1 }, { type: 'Buff' }] });
   assert.equal(beast.matching_moves.length, 2, 'Same visible shape must not identify a hidden phase');
+});
+
+test('a downed segment still exposes its visible revival intent and unknown random follow-up', () => {
+  const state = completeCombat();
+  Object.assign(state.combat.enemies[0], { id: 'DECIMILLIPEDE_SEGMENT_FRONT', hp: 0, is_alive: false,
+    powers: [{ id: 'REATTACH_POWER', amount: 25 }], intents: [{ type: 'Heal' }] });
+  const outlook = describeEnemyOutlook(state);
+  assert.equal(outlook.length, 1);
+  assert.equal(outlook[0].matching_moves[0].current_move, 'REATTACH');
+  assert.equal(outlook[0].matching_moves[0].after_current_intent.branch, 'random');
+  assert.match(outlook[0].matching_moves[0].after_current_intent.resolution, /Unknown/);
+  const progress = encounterProgress(state.combat, [{ combat_id: 42, hp: 0 }], [42]);
+  assert.equal(progress[0].reattach.revival_prevented_by_group_depletion, null);
 });
 
 test('visible status-card intents identify their public move and linked card generation', () => {

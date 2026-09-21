@@ -2,6 +2,8 @@ import { projectPositioning } from './combat_positioning.mjs';
 import { uncomputedAttackReactions } from './combat_reactions.mjs';
 import { attackCardFlowEffects, describeCardFlow } from './card_flow_projection.mjs';
 import { knownTurnEndDamage, uncomputedTurnEndHealthEffects } from './effect_lifecycle.mjs';
+import { uncomputedDepletionRules } from './combat_depletion.mjs';
+export { uncomputedDepletionRules } from './combat_depletion.mjs';
 
 // Arithmetic over player-visible facts only. These are single-action estimates,
 // not a combat simulator: draws, general triggered effects and future choices stay unknown.
@@ -39,10 +41,6 @@ export function attackHitPreview(card) {
 }
 
 export const previewHitCount = card => attackHitPreview(card).hits;
-
-export const uncomputedDepletionRules = enemy => (enemy.powers || []).filter(p => !['ILLUSION_POWER', 'MINION_POWER'].includes(p.id)
-  && (['ADAPTABLE_POWER', 'REATTACH_POWER'].includes(p.id)
-    || /reviv|resurrect|(?:when|upon|on)[^.]*\b(?:death|dies?|defeated)\b/i.test(p.description || '')));
 
 export function previewDamageSum(card, enemy) {
   const damage = card.target_previews?.find(preview => preview.target_id === enemy.combat_id)?.damage;
@@ -109,7 +107,9 @@ export function combatForecast(combat, card = null, target = null) {
   const exhausted = card?.id === 'SECOND_WIND' ? (combat.hand || []).filter(other => other.index !== card.index && other.type !== 'Attack') : null;
   const remainingHand = (combat.hand || []).filter(other => other.index !== card?.index && !exhausted?.some(removed => removed.index === other.index));
   const living = combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0);
-  const allTargetsDepleted = living.length > 0 && living.every(enemy => depleted.has(enemy.combat_id));
+  // A sequence forecast may already have depleted every enemy before this
+  // final empty-action forecast. There is then no turn-end damage to advance.
+  const allTargetsDepleted = combat.enemies.length > 0 && living.every(enemy => depleted.has(enemy.combat_id));
   const endTurnDamage = allTargetsDepleted ? [] : knownTurnEndDamage(combat, remainingHand, depleted);
   const timedEffects = allTargetsDepleted ? [] : uncomputedTurnEndHealthEffects(combat, remainingHand, endTurnDamage);
   const healthUnresolved = reactionUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;

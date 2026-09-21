@@ -1,0 +1,1057 @@
+{
+  "at": "2026-09-21T02:36:47.908Z",
+  "run_id": "run-1789936871",
+  "roots": [
+    "run-artifacts/run32-2026-09-20T20-41-07.165Z",
+    "run-artifacts/run32-resume-2026-09-20T20-54-30.343Z",
+    "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z",
+    "run-artifacts/run32-resume3-2026-09-21T02-01-51.174Z",
+    "run-artifacts/run32-resume4-2026-09-21T02-13-16.240Z",
+    "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z"
+  ],
+  "started_at_floor": 1,
+  "acts": [
+    0,
+    1
+  ],
+  "final": {
+    "source": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/settled-game-over.json",
+    "sha256": "d571630806c07c5b8340bc2eacee5cbf69a29fb6f80be6b3e13444f128a49218",
+    "is_victory": false,
+    "floor": 27,
+    "score": 524,
+    "epochs_discovered": 0,
+    "can_return_to_menu": true,
+    "can_continue": false
+  },
+  "final_memory": {
+    "source": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/final-memory.json",
+    "sha256": "ed229e64d3f942b2b5b83c571dbaafd6d9d6566b66835a50a4d58a3de9156f46",
+    "pending": null
+  },
+  "live_usage": [
+    {
+      "model": "typesafe/jev-1.13-20260917",
+      "responses": 2294,
+      "input_tokens": 51174604,
+      "output_tokens": 178524,
+      "reported_cost_usd": 2.1493333679999993
+    },
+    {
+      "model": "jev-1.13.0",
+      "responses": 545,
+      "input_tokens": 13347374,
+      "output_tokens": 30755,
+      "reported_cost_usd": null
+    }
+  ],
+  "elite": {
+    "floor": 27,
+    "enter_hp": 48,
+    "turns": [
+      {
+        "turn": 1,
+        "source": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0097",
+        "hp": 48,
+        "enemies_hp": [
+          40,
+          42,
+          46
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "SHOCKWAVE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "DRAMATIC_ENTRANCE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "EQUILIBRIUM",
+            "nth": 0
+          }
+        ],
+        "end_hp": 45,
+        "hp_balance_before_clamping": 45,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 2,
+        "source": "run-artifacts/run32-resume4-2026-09-21T02-13-16.240Z/step-0001",
+        "hp": 45,
+        "enemies_hp": [
+          24,
+          26,
+          30
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "RAGE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "POMMEL_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 2,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 2
+          },
+          {
+            "cmd": "play_card",
+            "id": "PRIMAL_FORCE",
+            "nth": 0
+          }
+        ],
+        "end_hp": 45,
+        "hp_balance_before_clamping": 45,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 3,
+        "source": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0006",
+        "hp": 45,
+        "enemies_hp": [
+          0,
+          16,
+          30
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "UPPERCUT",
+            "nth": 0,
+            "target": 2
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 3
+          }
+        ],
+        "end_hp": 34,
+        "hp_balance_before_clamping": 34,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 4,
+        "source": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0009",
+        "hp": 34,
+        "enemies_hp": [
+          25,
+          2,
+          20
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "BULLY",
+            "nth": 0,
+            "target": 3
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "THUNDERCLAP",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "HEADBUTT",
+            "nth": 0,
+            "target": 1
+          }
+        ],
+        "end_hp": 23,
+        "hp_balance_before_clamping": 23,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 5,
+        "source": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0014",
+        "hp": 23,
+        "enemies_hp": [
+          12,
+          0,
+          7
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "THUNDERCLAP",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "INFLAME",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          }
+        ],
+        "end_hp": 8,
+        "hp_balance_before_clamping": 8,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 6,
+        "source": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0018",
+        "hp": 8,
+        "enemies_hp": [
+          8,
+          25,
+          1
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "BULLY",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 1,
+            "target": 3
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "EQUILIBRIUM",
+            "nth": 0
+          }
+        ],
+        "end_hp": 8,
+        "hp_balance_before_clamping": 8,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 7,
+        "source": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0024",
+        "hp": 8,
+        "enemies_hp": [
+          0,
+          25,
+          0
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "RAGE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "GIANT_ROCK",
+            "nth": 0,
+            "target": 2
+          },
+          {
+            "cmd": "play_card",
+            "id": "TRUE_GRIT",
+            "nth": 0
+          },
+          {
+            "cmd": "hand_select_card",
+            "card_ids": [
+              "PRIMAL_FORCE"
+            ],
+            "nth_values": [
+              0
+            ]
+          },
+          {
+            "cmd": "hand_confirm_selection"
+          }
+        ],
+        "end_hp": 8,
+        "hp_balance_before_clamping": 8,
+        "endpoint_matches": true
+      },
+      {
+        "turn": 8,
+        "source": "run-artifacts/run32-typesafe-2026-09-21T02-17-47.333Z/step-0031",
+        "hp": 8,
+        "enemies_hp": [
+          25,
+          3,
+          25
+        ],
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 3
+          },
+          {
+            "cmd": "play_card",
+            "id": "GIANT_ROCK",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "TRUE_GRIT",
+            "nth": 0
+          },
+          {
+            "cmd": "hand_select_card",
+            "card_ids": [
+              "SHRUG_IT_OFF"
+            ],
+            "nth_values": [
+              0
+            ]
+          },
+          {
+            "cmd": "hand_confirm_selection"
+          }
+        ],
+        "end_hp": 0,
+        "hp_balance_before_clamping": -11,
+        "endpoint_matches": true
+      }
+    ]
+  },
+  "change": {
+    "reason": "Reattach depletion was incorrectly left wholly unknown, erasing canceled current attacks and group defeat. Downed segments were omitted from enemy outlook.",
+    "behavior": "Known segment depletion cancels its move; revival depends on another living Reattach owner. Joint group depletion prevents revival. Unknown owners/additional death hooks remain unresolved. Downed visible Heal intents retain their public next-move graph.",
+    "native_sources": [
+      {
+        "source": "temp/knowledge-research/ReattachPower.cs",
+        "sha256": "405e83a07405fda654eb22b09717d112ea33f04502634ba877cbd52abf200175"
+      },
+      {
+        "source": "temp/knowledge-research/monsters/DecimillipedeSegment.cs",
+        "sha256": "e99271a5278251619c9f1d3446d7aa1b3c1d0c1214766735201f9a505d808862"
+      }
+    ],
+    "assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9"
+  },
+  "conditional_examples": [
+    {
+      "step": "step-0014",
+      "turn": 5,
+      "actions": [
+        [
+          "GIANT_ROCK",
+          1
+        ],
+        [
+          "STRIKE_IRONCLAD",
+          3
+        ]
+      ],
+      "projection": {
+        "calculation_status": "preview_arithmetic",
+        "fully_simulated": false,
+        "known_effects_only": {
+          "block": 0,
+          "hp_if_ending": 23,
+          "hp_loss_if_ending": 0,
+          "block_including_end_turn_gains": 0,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": 0,
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 12,
+              "block_removed": 0,
+              "power_changes": []
+            },
+            {
+              "combat_id": 2,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            },
+            {
+              "combat_id": 3,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 7,
+              "block_removed": 0,
+              "power_changes": []
+            }
+          ]
+        },
+        "sequence_dependencies": {
+          "is_observed": false,
+          "steps": [
+            {
+              "sequence": 0,
+              "source_id": "GIANT_ROCK",
+              "energy_before": 3,
+              "energy_after": 2,
+              "strength_change_before_action": 0,
+              "dexterity_change_before_action": 0,
+              "damage_instances": 1,
+              "damage_per_target": [
+                {
+                  "target_id": 1,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 20,
+                    "max": 20
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 20,
+                    "max": 20
+                  }
+                },
+                {
+                  "target_id": 3,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 30,
+                    "max": 30
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 30,
+                    "max": 30
+                  }
+                }
+              ],
+              "after_block_and_hp_loss_caps": [
+                {
+                  "target_id": 1,
+                  "hits_counted": 1,
+                  "hp_removed": 12,
+                  "block_removed": 0,
+                  "applied_hp_loss_limits": [],
+                  "scope": "Conditional arithmetic for the counted hits, after current target Block and supported HP-loss caps. Other triggers, changed modifiers and death effects may invalidate it. These are not the pre-prevention damage numbers."
+                }
+              ]
+            },
+            {
+              "sequence": 1,
+              "source_id": "STRIKE_IRONCLAD",
+              "energy_before": 2,
+              "energy_after": 1,
+              "strength_change_before_action": 0,
+              "dexterity_change_before_action": 0,
+              "damage_instances": 1,
+              "damage_per_target": [
+                {
+                  "target_id": 1,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 9,
+                    "max": 9
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 9,
+                    "max": 9
+                  }
+                },
+                {
+                  "target_id": 3,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 13,
+                    "max": 13
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 13,
+                    "max": 13
+                  }
+                }
+              ],
+              "after_block_and_hp_loss_caps": [
+                {
+                  "target_id": 3,
+                  "hits_counted": 1,
+                  "hp_removed": 7,
+                  "block_removed": 0,
+                  "applied_hp_loss_limits": [],
+                  "scope": "Conditional arithmetic for the counted hits, after current target Block and supported HP-loss caps. Other triggers, changed modifiers and death effects may invalidate it. These are not the pre-prevention damage numbers."
+                }
+              ]
+            }
+          ],
+          "checkpoint": null,
+          "violations": [],
+          "scope": "Conditional ordered costs, inspectable hand upgrades, resolved stat potion deltas, direct Inflame/Footwork gains, Setup Strike, Tender after each card, and identity-X Whirlwind payment. Stat deltas use ordinary Weak, Vulnerable, Shrink and Frail multipliers while those modifiers remain active; source death and other multiplier changes are not simulated. Next-card consumers, draws and other uncomputed state changes require observation. Native starting previews are not reapplied as unchanged future facts; unresolved ranges remain unknown. No actions beyond a checkpoint are promised."
+        },
+        "encounter_progress": [
+          {
+            "combat_id": 1,
+            "role": "not_identified_as_minion",
+            "hp_removed_if_declared_actions_resolve": 12,
+            "hp_depleted": true,
+            "depletion_rules": [
+              {
+                "id": "REATTACH_POWER",
+                "rules": "If other segments are still alive, revives in 2 turns with 25 HP."
+              }
+            ],
+            "reattach": {
+              "current_intent_canceled_if_depleted": true,
+              "enemy_turns_until_revive_after_new_depletion": 2,
+              "revive_hp_before_other_modifiers": 25,
+              "all_segments_down_after_declared_actions": true,
+              "revival_prevented_by_group_depletion": true,
+              "scope": "Conditional on the declared hits resolving. A newly depleted segment loses its current attack and cannot be hit while reviving. Existing downed segments may already be closer to revival; use their visible intent. If all Reattach owners are down before a revival, the group stays defeated. Otherwise a surviving segment permits revival; future random attacks and healing modifiers are not simulated."
+            },
+            "permanent_removal_established": true,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          },
+          {
+            "combat_id": 2,
+            "role": "not_identified_as_minion",
+            "hp_removed_if_declared_actions_resolve": 0,
+            "hp_depleted": true,
+            "depletion_rules": [
+              {
+                "id": "REATTACH_POWER",
+                "rules": "If other segments are still alive, revives in 2 turns with 25 HP."
+              }
+            ],
+            "reattach": {
+              "current_intent_canceled_if_depleted": true,
+              "enemy_turns_until_revive_after_new_depletion": 2,
+              "revive_hp_before_other_modifiers": 25,
+              "all_segments_down_after_declared_actions": true,
+              "revival_prevented_by_group_depletion": true,
+              "scope": "Conditional on the declared hits resolving. A newly depleted segment loses its current attack and cannot be hit while reviving. Existing downed segments may already be closer to revival; use their visible intent. If all Reattach owners are down before a revival, the group stays defeated. Otherwise a surviving segment permits revival; future random attacks and healing modifiers are not simulated."
+            },
+            "permanent_removal_established": true,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          },
+          {
+            "combat_id": 3,
+            "role": "not_identified_as_minion",
+            "hp_removed_if_declared_actions_resolve": 7,
+            "hp_depleted": true,
+            "depletion_rules": [
+              {
+                "id": "REATTACH_POWER",
+                "rules": "If other segments are still alive, revives in 2 turns with 25 HP."
+              }
+            ],
+            "reattach": {
+              "current_intent_canceled_if_depleted": true,
+              "enemy_turns_until_revive_after_new_depletion": 2,
+              "revive_hp_before_other_modifiers": 25,
+              "all_segments_down_after_declared_actions": true,
+              "revival_prevented_by_group_depletion": true,
+              "scope": "Conditional on the declared hits resolving. A newly depleted segment loses its current attack and cannot be hit while reviving. Existing downed segments may already be closer to revival; use their visible intent. If all Reattach owners are down before a revival, the group stays defeated. Otherwise a surviving segment permits revival; future random attacks and healing modifiers are not simulated."
+            },
+            "permanent_removal_established": true,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          }
+        ],
+        "omitted_effects": [],
+        "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+        "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+      },
+      "complete_context_bytes": 62407
+    },
+    {
+      "step": "step-0025",
+      "turn": 7,
+      "actions": [
+        [
+          "GIANT_ROCK",
+          2
+        ],
+        [
+          "POMMEL_STRIKE",
+          2
+        ]
+      ],
+      "projection": {
+        "calculation_status": "incomplete",
+        "fully_simulated": false,
+        "known_effects_only": {
+          "block": 10,
+          "hp_if_ending": null,
+          "hp_loss_if_ending": null,
+          "block_including_end_turn_gains": null,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": null,
+          "enemies": [
+            {
+              "combat_id": 1,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            },
+            {
+              "combat_id": 2,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 25,
+              "block_removed": 0,
+              "power_changes": []
+            },
+            {
+              "combat_id": 3,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            }
+          ]
+        },
+        "sequence_dependencies": {
+          "is_observed": false,
+          "steps": [
+            {
+              "sequence": 0,
+              "source_id": "GIANT_ROCK",
+              "energy_before": 3,
+              "energy_after": 2,
+              "strength_change_before_action": 0,
+              "dexterity_change_before_action": 0,
+              "damage_instances": 1,
+              "damage_per_target": [
+                {
+                  "target_id": 2,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 22,
+                    "max": 22
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 22,
+                    "max": 22
+                  }
+                }
+              ],
+              "after_block_and_hp_loss_caps": [
+                {
+                  "target_id": 2,
+                  "hits_counted": 1,
+                  "hp_removed": 22,
+                  "block_removed": 0,
+                  "applied_hp_loss_limits": [],
+                  "scope": "Conditional arithmetic for the counted hits, after current target Block and supported HP-loss caps. Other triggers, changed modifiers and death effects may invalidate it. These are not the pre-prevention damage numbers."
+                }
+              ]
+            },
+            {
+              "sequence": 1,
+              "source_id": "POMMEL_STRIKE",
+              "energy_before": 2,
+              "energy_after": 1,
+              "strength_change_before_action": 0,
+              "dexterity_change_before_action": 0,
+              "damage_instances": 1,
+              "damage_per_target": [
+                {
+                  "target_id": 2,
+                  "per_hit_before_block_and_hp_loss_caps": {
+                    "min": 15,
+                    "max": 15
+                  },
+                  "total_before_block_and_hp_loss_caps": {
+                    "min": 15,
+                    "max": 15
+                  }
+                }
+              ],
+              "after_block_and_hp_loss_caps": [
+                {
+                  "target_id": 2,
+                  "hits_counted": 1,
+                  "hp_removed": 3,
+                  "block_removed": 0,
+                  "applied_hp_loss_limits": [],
+                  "scope": "Conditional arithmetic for the counted hits, after current target Block and supported HP-loss caps. Other triggers, changed modifiers and death effects may invalidate it. These are not the pre-prevention damage numbers."
+                }
+              ]
+            }
+          ],
+          "checkpoint": {
+            "after_sequence": 1,
+            "source_id": "POMMEL_STRIKE",
+            "reason": "Draw 2 cards"
+          },
+          "violations": [],
+          "scope": "Conditional ordered costs, inspectable hand upgrades, resolved stat potion deltas, direct Inflame/Footwork gains, Setup Strike, Tender after each card, and identity-X Whirlwind payment. Stat deltas use ordinary Weak, Vulnerable, Shrink and Frail multipliers while those modifiers remain active; source death and other multiplier changes are not simulated. Next-card consumers, draws and other uncomputed state changes require observation. Native starting previews are not reapplied as unchanged future facts; unresolved ranges remain unknown. No actions beyond a checkpoint are promised."
+        },
+        "encounter_progress": [
+          {
+            "combat_id": 1,
+            "role": "not_identified_as_minion",
+            "hp_removed_if_declared_actions_resolve": 0,
+            "hp_depleted": true,
+            "depletion_rules": [
+              {
+                "id": "REATTACH_POWER",
+                "rules": "If other segments are still alive, revives in 2 turns with 25 HP."
+              }
+            ],
+            "reattach": {
+              "current_intent_canceled_if_depleted": true,
+              "enemy_turns_until_revive_after_new_depletion": 2,
+              "revive_hp_before_other_modifiers": 25,
+              "all_segments_down_after_declared_actions": true,
+              "revival_prevented_by_group_depletion": true,
+              "scope": "Conditional on the declared hits resolving. A newly depleted segment loses its current attack and cannot be hit while reviving. Existing downed segments may already be closer to revival; use their visible intent. If all Reattach owners are down before a revival, the group stays defeated. Otherwise a surviving segment permits revival; future random attacks and healing modifiers are not simulated."
+            },
+            "permanent_removal_established": true,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          },
+          {
+            "combat_id": 2,
+            "role": "not_identified_as_minion",
+            "hp_removed_if_declared_actions_resolve": 25,
+            "hp_depleted": true,
+            "depletion_rules": [
+              {
+                "id": "REATTACH_POWER",
+                "rules": "If other segments are still alive, revives in 2 turns with 25 HP."
+              }
+            ],
+            "reattach": {
+              "current_intent_canceled_if_depleted": true,
+              "enemy_turns_until_revive_after_new_depletion": 2,
+              "revive_hp_before_other_modifiers": 25,
+              "all_segments_down_after_declared_actions": true,
+              "revival_prevented_by_group_depletion": true,
+              "scope": "Conditional on the declared hits resolving. A newly depleted segment loses its current attack and cannot be hit while reviving. Existing downed segments may already be closer to revival; use their visible intent. If all Reattach owners are down before a revival, the group stays defeated. Otherwise a surviving segment permits revival; future random attacks and healing modifiers are not simulated."
+            },
+            "permanent_removal_established": true,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          },
+          {
+            "combat_id": 3,
+            "role": "not_identified_as_minion",
+            "hp_removed_if_declared_actions_resolve": 0,
+            "hp_depleted": true,
+            "depletion_rules": [
+              {
+                "id": "REATTACH_POWER",
+                "rules": "If other segments are still alive, revives in 2 turns with 25 HP."
+              }
+            ],
+            "reattach": {
+              "current_intent_canceled_if_depleted": true,
+              "enemy_turns_until_revive_after_new_depletion": 2,
+              "revive_hp_before_other_modifiers": 25,
+              "all_segments_down_after_declared_actions": true,
+              "revival_prevented_by_group_depletion": true,
+              "scope": "Conditional on the declared hits resolving. A newly depleted segment loses its current attack and cannot be hit while reviving. Existing downed segments may already be closer to revival; use their visible intent. If all Reattach owners are down before a revival, the group stays defeated. Otherwise a surviving segment permits revival; future random attacks and healing modifiers are not simulated."
+            },
+            "permanent_removal_established": true,
+            "scope": "Conditional HP progress, not a complete death-hook simulation. Account for leader removal, revival, phase changes and current attacks separately; no future random outcome is assumed."
+          }
+        ],
+        "omitted_effects": [
+          "Pommel Strike+: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed",
+          "Observe after POMMEL_STRIKE: Draw 2 cards No later action or end-turn outcome is promised."
+        ],
+        "interpretation": "Numbers exclude omitted effects; an omitted effect is not zero benefit. Compare its full rules, timing and later-turn benefits separately. Equal baselines do not establish equal outcomes.",
+        "scope": "Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint."
+      },
+      "complete_context_bytes": 63765
+    }
+  ],
+  "replay": {
+    "freeze": {
+      "source": "run-artifacts/run32-reattach-review/freeze.json",
+      "candidate_sha256": "e244711ac883c39abf4272216d63bc808ee962e14916848f0c55b276d0e0976a"
+    },
+    "cases": [
+      {
+        "id": "elite-turn5",
+        "source": "run-artifacts/run32-reattach-review/cases/elite-turn5.json",
+        "input_sha256": "1f53571cb446403fa59ce427d618a4795f1b3fd8edc12a9ea16d1e61bd681624",
+        "result_root": "run-artifacts/run32-reattach-review/results/elite-turn5/segment-depletion/1",
+        "calls": 45,
+        "usage": {
+          "input_tokens": 1114624,
+          "output_tokens": 2363
+        },
+        "actual_providers": [
+          "typesafe"
+        ],
+        "actual_models": [
+          "jev-1.13.0"
+        ],
+        "request": {
+          "cmd": "play_card",
+          "id": "GIANT_ROCK",
+          "nth": 0,
+          "target": 3
+        },
+        "steps": [
+          {
+            "kind": "play_card",
+            "card_id": "GIANT_ROCK",
+            "target": 3
+          },
+          {
+            "kind": "play_card",
+            "card_id": "STRIKE_IRONCLAD",
+            "target": 1
+          },
+          {
+            "kind": "play_card",
+            "card_id": "THUNDERCLAP"
+          },
+          {
+            "kind": "end_turn"
+          }
+        ],
+        "coverage": {
+          "inspected_prefixes": 1308,
+          "enumerated_plans": 325,
+          "selected_plans": 64,
+          "first_action_variants": 8,
+          "search_truncated": false,
+          "candidate_selection_truncated": true,
+          "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+          "eligible_plans": 91,
+          "assessed_plans": 91,
+          "distinct_allocations": 57,
+          "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+          "compared_plans": 4
+        },
+        "assessment_shortlist": [
+          {
+            "value": "variant_56",
+            "score": 2.94,
+            "probabilities": {
+              "0": 0.04,
+              "1": 0.12,
+              "2": 0.1,
+              "3": 0.35,
+              "4": 0.39
+            },
+            "confidence": 0.11,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "enemy_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "variant_46",
+            "score": 2.92,
+            "probabilities": {
+              "0": 0.07,
+              "1": 0.14,
+              "2": 0.08,
+              "3": 0.21,
+              "4": 0.5
+            },
+            "confidence": 0.1,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "enemy_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "variant_25",
+            "score": 2.88,
+            "probabilities": {
+              "0": 0.03,
+              "1": 0.16,
+              "2": 0.1,
+              "3": 0.31,
+              "4": 0.4
+            },
+            "confidence": 0.07,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "enemy_turn",
+            "energy_left": 1
+          }
+        ],
+        "compared_pairs": 6,
+        "order_disagreements": 5
+      },
+      {
+        "id": "elite-turn7-after-rage",
+        "source": "run-artifacts/run32-reattach-review/cases/elite-turn7-after-rage.json",
+        "input_sha256": "74f689947c18b57f2e3a2214ebc17fb66cb474d2b3bff6c60d3283f03a4b7cff",
+        "result_root": "run-artifacts/run32-reattach-review/results/elite-turn7-after-rage/segment-depletion/1",
+        "calls": 66,
+        "usage": {
+          "input_tokens": 1644621,
+          "output_tokens": 3777
+        },
+        "actual_providers": [
+          "typesafe"
+        ],
+        "actual_models": [
+          "jev-1.13.0"
+        ],
+        "request": {
+          "cmd": "play_card",
+          "id": "DEFEND_IRONCLAD",
+          "nth": 0
+        },
+        "steps": [
+          {
+            "kind": "play_card",
+            "card_id": "DEFEND_IRONCLAD"
+          },
+          {
+            "kind": "play_card",
+            "card_id": "GIANT_ROCK",
+            "target": 2
+          },
+          {
+            "kind": "play_card",
+            "card_id": "POMMEL_STRIKE",
+            "target": 2
+          }
+        ],
+        "coverage": {
+          "inspected_prefixes": 138,
+          "enumerated_plans": 79,
+          "selected_plans": 64,
+          "first_action_variants": 8,
+          "search_truncated": false,
+          "candidate_selection_truncated": true,
+          "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+          "eligible_plans": 65,
+          "assessed_plans": 65,
+          "distinct_allocations": 47,
+          "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+          "compared_plans": 6
+        },
+        "assessment_shortlist": [
+          {
+            "value": "variant_51",
+            "score": 2.57,
+            "probabilities": {
+              "0": 0.08,
+              "1": 0.17,
+              "2": 0.11,
+              "3": 0.37,
+              "4": 0.27
+            },
+            "confidence": 0.19,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "observe_then_continue_same_player_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "variant_35",
+            "score": 2.42,
+            "probabilities": {
+              "0": 0.07,
+              "1": 0.2,
+              "2": 0.15,
+              "3": 0.4,
+              "4": 0.18
+            },
+            "confidence": 0.22,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "observe_then_continue_same_player_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "variant_16",
+            "score": 2.39,
+            "probabilities": {
+              "0": 0.11,
+              "1": 0.21,
+              "2": 0.1,
+              "3": 0.32,
+              "4": 0.26
+            },
+            "confidence": 0.07,
+            "reason": "best_assessed_distinct_allocation",
+            "handoff": "observe_then_continue_same_player_turn",
+            "energy_left": 1
+          },
+          {
+            "value": "variant_43",
+            "score": 1.95,
+            "probabilities": {
+              "0": 0.17,
+              "1": 0.3,
+              "2": 0.12,
+              "3": 0.23,
+              "4": 0.18
+            },
+            "confidence": 0,
+            "reason": "best_assessed_handoff",
+            "handoff": "enemy_turn",
+            "energy_left": 0
+          },
+          {
+            "value": "variant_7",
+            "score": 2.04,
+            "probabilities": {
+              "0": 0.07,
+              "1": 0.3,
+              "2": 0.22,
+              "3": 0.34,
+              "4": 0.07
+            },
+            "confidence": 0.08,
+            "reason": "preserve_resources_for_observation",
+            "handoff": "observe_then_continue_same_player_turn",
+            "energy_left": 3
+          }
+        ],
+        "compared_pairs": 15,
+        "order_disagreements": 5
+      }
+    ]
+  },
+  "validation": {
+    "targeted_checks": 42,
+    "failures": 0,
+    "log": "temp/run32-reattach-checks.log"
+  },
+  "limitations": [
+    "Inspected development cases, not held-out evidence or a win-rate estimate.",
+    "Replay plans conditionally deplete the group but were not executed; actual death/draw triggers would still require reobservation.",
+    "Turn5 uses three attacks where the visible hand supports a two-attack finish; turn7 still includes unnecessary defense.",
+    "Balanced comparisons still disagree across presentation order. Confidence is not correctness or win probability.",
+    "Native TypeSafe responses did not report cost; null is not free usage."
+  ]
+}
