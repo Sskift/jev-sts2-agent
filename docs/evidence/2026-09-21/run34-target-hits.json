@@ -1,0 +1,375 @@
+{
+  "at": "2026-09-21T04:23:12.418Z",
+  "run_id": "run-1789963561",
+  "source": {
+    "source": "run-artifacts/run34-2026-09-21T04-05-56.584Z/step-0017/before-state.json",
+    "sha256": "590388e6302fe875d505b97b4eb79bd264e852f650d468548fcb795043f37852"
+  },
+  "native_rule": {
+    "source": "temp/knowledge-research/Dismantle.cs",
+    "sha256": "b4895dc380d3bf1e4c6fe94debefc88666c92f28f9a983862f6bd1331c086fd8"
+  },
+  "assembly": {
+    "source": "D:/SteamLibrary/steamapps/common/Slay the Spire 2/data_sts2_windows_x86_64/sts2.dll",
+    "sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9"
+  },
+  "observed_defect": {
+    "request": {
+      "source": "run-artifacts/run34-2026-09-21T04-05-56.584Z/step-0021/jev-turn_assess_plans-0008.json",
+      "sha256": "a484fe3d76a97e78860b6752bfb6bf5d481d7729d449dde60680cfcedd98d69d"
+    },
+    "declared_plan": [
+      "Strike target2",
+      "Defend",
+      "Dismantle target2"
+    ],
+    "old_reported_enemy_hp": 20,
+    "old_reported_hp_removed": 6,
+    "original_enemy_hp": 26,
+    "dismantle_before": {
+      "source": "run-artifacts/run34-2026-09-21T04-05-56.584Z/step-0023/before-state.json",
+      "sha256": "4c69e41498e9d20769b59e6f43c19a5b50af77c987ed89cf87d134a17c019baa"
+    },
+    "actual_after": {
+      "source": "run-artifacts/run34-2026-09-21T04-05-56.584Z/step-0023/after-state.json",
+      "sha256": "1acac05a7dcfa3f2f0df3dc3de2b15b9ea95d24d1fd293d92229b102d1d99089"
+    },
+    "actual_enemy_hp": 12,
+    "actual_dismantle_hp_loss": 8
+  },
+  "change": "Unknown hit counts invalidate affected enemy HP and response estimates instead of acting as zero damage. Verified native Dismantle target condition is shared by single-action damage, ordered Weak/Vulnerable branches, hit caps, reactions and card-generation counts. Artifact absorption keeps the condition false. Unknown effects and automatic repetitions remain unknown.",
+  "conditional_examples": {
+    "original_initial_plan": {
+      "sequence": [
+        {
+          "action": "Bash",
+          "target": 3
+        },
+        {
+          "action": "Strike",
+          "target": 3
+        }
+      ],
+      "energy": 0,
+      "known": {
+        "block": 0,
+        "hp_if_ending": 69,
+        "hp_loss_if_ending": 11,
+        "block_including_end_turn_gains": 0,
+        "end_turn_block_gains": [],
+        "end_turn_damage_events": [],
+        "incoming_attack": 11,
+        "enemies": [
+          {
+            "combat_id": 2,
+            "hp": 26,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0,
+            "power_changes": []
+          },
+          {
+            "combat_id": 3,
+            "hp": 0,
+            "block": 0,
+            "hp_removed": 13,
+            "block_removed": 0,
+            "power_changes": [
+              {
+                "power_id": "VULNERABLE_POWER",
+                "before": 0,
+                "after_declared_actions": {
+                  "min": 2,
+                  "max": 2
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "resources": {
+        "current_displayed_attack_damage": 14,
+        "consumed_potions": [],
+        "potions_still_available": [
+          {
+            "id": "BLOCK_POTION",
+            "slot": 0
+          }
+        ],
+        "known_blockable_damage_before_block": 11,
+        "block_unused_by_known_damage": 0,
+        "ordinary_block_reset": "At the next owner turn start; it protects through this enemy response, but does not carry to a later enemy turn without a retention rule.",
+        "scope": "Conditional on the declared actions. Consumed potions are unavailable afterward; held automatic potions remain armed until their conditions trigger, and their final inventory is not simulated. Block accounting covers only calculated incoming damage; evaluate uncomputed triggers, retention and other uses of Block from the current rules."
+      }
+    },
+    "final_replay": {
+      "sequence": [
+        {
+          "action": "Strike",
+          "target": 3
+        },
+        {
+          "action": "Defend"
+        },
+        {
+          "action": "Dismantle",
+          "target": 3
+        }
+      ],
+      "energy": 0,
+      "known": {
+        "block": 5,
+        "hp_if_ending": 74,
+        "hp_loss_if_ending": 6,
+        "block_including_end_turn_gains": 5,
+        "end_turn_block_gains": [],
+        "end_turn_damage_events": [],
+        "incoming_attack": 11,
+        "enemies": [
+          {
+            "combat_id": 2,
+            "hp": 26,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0,
+            "power_changes": []
+          },
+          {
+            "combat_id": 3,
+            "hp": 0,
+            "block": 0,
+            "hp_removed": 13,
+            "block_removed": 0,
+            "power_changes": []
+          }
+        ]
+      },
+      "resources": {
+        "current_displayed_attack_damage": 14,
+        "consumed_potions": [],
+        "potions_still_available": [
+          {
+            "id": "BLOCK_POTION",
+            "slot": 0
+          }
+        ],
+        "known_blockable_damage_before_block": 11,
+        "block_unused_by_known_damage": 0,
+        "ordinary_block_reset": "At the next owner turn start; it protects through this enemy response, but does not carry to a later enemy turn without a retention rule.",
+        "scope": "Conditional on the declared actions. Consumed potions are unavailable afterward; held automatic potions remain armed until their conditions trigger, and their final inventory is not simulated. Block accounting covers only calculated incoming damage; evaluate uncomputed triggers, retention and other uses of Block from the current rules."
+      }
+    },
+    "available_large_target_finish": {
+      "sequence": [
+        {
+          "action": "Bash",
+          "target": 2
+        },
+        {
+          "action": "Dismantle",
+          "target": 2
+        }
+      ],
+      "energy": 0,
+      "known": {
+        "block": 0,
+        "hp_if_ending": 77,
+        "hp_loss_if_ending": 3,
+        "block_including_end_turn_gains": 0,
+        "end_turn_block_gains": [],
+        "end_turn_damage_events": [],
+        "incoming_attack": 3,
+        "enemies": [
+          {
+            "combat_id": 2,
+            "hp": 0,
+            "block": 0,
+            "hp_removed": 26,
+            "block_removed": 0,
+            "power_changes": [
+              {
+                "power_id": "VULNERABLE_POWER",
+                "before": 0,
+                "after_declared_actions": {
+                  "min": 2,
+                  "max": 2
+                }
+              }
+            ]
+          },
+          {
+            "combat_id": 3,
+            "hp": 13,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0,
+            "power_changes": []
+          }
+        ]
+      },
+      "resources": {
+        "current_displayed_attack_damage": 14,
+        "consumed_potions": [],
+        "potions_still_available": [
+          {
+            "id": "BLOCK_POTION",
+            "slot": 0
+          }
+        ],
+        "known_blockable_damage_before_block": 3,
+        "block_unused_by_known_damage": 0,
+        "ordinary_block_reset": "At the next owner turn start; it protects through this enemy response, but does not carry to a later enemy turn without a retention rule.",
+        "scope": "Conditional on the declared actions. Consumed potions are unavailable afterward; held automatic potions remain armed until their conditions trigger, and their final inventory is not simulated. Block accounting covers only calculated incoming damage; evaluate uncomputed triggers, retention and other uses of Block from the current rules."
+      }
+    }
+  },
+  "replay": {
+    "intermediate": {
+      "result": {
+        "source": "run-artifacts/run34-target-hit-review/results/slime-turn2/target-dependent-hits/1/summary.json",
+        "sha256": "ff759b785c9d9ca74176f78a909cf76b922ec06fa87efa7131b0c3501845b08d"
+      },
+      "freeze": "b1951c42064499c603d6f38b36e1919d8eb64ba0d7977331ae508bb2468fac42",
+      "calls": 43,
+      "usage": {
+        "input_tokens": 901083,
+        "output_tokens": 2845
+      },
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 3
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Dismantle",
+          "card_id": "DISMANTLE",
+          "target": 3
+        },
+        {
+          "kind": "end_turn"
+        }
+      ]
+    },
+    "initial_final_attempt": {
+      "result": {
+        "source": "run-artifacts/run34-target-hit-final-review/results/slime-turn2/shared-hit-counts/1/summary.json",
+        "sha256": "ea4cc6c99122e20048bd6ca5b698006903c3dc277fb8171bcd584c7a955c8d20"
+      },
+      "calls": 6,
+      "responses": 6,
+      "error": "Jev API error 402 (billing_error) via typesafe"
+    },
+    "final": {
+      "result": {
+        "source": "run-artifacts/run34-target-hit-final-review/results/slime-turn2/shared-hits-second-key/1/summary.json",
+        "sha256": "12b26a95f3ad6123d65c525e1b7307746a652c7ddb5f10c184e679c757f0651c"
+      },
+      "freeze": "86f21debc5f233e29d034ed284e91966a9a849d94b01ee0ff3874bd4efe6f6f0",
+      "input_sha256": "1cfe61d5f8f535ef3a4b2010f2b0c6212a1d55c7179ef4c64e4e721a1971256b",
+      "provider": "typesafe",
+      "model": "jev-1.13.0",
+      "key_slot": "second_official_key",
+      "calls": 40,
+      "usage": {
+        "input_tokens": 847661,
+        "output_tokens": 2744
+      },
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 3
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Dismantle",
+          "card_id": "DISMANTLE",
+          "target": 3
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "coverage": {
+        "inspected_prefixes": 3908,
+        "enumerated_plans": 885,
+        "selected_plans": 64,
+        "first_action_variants": 10,
+        "search_truncated": false,
+        "candidate_selection_truncated": true,
+        "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+        "eligible_plans": 101,
+        "assessed_plans": 101,
+        "distinct_allocations": 61,
+        "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+        "compared_plans": 4
+      },
+      "pairs": 6,
+      "order_disagreements": 3
+    }
+  },
+  "provider_recovery": {
+    "first_key_error": "402 billing_error",
+    "second_key_probe": {
+      "at": "2026-09-21T04:19:08.234Z",
+      "source": "run-artifacts/run34-target-hit-final-review/results/slime-turn2/shared-hit-counts/1/request-6.json",
+      "provider": "typesafe",
+      "key_slot": "second_official_key",
+      "success": true,
+      "model": "jev-1.13.0",
+      "usage": {
+        "input_tokens": 16511,
+        "output_tokens": 77
+      }
+    },
+    "active_key": "second_official_key",
+    "first_key": "retained locally, not used for automatic retry",
+    "provider_fallback": false,
+    "live_stopped_at": {
+      "floor": 13,
+      "turn": 1,
+      "hp": 74,
+      "energy": 3,
+      "pending": null,
+      "outcome_unknown": false,
+      "fingerprint_matched": true,
+      "source": {
+        "source": "temp/run34-before-resume.json",
+        "sha256": "5a6f8f9d84bb41b5c14dacb120ea6c733861d102178062e22e180d04c838ac5d"
+      }
+    }
+  },
+  "validation": {
+    "checks": 54,
+    "failures": 0,
+    "log": "temp/run34-target-hits-final-checks.log",
+    "observed_action_audit": {
+      "root": "C:\\Users\\skift\\jevmake\\run-artifacts\\run34-2026-09-21T04-05-56.584Z",
+      "checked": 21,
+      "continued": 15,
+      "discrepancies": [],
+      "already_reviewed": []
+    }
+  },
+  "limitations": [
+    "Development case only; no held-out or win-rate claim.",
+    "Both full replays still target the smaller enemy. The visible Bash + Dismantle route can instead finish the larger target, so the replay is not optimal.",
+    "The original initial-plan estimate ended at 69 HP, but actual later review consumed Block Potion and ended at 80 HP. The new initial-plan estimate of 74 HP is not an observed five-HP improvement.",
+    "The final replay still has three of six pair-position disagreements.",
+    "The hit-condition branch is verified for native v0.111.0 and the matching current card rule; it is not a general conditional-text interpreter."
+  ]
+}

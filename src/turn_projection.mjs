@@ -50,7 +50,7 @@ export function describeTurnProjection(state, steps) {
       && result.current_attack_after_debuffs.max === intentDamage(before) || resolved.some(e => e.combat_id === result.combat_id);
   }).map(result => result.combat_id));
   const projection = projectTurnPrefix(state, steps, { ...sequence, unknown_targets: sequence.unknown_targets.filter(id => !knownResponses.has(id)) },
-    { enemies: resolved, applications: debuffs?.transitions || [] });
+    { enemies: resolved, applications: debuffs?.transitions || [], ordered_damage: debuffs?.ordered_damage || [] });
   const lifecycle = describeEffectLifecycle(state, steps);
   const affected = new Set([...(debuffs?.affected_target_ids || []), ...sequence.unknown_targets].filter(id => !resolved.some(e => e.combat_id === id)));
   const depletionEffects = projection.remaining_enemies.flatMap(enemy => {
@@ -117,7 +117,9 @@ export function describeTurnProjection(state, steps) {
           total_before_block_and_hp_loss_caps: Object.fromEntries(['min', 'max'].map(bound => [bound,
             updated.per_hit[bound] === null || updated.preview_hits === null ? null : updated.per_hit[bound] * updated.preview_hits])) } : effect;
       });
-      return { ...step, ...(damage ? { damage_per_target: damage } : {}),
+      const hitCounts = ordered.map(effect => effect.preview_hits);
+      return { ...step, ...(hitCounts.length ? { damage_instances: hitCounts.every(hits => hits === hitCounts[0]) ? hitCounts[0] : null } : {}),
+        ...(damage ? { damage_per_target: damage } : {}),
         ...(effects.length ? { after_block_and_hp_loss_caps: effects.map(({ sequence: _sequence, ...effect }) =>
           affected.has(effect.target_id) ? { ...effect, hp_removed: null, block_removed: null, limitation: 'Unresolved modifiers or depletion hooks invalidate this point estimate; see dependency ranges.' } : effect) } : {}) };
     }) },
@@ -137,7 +139,14 @@ export function describeTurnProjection(state, steps) {
 export function projectTurnPrefix(state, steps, sequence = inspectSequence(state, steps), dependencies = { enemies: [], applications: [] }) {
   const combat = structuredClone(state.combat), unresolved = [], reactions = [], cardFlowEffects = [], attackEffects = [];
   for (const entry of sequence.entries) {
-    const { sequence: index, step, card } = entry;
+    const { sequence: index, step } = entry;
+    let card = entry.card;
+    // The debuff walk already knows whether a preceding application changed
+    // the target's hit condition. Reuse that count for HP caps and reactions,
+    // rather than rereading the unchanged native target in this separate walk.
+    const counts = (dependencies.ordered_damage || []).filter(effect => effect.sequence === index).map(effect => effect.preview_hits);
+    if (card?.type === 'Attack' && counts.length) card = { ...card,
+      _ordered_hit_count: counts.every(hits => hits === counts[0]) ? counts[0] : null };
     const applications = dependencies.applications.filter(effect => effect.sequence === index);
     const supportedApplication = applications.length > 0 && applications.every(effect => effect.outcome !== 'unresolved');
     if (step.kind !== 'play_card') { if (!supportedApplication && !sequence.analysis.steps.find(s => s.sequence === index)?.applies_after_action) unresolved.push(`${step.name}: potion effects are not simulated`); continue; }

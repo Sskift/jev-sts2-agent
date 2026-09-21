@@ -128,9 +128,9 @@ export function inspectSequence(state, steps) {
           .filter(clause => !/^Costs? \d+ less (?:\d+ )?Energy for each Attack played this turn$/i.test(clause)).join('. ');
         const mutableBasis = sequence > 0 && /(?:your (?:current )?(?:Block|HP)|cards? in (?:your )?(?:Hand|Discard|Exhaust)|(?:Attacks?|Skills?|cards?) played (?:this turn|this combat))/i.test(damageRules);
         const unusualScaling = strength !== 0 && /\bStrength\b/i.test(card.description) && card.id !== 'SETUP_STRIKE';
-        const hits = previewHitCount(card);
+        const hits = previewHitCount(card, observed.enemies.find(e => e.combat_id === step.target));
         detail.damage_instances = hits;
-        if (!card.target_previews?.length && hits !== 0) {
+        if (hits === null || !card.target_previews?.length && hits !== 0) {
           for (const enemy of observed.enemies.filter(e => e.is_alive && (card.target_type === 'AllEnemies' || e.combat_id === step.target))) unknownTargets.add(enemy.combat_id);
         }
         detail.damage_per_target = (card.target_previews || []).map(preview => {

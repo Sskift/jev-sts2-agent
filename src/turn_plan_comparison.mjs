@@ -33,7 +33,7 @@ export function visibleSurvivalConstraints(state) {
   const reactionRules = new Set();
   const reactionExposure = combat.hand.reduce((sum, card) => {
     const targets = card.target_type === 'AllEnemies' ? [null] : combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0);
-    const alternatives = targets.map(target => uncomputedAttackReactions(combat, card, target, previewHitCount(card)));
+    const alternatives = targets.map(target => uncomputedAttackReactions(combat, card, target, previewHitCount(card, target)));
     for (const reaction of alternatives.flat()) reactionRules.add(reaction.source_id);
     return sum + Math.max(0, ...alternatives.map(reactions => reactions.reduce((total, reaction) => total + (reaction.damage_if_all_preview_hits_resolve ?? 0), 0)));
   }, 0);

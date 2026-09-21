@@ -82,6 +82,7 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
       // recipient (e.g. a creature temporarily outside that set).
       if (card.target_type === 'AllEnemies' && !card.target_previews?.some(p => p.target_id === id)) continue;
       const perHit = {};
+      const hitCounts = [];
       const effects = [];
       let boosted = false;
       for (const { bound, enemies } of branches) {
@@ -107,7 +108,8 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
             && /\bfor (?:each|every)\b[^.]*\bVulnerable\b/i.test(card.description)) {
             affected.add(id); preview = null; // Both the base damage and multiplier changed; old previews cannot establish a point/range.
           }
-          const hits = previewHitCount(card);
+          const hits = previewHitCount(card, enemy);
+          hitCounts.push(hits);
           if (preview === null || preview === undefined || hits === null) invalid.add(id);
           else {
             const projectedCard = { ...card, target_previews: [{ target_id: id, damage: preview }] };
@@ -140,7 +142,8 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
         }
       }
       if (card.type === 'Attack') damage.push({ sequence, card_id: card.id, target_id: id,
-        per_hit: { min: perHit.min ?? null, max: perHit.max ?? null }, preview_hits: previewHitCount(card), includes_new_vulnerable: Boolean(boosted),
+        per_hit: { min: perHit.min ?? null, max: perHit.max ?? null },
+        preview_hits: hitCounts.length === 2 && hitCounts[0] === hitCounts[1] ? hitCounts[0] : null, includes_new_vulnerable: Boolean(boosted),
         after_block_and_hp_loss_caps: {
           hp_removed: effects.length === 2 && !invalid.has(id) ? bounds(effects.map(e => e.hp_removed)) : { min: null, max: null },
           block_removed: effects.length === 2 && !invalid.has(id) ? bounds(effects.map(e => e.block_removed)) : { min: null, max: null },

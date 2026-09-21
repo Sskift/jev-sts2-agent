@@ -13,7 +13,7 @@ export function firstHitHpLoss(card, enemy) {
   // A per-hit preview without a verified count does not establish that X will hit.
   // Zero-energy Whirlwind is playable but can deal no damage; payment modifiers
   // also mean current energy alone cannot establish the number of hits.
-  const hits = previewHitCount(card);
+  const hits = previewHitCount(card, enemy);
   if (hits === 0 || hits === null) return null;
   const damage = card.target_previews?.find(p => p.target_id === enemy.combat_id)?.damage;
   if (!Number.isFinite(damage)) return null;
@@ -26,8 +26,15 @@ export function firstHitHpLoss(card, enemy) {
   return { damage, hp_loss: hpLoss, limits };
 }
 
-export function attackHitPreview(card) {
+export function attackHitPreview(card, enemy = null) {
   if (card._uncomputed_repetitions) return { hits: null, source: 'uncomputed_automatic_plays' };
+  if (Object.hasOwn(card, '_ordered_hit_count')) return { hits: card._ordered_hit_count, source: 'ordered_target_condition' };
+  // Native Dismantle.OnPlay checks the selected target once before attacking.
+  // Use the current/ordered target condition, including a preceding Vulnerable
+  // application; a target-independent count cannot describe both alternatives.
+  if (card.id === 'DISMANTLE' && enemy && /^Deal [\d.]+ damage\. If the enemy is Vulnerable, hits twice\.$/i.test(card.description?.trim() || '')) {
+    return { hits: enemy.powers?.some(power => power.id === 'VULNERABLE_POWER') ? 2 : 1, source: 'verified_native_target_condition' };
+  }
   const hits = card.attack_preview?.hits;
   if (Number.isSafeInteger(hits) && hits >= 0) return { hits, source: 'native_preview' };
   if (card.cost < 0) return { hits: null, source: 'unknown_x_cost_repetitions' };
@@ -40,18 +47,18 @@ export function attackHitPreview(card) {
   return { hits: 1, source: 'single_hit_baseline' };
 }
 
-export const previewHitCount = card => attackHitPreview(card).hits;
+export const previewHitCount = (card, enemy = null) => attackHitPreview(card, enemy).hits;
 
 export function previewDamageSum(card, enemy) {
   const damage = card.target_previews?.find(preview => preview.target_id === enemy.combat_id)?.damage;
-  const hits = previewHitCount(card);
+  const hits = previewHitCount(card, enemy);
   return Number.isFinite(damage) && hits !== null ? damage * hits : null;
 }
 
 // Known hit counts use the same visible per-hit preview. Only the listed caps
 // and Block are advanced between hits; other changing triggers remain unknown.
 export function attackHpLoss(card, enemy) {
-  const hits = previewHitCount(card);
+  const hits = previewHitCount(card, enemy);
   if (hits === null) return null;
   if (hits === 0) return { damage: 0, hp_loss: 0, hits: 0, limits: [], block_after: enemy.block, powers_after: enemy.powers || [] };
   const remaining = { ...enemy, powers: (enemy.powers || []).map(power => ({ ...power })) };
@@ -86,9 +93,9 @@ export function immediateBlockPreview(card) {
 }
 
 export function combatForecast(combat, card = null, target = null) {
-  const reactions = uncomputedAttackReactions(combat, card, target, card ? previewHitCount(card) : 0);
+  const reactions = uncomputedAttackReactions(combat, card, target, card ? previewHitCount(card, target) : 0);
   const reactionUnresolved = reactions.length > 0;
-  const hitPreview = card ? attackHitPreview(card) : { hits: 0, source: 'no_card' };
+  const hitPreview = card ? attackHitPreview(card, target) : { hits: 0, source: 'no_card' };
   const cardFlow = describeCardFlow(combat, attackCardFlowEffects(combat, card, target, hitPreview.hits, hitPreview.source));
   const hit = target && card ? attackHpLoss(card, target) : null;
   const targetDepleted = hit && hit.hp_loss >= target.hp;
@@ -112,7 +119,8 @@ export function combatForecast(combat, card = null, target = null) {
   const allTargetsDepleted = combat.enemies.length > 0 && living.every(enemy => depleted.has(enemy.combat_id));
   const endTurnDamage = allTargetsDepleted ? [] : knownTurnEndDamage(combat, remainingHand, depleted);
   const timedEffects = allTargetsDepleted ? [] : uncomputedTurnEndHealthEffects(combat, remainingHand, endTurnDamage);
-  const healthUnresolved = reactionUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;
+  const attackUnresolved = card?.type === 'Attack' && (hitPreview.hits === null || target && !hit || areaHits?.some(hit => hit.hp_loss === null));
+  const healthUnresolved = reactionUnresolved || attackUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;
   const endTurnHandDamage = endTurnDamage.filter(e => e.hand_index !== undefined).reduce((sum, e) => sum + e.amount, 0);
   const selfHpLoss = Math.max(0, card?.hp_loss || 0);
   const blockPreview = immediateBlockPreview(card);
@@ -173,7 +181,7 @@ export function combatForecast(combat, card = null, target = null) {
     end_turn_block_gains: endTurnBlockGains,
     ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
-    displayed_attacks_after_target_depletion: reactionUnresolved || depletionEffects.length ? null : incoming,
+    displayed_attacks_after_target_depletion: reactionUnresolved || attackUnresolved || depletionEffects.length ? null : incoming,
     ...(depletionEffects.length ? { uncomputed_depletion_effects: depletionEffects } : {}),
     ...(reactionUnresolved ? { uncomputed_reactions: reactions,
       block_baseline_without_reactions: block,

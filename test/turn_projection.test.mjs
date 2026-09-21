@@ -14,6 +14,49 @@ function state() {
 const strike = { kind: 'play_card', name: 'Strike', card_instance_id: 'STRIKE_IRONCLAD', target: 42 };
 const defend = { kind: 'play_card', name: 'Defend', card_instance_id: 'DEFEND_IRONCLAD' };
 
+test('unknown attack repetitions never become zero damage or a certain unchanged enemy response', () => {
+  const s = state();
+  s.combat.hand[0].description = 'Deal 6 damage. Repeat this attack a random number of times.';
+  const p = describeTurnProjection(s, [strike]);
+  assert.equal(p.known_effects_only.enemies[0].hp, null);
+  assert.equal(p.known_effects_only.enemies[0].hp_removed, null);
+  assert.equal(p.known_effects_only.incoming_attack, null);
+  assert.equal(p.known_effects_only.hp_if_ending, null);
+  const single = combatForecast(s.combat, s.combat.hand[0], s.combat.enemies[0]);
+  assert.equal(single.hp_remaining_if_end_turn, null);
+  assert.equal(single.displayed_attacks_after_target_depletion, null);
+});
+
+test('Dismantle uses the actual target condition and preceding Vulnerable applications', () => {
+  const s = state(); s.combat.enemies[0].hp = 60;
+  s.combat.hand[0] = fixtureCard('DISMANTLE', { index: 0, target_type: 'AnyEnemy', can_play: true,
+    description: 'Deal 8 damage. If the enemy is Vulnerable, hits twice.', target_previews: [{ target_id: 42, damage: 8 }] });
+  s.combat.hand[1] = fixtureCard('BASH', { index: 1, cost: 2, target_type: 'AnyEnemy', can_play: true,
+    description: 'Deal 8 damage. Apply 2 Vulnerable.', target_previews: [{ target_id: 42, damage: 8 }] });
+  const hit = { ...strike, card_instance_id: 'DISMANTLE' }, bash = { ...strike, card_instance_id: 'BASH' }, before = structuredClone(s);
+  assert.equal(describeTurnProjection(s, [hit]).known_effects_only.enemies[0].hp_removed, 8);
+  const early = describeTurnProjection(s, [bash, hit]), late = describeTurnProjection(s, [hit, bash]);
+  assert.equal(early.sequence_dependencies.steps[1].damage_instances, 2);
+  assert.deepEqual(early.debuff_dependencies.ordered_damage[1].after_block_and_hp_loss_caps.hp_removed, { min: 24, max: 26 });
+  assert.deepEqual(early.known_effects_only.enemies[0].conditional_bounds.hp_removed, { min: 32, max: 34 });
+  assert.equal(late.known_effects_only.enemies[0].hp_removed, 16);
+  assert.deepEqual(s, before);
+  s.combat.enemies[0].powers = [{ id: 'VULNERABLE_POWER', amount: 2 }];
+  s.combat.hand[0].target_previews[0].damage = 12;
+  assert.equal(combatForecast(s.combat, s.combat.hand[0], s.combat.enemies[0]).attack_hp_loss, 24);
+  s.combat.enemies[0].powers = [{ id: 'ARTIFACT_POWER', amount: 1 }];
+  s.combat.hand[0].target_previews[0].damage = 8;
+  const absorbed = describeTurnProjection(s, [bash, hit]);
+  assert.equal(absorbed.sequence_dependencies.steps[1].damage_instances, 1);
+  assert.equal(absorbed.known_effects_only.enemies[0].hp_removed, 16);
+  s.combat.enemies[0].powers = [{ id: 'THORNS_POWER', amount: 3, description: 'When hit by an attack, deal 3 damage back.' }];
+  const retaliation = describeTurnProjection(s, [bash, hit]);
+  assert.equal(retaliation.uncomputed_reactions.find(r => r.sequence === 1).preview_hits, 2);
+  assert.equal(retaliation.uncomputed_reactions.find(r => r.sequence === 1).damage_if_all_preview_hits_resolve, 6);
+  assert.equal(retaliation.sequence_dependencies.steps[1].after_block_and_hp_loss_caps[0].hits_counted, 2);
+  assert.equal(retaliation.known_effects_only.hp_if_ending, null, 'A conditional hit count is not a guarantee of surviving the reactions');
+});
+
 test('draw checkpoints retain the attack coverage gap and resources without promising an end-turn outcome', () => {
   const s = state(); s.combat.player.hp = 6;
   s.combat.enemies[0].intents = [{ type: 'Attack', damage: 24, hits: 1 }];

@@ -54,4 +54,6 @@
 
 第 33 局 Boss 首回合的同事实、同问题诊断显示，普通具名方案比深层压缩表示更容易被模型理解。完整规划回放从单张 Stomp 改为 Peck → Stomp，同样 3 能量的已知总伤害由 51 增至 63，仍漏掉可达到 75 的另一张攻击。37 项相关检查通过；26 份历史大判断的容量核查中，20 份需要完整压缩回退，均能装下。这是开发样本上的有限改善，不是最优性或胜率结论；[证据](evidence/2026-09-21/run33-readable-plans.json)保留未采用的说明差值试验和仍存在的位置分歧。
 
-当前运行提供方为 TypeSafe 官方直连，两把 key 均已验证，第一把启用、第二把本地备用；OpenRouter、Vercel 和自动回退关闭。原生版本和实机结果见[模组说明](../mods/sts2-cli-compat/README.md)、[历史战况](full-run-progress.md)与[上下文架构](context-architecture.md)。
+第 34 局发现命中次数未知时，方案错误保留了未扣血的敌人生命。现让受影响的生命、攻击中断和回合末结果保持未知，并根据已核实的原生 Dismantle 条件计算目标当时的一次／两次命中；此前的易伤施加、Artifact 阻挡、反伤与生成牌共用次数。54 项相关检查通过，最终完整回放仍未选择可行的最大目标收尾，不能把账目修正等同于最优决策。[证据](evidence/2026-09-21/run34-target-hits.json)
+
+当前运行提供方为 TypeSafe 官方直连。第一把 key 返回计费错误后，第二把通过完整请求并已启用；OpenRouter、Vercel、自动回退与自动轮换关闭。原生版本和实机结果见[模组说明](../mods/sts2-cli-compat/README.md)、[历史战况](full-run-progress.md)与[上下文架构](context-architecture.md)。
