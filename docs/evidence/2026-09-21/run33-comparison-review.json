@@ -747,5 +747,50 @@
     "pending": null,
     "native_fingerprint_matched": true,
     "source": "temp/run33-before-comparison-reload.json"
+  },
+  "network_recovery": {
+    "at": "2026-09-21T03:12:03.975Z",
+    "stop_result": {
+      "source": "temp/run33-resume-result.json",
+      "sha256": "88059f6c1ffd8515c466c21aee64e73b21a9e6fd5d263ef2c27cd7b04709cf97"
+    },
+    "failed_request": {
+      "source": "run-artifacts/run33-resume-2026-09-21T03-00-45.627Z/step-0009/jev-turn_refine_pairs-0026.json",
+      "sha256": "6f1a4d43419d1bc93cc1a011cd66f251c53bf896cbd068bb8b204ad669eaa81f"
+    },
+    "outcome_unknown": false,
+    "exact_request_retry": {
+      "at": "2026-09-21T03:05:10.471Z",
+      "source": "C:\\Users\\skift\\jevmake\\run-artifacts\\run33-resume-2026-09-21T03-00-45.627Z\\step-0009\\jev-turn_refine_pairs-0026.json",
+      "provider": "typesafe",
+      "model": "jev-1.13.0",
+      "answer_count": 2,
+      "usage": {
+        "input_tokens": 25873,
+        "output_tokens": 87
+      },
+      "native_fingerprint_matched": true
+    },
+    "resumed_root": "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z",
+    "runtime_commit": "715a139e2641fcb9ba01f63bca37fd2a26367add",
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "native_fingerprint_matched": true,
+    "prior_pending": null,
+    "first_command": {
+      "cmd": "play_card",
+      "id": "TAUNT",
+      "nth": 0,
+      "target": 3
+    },
+    "first_response_ok": true,
+    "first_after": {
+      "source": "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z/step-0001/after-state.json",
+      "sha256": "9a677f993fcd581f91db789877ba41c7f2d11c95ea323765a622f1a78f665529",
+      "hp": 31,
+      "energy": 3,
+      "turn": 4
+    },
+    "interpretation": "A transient model request failure stopped before game dispatch. A read-only retry succeeded on the same TypeSafe provider and primary key; the unchanged native state was then resumed without replaying any game command."
   }
 }
