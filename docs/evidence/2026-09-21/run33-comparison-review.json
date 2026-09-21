@@ -707,7 +707,34 @@
     "failures": 0,
     "log": "temp/run33-comparison-checks.log"
   },
-  "runtime_loaded": false,
+  "runtime_loaded": {
+    "at": "2026-09-21T03:02:39.175Z",
+    "commit": "fcd09f12b57271a41dae21b28ddabbb031b183e5",
+    "root": "C:/Users/skift/jevmake/run-artifacts/run33-resume-2026-09-21T03-00-45.627Z",
+    "run_id": "run-1789958402",
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "original_fingerprint_matched": true,
+    "live_comparison_request": {
+      "source": "C:/Users/skift/jevmake/run-artifacts/run33-resume-2026-09-21T03-00-45.627Z/step-0001/jev-turn_refine_pairs-0028.json",
+      "sha256": "a239b365001d61be9e6b6f5e3f50c46d132cb60efe58dad5d34fceb5b866091d"
+    },
+    "first_command": {
+      "cmd": "play_card",
+      "id": "SETUP_STRIKE",
+      "nth": 0,
+      "target": 1
+    },
+    "first_after": {
+      "source": "C:/Users/skift/jevmake/run-artifacts/run33-resume-2026-09-21T03-00-45.627Z/step-0001/after-state.json",
+      "sha256": "d2e15bc0b203daec012fc98d46faa1abc84954f2457000ef0798e8e6011f28d4",
+      "hp": 46,
+      "energy": 1,
+      "floor": 17,
+      "turn": 2
+    },
+    "neutral_pairs": 3
+  },
   "interpretation": "Potion-before-use replay selects three Strikes without consuming the potion. Segment-finish replay preserves the prior three-attack group-depletion plan. Both are inspected development cases and were not executed. Order disagreements remain 5/6 and 3/6; no win-rate or all-case improvement is established.",
   "reload_checkpoint": {
     "root": "C:\\Users\\skift\\jevmake\\run-artifacts\\run33-2026-09-21T02-39-57.865Z",
