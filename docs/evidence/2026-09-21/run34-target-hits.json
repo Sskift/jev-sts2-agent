@@ -371,5 +371,207 @@
     "The original initial-plan estimate ended at 69 HP, but actual later review consumed Block Potion and ended at 80 HP. The new initial-plan estimate of 74 HP is not an observed five-HP improvement.",
     "The final replay still has three of six pair-position disagreements.",
     "The hit-condition branch is verified for native v0.111.0 and the matching current card rule; it is not a general conditional-text interpreter."
-  ]
+  ],
+  "runtime_loaded": {
+    "at": "2026-09-21T04:30:34.821Z",
+    "commit": "530a8d120933030232f390be11c6ccebce264fac",
+    "root": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z",
+    "run_id": "run-1789963561",
+    "provider": "typesafe",
+    "model": "jev-1.13.0",
+    "key_slot": "second_official_key",
+    "fingerprint_matched": true,
+    "pending_at_resume": null,
+    "resume_native": {
+      "source": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z/resume-native.json",
+      "sha256": "2b08ad568e4e07e9a32597af83f2e02b276a1464512972dbd31a2e4d4295400d"
+    },
+    "first_confirmed_action": {
+      "source": {
+        "source": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z/step-0001/result.json",
+        "sha256": "adb004908a65c777a4bfc9762d9b39b49d7f0a4a597fe3cfc76668993d129bf7"
+      },
+      "request": {
+        "cmd": "play_card",
+        "id": "DEFEND_IRONCLAD",
+        "nth": 1
+      },
+      "ok": true
+    },
+    "actual_model_response": {
+      "source": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z/step-0001/jev-response-0002.json",
+      "sha256": "26a16b85720ace56721149bb19ea00c701c6aa12dec79288b7c91f041fe6f087"
+    },
+    "hit_count_example": {
+      "request": {
+        "source": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z/step-0032/jev-turn_assess_plans-0003.json",
+        "sha256": "bee4dd3aadc89c8ac03c3239df97649936bd07ad3036618c491a2b1723537191"
+      },
+      "sequence": [
+        {
+          "action": "Dismantle",
+          "hand_index": 1,
+          "observed_cost": 1,
+          "reserved_cost_in_sequence": 1,
+          "target": 1,
+          "rules": "Deal 8 damage. If the enemy is Vulnerable, hits twice.",
+          "energy_after_reserved_costs": 0
+        }
+      ],
+      "dependencies": [
+        {
+          "sequence": 0,
+          "source_id": "DISMANTLE",
+          "energy_before": 1,
+          "energy_after": 0,
+          "strength_change_before_action": 0,
+          "dexterity_change_before_action": 0,
+          "damage_instances": 1,
+          "damage_per_target": [
+            {
+              "per_hit_before_block_and_hp_loss_caps": {
+                "min": 8,
+                "max": 8
+              },
+              "total_before_block_and_hp_loss_caps": {
+                "min": 8,
+                "max": 8
+              },
+              "target_id": 1
+            },
+            {
+              "per_hit_before_block_and_hp_loss_caps": {
+                "min": 8,
+                "max": 8
+              },
+              "total_before_block_and_hp_loss_caps": {
+                "min": 8,
+                "max": 8
+              },
+              "target_id": 2
+            },
+            {
+              "per_hit_before_block_and_hp_loss_caps": {
+                "min": 8,
+                "max": 8
+              },
+              "total_before_block_and_hp_loss_caps": {
+                "min": 8,
+                "max": 8
+              },
+              "target_id": 3
+            }
+          ],
+          "after_block_and_hp_loss_caps": [
+            {
+              "target_id": 1,
+              "hits_counted": 1,
+              "hp_removed": 1,
+              "block_removed": 0,
+              "applied_hp_loss_limits": [
+                "Slippery"
+              ],
+              "scope": "Conditional arithmetic for the counted hits, after current target Block and supported HP-loss caps. Other triggers, changed modifiers and death effects may invalidate it. These are not the pre-prevention damage numbers."
+            }
+          ]
+        }
+      ],
+      "known_effects_only": {
+        "block": 8,
+        "hp_if_ending": 65,
+        "hp_loss_if_ending": 0,
+        "block_including_end_turn_gains": 12,
+        "end_turn_block_gains": [
+          {
+            "source_id": "PLATING_POWER",
+            "amount": 4,
+            "timing": "turn_end_early"
+          }
+        ],
+        "end_turn_damage_events": [],
+        "incoming_attack": 12,
+        "enemies": [
+          {
+            "combat_id": 1,
+            "hp": 12,
+            "block": 0,
+            "hp_removed": 1,
+            "block_removed": 0,
+            "power_changes": [
+              {
+                "power_id": "SLIPPERY_POWER",
+                "before": 1,
+                "after_declared_actions": {
+                  "min": 0,
+                  "max": 0
+                }
+              }
+            ]
+          },
+          {
+            "combat_id": 2,
+            "hp": 11,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0,
+            "power_changes": []
+          },
+          {
+            "combat_id": 3,
+            "hp": 16,
+            "block": 0,
+            "hp_removed": 0,
+            "block_removed": 0,
+            "power_changes": []
+          }
+        ]
+      }
+    },
+    "confirmed_dismantle": {
+      "before": {
+        "source": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z/step-0032/before-state.json",
+        "sha256": "f37a8f2068ee4c104746551b13feb744c982b6ae74e13a0903e30b3c2c0ba770"
+      },
+      "result": {
+        "source": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z/step-0032/result.json",
+        "sha256": "d150883fbe2a2b83bf88000cd71808f5425ff5c2d235ca43403b9eacd2ee2a84"
+      },
+      "after": {
+        "source": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z/step-0032/after-state.json",
+        "sha256": "e8e9b06c7edb08928a7c8389081826532770fb2df33abbbaa23687f4c56cc805"
+      },
+      "request": {
+        "cmd": "play_card",
+        "id": "DISMANTLE",
+        "nth": 0,
+        "target": 2
+      },
+      "response": {
+        "ok": true,
+        "data": {
+          "card_index": 1,
+          "card_id": "DISMANTLE",
+          "target": 2,
+          "results": [
+            {
+              "type": "damage",
+              "target_id": 2,
+              "target_name": "INKLET",
+              "damage": 1,
+              "blocked": 0,
+              "hp_loss": 1,
+              "killed": false
+            },
+            {
+              "type": "power",
+              "target_id": 2,
+              "target_name": "INKLET",
+              "power_id": "SLIPPERY_POWER",
+              "amount": -1
+            }
+          ]
+        }
+      }
+    }
+  }
 }
