@@ -132,6 +132,20 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
         save(path.join(directory, 'jev-request.json'), prepared.payload);
         save(path.join(directory, 'context-metrics.json'), prepared.metrics);
       }
+      // Start-turn hooks can still update relic counters after actions unlock.
+      // Observe a stable frame before spending on a combat decision; keep the
+      // separate pre-action check because later changes remain possible.
+      if (intervalMs > 0 && state.screen === 'COMBAT' && prepared.candidates?.size > 1) {
+        await sleep(intervalMs);
+        if (signal?.aborted) break;
+        const settled = await client.state({ includePileDetails: true });
+        save(path.join(directory, 'decision-readiness-state.json'), settled);
+        if (actionFingerprint(settled) !== actionFingerprint(state)) {
+          save(path.join(directory, 'result.json'), { executed: false, reason: 'State changed before decision; observe again', modelCalls: 0 });
+          logger(JSON.stringify({ step, screen: state.screen, wait: 'Combat state is still settling; no model request sent' }));
+          continue;
+        }
+      }
       let planningCalls = 0, planningDecisions = 0, modelCalls = 0, strategicAssessments = 0;
       const decision = await decide(state, { memory, prepared, runStrategy: true,
         onRequest: (payload, metrics) => {

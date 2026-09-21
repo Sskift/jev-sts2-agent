@@ -1,0 +1,93 @@
+{
+  "at": "2026-09-21T10:26:08.374Z",
+  "run_id": "run-1789968641",
+  "provider": "openrouter",
+  "prior_runtime_commit": "94c201cf205329d4702b6d42c9b1c84453d661fc",
+  "availability": {
+    "source": "temp/run35-openrouter-diagnostic-1789985738835.json",
+    "sha256": "673d6ee6f9a7dfbc36e9e58ac1db7f0f285103304ced11f9afe2630a4620ed7e"
+  },
+  "session": {
+    "source": "temp/run35-resume4-result.json",
+    "sha256": "e88dc6c1fddbaa98c40b793df87f598a450950cd389d1748ee5c8a7ca8ffcfde"
+  },
+  "native": {
+    "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/settling-reload-native.json",
+    "sha256": "8c944fde203a824d851a080f0eb4c27663258ed27b93a85498ce5ab5dfb4d914"
+  },
+  "memory": {
+    "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/settling-reload-memory.json",
+    "sha256": "e30aa0c816bf92d23e46daeb707a2cfaf22f1e081874ae611730f118f0404f4e"
+  },
+  "pending": null,
+  "fingerprint_matches_last_confirmed_action": true,
+  "screen": "COMBAT",
+  "act_index": 1,
+  "floor": 31,
+  "turn": 3,
+  "hp": 80,
+  "energy": 3,
+  "enemies": [
+    {
+      "id": "BOWLBUG_ROCK",
+      "hp": 26
+    }
+  ],
+  "spending": {
+    "ledger": {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/settling-reload-spending.json",
+      "sha256": "e90ac09560421390ab278ebe5e3436bca7f5c45b9c8cf9a63072c713f8d76c95"
+    },
+    "max_usd": 1,
+    "reported_usd": 0.7199638739999996,
+    "unreported_reserved_usd": 0.011935266000000028,
+    "allowance_reached": false
+  },
+  "discarded_decision": [
+    {
+      "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0050",
+      "floor": 28,
+      "turn": 3,
+      "responses": 31,
+      "reported_cost": 0.030652692000000006,
+      "differences": [
+        {
+          "field": ".decision_context.player.relics.8.counter",
+          "before": 3,
+          "after": 0
+        },
+        {
+          "field": ".combat.player.relics.8.counter",
+          "before": 3,
+          "after": 0
+        }
+      ],
+      "before": {
+        "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0050/before-state.json",
+        "sha256": "b1a37e2cc5b5fd4e97fd303a4359db8f8c5e51477dc66b5d10d3001a49cc3ab6"
+      },
+      "pre_action": {
+        "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0050/pre-action-state.json",
+        "sha256": "5ae752162120fddc7050888f34fca9fd7f324bb9b866285004e28b286f472eda"
+      },
+      "result": {
+        "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0050/result.json",
+        "sha256": "12c73d894e465b0e8b1a8ee874bc4eac5f3d36466d46be4d89b1b938825a26e4"
+      }
+    }
+  ],
+  "change": "Before a combat decision with multiple actions, observe again after the configured interval. If any supplied fact or candidate changed, defer without sending model requests. Preserve all counters and the existing post-decision validation.",
+  "checks": {
+    "passed": 16,
+    "log": {
+      "source": "temp/run35-settling-checks.log",
+      "sha256": "6d49db583e75472a67b5411e0eba784882f6d5d900500dc58114b1d2a59df26c"
+    },
+    "includes": "Counter changes after player actions unlock defer the decision until the stable state; existing stale-action and uncertain-command checks remain."
+  },
+  "limitations": [
+    "Two equal observations do not guarantee that no later state change occurs.",
+    "The observed discarded decision cost is historical, not a measured future savings guarantee.",
+    "The change has not yet been loaded into this game controller. No new paid replay was run."
+  ]
+}

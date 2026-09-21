@@ -60,6 +60,28 @@ function chooseAttack(state) {
   return choice;
 }
 
+test('combat facts must settle before a paid decision, including counters changing after actions unlock', async t => {
+  const initial = combat(), settled = combat(), artifactDir = temporaryFolder(t);
+  for (const [state, counter] of [[initial, 3], [settled, 0]]) {
+    const relics = [{ id: 'HAPPY_FLOWER', name: 'Happy Flower', description: 'Every 3 turns, gain 1 Energy.', counter }];
+    state.decision_context.player.relics = relics;
+    state.combat.player.relics = structuredClone(relics);
+  }
+  const client = scriptedClient([initial, settled, settled, settled, settled, reward()]);
+  const seen = [];
+  const result = await runModLoop({ client, artifactDir, maxSteps: 2, intervalMs: 1, logger() {}, decide: state => {
+    seen.push(state.combat.player.relics[0].counter);
+    return chooseAttack(state);
+  } });
+  assert.equal(result.error, undefined);
+  assert.deepEqual(seen, [0]);
+  assert.equal(client.requests.length, 1);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(artifactDir, 'step-0001', 'result.json'))), {
+    executed: false, reason: 'State changed before decision; observe again', modelCalls: 0
+  });
+  assert.ok(fs.existsSync(path.join(artifactDir, 'step-0001', 'decision-readiness-state.json')));
+});
+
 function enemySelection() {
   const state = combat();
   state.screen = 'TRI_SELECT';
