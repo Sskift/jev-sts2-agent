@@ -1,0 +1,46 @@
+{
+  "recorded_at": "2026-09-21T03:17:10.145Z",
+  "run_id": "run-1789958402",
+  "runtime_commit": "715a139e2641fcb9ba01f63bca37fd2a26367add",
+  "started_at_floor": 1,
+  "start_evidence": "docs/evidence/2026-09-21/run33-start.json",
+  "provider": "typesafe",
+  "model": "jev-1.13.0",
+  "boss": {
+    "id": "THE_KIN_BOSS",
+    "floor": 17,
+    "turn": 9,
+    "before_final_action": {
+      "file": "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z/step-0025/before-state.json",
+      "sha256": "13ba044245aaffb83b955b9c500e44a2a7d846403e6d15f3e997020c3ef49061"
+    },
+    "priest_hp_before": 11,
+    "final_action": {
+      "file": "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z/step-0025/decision.json",
+      "sha256": "7dbf507f541b680ab9abec5acd5ca4875269f4df360e1d54ba3312285d1ce30a",
+      "request": {
+        "cmd": "play_card",
+        "id": "STOMP",
+        "nth": 0
+      }
+    },
+    "after_final_action": {
+      "file": "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z/step-0025/after-state.json",
+      "sha256": "76870dad447934dd4f29d04fda0b9f585cfc9c9fbd4c49fda35567220906122f"
+    },
+    "reward": {
+      "file": "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z/step-0030/before-state.json",
+      "sha256": "920e4f308c67c796b2947d0b1f8d95945a6cc85e796c3f93621a9eb292bdc223",
+      "screen": "REWARD"
+    },
+    "hp_after": 22
+  },
+  "second_act": {
+    "file": "run-artifacts/run33-resume2-2026-09-21T03-08-51.764Z/step-0033/after-state.json",
+    "sha256": "d07540c78744cd90d4ce1b54fa64b4bb32848b7ffaa9a70f495fcc6525d7d609",
+    "act_index": 1,
+    "floor": 18,
+    "hp": 80
+  },
+  "goal_complete": false
+}

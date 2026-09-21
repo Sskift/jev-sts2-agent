@@ -51,6 +51,28 @@ test('damage before prevention is distinct from sequential HP loss and consumed 
   assert.deepEqual(s, before);
 });
 
+test('an attack-count cost discount preserves fixed damage while actual damage counters remain unknown', () => {
+  const s = combat();
+  s.combat.hand.push(fixtureCard('STOMP', { index: 2, cost: 3, target_type: 'AllEnemies',
+    description: 'Deal 12 damage to ALL enemies. Costs 1 less 1 Energy for each Attack played this turn.',
+    target_previews: [{ target_id: 42, damage: 12 }] }));
+  const steps = [play('STRIKE_IRONCLAD', 42), play('STOMP'), end], before = structuredClone(s);
+  assert.deepEqual(reserveSequence(s, steps).costs, [1, 2, 0]);
+  const p = describeTurnProjection(s, steps);
+  assert.equal(p.known_effects_only.enemies[0].hp_removed, 18);
+  assert.equal(p.known_effects_only.incoming_attack, 12);
+  assert.equal(p.known_effects_only.hp_if_ending, 28);
+  const cost = describePlanAlternative(s, steps).ordered_sequence[1];
+  assert.equal(cost.observed_cost, 3);
+  assert.equal(cost.reserved_cost_in_sequence, 2);
+  assert.equal(cost.energy_after_reserved_costs, 0);
+  assert.deepEqual(s, before);
+  s.combat.hand[2].description += ' Deal extra damage for each Attack played this turn.';
+  const uncertain = describeTurnProjection(s, steps);
+  assert.equal(uncertain.known_effects_only.enemies[0].hp_removed, null);
+  assert.equal(uncertain.known_effects_only.hp_if_ending, null);
+});
+
 test('Strength changes use Shrink before rounding, including indefinite duration and combined multipliers', () => {
   const s = combat();
   const hit = play('STRIKE_IRONCLAD', 42);

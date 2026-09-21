@@ -1,0 +1,238 @@
+{
+  "at": "2026-09-21T03:19:55.392Z",
+  "run_id": "run-1789958402",
+  "source": {
+    "source": "run-artifacts/run33-2026-09-21T02-39-57.865Z/step-0224/before-state.json",
+    "sha256": "24edc0232baf664e90bd345bc97a3811d4e02c410e434d41793fe67b236640eb"
+  },
+  "native_rule": {
+    "source": "temp/knowledge-research/Stomp.cs",
+    "sha256": "47fcc96e3fa51d919a0d20e71ac3c4122a408fe692316dbc418985d5010de839"
+  },
+  "assembly": {
+    "source": "D:/SteamLibrary/steamapps/common/Slay the Spire 2/data_sts2_windows_x86_64/sts2.dll",
+    "sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9"
+  },
+  "cause": "The broad damage-dependency matcher read the standalone attack-count cost clause as a damage formula and erased unchanged damage and incoming-HP results from ordered combinations.",
+  "change": "Exclude only the complete standalone cost-discount clause from damage dependency matching; actual counter-based damage stays unknown. Ordered action labels expose observed_cost and reserved_cost_in_sequence separately.",
+  "conditional_examples": {
+    "source": "run-artifacts/run33-2026-09-21T02-39-57.865Z/step-0224/before-state.json",
+    "before": {
+      "steps": [
+        {
+          "action": "Rampage",
+          "target": 1,
+          "observed_cost": 1,
+          "energy_after": 2
+        },
+        {
+          "action": "Peck",
+          "target": 3,
+          "observed_cost": 1,
+          "energy_after": 1
+        },
+        {
+          "action": "Stomp+",
+          "observed_cost": 3,
+          "energy_after": 0
+        }
+      ],
+      "hp_if_ending": null,
+      "incoming_attack": null,
+      "enemies": [
+        {
+          "hp": null,
+          "block": null,
+          "hp_removed": null,
+          "block_removed": null,
+          "power_changes": [],
+          "combat_id": 1
+        },
+        {
+          "hp": null,
+          "block": null,
+          "hp_removed": null,
+          "block_removed": null,
+          "power_changes": [],
+          "combat_id": 2
+        },
+        {
+          "hp": null,
+          "block": null,
+          "hp_removed": null,
+          "block_removed": null,
+          "power_changes": [],
+          "combat_id": 3
+        }
+      ],
+      "energy_spent": 3
+    },
+    "after": {
+      "steps": [
+        {
+          "action": "Rampage",
+          "target": 1,
+          "observed_cost": 1,
+          "reserved_cost": 1,
+          "energy_after": 2
+        },
+        {
+          "action": "Peck",
+          "target": 3,
+          "observed_cost": 1,
+          "reserved_cost": 1,
+          "energy_after": 1
+        },
+        {
+          "action": "Stomp+",
+          "observed_cost": 3,
+          "reserved_cost": 1,
+          "energy_after": 0
+        }
+      ],
+      "hp_if_ending": 46,
+      "incoming_attack": 13,
+      "enemies": [
+        {
+          "combat_id": 1,
+          "hp": 29,
+          "block": 0,
+          "hp_removed": 29,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 2,
+          "hp": 42,
+          "block": 0,
+          "hp_removed": 17,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 3,
+          "hp": 161,
+          "block": 0,
+          "hp_removed": 29,
+          "block_removed": 0,
+          "power_changes": []
+        }
+      ],
+      "energy_spent": 3
+    },
+    "single_stomp": {
+      "steps": [
+        {
+          "action": "Stomp+",
+          "observed_cost": 3,
+          "reserved_cost": 3,
+          "energy_after": 0
+        }
+      ],
+      "hp_if_ending": 46,
+      "incoming_attack": 13,
+      "enemies": [
+        {
+          "combat_id": 1,
+          "hp": 41,
+          "block": 0,
+          "hp_removed": 17,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 2,
+          "hp": 42,
+          "block": 0,
+          "hp_removed": 17,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 3,
+          "hp": 173,
+          "block": 0,
+          "hp_removed": 17,
+          "block_removed": 0,
+          "power_changes": []
+        }
+      ],
+      "energy_spent": 3
+    },
+    "comparison": "Same three energy and 13 visible incoming damage. The three-attack sequence accounts for 75 total enemy HP loss versus 51 from Stomp alone; future Rampage growth and Razor Tooth upgrades remain rule-based omitted effects. Conditional calculation only, not game execution."
+  },
+  "replays": [
+    {
+      "label": "cost-damage-separation",
+      "result_root": "run-artifacts/run33-discount-review/results/boss-opening/cost-damage-separation/1",
+      "freeze": "49e5c27e12ed46ccba201bf3df9e23265cc5feea54106a958e114e2bbd4d5426",
+      "input_sha256": "c05d74dfd70b73f151c4c7479c54d172603fdb1955bc078de59f15c27c18aa0c",
+      "calls": 24,
+      "usage": {
+        "input_tokens": 524875,
+        "output_tokens": 2249
+      },
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Stomp+",
+          "card_id": "STOMP"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "providers": [
+        "typesafe"
+      ],
+      "models": [
+        "jev-1.13.0"
+      ],
+      "compared_pairs": 10,
+      "order_disagreements": 4,
+      "choice_improved": false
+    },
+    {
+      "label": "explicit-sequence-payment",
+      "result_root": "run-artifacts/run33-payment-review/results/boss-opening/explicit-sequence-payment/1",
+      "freeze": "0a03c05285ad974bcc3a5a82d87a1d50ff7f97f1981d07583e9186aad1a5270e",
+      "input_sha256": "c05d74dfd70b73f151c4c7479c54d172603fdb1955bc078de59f15c27c18aa0c",
+      "calls": 24,
+      "usage": {
+        "input_tokens": 523498,
+        "output_tokens": 2249
+      },
+      "sequence": [
+        {
+          "kind": "play_card",
+          "name": "Stomp+",
+          "card_id": "STOMP"
+        },
+        {
+          "kind": "end_turn"
+        }
+      ],
+      "providers": [
+        "typesafe"
+      ],
+      "models": [
+        "jev-1.13.0"
+      ],
+      "compared_pairs": 10,
+      "order_disagreements": 6,
+      "choice_improved": false
+    }
+  ],
+  "validation": {
+    "targeted_checks": 42,
+    "failures": 0,
+    "log": "temp/run33-discount-checks.log"
+  },
+  "limitations": [
+    "Both full offline replays still selected Stomp alone; no improved strategy or win rate is established.",
+    "All cases are inspected development evidence, with only history before the original decision supplied.",
+    "Calculations describe declared actions and retain omitted triggers; no hypothetical sequence was executed.",
+    "Confidence remains distribution concentration, not correctness."
+  ],
+  "runtime_loaded": false
+}

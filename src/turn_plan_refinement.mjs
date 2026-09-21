@@ -34,7 +34,7 @@ export function describePlanAlternative(state, steps) {
   const known = projection.known_effects_only;
   const currentAttack = state.combat.enemies.filter(e => e.is_alive && e.hp > 0).reduce((sum, e) => sum + intentDamage(e), 0);
   const blockable = known.incoming_attack === null ? null : known.incoming_attack + known.end_turn_damage_events.reduce((sum, event) => sum + event.amount, 0);
-  let energyAfterPrintedCosts = state.combat.player.energy;
+  let energyAfterReservedCosts = state.combat.player.energy;
   return {
     resource_consequences: {
       current_displayed_attack_damage: currentAttack,
@@ -48,13 +48,13 @@ export function describePlanAlternative(state, steps) {
       scope: 'Conditional on the declared actions. Consumed potions are unavailable afterward; held automatic potions remain armed until their conditions trigger, and their final inventory is not simulated. Block accounting covers only calculated incoming damage; evaluate uncomputed triggers, retention and other uses of Block from the current rules.'
     },
     ordered_sequence: steps.filter(step => step.kind !== 'end_turn').map((step, index) => {
-      energyAfterPrintedCosts -= budget.costs[index];
+      energyAfterReservedCosts -= budget.costs[index];
       const beneficiary = state.combat.hand.find(card => cardInstance(card) === (step.beneficiary_instance_id || step.next_card_instance_id));
       const card = state.combat.hand.find(card => cardInstance(card) === step.card_instance_id);
       const potionEffect = step.kind === 'use_potion' ? potionEffectFacts(state.combat.player.potions.find(p => p.id === step.potion_id && p.slot === step.slot)) : null;
-      return { action: step.name, ...(card ? { hand_index: card.index, printed_cost: card.cost } : {}), ...(step.target !== undefined ? { target: step.target } : {}), rules: step.rules_at_planning,
+      return { action: step.name, ...(card ? { hand_index: card.index, observed_cost: card.cost, reserved_cost_in_sequence: budget.costs[index] } : {}), ...(step.target !== undefined ? { target: step.target } : {}), rules: step.rules_at_planning,
         ...(potionEffect ? { effect_facts: potionEffect } : {}),
-        energy_after_reserved_costs: energyAfterPrintedCosts,
+        energy_after_reserved_costs: energyAfterReservedCosts,
         ...(beneficiary ? { intended_followthrough: beneficiary.name,
           ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
     }),

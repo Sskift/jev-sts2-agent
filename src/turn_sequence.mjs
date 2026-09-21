@@ -118,7 +118,11 @@ export function inspectSequence(state, steps) {
         // Shrink -1 is indefinite, not inactive; its verified native hook
         // multiplies powered attack damage by 0.7 independently of stacks.
         const shrink = observed.player.powers?.some(p => p.id === 'SHRINK_POWER');
-        const mutableBasis = sequence > 0 && /(?:your (?:current )?(?:Block|HP)|cards? in (?:your )?(?:Hand|Discard|Exhaust)|(?:Attacks?|Skills?|cards?) played (?:this turn|this combat))/i.test(card.description);
+        // A standalone cost discount (native Stomp) changes payment, not its
+        // damage basis. Keep other counter-dependent clauses conservative.
+        const damageRules = card.description.split(/[.\n]/).map(clause => clause.trim())
+          .filter(clause => !/^Costs? \d+ less (?:\d+ )?Energy for each Attack played this turn$/i.test(clause)).join('. ');
+        const mutableBasis = sequence > 0 && /(?:your (?:current )?(?:Block|HP)|cards? in (?:your )?(?:Hand|Discard|Exhaust)|(?:Attacks?|Skills?|cards?) played (?:this turn|this combat))/i.test(damageRules);
         const unusualScaling = strength !== 0 && /\bStrength\b/i.test(card.description) && card.id !== 'SETUP_STRIKE';
         const hits = previewHitCount(card);
         detail.damage_instances = hits;
