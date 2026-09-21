@@ -32,6 +32,23 @@ function slowFixture() {
 }
 const defend = { kind: 'play_card', card_instance_id: 'defend' }, strike = { kind: 'play_card', card_instance_id: 'strike', target: 42 };
 
+test('Tremble uses live upgraded Vulnerable amounts before later attacks and respects Artifact', () => {
+  const s = fixture();
+  s.combat.hand[0] = fixtureCard('TREMBLE', { index: 0, type: 'Skill', cost: 1, target_type: 'AnyEnemy', can_play: true,
+    description: 'Apply 4 Vulnerable. Exhaust.', keywords: ['Exhaust'], details: { instance_id: 'tremble' } });
+  const prepare = { kind: 'play_card', card_instance_id: 'tremble', target: 42 };
+  const ordered = describeTurnProjection(s, [prepare, strike]);
+  assert.deepEqual(ordered.debuff_dependencies.adapters, ['TREMBLE']);
+  assert.deepEqual(ordered.debuff_dependencies.ordered_damage[0].per_hit, { min: 9, max: 10 });
+  assert.deepEqual(ordered.debuff_dependencies.enemies[0].power_changes.find(p => p.power_id === 'VULNERABLE_POWER').after_declared_actions, { min: 4, max: 4 });
+  const reversed = describeTurnProjection(s, [strike, prepare]);
+  assert.deepEqual(reversed.debuff_dependencies.ordered_damage[0].per_hit, { min: 6, max: 6 });
+  s.combat.enemies[0].powers = [{ id: 'ARTIFACT_POWER', amount: 1, description: 'Negates the next debuff.' }];
+  const blocked = describeTurnProjection(s, [prepare, strike]).debuff_dependencies;
+  assert.deepEqual(blocked.ordered_damage[0].per_hit, { min: 6, max: 6 });
+  assert.deepEqual(blocked.enemies[0].power_changes.find(p => p.power_id === 'ARTIFACT_POWER').after_declared_actions, { min: 0, max: 0 });
+});
+
 test('Slow counts completed cards, benefits later attacks, and preserves hidden rounding bounds', () => {
   const s = slowFixture(), before = structuredClone(s);
   const early = describeTurnProjection(s, [strike, defend]).debuff_dependencies;

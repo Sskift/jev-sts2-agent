@@ -1,0 +1,270 @@
+{
+  "date": "2026-09-21",
+  "run_id": "run-1789992163",
+  "native_version": "v0.111.0",
+  "native_assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
+  "native_methods": [
+    "Tremble.OnPlay / OnUpgrade",
+    "TuningFork.AfterCardPlayed / UpdateDisplay / DisplayAmount"
+  ],
+  "findings": [
+    "Tremble applies resolved Vulnerable before later cards, with the normal Artifact/immunity rules. Its native exhaust keyword remains unchanged.",
+    "Tuning Fork increments per owned Skill. Only non-triggering increments with matching full relic records are accepted for continuation; trigger, threshold animation, unknown counters and unrelated changes still require review."
+  ],
+  "checked_confirmed_cards": 45,
+  "changed_plan_statuses": [
+    {
+      "source": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0062",
+      "request": {
+        "cmd": "play_card",
+        "id": "TREMBLE",
+        "nth": 0,
+        "target": 1
+      },
+      "before_status": "needs_review",
+      "before_reasons": [
+        "Enemy availability, intent or powers changed."
+      ],
+      "after_status": "active",
+      "after_reasons": [],
+      "next_kind": "play_card",
+      "next": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 0,
+        "target": 1
+      },
+      "model": "jev-turn-plan"
+    },
+    {
+      "source": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0106",
+      "request": {
+        "cmd": "play_card",
+        "id": "TREMBLE",
+        "nth": 0,
+        "target": 1
+      },
+      "before_status": "needs_review",
+      "before_reasons": [
+        "Player relics changed.",
+        "Enemy availability, intent or powers changed."
+      ],
+      "after_status": "active",
+      "after_reasons": [],
+      "next_kind": "play_card",
+      "next": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 0,
+        "target": 2
+      },
+      "model": "jev-turn-plan"
+    },
+    {
+      "source": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0132",
+      "request": {
+        "cmd": "play_card",
+        "id": "TREMBLE",
+        "nth": 0,
+        "target": 1
+      },
+      "before_status": "needs_review",
+      "before_reasons": [
+        "Player relics changed.",
+        "Enemy availability, intent or powers changed."
+      ],
+      "after_status": "active",
+      "after_reasons": [],
+      "next_kind": "play_card",
+      "next": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 1,
+        "target": 2
+      },
+      "model": "jev-turn-plan"
+    },
+    {
+      "source": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0153",
+      "request": {
+        "cmd": "play_card",
+        "id": "DEFEND_IRONCLAD",
+        "nth": 0
+      },
+      "before_status": "needs_review",
+      "before_reasons": [
+        "Player relics changed."
+      ],
+      "after_status": "active",
+      "after_reasons": [],
+      "next_kind": "play_card",
+      "next": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 1,
+        "target": 2
+      },
+      "model": "jev-turn-plan"
+    },
+    {
+      "source": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0158",
+      "request": {
+        "cmd": "play_card",
+        "id": "DEFEND_IRONCLAD",
+        "nth": 2
+      },
+      "before_status": "needs_review",
+      "before_reasons": [
+        "Player relics changed."
+      ],
+      "after_status": "active",
+      "after_reasons": [],
+      "next_kind": "end_turn"
+    },
+    {
+      "source": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0160",
+      "request": {
+        "cmd": "play_card",
+        "id": "TAUNT",
+        "nth": 0,
+        "target": 1
+      },
+      "before_status": "needs_review",
+      "before_reasons": [
+        "Player relics changed."
+      ],
+      "after_status": "active",
+      "after_reasons": [],
+      "next_kind": "play_card",
+      "next": {
+        "cmd": "play_card",
+        "id": "TREMBLE",
+        "nth": 0,
+        "target": 1
+      },
+      "model": "jev-turn-plan"
+    }
+  ],
+  "new_network_calls": 0,
+  "verified_next_card_continuations": 5,
+  "full_context_bytes": 53459,
+  "targeted_checks_passed": 37,
+  "checkpoint": {
+    "floor": 15,
+    "turn": 4,
+    "hp": 46,
+    "energy": 1,
+    "pending": null
+  },
+  "scope": "Read-only replay of native before/after snapshots and the plan already selected at that time. The historical plan is preserved for execution validation; no new model strategy judgment or counterfactual victory is claimed.",
+  "artifacts": [
+    {
+      "path": "temp/run36-continuation-audit.json",
+      "sha256": "1acd034ef2613ce5c167ba029676d06f828ed135dead7beab19d181766d9fa14"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/continuation-stop-native.json",
+      "sha256": "5aee233f5a2690d2010dfc77712ea575366faf98c3f611084094cba7b50e7df7"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/continuation-stop-memory.json",
+      "sha256": "9c51c76d1b9b59d86deefe676d1b659081786fba4367ebe8a6b777304f245259"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0062/before-state.json",
+      "sha256": "d90407ed7cd2bee9f1cd1db6c97ee142bf3a237a1d888835a374103162095f76"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0062/after-state.json",
+      "sha256": "70e6623df52230d39b558142378e33f09385deeb1feffbae7a5e0245962543de"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0062/decision.json",
+      "sha256": "040af154b80674e6ee294b596aae1fcc8ff87da7a6580d7513bb7448f107bd06"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0062/response.json",
+      "sha256": "f3fd267edcebfaec44271dd8de4560a428023a2428f5796ef87b80e7f99dcc75"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0106/before-state.json",
+      "sha256": "133125f48937e7885b873b14847ee3539c695dbc2d2d240da7706ae7fbafc43a"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0106/after-state.json",
+      "sha256": "5e2ccdb56e241d14020b950586174105d45618f0300707071a366eecf40da06d"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0106/decision.json",
+      "sha256": "adf6748e6be60b6abc353e8d5a06d8f6981e97b4631b77bb4e205e82f215bbdb"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0106/response.json",
+      "sha256": "ede078fc50066e2294dab8a53278fb1000e835a43af0bf9d40a9877e072c3954"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0132/before-state.json",
+      "sha256": "3e38c6cc218ac4fe128b72ae6041ef93439ae0365b0b47102a4c427e871afaf3"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0132/after-state.json",
+      "sha256": "63e7787464b3eefa89a24248920b8dd16646ddc38fc89ebb47bd5aba405a3107"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0132/decision.json",
+      "sha256": "bdaf1550704f06c3902443e53f8656dbe0efb667c39b3a50501a25903fe95fa5"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0132/response.json",
+      "sha256": "52e019899b1d1b1666ad0c78cf9b78f6800e4d089590de1c3a73d371e92e8cb1"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0153/before-state.json",
+      "sha256": "30943a55c7759302311acdeacee7d0441b95daa646ec00d2171689c215cb2ded"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0153/after-state.json",
+      "sha256": "b19ea8baf0d19331276413ce99704ceeedfe403ac83beef3977e3d6f3eb59631"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0153/decision.json",
+      "sha256": "350c14c89f74222e5aa7c72dfd5a037073921d1b7bd4181935da38491eb66217"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0153/response.json",
+      "sha256": "34ed885a30928fd51c51042d2ba8b960afe29942129b71316934d15d74cc5209"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0158/before-state.json",
+      "sha256": "914e230a89d02c84270a7cdc1ce2f090edfe37bc2f058ea1493c2967c573d56f"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0158/after-state.json",
+      "sha256": "37648c7a14b35668375199f3888287d0e5389cd06d04f162c644398a0a408b8f"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0158/decision.json",
+      "sha256": "b99ecd4dea7455d7ce9ef5bbb2a274ff874e809296c58649121fdf49c6b1df65"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0158/response.json",
+      "sha256": "60cf83def0fd66cf8c2ab542445b4f5601da50ee08c0340ed4200fb457a50c5b"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0160/before-state.json",
+      "sha256": "06b055aa2b4adc2da9848aac6f4909c6b032ba3b49463c26e835f91832d381a1"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0160/after-state.json",
+      "sha256": "21808830aa8543cec1fea827757d5a0540cdada68cc2b0b9324d1e55626f4771"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0160/decision.json",
+      "sha256": "c7ccf5074d77d2e2890ad6d8d46649ddad4fedd82593d9da96d0a908af35c4e8"
+    },
+    {
+      "path": "run-artifacts/run36-2026-09-21T12-02-36.406Z/step-0160/response.json",
+      "sha256": "21b0741b2453de90753c51ffd461d7e9556be34f31d8602298a87b9c378d6e2a"
+    }
+  ]
+}

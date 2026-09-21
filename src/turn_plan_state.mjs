@@ -17,17 +17,39 @@ export function turnFingerprint(state) {
   return createHash('sha256').update(JSON.stringify(canonicalObservation(state))).digest('hex');
 }
 
+// Native v0.111.0 TuningFork.AfterCardPlayed increments once per owned Skill.
+// Only a non-triggering increment is explained here. Activation can grant
+// Block and show the threshold during its animation, so it still needs review.
+function expectedNonTriggerRelics(combat, step) {
+  const card = step?.kind === 'play_card' && combat.hand.find(card => cardInstance(card) === step.card_instance_id);
+  if (card?.type !== 'Skill') return null;
+  let changed = false;
+  const relics = canonicalRelics(combat.player.relics)?.map(relic => {
+    if (relic.id !== 'TUNING_FORK' || relic.status !== 'Normal') return relic;
+    const match = /^Every time you play (\d+) Skills, gain ([\d.]+) Block\.$/.exec(relic.description || '');
+    const threshold = Number(match?.[1]);
+    if (!Number.isSafeInteger(threshold) || threshold < 2 || !Number.isSafeInteger(relic.counter)
+      || relic.counter < 0 || relic.counter >= threshold - 1) return relic;
+    changed = true;
+    const counter = relic.counter + 1;
+    return { ...relic, counter, status: counter === threshold - 1 ? 'Active' : 'Normal' };
+  });
+  return changed ? relics : null;
+}
+
 export function turnGuard(state, step = null) {
   if (!state.combat) return null;
   const combat = state.combat;
   const expectedEnemies = step ? projectDebuffDependencies(state, [step])?.enemies : null;
+  const expectedRelics = expectedNonTriggerRelics(combat, step);
   return {
     energy: combat.player.energy, hp: combat.player.hp, powers: combat.player.powers,
     relics: canonicalRelics(combat.player.relics), orbs: combat.player.orbs,
     positioning: combat.positioning,
     hand: combat.hand.map(card => ({ id: card.id, instance_id: cardInstance(card), cost: card.cost, description: card.description, can_play: card.can_play })),
     enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, hp: enemy.hp, block: enemy.block, is_alive: enemy.is_alive, intents: enemy.intents, powers: enemy.powers })),
-    ...(expectedEnemies ? { expected_enemy_changes: expectedEnemies } : {})
+    ...(expectedEnemies ? { expected_enemy_changes: expectedEnemies } : {}),
+    ...(expectedRelics ? { expected_relic_changes: expectedRelics } : {})
   };
 }
 
@@ -141,7 +163,8 @@ function changesRequiringReview(before, after, step, remaining) {
   if (after.energy !== before.energy - cost) reasons.push('Energy differs from the reserved printed cost; new actions may be possible.');
   for (const field of ['hp', 'powers', 'relics', 'orbs', 'positioning']) {
     const normalize = field === 'relics' ? canonicalRelics : value => value;
-    if (!same(normalize(before[field]), normalize(after[field]))) reasons.push(`Player ${field} changed.`);
+    const expected = field === 'relics' ? before.expected_relic_changes ?? before[field] : before[field];
+    if (!same(normalize(expected), normalize(after[field]))) reasons.push(`Player ${field} changed.`);
   }
   const old = new Map(before.hand.map(card => [card.instance_id, card]));
   for (const card of after.hand) {

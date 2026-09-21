@@ -35,6 +35,28 @@ function savedPlan(state, ids) {
     steps: ids.map(id => planStep(state, candidates.get(id))), retained_cards: [], cursor: 0,
     status: 'active', review_reasons: [], completed_actions: [], expected_fingerprint: turnFingerprint(state) };
 }
+
+test('ordinary Tuning Fork progress can continue the same plan; activation or unrelated changes require review', () => {
+  for (const [beforeCount, afterCount, expected] of [[1, 2, 'active'], [8, 9, 'active'], [9, 10, 'needs_review'], [1, 3, 'needs_review']]) {
+    const s = stateWith([card('DEFEND_IRONCLAD', 'defend', 0, { type: 'Skill', target_type: 'Self', description: 'Gain 5 Block.', block: 5 }), card('STRIKE_IRONCLAD', 'strike', 1)]);
+    s.combat.player.relics = [{ id: 'TUNING_FORK', counter: beforeCount, status: beforeCount === 9 ? 'Active' : 'Normal', description: 'Every time you play 10 Skills, gain 7 Block.' }];
+    sync(s);
+    const plan = savedPlan(s, ['card_0', 'card_1_target_42']);
+    const m = new DecisionMemory(); m.observe(s);
+    m.begin({ cmd: 'play_card', id: 'DEFEND_IRONCLAD', nth: 0 }, s, { turnPlan: plan, turnStep: 0 });
+    const after = structuredClone(s); after.combat.hand.shift(); after.combat.player.energy--;
+    Object.assign(after.combat.player.relics[0], { counter: afterCount, status: afterCount === 9 ? 'Active' : 'Normal' });
+    sync(after); m.finish({ ok: true }, after);
+    assert.equal(m.data.turn_plan.status, expected, `${beforeCount} -> ${afterCount}`);
+    if (expected === 'active') {
+      after.combat.player.relics[0].description = 'Changed effect.';
+      const changed = new DecisionMemory(); changed.observe(s);
+      changed.begin({ cmd: 'play_card', id: 'DEFEND_IRONCLAD', nth: 0 }, s, { turnPlan: plan, turnStep: 0 });
+      changed.finish({ ok: true }, sync(after));
+      assert.equal(changed.data.turn_plan.status, 'needs_review');
+    }
+  }
+});
 function fakeJev(answers, seen = []) {
   return async (_url, request) => {
     const body = parseJevRequest(request.body); seen.push(body);

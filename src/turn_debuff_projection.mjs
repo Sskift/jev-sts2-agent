@@ -3,7 +3,7 @@ import { slowPercent } from './turn_effects.mjs';
 
 // These adapters follow verified native v0.111.0 OnPlay ordering. Amounts
 // come from resolved live text, never from a base/upgrade Wiki guess.
-const applications = { BASH: ['Vulnerable'], TAUNT: ['Vulnerable'], VULNERABLE_POTION: ['Vulnerable'], UPPERCUT: ['Weak', 'Vulnerable'], THUNDERCLAP: ['Vulnerable'], SHOCKWAVE: ['Weak', 'Vulnerable'] };
+const applications = { BASH: ['Vulnerable'], TAUNT: ['Vulnerable'], TREMBLE: ['Vulnerable'], VULNERABLE_POTION: ['Vulnerable'], UPPERCUT: ['Weak', 'Vulnerable'], THUNDERCLAP: ['Vulnerable'], SHOCKWAVE: ['Weak', 'Vulnerable'] };
 function applicationAmount(card, kind) {
   const rule = card.id === 'THUNDERCLAP' ? /^Deal [\d.]+ damage and apply (\d+) Vulnerable to ALL enemies\.(?:\s|$)/i
     : card.id === 'SHOCKWAVE' ? /^Apply (\d+) Weak and Vulnerable to ALL enemies\.(?:\s|$)/i
