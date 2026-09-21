@@ -1,0 +1,103 @@
+{
+  "at": "2026-09-21T10:36:38.599Z",
+  "run_id": "run-1789968641",
+  "provider": "openrouter",
+  "runtime_commit": "6c3f535e80936ed7342b9f06af5d93742d0ad3ef",
+  "stop_reason": "Spending allowance; stopped before sending the next model request",
+  "controller": {
+    "source": "temp/run35-resume6-result.json",
+    "sha256": "fb413ba0a15f157c879e4f9c7216ec2b8184e1432f29a62723b9397ba9cd2544"
+  },
+  "native": {
+    "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/confirmed-stop-native.json",
+    "sha256": "cd558a9e9e91db772474cbf592e2f0b792b9fd01e66fa51d363ce2a67def9aeb"
+  },
+  "memory": {
+    "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/confirmed-stop-memory.json",
+    "sha256": "c6706213c451ce6c08849c96c06f961e6c831e007bdf670c53484d7835e3c51a"
+  },
+  "expected_state": {
+    "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0017/before-state.json",
+    "sha256": "68a535d4d0644da0b9281b6327d33ac42a7358c1897a01b2badf4c29623cf277"
+  },
+  "fingerprint_matches": true,
+  "pending": null,
+  "confirmed_commands_in_latest_controller": 15,
+  "progress": {
+    "runId": "run-1789968641",
+    "startedAtFloor": 1,
+    "acts": [
+      0,
+      1
+    ],
+    "floor": 33,
+    "hp": 80
+  },
+  "screen": "COMBAT",
+  "act_index": 1,
+  "floor": 33,
+  "turn": 4,
+  "hp": 80,
+  "energy": 5,
+  "enemies": [
+    {
+      "id": "THE_INSATIABLE",
+      "hp": 233
+    }
+  ],
+  "spending": {
+    "ledger": {
+      "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/confirmed-stop-spending.json",
+      "sha256": "b953ed2422bb1986fd0c2d19c46c6de6d48b7bc3f584a84e08b91bf8cb30de75"
+    },
+    "max_usd": 1,
+    "reported_usd": 0.9718836960000002,
+    "unreported_reserved_usd": 0.015792966000000012,
+    "stopped_before_request": {
+      "at": "2026-09-21T10:35:49.628Z",
+      "reason": "continuation_spending_allowance",
+      "next_reserve_usd": 0.013334202000000002
+    }
+  },
+  "settling_runtime": {
+    "first_native": {
+      "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0001/before-state.json",
+      "sha256": "2ee7223a2eeb5fe8ed753692ea95eeb1b281bf49ffd739e821961eff14ed6f77"
+    },
+    "first_readiness": {
+      "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0001/decision-readiness-state.json",
+      "sha256": "3dba1c249c5e5a0cfa68dab44812ed4ae8895499705b5a21c2bad6671919be68"
+    },
+    "first_decision": {
+      "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0001/decision.json",
+      "sha256": "16efa8ab3647ea506e4dba315e01cbaf78f808ee12bda42cadd500fba043d9fc"
+    },
+    "first_response": {
+      "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0001/response.json",
+      "sha256": "107c2ba23804a21d07487d07cdf645ac2497a78baec78fd812b431a4ff026a54"
+    },
+    "readiness_checks": 13,
+    "deferred_before_paid_requests": [
+      {
+        "before": {
+          "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0016/before-state.json",
+          "sha256": "c358782d27632c01b27fc6647b411b63684ae280779484f7874db16973b3e288"
+        },
+        "readiness": {
+          "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0016/decision-readiness-state.json",
+          "sha256": "3a207e50c35e97d8462dc239e2c07166aae03c9eee75e5ed34eaf72b5c31e50a"
+        },
+        "result": {
+          "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0016/result.json",
+          "sha256": "204ce01d94ab43a1e5f36480db7f51533602296aae817fc3ebfa0fdc57ea85a1"
+        },
+        "responses": 0
+      }
+    ]
+  },
+  "limitations": [
+    "The run has not completed three acts or reached formal victory.",
+    "The spending ledger includes the earlier saved replay and continuations. Unreported cost reservations are not confirmed charges.",
+    "Two equal observations do not guarantee there will be no later state change."
+  ]
+}

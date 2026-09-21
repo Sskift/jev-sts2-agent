@@ -3,6 +3,8 @@ import path from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import Ajv2020 from 'ajv/dist/2020.js';
+import { canonicalObservation } from './observation_state.mjs';
+export { canonicalObservation } from './observation_state.mjs';
 import { previewDamageSum } from './combat_arithmetic.mjs';
 import { buildRuleReference } from './rule_reference.mjs';
 import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
@@ -110,15 +112,6 @@ export function cardRewardKey(reward) {
 const keyOf = node => `${node.col},${node.row}`;
 const preRun = new Set(['MENU', 'SINGLEPLAYER_SUBMENU', 'CHARACTER_SELECT', 'GAME_OVER']);
 const array = (value, name) => { if (!Array.isArray(value)) throw new ContextError(`Missing context array: ${name}`); return value; };
-
-// Canonicalize only unordered piles, never hand positions, discard order,
-// selected cards, or action/history sequences. Every card attribute is retained.
-export function canonicalObservation(state) {
-  const copy = clone(state);
-  delete copy.timestamp;
-  if (copy.combat?.draw_pile) copy.combat.draw_pile.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
-  return copy;
-}
 
 export function validateContext(state) {
   if (preRun.has(state.screen)) return;
@@ -303,6 +296,7 @@ export class DecisionMemory {
     }
   }
   observe(state) {
+    state = canonicalObservation(state);
     const runId = state.decision_context?.run_id || null;
     if (runId && runId !== this.data.run_id) {
       this.data = { version: 1, run_id: runId, actions: [], observations: [], pending: null, started_at_floor: state.decision_context.total_floor, coverage: 'Agent observations since attachment; game history supplies earlier events where available.' };

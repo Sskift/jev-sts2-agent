@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { costAfterAttacks } from './turn_sequence.mjs';
 import { projectDebuffDependencies } from './turn_debuff_projection.mjs';
+import { canonicalObservation, canonicalRelics } from './observation_state.mjs';
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export const cardInstance = card => card?.details?.instance_id;
@@ -10,13 +11,10 @@ export function sameTurn(plan, state) {
     && plan.combat_id === state.decision_context?.combat_id && plan.turn === state.combat.turn_number);
 }
 
-// A consistency check, not extra model knowledge. Ignore extraction time and
-// unknown draw order. Original game observations remain in the step artifacts.
+// Use the same gameplay facts as the model, including presentation-only field
+// handling. Original game observations remain in the step artifacts.
 export function turnFingerprint(state) {
-  const copy = structuredClone(state);
-  delete copy.timestamp;
-  if (copy.combat?.draw_pile) copy.combat.draw_pile.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
-  return createHash('sha256').update(JSON.stringify(copy)).digest('hex');
+  return createHash('sha256').update(JSON.stringify(canonicalObservation(state))).digest('hex');
 }
 
 export function turnGuard(state, step = null) {
@@ -25,7 +23,7 @@ export function turnGuard(state, step = null) {
   const expectedEnemies = step ? projectDebuffDependencies(state, [step])?.enemies : null;
   return {
     energy: combat.player.energy, hp: combat.player.hp, powers: combat.player.powers,
-    relics: combat.player.relics, orbs: combat.player.orbs,
+    relics: canonicalRelics(combat.player.relics), orbs: combat.player.orbs,
     positioning: combat.positioning,
     hand: combat.hand.map(card => ({ id: card.id, instance_id: cardInstance(card), cost: card.cost, description: card.description, can_play: card.can_play })),
     enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, hp: enemy.hp, block: enemy.block, is_alive: enemy.is_alive, intents: enemy.intents, powers: enemy.powers })),
@@ -141,7 +139,10 @@ function changesRequiringReview(before, after, step, remaining) {
   const reasons = [];
   const cost = step?.kind === 'play_card' ? step.cost_at_dispatch < 0 ? before.energy : step.cost_at_dispatch : 0;
   if (after.energy !== before.energy - cost) reasons.push('Energy differs from the reserved printed cost; new actions may be possible.');
-  for (const field of ['hp', 'powers', 'relics', 'orbs', 'positioning']) if (!same(before[field], after[field])) reasons.push(`Player ${field} changed.`);
+  for (const field of ['hp', 'powers', 'relics', 'orbs', 'positioning']) {
+    const normalize = field === 'relics' ? canonicalRelics : value => value;
+    if (!same(normalize(before[field]), normalize(after[field]))) reasons.push(`Player ${field} changed.`);
+  }
   const old = new Map(before.hand.map(card => [card.instance_id, card]));
   for (const card of after.hand) {
     const previous = old.get(card.instance_id);

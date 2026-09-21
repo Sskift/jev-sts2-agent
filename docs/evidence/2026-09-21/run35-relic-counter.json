@@ -1,0 +1,123 @@
+{
+  "at": "2026-09-21T10:40:48.555Z",
+  "run_id": "run-1789968641",
+  "native_game_dll_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
+  "native_reference": {
+    "source": "temp/knowledge-research/HappyFlower-counter.cs",
+    "sha256": "4dfd576483aabe892788d246e6d091177726b0ffc2cfc851e5d0b8982e750401"
+  },
+  "extraction_reference": {
+    "source": "temp/sts2-context-source/STS2.Cli.Mod/State/Builders/RelicStateBuilder.cs",
+    "sha256": "940ca0ddeef4d8bdcd30fe0ae481b170ea5843483d61d4dd2f8498335aa68fc5"
+  },
+  "finding": "The mod exports DisplayAmount. HappyFlower.TurnsSeen is incremented modulo 3 before energy gain. During the independent activation animation, DisplayAmount returns 3 although TurnsSeen is already 0. Only this known display sentinel is mapped to the gameplay counter; energy, status, actual counters 1/2 and other relics remain meaningful changes.",
+  "change": "One shared canonical observation supplies model facts and execution fingerprints. Continuation guards and newly observed memory use the same relic semantics. Raw mod artifacts are unchanged. The earlier extra settling read was removed because it depended on visual timing.",
+  "checks": {
+    "passed": 71,
+    "log": {
+      "source": "temp/run35-counter-checks.log",
+      "sha256": "ea4500983e6a0eee862dddf183462fab768bc8a555de114feb64bb4c7491b840"
+    }
+  },
+  "cases": [
+    {
+      "before": {
+        "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0050/before-state.json",
+        "sha256": "b1a37e2cc5b5fd4e97fd303a4359db8f8c5e51477dc66b5d10d3001a49cc3ab6"
+      },
+      "after": {
+        "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0050/pre-action-state.json",
+        "sha256": "5ae752162120fddc7050888f34fca9fd7f324bb9b866285004e28b286f472eda"
+      },
+      "original_result": {
+        "source": "run-artifacts/run35-resume4-2026-09-21T10-15-59.285Z/step-0050/result.json",
+        "sha256": "12c73d894e465b0e8b1a8ee874bc4eac5f3d36466d46be4d89b1b938825a26e4"
+      },
+      "raw_counter": [
+        3,
+        0
+      ],
+      "decision_counter": [
+        0,
+        0
+      ],
+      "original_responses": 31,
+      "original_reported_cost_usd": 0.030652692000000006,
+      "checks": {
+        "decision_fingerprint_equal": true,
+        "continuation_fingerprint_equal": true,
+        "continuation_guard_equal": true,
+        "complete_request_equal": true,
+        "source_preserved": true
+      }
+    },
+    {
+      "before": {
+        "source": "run-artifacts/run35-resume5-2026-09-21T10-28-10.352Z/step-0020/before-state.json",
+        "sha256": "8d361b1c1bd8959b1458abe40515da9bf2a7ba32293f41009850f87c9619e7ff"
+      },
+      "after": {
+        "source": "run-artifacts/run35-resume5-2026-09-21T10-28-10.352Z/step-0020/pre-action-state.json",
+        "sha256": "5a88e1cdc9b59aaaae7f37a1740e0fe274108deb3f5a7023633231b01b0a4d06"
+      },
+      "original_result": {
+        "source": "run-artifacts/run35-resume5-2026-09-21T10-28-10.352Z/step-0020/result.json",
+        "sha256": "12c73d894e465b0e8b1a8ee874bc4eac5f3d36466d46be4d89b1b938825a26e4"
+      },
+      "raw_counter": [
+        3,
+        0
+      ],
+      "decision_counter": [
+        0,
+        0
+      ],
+      "original_responses": 29,
+      "original_reported_cost_usd": 0.027782538000000002,
+      "checks": {
+        "decision_fingerprint_equal": true,
+        "continuation_fingerprint_equal": true,
+        "continuation_guard_equal": true,
+        "complete_request_equal": true,
+        "source_preserved": true
+      }
+    },
+    {
+      "before": {
+        "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0016/before-state.json",
+        "sha256": "c358782d27632c01b27fc6647b411b63684ae280779484f7874db16973b3e288"
+      },
+      "after": {
+        "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0016/decision-readiness-state.json",
+        "sha256": "3a207e50c35e97d8462dc239e2c07166aae03c9eee75e5ed34eaf72b5c31e50a"
+      },
+      "original_result": {
+        "source": "run-artifacts/run35-resume6-2026-09-21T10-33-20.689Z/step-0016/result.json",
+        "sha256": "204ce01d94ab43a1e5f36480db7f51533602296aae817fc3ebfa0fdc57ea85a1"
+      },
+      "raw_counter": [
+        3,
+        0
+      ],
+      "decision_counter": [
+        0,
+        0
+      ],
+      "original_responses": 0,
+      "original_reported_cost_usd": 0,
+      "checks": {
+        "decision_fingerprint_equal": true,
+        "continuation_fingerprint_equal": true,
+        "continuation_guard_equal": true,
+        "complete_request_equal": true,
+        "source_preserved": true
+      }
+    }
+  ],
+  "limitations": [
+    "Only Happy Flower v0.111.0 display sentinel 3 is mapped; this is not a blanket counter normalization.",
+    "No additional model or game calls were used for these historical checks.",
+    "The latest native counter correction has not yet been loaded into a running game controller.",
+    "Historical costs are not claimed as guaranteed future savings or an improvement in decision quality."
+  ]
+}

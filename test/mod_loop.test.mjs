@@ -5,6 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { actionFingerprint, observeModBattle, runModLoop, observedEndTurnSelection, observedEventProgress } from '../src/mod_loop.mjs';
 import { DecisionMemory } from '../src/decision_context.mjs';
+import { canonicalObservation } from '../src/observation_state.mjs';
+import { turnFingerprint, turnGuard } from '../src/turn_plan_state.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
 import { ModTransportError } from '../src/mod_client.mjs';
 import { withContext } from './fixtures/context.mjs';
@@ -60,26 +62,45 @@ function chooseAttack(state) {
   return choice;
 }
 
-test('combat facts must settle before a paid decision, including counters changing after actions unlock', async t => {
+test('Happy Flower activation display does not discard paid decisions or change gameplay counters', async t => {
   const initial = combat(), settled = combat(), artifactDir = temporaryFolder(t);
   for (const [state, counter] of [[initial, 3], [settled, 0]]) {
     const relics = [{ id: 'HAPPY_FLOWER', name: 'Happy Flower', description: 'Every 3 turns, gain 1 Energy.', counter }];
     state.decision_context.player.relics = relics;
     state.combat.player.relics = structuredClone(relics);
   }
-  const client = scriptedClient([initial, settled, settled, settled, settled, reward()]);
+  assert.equal(canonicalObservation(initial).combat.player.relics[0].counter, 0);
+  assert.equal(initial.combat.player.relics[0].counter, 3, 'raw observation remains intact');
+  assert.equal(actionFingerprint(initial), actionFingerprint(settled));
+  assert.equal(turnFingerprint(initial), turnFingerprint(settled));
+  assert.deepEqual(turnGuard(initial), turnGuard(settled));
+  const memory = new DecisionMemory();
+  memory.observe(initial); memory.observe(settled);
+  assert.equal(memory.data.observations.length, 0, 'animation is not recorded as a gameplay event');
+  const client = scriptedClient([initial, settled, reward()]);
   const seen = [];
-  const result = await runModLoop({ client, artifactDir, maxSteps: 2, intervalMs: 1, logger() {}, decide: state => {
-    seen.push(state.combat.player.relics[0].counter);
+  const result = await runModLoop({ client, artifactDir, maxSteps: 1, intervalMs: 0, logger() {}, decide: state => {
+    seen.push(canonicalObservation(state).combat.player.relics[0].counter);
     return chooseAttack(state);
   } });
   assert.equal(result.error, undefined);
   assert.deepEqual(seen, [0]);
   assert.equal(client.requests.length, 1);
-  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(artifactDir, 'step-0001', 'result.json'))), {
-    executed: false, reason: 'State changed before decision; observe again', modelCalls: 0
-  });
-  assert.ok(fs.existsSync(path.join(artifactDir, 'step-0001', 'decision-readiness-state.json')));
+  assert.ok(fs.existsSync(path.join(artifactDir, 'step-0001', 'response.json')));
+  for (const change of [
+    state => { state.combat.player.energy++; },
+    state => { state.combat.player.relics[0].counter = 1; },
+    state => { state.combat.player.relics[0].status = 'Active'; },
+    state => { state.combat.player.relics[0].id = 'OTHER_RELIC'; }
+  ]) {
+    const different = structuredClone(initial); change(different);
+    assert.notEqual(actionFingerprint(initial), actionFingerprint(different));
+    assert.notEqual(turnFingerprint(initial), turnFingerprint(different));
+  }
+  const otherBefore = structuredClone(initial), otherAfter = structuredClone(initial);
+  otherBefore.combat.player.relics[0].id = otherAfter.combat.player.relics[0].id = 'OTHER_RELIC';
+  otherAfter.combat.player.relics[0].counter = 0;
+  assert.notEqual(actionFingerprint(otherBefore), actionFingerprint(otherAfter), 'other counters stay authoritative');
 });
 
 function enemySelection() {
