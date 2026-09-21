@@ -284,6 +284,29 @@
       "failures": 0,
       "log": "temp/run33-plan-continuation-checks.log"
     },
-    "runtime_loaded": false
+    "runtime_loaded": {
+      "commit": "e9c74ed854bbc72acacd37c092c06af244293572",
+      "root": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z",
+      "provider": "typesafe",
+      "model": "jev-1.13.0",
+      "run_id": "run-1789958402",
+      "native_fingerprint_matched": true,
+      "prior_pending": null,
+      "floor": 24,
+      "turn": 2,
+      "hp": 39,
+      "energy": 4,
+      "first_confirmed_command": {
+        "cmd": "play_card",
+        "id": "SETUP_STRIKE",
+        "nth": 0,
+        "target": 1
+      },
+      "first_after": {
+        "source": "run-artifacts/run33-resume4-2026-09-21T03-28-53.417Z/step-0001/after-state.json",
+        "sha256": "6357770fa6833ee3347a5675d1a2c16605e3322ceaaaa3b1cfb525b474f3634d"
+      },
+      "scope": "The updated controller loaded and continued the same run. The zero-call expected-discount demonstration above is an offline replay of actual prior states, not a newly observed live discount transition."
+    }
   }
 }
