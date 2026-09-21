@@ -111,6 +111,10 @@ export async function decideTurn(state, options, prepared, choose) {
     // sharing the same full observation and general run objective.
     const constraints = visibleSurvivalConstraints(state), compareSurvival = constraints.length > 0;
     const questionsPerPair = assessment ? 1 : compareSurvival ? 2 : 1;
+    // Under a spending cap, intern repeated plan facts before sizing a batch.
+    // Sizing expanded plans first often sends one full observation per plan,
+    // even though several complete judgments fit in the lossless representation.
+    const preferredPresentation = options.planAssessmentLimit == null ? 'named' : 'packed';
     const purpose = assessment ? 'turn_assess_plans' : 'turn_refine_pairs';
     const comparisonState = { ...prepared.payload.state, turn_planning: planningState({ ...extra, survival_constraints: constraints }) };
     validateDecisionPacket(comparisonState);
@@ -122,13 +126,13 @@ export async function decideTurn(state, options, prepared, choose) {
           : { comparisons: items.map(pair => ({ plan_a: pair[0].label, plan_b: pair[1].label,
             continuation_resources: compareContinuationResources(pair[0].label, pair[1].label) })) }) } },
       questions: (assessment ? planAssessmentQuestions : planComparisonQuestions)(items, `${instructions} ${turnStrategyInstructions(state)} ${wholeTurnValue} ${references}`, compareSurvival) });
-    const batchRequest = (items, presentation = 'named') => {
+    const batchRequest = (items, presentation = preferredPresentation) => {
       const raw = payloadFor(items), payload = presentation === 'packed' ? compactPlanningRequest(raw) : raw;
       const metrics = { ...prepared.metrics, purpose, plan_record_presentation: presentation };
       return { payload, metrics: { ...metrics, request_bytes: compileModelRequest(payload, metrics).bytes,
         question_count: items.length * questionsPerPair } };
     };
-    async function flush(presentation = 'named') {
+    async function flush(presentation = preferredPresentation) {
       if (!batch.length) return;
       const { payload, metrics } = batchRequest(batch, presentation), body = JSON.stringify(payload);
       const decision = await choose(state, options, { candidates: prepared.candidates, payload, body,
