@@ -2,7 +2,7 @@
 
 《Slay the Spire 2》游戏 Agent：**C# 模组读取实时状态 → Node.js 组织规则与上下文 → Jev 制定回合计划 → 模组执行 → 重新观察。** 游戏自行结算和渲染，正常循环不要求窗口置顶。
 
-目前是研究原型。已启动 35 局，34 局结束，22 局通过第一幕。最远记录仍为第二幕 Boss，尚未通关。第 35 局已击败 Ceremonial Beast 并进入第二幕；[连续原生证据](docs/evidence/2026-09-21/run35-act-one.json)已保存。官方接口随后返回计费错误，控制器在第 22 层第 2 回合、59/80 的[确认局面](docs/evidence/2026-09-21/run35-provider-stop.json)停止，pending=null，未重开游戏。实时记录见[整局进展](docs/full-run-progress.md)。
+目前是研究原型。已启动 35 局，34 局结束，22 局通过第一幕。最远记录仍为第二幕 Boss，尚未通关。第 35 局已击败 Ceremonial Beast 并进入第二幕；[连续原生证据](docs/evidence/2026-09-21/run35-act-one.json)已保存。官方接口因计费错误停止后，已通过 OpenRouter 从第 22 层第 2 回合、59/80 的相同局面恢复，[原生执行记录](docs/evidence/2026-09-21/run35-openrouter-recovery.json)确认未重开游戏。实时记录见[整局进展](docs/full-run-progress.md)。
 
 当前按用户要求使用 OpenRouter `typesafe/jev-1.13`，自动回退关闭。已接入五个角色的策略参考、115 个怪物的行动图、招式关联规则、独立有序候选和方案比较分歧记录。最新修复覆盖目标相关的命中次数，并将相邻换序扩展到采样方案，避免只评到一组牌的较差顺序；等价副本按实际顺序去重。[同局面回放](docs/evidence/2026-09-21/run34-order-coverage.json)已选出可行收尾，仍有比较分歧，尚不能证明胜率提高。
 

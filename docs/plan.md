@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-第 35 局 `run-1789968641` 已在第一幕第 14 回合击败 Ceremonial Beast，战后 39/80，正常进入第二幕恢复 80/80；[连续原生证据](evidence/2026-09-21/run35-act-one.json)已保存。标准模式、铁甲战士、进阶 0，从第一层开始。累计 35 局启动、34 局结束、22 局通过第一幕。控制器因官方 `402 billing_error` 停在第二幕第 22 层第 2 回合，59/80、3 能量，pending=null，原生指纹与失败请求前一致；[停机证据](evidence/2026-09-21/run35-provider-stop.json)已保存。本局尚未结束，goal 未完成。
+第 35 局 `run-1789968641` 已在第一幕第 14 回合击败 Ceremonial Beast，战后 39/80，正常进入第二幕恢复 80/80；[连续原生证据](evidence/2026-09-21/run35-act-one.json)已保存。标准模式、铁甲战士、进阶 0，从第一层开始。累计 35 局启动、34 局结束、22 局通过第一幕。官方计费停机后，现已通过 OpenRouter 从第 22 层第 2 回合、59/80、3 能量、pending=null 的相同指纹处加载 `a3e733c`，首个 Anger 已确认。[恢复证据](evidence/2026-09-21/run35-openrouter-recovery.json)与目录 `run-artifacts/run35-resume2-2026-09-21T07-12-13.504Z` 已保存。本局尚未结束，goal 未完成。
 
 第 34 局在第二幕第 21 层 The Obscura 第 11 回合正式失败；[复盘](run34-review.md)与[结算](evidence/2026-09-21/run34-review.json)已保存。确定性变形的作用范围修正与[回放证据](evidence/2026-09-21/run34-transformation.json)已提交推送，再启动本局；未回退或重打上一局战斗。
 
