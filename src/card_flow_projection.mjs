@@ -1,3 +1,5 @@
+import { lookupRule } from './rule_reference.mjs';
+
 // Visible-rule adapters produce conditional pile deltas. They do not insert
 // hypothetical cards into the observation or sample hidden placement/draw RNG.
 export function attackCardFlowEffects(combat, card, target, hits, hitSource = 'supplied_preview') {
@@ -38,6 +40,29 @@ export function describeCardFlow(combat, effects) {
   };
 }
 
+// Native v0.111.0 PrimalForce.OnPlay selects Attacks still in Hand. In this
+// pile CardModel.IsTransformable is true even for Eternal cards. Reuse the
+// ordered hand, including earlier upgrades; do not create future instances.
+function handTransformation(sequence) {
+  const source = sequence.entries.at(-1)?.card;
+  if (!sequence.checkpoint || source?.id !== 'PRIMAL_FORCE') return null;
+  const rule = lookupRule('cards', 'GIANT_ROCK');
+  const affected = sequence.remaining_hand.filter(card => card.type === 'Attack');
+  const upgraded = typeof source.is_upgraded === 'boolean' ? source.is_upgraded : null;
+  return { is_observed: false, source_id: source.id, source_hand_index: source.index,
+    after_sequence: sequence.checkpoint.after_sequence,
+    selector: 'All Attacks still in Hand when this effect resolves; earlier played cards are absent. Hand cards satisfy native IsTransformable, including Eternal.',
+    affected_hand_indices: affected.map(card => card.index), affected_count: affected.length,
+    unaffected_hand_indices: sequence.remaining_hand.filter(card => card.type !== 'Attack').map(card => card.index),
+    replacement_per_affected_card: { rule_ref: 'cards/GIANT_ROCK', id: rule.id, name: rule.name,
+      type: rule.type, target: rule.target, base_energy_cost: rule.cost, is_upgraded: upgraded,
+      rules: upgraded === null ? { base: rule.description, upgraded: rule.upgrade_description }
+        : upgraded ? rule.upgrade_description : rule.description,
+      upgrade_source: 'Primal Force at this ordered checkpoint, independent of the replaced Attack upgrade.' },
+    copies_within_remaining_energy_at_base_cost: Math.min(affected.length, Math.max(0, Math.floor(sequence.energy_left / rule.cost))),
+    scope: 'Conditional replacement recipients after the declared prefix, before other uncomputed hand-changing triggers. Zero recipients means this transformation replaces no card in this hand; independent on-play effects can still occur. Each recipient loses its old card form; Skills and other non-Attacks remain. Replacement cost and damage rules are base facts, not resolved future previews or legal plays. Current modifiers and triggers may change them. Observe actual new identities, costs and targets before any follow-up command.' };
+}
+
 // Compare observation segments and end-turn plans at the same decision horizon.
 // These are remaining choices and known pools, never sampled future cards.
 export function describeContinuation(combat, sequence) {
@@ -45,6 +70,7 @@ export function describeContinuation(combat, sequence) {
   const last = sequence.entries.at(-1), entity = last?.card || last?.potion;
   const text = entity?.description || '';
   const draw = text.match(/(?:^|[.\n]\s*)Draw (\d+) cards?\./i);
+  const transformation = handTransformation(sequence);
   const groups = new Map();
   for (const card of combat.draw_pile || []) {
     const key = JSON.stringify([card.id, card.cost, card.description]);
@@ -56,6 +82,7 @@ export function describeContinuation(combat, sequence) {
     checkpoint: sequence.checkpoint, energy_after_known_payments: sequence.energy_left,
     remaining_hand_before_unresolved_effects: sequence.remaining_hand.map(card => ({ hand_index: card.index,
       id: card.id, name: card.name, cost: card.cost, type: card.type, rules: card.description })),
+    ...(transformation ? { hand_transformation: transformation } : {}),
     ...(/\b(?:Discard|Exhaust|Draw) Pile\b/.test(text) || Number(draw?.[1]) > combat.draw_pile.length ? {
       conditional_pile_access: {
         observed_discard_count: combat.discard_pile.length,
@@ -84,18 +111,23 @@ export function compareContinuationResources(planA, planB) {
   const describe = (plan, other) => {
     if (!plan.continuation.further_player_choices) return null;
     const hand = plan.continuation.remaining_hand_before_unresolved_effects;
-    const unspent = other.ordered_sequence.flatMap(action => {
+    const replacement = plan.continuation.hand_transformation;
+    const shared = other.ordered_sequence.flatMap(action => {
       const card = hand.find(card => card.hand_index === action.hand_index);
       return card ? [{ hand_index: card.hand_index, name: card.name, observed_cost: card.cost,
         ...(action.target !== undefined ? { other_plan_target: action.target } : {}) }] : [];
     });
-    if (!unspent.length) return null;
+    const replaced = shared.filter(card => replacement?.affected_hand_indices.includes(card.hand_index));
+    const unspent = shared.filter(card => !replacement?.affected_hand_indices.includes(card.hand_index));
+    if (!shared.length) return null;
     const cost = unspent.every(card => Number.isFinite(card.observed_cost) && card.observed_cost >= 0)
       ? unspent.reduce((sum, card) => sum + card.observed_cost, 0) : null;
     return { other_plan_cards_still_in_hand_before_unresolved_effects: unspent,
+      ...(replaced.length ? { other_plan_cards_replaced_by_checkpoint: replaced,
+        replacement_rule_ref: replacement.replacement_per_affected_card.rule_ref } : {}),
       total_observed_cost: cost, energy_after_known_payments: plan.energy_left,
       fits_remaining_energy_at_observed_cost: cost === null ? null : cost <= plan.energy_left,
-      scope: 'These actions from the other plan have not been spent by this segment and remain possible follow-up resources, subject to the observation. This is only a current-cost reservation check. New effects, targets, costs, restrictions, selection, discards or hand transformations can invalidate it; no follow-up effect is guaranteed. Newly revealed choices may justify changing the continuation.' };
+      scope: 'These actions from the other plan have not been spent by this segment. Cards marked replaced cannot continue in their old form; compare the checkpoint replacement rules instead. The cost sum covers only the listed non-replaced cards at observed costs. They remain possible follow-up resources subject to observation. New effects, targets, costs, restrictions, selection, discards or other hand changes can invalidate them; no follow-up effect is guaranteed. Newly revealed choices may justify changing the continuation.' };
   };
   return { after_plan_a_observation: describe(planA, planB), after_plan_b_observation: describe(planB, planA) };
 }

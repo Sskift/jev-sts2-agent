@@ -1,12 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { attackCardFlowEffects, describeCardFlow } from '../src/card_flow_projection.mjs';
+import { attackCardFlowEffects, describeCardFlow, describeContinuation, compareContinuationResources } from '../src/card_flow_projection.mjs';
 import { combatForecast, attackHitPreview } from '../src/combat_arithmetic.mjs';
 import { describeTurnProjection } from '../src/turn_projection.mjs';
 import { prepareModDecision } from '../src/mod_decision.mjs';
 import { compileModelRequest } from '../src/context_compiler.mjs';
-import { completeCombat } from './fixtures/context.mjs';
+import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 import { decisionHistoryPolicy, relevantCombatEvent } from '../src/history_scope.mjs';
+
+import { inspectSequence } from '../src/turn_sequence.mjs';
 
 function state() {
   const s = completeCombat();
@@ -76,4 +78,64 @@ test('earlier card generation survives only a relevant unresolved ordering windo
   s.combat.draw_pile = [];
   policy = decisionHistoryPolicy(s, archive);
   assert.equal(relevantCombatEvent(generated, policy), false);
+});
+
+const play = id => ({ kind: 'play_card', card_instance_id: id, target: id === 'STRIKE_IRONCLAD' ? 42 : undefined });
+const transformState = () => {
+  const state = completeCombat();
+  state.combat.hand.push(
+    fixtureCard('PRIMAL_FORCE', { index: 1, name: 'Primal Force', type: 'Skill', cost: 0, description: 'Transform all Attacks in your Hand into Giant Rock.' }),
+    fixtureCard('DEFEND_IRONCLAD', { index: 2, name: 'Defend', type: 'Skill', description: 'Gain 5 Block.' })
+  );
+  return state;
+};
+const continuation = (state, ids) => describeContinuation(state.combat, inspectSequence(state, ids.map(play)));
+
+test('ordered transformation recipients exclude earlier plays and leave other card types intact', () => {
+  const state = transformState(), before = structuredClone(state);
+  const early = continuation(state, ['PRIMAL_FORCE']);
+  assert.deepEqual(early.hand_transformation.affected_hand_indices, [0]);
+  assert.deepEqual(early.hand_transformation.unaffected_hand_indices, [2]);
+  assert.equal(early.hand_transformation.copies_within_remaining_energy_at_base_cost, 1);
+  assert.equal(early.hand_transformation.replacement_per_affected_card.rules, 'Deal 20 damage.');
+  const empty = continuation(state, ['STRIKE_IRONCLAD', 'PRIMAL_FORCE']);
+  assert.equal(empty.hand_transformation.affected_count, 0);
+  assert.deepEqual(empty.hand_transformation.affected_hand_indices, []);
+  assert.equal(empty.hand_transformation.copies_within_remaining_energy_at_base_cost, 0);
+  assert.equal(empty.hand_transformation.after_sequence, 1);
+  state.combat.player.energy = 0;
+  assert.equal(continuation(state, ['PRIMAL_FORCE']).hand_transformation.copies_within_remaining_energy_at_base_cost, 0);
+  state.combat.player.energy = before.combat.player.energy;
+  assert.deepEqual(state, before, 'Describing replacement must not insert future cards into native state');
+});
+
+test('replacement upgrade follows the ordered source, not the Attack, and never crosses an unresolved draw', () => {
+  const state = transformState();
+  state.combat.hand[0].is_upgraded = true;
+  state.combat.hand[0].keywords = ['Eternal'];
+  assert.equal(continuation(state, ['PRIMAL_FORCE']).hand_transformation.affected_count, 1);
+  assert.equal(continuation(state, ['PRIMAL_FORCE']).hand_transformation.replacement_per_affected_card.is_upgraded, false);
+  state.combat.hand[1].upgrade_preview = { description: 'Transform all Attacks in your Hand into Giant Rock+.' };
+  state.combat.hand.push(fixtureCard('ARMAMENTS', { index: 3, name: 'Armaments+', type: 'Skill', description: 'Gain 5 Block. Upgrade ALL cards in your Hand.' }));
+  const upgraded = continuation(state, ['ARMAMENTS', 'PRIMAL_FORCE']).hand_transformation.replacement_per_affected_card;
+  assert.equal(upgraded.is_upgraded, true);
+  assert.equal(upgraded.rules, 'Deal 24 damage.');
+  assert.equal(upgraded.base_energy_cost, 1);
+  state.combat.hand.push(fixtureCard('DRAW', { index: 4, type: 'Skill', cost: 0, description: 'Draw 1 card.' }));
+  const blocked = inspectSequence(state, [play('DRAW'), play('PRIMAL_FORCE')]);
+  assert.equal(blocked.violations.length, 1);
+  assert.equal(describeContinuation(state.combat, blocked).hand_transformation, undefined);
+});
+
+test('comparison does not reserve a transformed Attack as its old follow-up form', () => {
+  const state = transformState();
+  const early = { energy_left: 2, ordered_sequence: [{ hand_index: 1 }], continuation: continuation(state, ['PRIMAL_FORCE']) };
+  const late = { energy_left: 0, ordered_sequence: [{ hand_index: 0 }, { hand_index: 2 }, { hand_index: 1 }],
+    continuation: continuation(state, ['STRIKE_IRONCLAD', 'DEFEND_IRONCLAD', 'PRIMAL_FORCE']) };
+  const result = compareContinuationResources(early, late).after_plan_a_observation;
+  assert.deepEqual(result.other_plan_cards_replaced_by_checkpoint.map(card => card.hand_index), [0]);
+  assert.deepEqual(result.other_plan_cards_still_in_hand_before_unresolved_effects.map(card => card.hand_index), [2]);
+  assert.equal(result.total_observed_cost, 1);
+  assert.equal(result.replacement_rule_ref, 'cards/GIANT_ROCK');
+  assert.deepEqual(compareContinuationResources(late, early).after_plan_b_observation, result);
 });

@@ -1,0 +1,392 @@
+{
+  "version": 1,
+  "date": "2026-09-21",
+  "run_id": "run-1789963561",
+  "baseline_commit": "149eed8",
+  "change": "Associate deterministic hand transformations with ordered remaining recipients and pinned replacement rules. Resource comparisons separate old cards that will be replaced. No change to candidate preferences or game commands.",
+  "provider": "typesafe",
+  "model": "jev-1.13.0",
+  "fallback_enabled": false,
+  "source": [
+    {
+      "source": "src/card_flow_projection.mjs",
+      "sha256": "20d53c101fa4e58669f082c58acb5c0417773acf2c6878b87bf2624990e875c0"
+    },
+    {
+      "source": "test/card_flow_projection.test.mjs",
+      "sha256": "c3d5dfffcf9bb567db770de0341c640fb49fe672bb2fbc048c8d1da039f8f28b"
+    }
+  ],
+  "native_rule_evidence": {
+    "source": "docs/evidence/2026-09-21/run34-review.json",
+    "sha256": "7c4fdec56296126ca3dec6caf2ff67ba52e3eff4e63a99840f3b98f5d2339252"
+  },
+  "freeze": {
+    "source": "run-artifacts/run34-final-review/freeze.json",
+    "sha256": "f28e81208c50f9a087c96f4a1c01624d11acac4eb567f4a93178f8a5232d0b30"
+  },
+  "candidate_sha256": "bbf29bab393cfd6d597829a31f469e06d1daa6bbfce0f2d432cb0ba31b7c9e63",
+  "checks": {
+    "passed": 32,
+    "failed": 0,
+    "log": {
+      "source": "temp/run34-transformation-checks.log",
+      "sha256": "ca03e1fa5b6c23eb3757be0522917e6303314a8f77378d6a459c9d9fd12f41aa"
+    }
+  },
+  "cases": [
+    {
+      "id": "obscura-turn5",
+      "cohort": "development",
+      "input": {
+        "source": "run-artifacts/run34-final-review/cases/obscura-turn5.json",
+        "sha256": "e88401e5c847ba66a613243e45bdd5ce9927120c382368ad9a8a69653b675ebd"
+      },
+      "input_sha256": "ab355d5a7f59a5d2633d35002cc19fb3d32aa57af424164725791c34322ca111",
+      "previous_decision": {
+        "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0013/decision.json",
+        "sha256": "a0f6ffebdc56aa722676c34583e5b56abe7f7c71b8a21509b236277532d6a195"
+      },
+      "previous_sequence": [
+        {
+          "kind": "play_card",
+          "id": "THUNDERCLAP"
+        },
+        {
+          "kind": "play_card",
+          "id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "id": "PRIMAL_FORCE"
+        }
+      ],
+      "replay": {
+        "source": "run-artifacts/run34-final-review/results/obscura-turn5/transformation/1/summary.json",
+        "sha256": "ce832b734709a6363c6b2237cf75a9602c3be6b53ec92c8a3dcd04627d7d1464"
+      },
+      "calls": 58,
+      "responses": 58,
+      "usage": {
+        "input_tokens": 1271089,
+        "output_tokens": 3334
+      },
+      "cost_usd": null,
+      "request": {
+        "cmd": "play_card",
+        "id": "DEFEND_IRONCLAD",
+        "nth": 0
+      },
+      "chosen_sequence": [
+        {
+          "kind": "play_card",
+          "name": "Defend+",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Thunderclap",
+          "card_id": "THUNDERCLAP"
+        },
+        {
+          "kind": "play_card",
+          "name": "Primal Force",
+          "card_id": "PRIMAL_FORCE"
+        }
+      ],
+      "balanced_pairs": 10,
+      "order_disagreements": 2,
+      "candidate_coverage": {
+        "inspected_prefixes": 80,
+        "enumerated_plans": 69,
+        "selected_plans": 64,
+        "first_action_variants": 6,
+        "search_truncated": false,
+        "candidate_selection_truncated": true,
+        "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+        "adjacent_order_review": {
+          "inspected": 108,
+          "added": 5,
+          "truncated": false
+        },
+        "order_grouping": "same_visible_copies; action_order_targets_and_bound_identities_preserved",
+        "eligible_plans": 69,
+        "assessed_plans": 69,
+        "distinct_allocations": 34,
+        "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+        "compared_plans": 5
+      },
+      "current_transformation": {
+        "is_observed": false,
+        "source_id": "PRIMAL_FORCE",
+        "source_hand_index": 2,
+        "after_sequence": 0,
+        "selector": "All Attacks still in Hand when this effect resolves; earlier played cards are absent. Hand cards satisfy native IsTransformable, including Eternal.",
+        "affected_hand_indices": [
+          3,
+          4
+        ],
+        "affected_count": 2,
+        "unaffected_hand_indices": [
+          0,
+          1
+        ],
+        "replacement_per_affected_card": {
+          "rule_ref": "cards/GIANT_ROCK",
+          "id": "GIANT_ROCK",
+          "name": "Giant Rock",
+          "type": "Attack",
+          "target": "AnyEnemy",
+          "base_energy_cost": 1,
+          "is_upgraded": false,
+          "rules": "Deal 20 damage.",
+          "upgrade_source": "Primal Force at this ordered checkpoint, independent of the replaced Attack upgrade."
+        },
+        "copies_within_remaining_energy_at_base_cost": 2,
+        "scope": "Conditional replacement recipients after the declared prefix, before other uncomputed hand-changing triggers. Zero recipients means this transformation replaces no card in this hand; independent on-play effects can still occur. Each recipient loses its old card form; Skills and other non-Attacks remain. Replacement cost and damage rules are base facts, not resolved future previews or legal plays. Current modifiers and triggers may change them. Observe actual new identities, costs and targets before any follow-up command."
+      },
+      "chosen_continuation": {
+        "handoff": "observe_then_continue_same_player_turn",
+        "further_player_choices": true,
+        "checkpoint": {
+          "after_sequence": 2,
+          "source_id": "PRIMAL_FORCE",
+          "reason": "Transform all Attacks in your Hand into Giant Rock"
+        },
+        "energy_after_known_payments": 1,
+        "remaining_hand_before_unresolved_effects": [
+          {
+            "hand_index": 0,
+            "id": "BURNING_PACT",
+            "name": "Burning Pact",
+            "cost": 1,
+            "type": "Skill",
+            "rules": "Exhaust 1 card. Draw 2 cards."
+          },
+          {
+            "hand_index": 4,
+            "id": "STRIKE_IRONCLAD",
+            "name": "Strike",
+            "cost": 1,
+            "type": "Attack",
+            "rules": "Deal 6 damage."
+          }
+        ],
+        "hand_transformation": {
+          "is_observed": false,
+          "source_id": "PRIMAL_FORCE",
+          "source_hand_index": 2,
+          "after_sequence": 2,
+          "selector": "All Attacks still in Hand when this effect resolves; earlier played cards are absent. Hand cards satisfy native IsTransformable, including Eternal.",
+          "affected_hand_indices": [
+            4
+          ],
+          "affected_count": 1,
+          "unaffected_hand_indices": [
+            0
+          ],
+          "replacement_per_affected_card": {
+            "rule_ref": "cards/GIANT_ROCK",
+            "id": "GIANT_ROCK",
+            "name": "Giant Rock",
+            "type": "Attack",
+            "target": "AnyEnemy",
+            "base_energy_cost": 1,
+            "is_upgraded": false,
+            "rules": "Deal 20 damage.",
+            "upgrade_source": "Primal Force at this ordered checkpoint, independent of the replaced Attack upgrade."
+          },
+          "copies_within_remaining_energy_at_base_cost": 1,
+          "scope": "Conditional replacement recipients after the declared prefix, before other uncomputed hand-changing triggers. Zero recipients means this transformation replaces no card in this hand; independent on-play effects can still occur. Each recipient loses its old card form; Skills and other non-Attacks remain. Replacement cost and damage rules are base facts, not resolved future previews or legal plays. Current modifiers and triggers may change them. Observe actual new identities, costs and targets before any follow-up command."
+        },
+        "scope": "The player still owns this turn. After observing, choose again using remaining resources and the actual changed hand; ending immediately is not required. Retained cards and the visible pool describe opportunities, not executed follow-up actions. Unresolved effects may change these resources; an unknown continuation is neither zero value nor a guaranteed best draw."
+      },
+      "emitted_recipient_counts": [
+        0,
+        1,
+        2
+      ],
+      "emitted_examples": [
+        {
+          "request": {
+            "source": "run-artifacts/run34-final-review/results/obscura-turn5/transformation/1/request-10.json",
+            "sha256": "253b179e5c5f664e9e2236c4651808287ba64f622a7b593d34f0718bd38792d4"
+          },
+          "affected_count": 0,
+          "energy_left": 0,
+          "sequence": [
+            {
+              "action": "Thunderclap",
+              "hand_index": 3
+            },
+            {
+              "action": "Defend+",
+              "hand_index": 1
+            },
+            {
+              "action": "Strike",
+              "hand_index": 4,
+              "target": 1
+            },
+            {
+              "action": "Primal Force",
+              "hand_index": 2
+            }
+          ]
+        },
+        {
+          "request": {
+            "source": "run-artifacts/run34-final-review/results/obscura-turn5/transformation/1/request-11.json",
+            "sha256": "101c0c634a3ef636ab69bac42834f135f79ea9069669b4cebb6093d80bafd174"
+          },
+          "affected_count": 1,
+          "energy_left": 2,
+          "sequence": [
+            {
+              "action": "Thunderclap",
+              "hand_index": 3
+            },
+            {
+              "action": "Primal Force",
+              "hand_index": 2
+            }
+          ]
+        },
+        {
+          "request": {
+            "source": "run-artifacts/run34-final-review/results/obscura-turn5/transformation/1/request-6.json",
+            "sha256": "e57378003e47a30305d4cec17b14d76c1bcee9524306e49db9e7c3b988e7da83"
+          },
+          "affected_count": 2,
+          "energy_left": 2,
+          "sequence": [
+            {
+              "action": "Defend+",
+              "hand_index": 1
+            },
+            {
+              "action": "Primal Force",
+              "hand_index": 2
+            }
+          ]
+        }
+      ],
+      "interpretation": "The new plan preserves one Attack and one energy at the transformation checkpoint. The old plan consumed both Attacks first. New native identities and continuation targets still require observation; this replay does not establish a fight victory."
+    },
+    {
+      "id": "obscura-empty-transform",
+      "cohort": "development",
+      "input": {
+        "source": "run-artifacts/run34-final-review/cases/obscura-empty-transform.json",
+        "sha256": "fe42be9f48358aa256494039d179fc482c3ff288f0c7a19c4e33b6259503bdcd"
+      },
+      "input_sha256": "5b7d2d9165044d9181df0b645def6d2c5cd11768ea7adff74eb0d082d0f4aefe",
+      "previous_decision": {
+        "source": "run-artifacts/run34-resume3-2026-09-21T04-58-34.595Z/step-0016/decision.json",
+        "sha256": "aa95c83493e1a57c4441eb50e022c057a16c71c5489471402aa4abca3a7324aa"
+      },
+      "previous_sequence": [
+        {
+          "kind": "play_card",
+          "id": "THUNDERCLAP"
+        },
+        {
+          "kind": "play_card",
+          "id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "id": "STRIKE_IRONCLAD",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "id": "PRIMAL_FORCE"
+        }
+      ],
+      "replay": {
+        "source": "run-artifacts/run34-final-review/results/obscura-empty-transform/transformation/1/summary.json",
+        "sha256": "645c63073f4eb521ebf8c701b116bb43254f038c5e98be2f663fdedbadec2da0"
+      },
+      "calls": 0,
+      "responses": 0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      "cost_usd": null,
+      "request": {
+        "cmd": "play_card",
+        "id": "PRIMAL_FORCE",
+        "nth": 0
+      },
+      "chosen_sequence": [
+        {
+          "kind": "play_card",
+          "name": "Thunderclap",
+          "card_id": "THUNDERCLAP"
+        },
+        {
+          "kind": "play_card",
+          "name": "Defend+",
+          "card_id": "DEFEND_IRONCLAD"
+        },
+        {
+          "kind": "play_card",
+          "name": "Strike",
+          "card_id": "STRIKE_IRONCLAD",
+          "target": 2
+        },
+        {
+          "kind": "play_card",
+          "name": "Primal Force",
+          "card_id": "PRIMAL_FORCE"
+        }
+      ],
+      "balanced_pairs": null,
+      "order_disagreements": null,
+      "candidate_coverage": null,
+      "current_transformation": {
+        "is_observed": false,
+        "source_id": "PRIMAL_FORCE",
+        "source_hand_index": 1,
+        "after_sequence": 0,
+        "selector": "All Attacks still in Hand when this effect resolves; earlier played cards are absent. Hand cards satisfy native IsTransformable, including Eternal.",
+        "affected_hand_indices": [],
+        "affected_count": 0,
+        "unaffected_hand_indices": [
+          0
+        ],
+        "replacement_per_affected_card": {
+          "rule_ref": "cards/GIANT_ROCK",
+          "id": "GIANT_ROCK",
+          "name": "Giant Rock",
+          "type": "Attack",
+          "target": "AnyEnemy",
+          "base_energy_cost": 1,
+          "is_upgraded": false,
+          "rules": "Deal 20 damage.",
+          "upgrade_source": "Primal Force at this ordered checkpoint, independent of the replaced Attack upgrade."
+        },
+        "copies_within_remaining_energy_at_base_cost": 0,
+        "scope": "Conditional replacement recipients after the declared prefix, before other uncomputed hand-changing triggers. Zero recipients means this transformation replaces no card in this hand; independent on-play effects can still occur. Each recipient loses its old card form; Skills and other non-Attacks remain. Replacement cost and damage rules are base facts, not resolved future previews or legal plays. Current modifiers and triggers may change them. Observe actual new identities, costs and targets before any follow-up command."
+      },
+      "chosen_continuation": null,
+      "emitted_recipient_counts": [],
+      "emitted_examples": [],
+      "interpretation": "This cutoff already has an active historical plan. The runtime correctly continues it with zero new model calls. The explicit empty-recipient ledger is verified separately; no new model preference or quality claim is attributed to this replay."
+    }
+  ],
+  "limitations": [
+    "Development cases only; no held-out result.",
+    "A changed choice with a plausible resource benefit does not establish a win-rate improvement.",
+    "Base replacement cost and damage are not future native previews. Unknown hooks and all post-checkpoint commands require observation.",
+    "The empty-hand snapshot reuses the prior plan; its historical comparisons are not new model calls.",
+    "No game commands were issued by these replays. Run35 has not started."
+  ]
+}
