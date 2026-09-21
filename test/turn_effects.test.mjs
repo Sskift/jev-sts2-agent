@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from '../src/turn_effects.mjs';
 import { reserveSequence } from '../src/turn_projection.mjs';
-import { refineTurnPlan } from '../src/turn_plan_refinement.mjs';
+import { refineTurnPlan, describePlanAlternative } from '../src/turn_plan_refinement.mjs';
 import { planStep } from '../src/turn_plan_state.mjs';
 import { prepareModDecision } from '../src/mod_decision.mjs';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
@@ -10,6 +10,25 @@ import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 const refineWithScores = (state, plan, prepared, score) => refineTurnPlan(state, plan, prepared,
   async pairs => pairs.map(pair => pair.toSorted((a, b) => score(b) - score(a))[0].value),
   async items => items.map(item => ({ value: item.value, score: score(item) })));
+
+test('a final kill describes combat completion without promising a turn-end healing tick', () => {
+  const state = completeCombat(); state.combat.enemies[0].hp = 5;
+  state.combat.hand[0].target_previews = [{ target_id: 42, damage: 6 }];
+  state.combat.player.powers.push({ id: 'REGEN_POWER', amount: 5, description: 'At the end of your turn, heal 5 HP, then reduce Regen by 1.' });
+  state.decision_context.player = structuredClone(state.combat.player);
+  const prepared = prepareModDecision(state), strike = planStep(state, prepared.candidates.get('card_0_target_42'));
+  const plan = describePlanAlternative(state, [strike, { kind: 'end_turn' }]);
+  assert.equal(plan.continuation.handoff, 'combat_completion');
+  assert.equal(plan.continuation.further_player_choices, false);
+  assert.ok(plan.continuation.completion_if_calculated_defeats_resolve.skipped_phases.includes('normal_player_turn_end'));
+  assert.equal(plan.conditional_preview.known_effects_only.hp_if_ending, state.combat.player.hp);
+  assert.match(plan.then, /no further manual actions or normal turn-end effects/);
+  state.combat.enemies[0].hp = 50;
+  assert.equal(describePlanAlternative(state, [strike]).continuation.completion_if_calculated_defeats_resolve, undefined);
+  state.combat.enemies[0].hp = 5;
+  state.combat.enemies[0].powers.push({ id: 'REVIVE_POWER', description: 'Upon death, revive with 10 HP.' });
+  assert.equal(describePlanAlternative(state, [strike]).continuation.completion_if_calculated_defeats_resolve, undefined);
+});
 
 test('future/random upgrades never invent a current hand-selection promise', () => {
   assert.equal(handUpgradeMode('Gain 5 Block. Upgrade a card in your Hand.'), 'one');

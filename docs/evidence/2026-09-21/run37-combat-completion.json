@@ -1,0 +1,329 @@
+{
+  "date": "2026-09-21",
+  "run_id": "run-1789993715",
+  "native_version": "v0.111.0",
+  "native_methods": [
+    "CombatManager.CheckWinCondition / EndCombatInternal",
+    "RegenPower.BeforeSideTurnEndEarly"
+  ],
+  "actual": {
+    "potion": {
+      "cmd": "use_potion",
+      "id": "REGEN_POTION",
+      "nth": 0,
+      "target": 0
+    },
+    "before_hp": 37,
+    "after_final_kill_hp": 43,
+    "post_combat_heal_source": "BURNING_BLOOD",
+    "regen_ticks_before_completion": 0
+  },
+  "changed_labels": [
+    {
+      "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0095",
+      "then": "Verify combat completion after the calculated final defeats. If combat ends, no further manual actions or normal turn-end effects occur; resolve separate after-combat rules. Only continue planning if the new native state still has an active combat.",
+      "continuation": {
+        "handoff": "observe_then_continue_same_player_turn",
+        "further_player_choices": true,
+        "checkpoint": {
+          "after_sequence": 2,
+          "source_id": "SHRUG_IT_OFF",
+          "reason": "Draw 1 card"
+        },
+        "energy_after_known_payments": 0,
+        "remaining_hand_before_unresolved_effects": [
+          {
+            "hand_index": 0,
+            "id": "STRIKE_IRONCLAD",
+            "name": "Strike+",
+            "cost": 2,
+            "type": "Attack",
+            "rules": "Deal 9 damage."
+          },
+          {
+            "hand_index": 3,
+            "id": "DEFEND_IRONCLAD",
+            "name": "Defend",
+            "cost": 1,
+            "type": "Skill",
+            "rules": "Gain 5 Block."
+          },
+          {
+            "hand_index": 4,
+            "id": "BASH",
+            "name": "Bash+",
+            "cost": 3,
+            "type": "Attack",
+            "rules": "Deal 10 damage. Apply 3 Vulnerable."
+          }
+        ],
+        "draw_access": {
+          "declared_count": 1,
+          "source": "Currently observed draw pile; its array order is not predictive.",
+          "pool": [
+            {
+              "id": "DEFEND_IRONCLAD",
+              "name": "Defend",
+              "cost": 1,
+              "count": 3,
+              "cost_within_remaining_energy": false
+            },
+            {
+              "id": "NOT_YET",
+              "name": "Not Yet",
+              "cost": 2,
+              "count": 1,
+              "cost_within_remaining_energy": false
+            },
+            {
+              "id": "PILLAGE",
+              "name": "Pillage",
+              "cost": 2,
+              "count": 1,
+              "cost_within_remaining_energy": false
+            },
+            {
+              "id": "STRIKE_IRONCLAD",
+              "name": "Strike",
+              "cost": 2,
+              "count": 2,
+              "cost_within_remaining_energy": false
+            },
+            {
+              "id": "STRIKE_IRONCLAD",
+              "name": "Strike",
+              "cost": 2,
+              "count": 1,
+              "cost_within_remaining_energy": false
+            },
+            {
+              "id": "TREMBLE",
+              "name": "Tremble",
+              "cost": 1,
+              "count": 1,
+              "cost_within_remaining_energy": false
+            },
+            {
+              "id": "SHRUG_IT_OFF",
+              "name": "Shrug It Off",
+              "cost": 1,
+              "count": 1,
+              "cost_within_remaining_energy": false
+            },
+            {
+              "id": "TAUNT",
+              "name": "Taunt",
+              "cost": 1,
+              "count": 1,
+              "cost_within_remaining_energy": false
+            }
+          ],
+          "pool_cards_within_remaining_energy_at_observed_cost": 0,
+          "observed_pool_size": 11,
+          "reshuffle_may_be_needed": false,
+          "checkpoint_rules": "Gain 8 Block. Draw 1 card.",
+          "current_draw_effects": [],
+          "scope": "Declared draw, not guaranteed arrivals: hand capacity, draw prevention, triggers and reshuffle can change the result. Cost comparisons use observed pile costs and remaining energy only, not future costs, legal playability or a guarantee of drawing any affordable card. No specific card or ordering is assumed."
+        },
+        "scope": "The player still owns this turn. After observing, choose again using remaining resources and the actual changed hand; ending immediately is not required. Retained cards and the visible pool describe opportunities, not executed follow-up actions. Unresolved effects may change these resources; an unknown continuation is neither zero value nor a guaranteed best draw.",
+        "completion_if_calculated_defeats_resolve": {
+          "condition": "If the calculated final enemy defeats resolve and end combat.",
+          "following_phase": "after_combat",
+          "no_further_manual_actions": true,
+          "skipped_phases": [
+            "normal_player_turn_end",
+            "enemy_turn",
+            "next_player_turn_start"
+          ],
+          "after_combat_effects_simulated": false,
+          "scope": "Effects waiting for those skipped phases provide no benefit before this combat ends, including turn-end healing or damage. Consumed potions remain spent. After-combat effects follow their own rules; omitted effects, survival and death/revival hooks still require native confirmation."
+        }
+      },
+      "computed_hp": null,
+      "request_bytes": 54200
+    },
+    {
+      "source": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0096",
+      "then": "Verify combat completion after the calculated final defeats. If combat ends, no further manual actions or normal turn-end effects occur; resolve separate after-combat rules. Only continue planning if the new native state still has an active combat.",
+      "continuation": {
+        "handoff": "combat_completion",
+        "further_player_choices": false,
+        "completion_if_calculated_defeats_resolve": {
+          "condition": "If the calculated final enemy defeats resolve and end combat.",
+          "following_phase": "after_combat",
+          "no_further_manual_actions": true,
+          "skipped_phases": [
+            "normal_player_turn_end",
+            "enemy_turn",
+            "next_player_turn_start"
+          ],
+          "after_combat_effects_simulated": false,
+          "scope": "Effects waiting for those skipped phases provide no benefit before this combat ends, including turn-end healing or damage. Consumed potions remain spent. After-combat effects follow their own rules; omitted effects, survival and death/revival hooks still require native confirmation."
+        }
+      },
+      "computed_hp": 37,
+      "request_bytes": 51921
+    }
+  ],
+  "checks_passed": 44,
+  "replay": {
+    "status": "incomplete",
+    "error": "Jev network or timeout error via openrouter",
+    "attempted_requests": 12,
+    "reported_cost_usd": 0.00896364,
+    "scope": "No completed new model decision; timeout reservation retained. No game actions. Do not claim this fixed the potion choice."
+  },
+  "checkpoint": {
+    "floor": 17,
+    "turn": 6,
+    "hp": 38,
+    "energy": 1,
+    "pending": null
+  },
+  "source_files": [
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0095/before-state.json",
+      "sha256": "556fb0784363b5c68caf15be32fd8283f9d22898549d1bc901474e6a87add4c1"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0095/decision.json",
+      "sha256": "43d59716e92d9a2c5eb2a7e72e779566c801bce6d8086694ca0a6e81b753cabd"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0096/before-state.json",
+      "sha256": "04ff8e660aab1bffb01290c150141af3411133c681ee1ca808f2fda833275c54"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0096/decision.json",
+      "sha256": "aaa72f004345947d05efbc562fbd916ced7d69b2d259d75dab80213718fe9575"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/step-0097/after-state.json",
+      "sha256": "c369ca4bfcaca47c48ae8c8b7e7a0b3a3a729c917dbedce1270eea3c30fa7958"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/continuation-stop-native.json",
+      "sha256": "cbab44c45a3fe485410da9aa06c5a7af5c21338ce3d89efe4c398c732767db00"
+    },
+    {
+      "path": "run-artifacts/run37-resume-2026-09-21T12-40-32.667Z/continuation-stop-memory.json",
+      "sha256": "4ad2ff2a73e5546639ff06cea096c6237f7f58c5ad62b2f6b19e96b13f45e11b"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/summary.json",
+      "sha256": "2d1f8e040b1166350258ecdbf374856a121d5ffae05b075e8d55bf389e5d9538"
+    },
+    {
+      "path": "temp/run37-resume-cost-audit.json",
+      "sha256": "a1324f1afc4e25b0ad39e26accb4f5e1694c21ee3007a2cf2a7d378c01f54123"
+    },
+    {
+      "path": "temp/knowledge-research/CombatManager.cs",
+      "sha256": "e6b545503326d707a3e90e898a59d1a7542a1ec6d830dd72be2702ba9a7c9c0c"
+    },
+    {
+      "path": "temp/knowledge-research/RegenPower.cs",
+      "sha256": "4b2d53dd9e28c15a169cc890f96ff47c40cdbfc695a60c48c00518c26527a052"
+    },
+    {
+      "path": "src/turn_plan_refinement.mjs",
+      "sha256": "3a3e13312261c1e108e79cf4a3d5a93b32d93abb3dd247d7d1630e2f361c0328"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-1.json",
+      "sha256": "6b1c75794aa0c36438cacccd7b51697eb3cee8ce0bac4e930c3c305eea9f1e1d"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-10.json",
+      "sha256": "5463ee157100ac0cb0cb7001dd96041b82e682a2511b3e277db55bc8a3a429a6"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-11.json",
+      "sha256": "eaeeef48532bfefd5d0039ba9455f2db74895c4ebc65e23b713a957ecba8c1fc"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-12.json",
+      "sha256": "80c28eef2e6df6e9f5da43d0d5c588b3f8eb7be28ad6c8cfc88b9990d0c41cb7"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-2.json",
+      "sha256": "b500a29bddc71c603a549ddd63accbaecc43496a957875738661665641743c85"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-3.json",
+      "sha256": "0025b444a0ac98212b6e4903bd3321068eee9856a209592ad2112084c7a2ec18"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-4.json",
+      "sha256": "b1e5a635df944c8e97021cd438a448a71c241eab314479527e18c1c12ff7400b"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-5.json",
+      "sha256": "3efeb8b612fa43a91f7dc886e3bb6947ac69c469401a87eac1a6447ee2fa4a98"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-6.json",
+      "sha256": "dd6b20d148ecab063898d44a5c5adfea5f19f652d5f7dec73e10b76a3f5f309f"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-7.json",
+      "sha256": "e7077310d30b5886f79f6320651e88407284d3061740a828cf9f03fb779daa8e"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-8.json",
+      "sha256": "50e952fe84cf6f3d87c73b07ee9062627a6384c0e13adde6c8dcee7eebc9bb2f"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/request-9.json",
+      "sha256": "7d80994070f6ecac8b6090dd49c0883832ff620c2faccdca1e2cf61da0e9e4e1"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-1.json",
+      "sha256": "cffc279defbd9a93356154c482dcf90352a5d9f2897d749719db9ce7319d26ca"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-10.json",
+      "sha256": "ad185e4d93da357a0bb4c405d2930e5a57b54910c57da218fea3ac9fceb866e9"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-11.json",
+      "sha256": "a040acbcfaa68fe808276485e4063c259dbec72ddb908edcaa12bb3082064cfa"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-12.json",
+      "sha256": "dc3d71da9e976cf66007da2cc198bc2def8c98e44620eb7c4ae1cd714d8b5e78"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-2.json",
+      "sha256": "19555db1e2d33c359fe2c01b418f919e63a49fc4e26ec88d1c9be3aeed46699d"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-3.json",
+      "sha256": "5558d5d02506570641e9608ea22a9a898ad036e12631e2cbb031b1c3a4075e1f"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-4.json",
+      "sha256": "3a176228abe1f8ada1c8ab5d32fef93411c4e199d8661d87a18377d6fc0838d7"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-5.json",
+      "sha256": "9860f47e38095a4e6a41f4130420da406f47e15fd69232619fd2571a77cf267b"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-6.json",
+      "sha256": "e6955b5469e5e3a047c41545bb532ddb1a68d627a38af75e779a51808334f3d9"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-7.json",
+      "sha256": "4a0970167f46ad3bc8d16a9e986f6c79728ea46888e072ea214c47ff9224e8c3"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-8.json",
+      "sha256": "dc65869760d15aa0756235a7e0c599b2ebad1239871550a87c10d06cc2638153"
+    },
+    {
+      "path": "run-artifacts/run37-completion-review/results/run37-regen-before-kill/completion-boundary/1/response-9.json",
+      "sha256": "17aeaf3738dc5a0cd9c1cc0d6b747c2fdf903a8ac09bbd328fcb0b469912995b"
+    }
+  ]
+}

@@ -32,6 +32,22 @@ export function describePlanAlternative(state, steps) {
   const automaticPotions = new Set((state.combat.player.potions || []).filter(p => p.usage === 'Automatic').map(p => p.slot));
   const conditionalPotions = new Set((projection.uncomputed_death_prevention || []).map(effect => effect.potion_slot));
   const known = projection.known_effects_only;
+  // Depleting the final enemy is a different phase boundary from End Turn.
+  // Keep this conditional when the prefix still has omitted effects or draws;
+  // neither post-combat healing nor unresolved death hooks are simulated here.
+  const completion = known.enemies.length && known.enemies.every(enemy => enemy.hp === 0) ? {
+    condition: 'If the calculated final enemy defeats resolve and end combat.',
+    following_phase: 'after_combat',
+    no_further_manual_actions: true,
+    skipped_phases: ['normal_player_turn_end', 'enemy_turn', 'next_player_turn_start'],
+    after_combat_effects_simulated: false,
+    scope: 'Effects waiting for those skipped phases provide no benefit before this combat ends, including turn-end healing or damage. Consumed potions remain spent. After-combat effects follow their own rules; omitted effects, survival and death/revival hooks still require native confirmation.'
+  } : null;
+  const continuation = describeContinuation(state.combat, sequence);
+  if (completion && !sequence.checkpoint && !projection.omitted_effects.length) {
+    Object.assign(continuation, { handoff: 'combat_completion', further_player_choices: false });
+  }
+  if (completion) continuation.completion_if_calculated_defeats_resolve = completion;
   const currentAttack = state.combat.enemies.filter(e => e.is_alive && e.hp > 0).reduce((sum, e) => sum + intentDamage(e), 0);
   const blockable = known.incoming_attack === null ? null : known.incoming_attack + known.end_turn_damage_events.reduce((sum, event) => sum + event.amount, 0);
   let energyAfterReservedCosts = state.combat.player.energy;
@@ -58,8 +74,9 @@ export function describePlanAlternative(state, steps) {
         ...(beneficiary ? { intended_followthrough: beneficiary.name,
           ...(handUpgradeMode(step.rules_at_planning) ? { upgrade_payoff: beneficiary.name, inspectable_upgrade: beneficiary.upgrade_preview ?? null } : {}) } : {}) };
     }),
-    then: sequence.checkpoint ? 'Observe the changed native state and replan the remaining turn; no end-turn command is promised.' : 'End turn, unless a new observation requires a revision.',
-    continuation: describeContinuation(state.combat, sequence),
+    then: completion ? 'Verify combat completion after the calculated final defeats. If combat ends, no further manual actions or normal turn-end effects occur; resolve separate after-combat rules. Only continue planning if the new native state still has an active combat.'
+      : sequence.checkpoint ? 'Observe the changed native state and replan the remaining turn; no end-turn command is promised.' : 'End turn, unless a new observation requires a revision.',
+    continuation,
     energy_left: budget.energy_left, energy_spent: state.combat.player.energy - budget.energy_left,
     conditional_preview: projection,
     ...(actions.constraints.length ? { action_reservation: actions } : {}),
