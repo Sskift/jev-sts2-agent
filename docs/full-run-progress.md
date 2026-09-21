@@ -6,6 +6,8 @@
 
 此前未完成的最终属性顺序回放现已通过 OpenRouter 完成，共 20 次调用、40 个候选已评分、4 个方案进入比较。Jev 仍选择 Strike 攻击随从 → Inflame → Defend，六对比较中有两对位置顺序分歧。算术结果已修正，但这次回放没有证明决策改善；[恢复与回放证据](evidence/2026-09-21/run32-provider-recovery.json)同时保留成功调用和未改善的取舍。
 
+第 27 层 Decimillipede 第 2 回合发生本地容量停机：45/80 生命、pending=null，完整 payoff 请求为 90,342 字节，比门槛多 342。新编译器复用现有可逆记录表存储按 action_id 索引的单动作估算，共享重复字段和条件；不改变 23 个候选、原始事实或门槛。请求降到 84,324 字节，完整往返校验与 36 项相关检查通过。只读发送实际请求获有效 Jev 选择，输入 26,706 tokens；[证据](evidence/2026-09-21/run32-capacity-recovery.json)不把这一单题通过当作整回合或整局胜利。恢复前再次核对同局指纹。
+
 第 32 局以 `db902d1` 运行，在 The Kin 第 6 回合用 Strike 击败剩余 11 生命的 Kin Priest，战后 59/80；同一 run ID 随后进入第二幕，第 18 层恢复至 80/80。第 16 层营火实际选择 Smith 并升级 Howl From Beyond；入场生命 54 → 79 来自 Pantograph 的 Boss 开战治疗，不能记为营火休息。[跨幕与停机证据](evidence/2026-09-21/run32-act-one.json)保存原生快照与哈希。
 
 Boss 第 3 回合实际按 Defend → Strike → Inflame 出牌。核对原生 Inflame／Footwork 后，已允许在同一候选中比较确定的直接属性增益与后续攻击／防御，并让伤害上下界贯穿既有格挡、HP 损失上限和结束生命计算。该真实局面的条件结果为先 Inflame 造成 12–13 点 Boss 生命伤害，先 Strike 为 10，两者已知结束生命均为 62；这不是执行过的反事实。27 项相关检查和两个完整上下文编译通过。

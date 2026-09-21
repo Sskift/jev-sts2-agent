@@ -1,0 +1,79 @@
+{
+  "recorded_at": "2026-09-21T02:01:25.431Z",
+  "run_id": "run-1789936871",
+  "stop": {
+    "result": {
+      "file": "temp/run32-resume2-result.json",
+      "sha256": "8792aa37301234d377f22a004e4d577086f20ab1168d207ce0dfcd857ac61672"
+    },
+    "native": {
+      "file": "temp/run32-before-capacity-resume.json",
+      "sha256": "233f5e176c25b515812d2bc67d6d5355311ee7ae43420a2bb9a42776863cdf13"
+    },
+    "act_index": 1,
+    "floor": 27,
+    "turn": 2,
+    "hp": 45,
+    "pending": null,
+    "outcome_unknown": false,
+    "game_run_ended": false
+  },
+  "failed_stage": "turn_payoff",
+  "old_request_bytes": 90342,
+  "new_request_bytes": 84324,
+  "local_byte_budget": 90000,
+  "choices": 23,
+  "preservation": "canonical_round_trip_verified",
+  "change": "Use existing record_map_v1 and record tables for repeated per-action estimates only when smaller. All values, nulls, action IDs, questions and alternatives round-trip unchanged. No budget increase or facts removed.",
+  "request": {
+    "file": "temp/run32-capacity-compiled.json",
+    "sha256": "556078604804834c889088c64d71d2bfeef93c5d1d799a5316373823a9e20afd"
+  },
+  "response": {
+    "file": "temp/run32-capacity-response.json",
+    "sha256": "9e62a72e9d7c439689203855dda5a9dfbcf7a9169f1674d1b0c161306bae5e4e"
+  },
+  "provider": "openrouter",
+  "model": "typesafe/jev-1.13-20260917",
+  "usage": {
+    "input_tokens": 26706,
+    "output_tokens": 280,
+    "cost": 0.001121652
+  },
+  "answer": {
+    "type": "choice",
+    "choice": "card_6",
+    "probabilities": {
+      "card_8_target_2": 0.02,
+      "card_0_target_3": 0.01,
+      "card_4": 0.25,
+      "card_1_target_2": 0,
+      "card_7_target_3": 0,
+      "card_9_target_1": 0.01,
+      "card_9_target_2": 0,
+      "card_0_target_2": 0.01,
+      "card_5": 0,
+      "card_6": 0.4,
+      "card_8_target_3": 0.03,
+      "card_0_target_1": 0.08,
+      "card_3": 0.06,
+      "card_8_target_1": 0.07,
+      "card_1_target_1": 0.01,
+      "end_turn": 0.04,
+      "card_2_target_1": 0.01,
+      "card_7_target_1": 0,
+      "card_1_target_3": 0,
+      "card_2_target_2": 0,
+      "card_2_target_3": 0,
+      "card_9_target_3": 0,
+      "card_7_target_2": 0
+    },
+    "confidence": 0.36
+  },
+  "verification": {
+    "passed": 36,
+    "log": "temp/run32-capacity-checks.log"
+  },
+  "scope": "One complete captured payoff request accepted by Jev, not a whole-turn or full-run success. The offline call sent no game action. Resume requires the same native fingerprint and no pending command.",
+  "runtime_loaded": false
+}

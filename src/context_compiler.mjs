@@ -53,7 +53,7 @@ const routes = [
 ];
 const aliases = Object.fromEntries(routes);
 aliases['rule_reference.entries'] = 'knowledge.catalog (keyed by category and rule ID)';
-aliases['legal_actions[].combat_estimate'] = 'analysis.action_estimates (keyed by action_id)';
+aliases['legal_actions[].combat_estimate'] = 'analysis.action_estimates (keyed by action_id after optional record_map_v1 decoding)';
 const domains = ['observation', 'knowledge', 'history', 'intent', 'analysis'];
 const prefix = 'Use the v2 domains and decision.reference_paths for source-path references. ';
 
@@ -149,7 +149,10 @@ export function compileModelRequest(payload, metrics = {}) {
   // exact commands, selection constraints and labels remain unchanged.
   if (Object.keys(estimates).length) {
     state.observation.legal_actions = compactRecords(actions);
-    state.analysis.action_estimates = estimates;
+    // Target variants repeat the same estimate fields and shared conditions.
+    // Reuse the existing keyed-record format while preserving every action.
+    const packed = { encoding: 'record_map_v1', keys: Object.keys(estimates), records: compactRecords(Object.values(estimates)) };
+    state.analysis.action_estimates = Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(estimates)) ? packed : estimates;
   }
   state.knowledge.entity_rules = entityLinks(state.observation, state.knowledge.catalog);
   state.decision = decisionFrame(original, payload.questions, metrics, state.observation);
@@ -177,8 +180,9 @@ export function restoreCanonicalContext(context) {
   if (source.knowledge.catalog) source.knowledge.reference.entries = Object.fromEntries(Object.entries(source.knowledge.catalog)
     .map(([category, table]) => [category, table.records]));
   if (source.analysis.action_estimates) {
+    const estimates = expandRecordTables(source.analysis.action_estimates);
     source.observation.legal_actions = expandRecordTables(source.observation.legal_actions).map(action => ({ ...action,
-      ...(Object.hasOwn(source.analysis.action_estimates, action.action_id) ? { combat_estimate: source.analysis.action_estimates[action.action_id] } : {}) }));
+      ...(Object.hasOwn(estimates, action.action_id) ? { combat_estimate: estimates[action.action_id] } : {}) }));
   }
   // Parent objects must be restored before lifted children.
   for (const [to, from] of [...routes].reverse()) {

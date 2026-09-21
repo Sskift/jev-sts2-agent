@@ -43,6 +43,30 @@ test('changing a planning stage does not invent a new observation, while changin
   assert.throws(() => validateModelRequest(one), /index is stale/);
 });
 
+test('repeated action estimates retain their distinct IDs, unknown values and unestimated actions through keyed compression', () => {
+  const canonical = prepareModDecision(completeCombat()).payload;
+  canonical.state = expandRecordTables(canonical.state);
+  const estimated = canonical.state.legal_actions.find(action => action.combat_estimate);
+  const unestimated = { ...estimated, action_id: 'without_estimate' };
+  delete unestimated.combat_estimate;
+  canonical.state.legal_actions = [unestimated, ...Array.from({ length: 20 }, (_, index) => ({ ...structuredClone(estimated),
+    action_id: `target_variant_${index}`, combat_estimate: { ...structuredClone(estimated.combat_estimate),
+      hp_remaining_if_end_turn: index % 2 ? null : index } }))];
+  const saved = structuredClone(canonical);
+  const compiled = compileModelRequest(canonical);
+  const packed = compiled.payload.state.analysis.action_estimates;
+  assert.equal(packed.encoding, 'record_map_v1');
+  const decoded = expandRecordTables(packed);
+  assert.equal(Object.keys(decoded).length, 20);
+  assert.equal(decoded.target_variant_0.hp_remaining_if_end_turn, 0);
+  assert.equal(decoded.target_variant_1.hp_remaining_if_end_turn, null);
+  assert.equal(decoded.target_variant_18.hp_remaining_if_end_turn, 18);
+  assert.equal(Object.hasOwn(decoded, 'without_estimate'), false);
+  assert.ok(JSON.stringify(packed).length < JSON.stringify(decoded).length);
+  assert.deepEqual(expandRecordTables(restoreCanonicalContext(compiled.payload.state)), canonical.state);
+  assert.deepEqual(canonical, saved);
+});
+
 test('between-room choices and advisory ratings use the same full context boundary', async () => {
   const state = withContext({ screen: 'REWARD', rewards: { rewards: [{ type: 'Card', card_choices: [{
     index: 0, id: 'BASH', name: 'Bash', type: 'Attack', cost: 2, description: 'Deal 8 damage. Apply 2 Vulnerable.'
