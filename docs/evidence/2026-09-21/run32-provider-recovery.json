@@ -1,0 +1,139 @@
+{
+  "recorded_at": "2026-09-21T01:50:18.931Z",
+  "run_id": "run-1789936871",
+  "runtime_commit": "55f8c65da0ab5413b0a3236a7bd6014c131845c1",
+  "source_fix_commit": "8688b9a",
+  "provider": "openrouter",
+  "model": "typesafe/jev-1.13-20260917",
+  "provider_verified_response": {
+    "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0001/jev-planning-decision-0001.json",
+    "sha256": "4a4ff8f2b66241dd9abafd6d3ceab1a27b93653aed1e04b6175bbb68a978970d"
+  },
+  "resume": {
+    "before": {
+      "file": "temp/run32-before-credit-resume.json",
+      "sha256": "e338867378ec42190896b95ed6423c2314c321c568b0a1d9e9e787bf49392726"
+    },
+    "after": {
+      "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/resume-native.json",
+      "sha256": "3a638d4317e82d36b275098c6836c444b44c2b26f8bbf6adb7b24be6551a035b"
+    },
+    "same_fingerprint": true,
+    "pending": null,
+    "act_index": 1,
+    "floor": 19,
+    "turn": 4,
+    "hp": 62
+  },
+  "first_actions": [
+    {
+      "decision": {
+        "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0001/decision.json",
+        "sha256": "bef19bb65827462c184f09db21efa0436fda8f68fe0dd7743370e6097d7e4fb8"
+      },
+      "request": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 2,
+        "target": 3
+      },
+      "response": {
+        "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0001/response.json",
+        "sha256": "bf2b70631d0d7ac909438f9a69a6a38aaf6d01a68ecc42582118f41a7b57986c"
+      },
+      "ok": true
+    },
+    {
+      "decision": {
+        "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0002/decision.json",
+        "sha256": "0291b3c1a7d97532dc425ba6bcc88aa2eba69445af304d171b3910d595a34791"
+      },
+      "request": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 0,
+        "target": 3
+      },
+      "response": {
+        "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0002/response.json",
+        "sha256": "ce859d07ff6ec707b121cd79031a20d4405da570712f40e2590f389435501561"
+      },
+      "ok": true
+    },
+    {
+      "decision": {
+        "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0003/decision.json",
+        "sha256": "8279995f9c344d55bc52fcf3cc44c33264176b7b9246125d97f46839e4106420"
+      },
+      "request": {
+        "cmd": "play_card",
+        "id": "GIANT_ROCK",
+        "nth": 0,
+        "target": 3
+      },
+      "response": {
+        "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0003/response.json",
+        "sha256": "968554962a7a18793a43196290fbebf954572420a4f901968e41ef8e9f379a9b"
+      },
+      "ok": true
+    }
+  ],
+  "first_battle_after_resume": {
+    "source": {
+      "file": "run-artifacts/run32-resume2-2026-09-21T01-47-39.877Z/step-0008/before-state.json",
+      "sha256": "e470a400d59eba8ebfa88d588c70bc4b3e76b6ef63071eb54c51b7b9ac0457f1"
+    },
+    "screen": "REWARD",
+    "hp": 68
+  },
+  "final_stat_replay": {
+    "freeze": "52bf473ecea1052a3dd6722a1da11b086235589ab4cd62a099286a7aac8b527e",
+    "input_sha256": "718edd305c3c12a3707df26036b6a7821199860171c2b098f6e52e9501446dd0",
+    "source": {
+      "file": "run-artifacts/run32-stat-final-review/results/boss-stat-order/ordered-stat-ranges/1/summary.json",
+      "sha256": "f90088cd15f82d06fdbb8b4b1be4830af606426aa44efa20db9a30b31a58c13b"
+    },
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Strike",
+        "card_id": "STRIKE_IRONCLAD",
+        "target": 1
+      },
+      {
+        "kind": "play_card",
+        "name": "Inflame",
+        "card_id": "INFLAME"
+      },
+      {
+        "kind": "play_card",
+        "name": "Defend",
+        "card_id": "DEFEND_IRONCLAD"
+      },
+      {
+        "kind": "end_turn"
+      }
+    ],
+    "provider": "openrouter",
+    "model": "typesafe/jev-1.13-20260917",
+    "calls": 20,
+    "coverage": {
+      "inspected_prefixes": 125,
+      "enumerated_plans": 40,
+      "selected_plans": 40,
+      "first_action_variants": 7,
+      "search_truncated": false,
+      "candidate_selection_truncated": false,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "eligible_plans": 40,
+      "assessed_plans": 40,
+      "distinct_allocations": 18,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 4
+    },
+    "comparison_pairs": 6,
+    "order_disagreements": 2,
+    "interpretation": "The final arithmetic version was successfully evaluated, but still selected Strike on a follower before Inflame. This does not establish an improved decision or win rate. The live game was not rewound or altered by this development replay."
+  },
+  "goal_complete": false
+}
