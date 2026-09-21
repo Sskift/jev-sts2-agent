@@ -4,7 +4,7 @@ import { potionEffectFacts } from './potion_effects.mjs';
 import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from './turn_effects.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
-import { independentTurnCandidates, compareFinalists, planSignature, planAllocation, shortlistPlans } from './turn_candidates.mjs';
+import { independentTurnCandidates, adjacentPlanOrders, compareFinalists, planSignature, planOrderSignature, planAllocation, shortlistPlans } from './turn_candidates.mjs';
 import { describeContinuation } from './card_flow_projection.mjs';
 import { intentDamage } from './combat_arithmetic.mjs';
 import { ContextError } from './decision_context.mjs';
@@ -89,10 +89,11 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
   plan.end_policy = inspectSequence(state, plan.steps).checkpoint ? 'review_after_segment' : 'end_after_steps_unless_conditions_change';
   // One neighborhood plus independent search; each sequence is described once.
   // Every candidate is an alternative to the entire unexecuted seed.
-  const seen = new Set([signature(plan.steps)]);
+  const orderSignature = steps => planOrderSignature(steps, state);
+  const seen = new Set([orderSignature(plan.steps)]);
   const end = plan.steps.at(-1), prefix = plan.steps.slice(0, -1), alternatives = new Map([['keep', plan.steps]]);
   const add = steps => {
-    const key = signature(steps);
+    const key = orderSignature(steps);
     if (seen.has(key) || !reserveSequence(state, steps) || !preservesPlanDependencies(steps)) return;
     if ((plan.retained_cards || []).some(card => card.prerequisite
       && !steps.some(step => (step.card_id || step.potion_id) === card.prerequisite))) return;
@@ -111,12 +112,17 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
   for (let index = 0; index < prefix.length; index++) {
     add([...prefix.filter((_, position) => position !== index), end]);
   }
-  // Adjacent swaps explicitly test local timing, e.g. Vulnerable before an
-  // attack. One insertion tests whether stopping leaves a useful card unused.
-  for (let index = 0; index + 1 < prefix.length; index++) {
-    const copy = structuredClone(prefix); [copy[index], copy[index + 1]] = [copy[index + 1], copy[index]];
-    add([...copy, end]);
+  // Sampling can retain a resource combination in only one order. Compare
+  // adjacent orders of the sampled pool as well as the initial proposal,
+  // without assigning either order a tactical preference.
+  const orderCoverage = { inspected: 0, added: 0, truncated: false };
+  for (const steps of adjacentPlanOrders([...alternatives.values()])) {
+    if (orderCoverage.added >= 96) { orderCoverage.truncated = true; break; }
+    orderCoverage.inspected++;
+    if (add(steps)) orderCoverage.added++;
   }
+  plan.candidate_coverage.adjacent_order_review = orderCoverage;
+  plan.candidate_coverage.order_grouping = 'same_visible_copies; action_order_targets_and_bound_identities_preserved';
   // An expensive payoff can crowd out useful defense or setup even when its
   // order is correct. Compare substitutions (including target changes), and
   // offer concrete continuations using released energy. Never reuse one

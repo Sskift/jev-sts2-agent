@@ -1,0 +1,784 @@
+{
+  "at": "2026-09-21T04:39:14.495Z",
+  "run_id": "run-1789963561",
+  "source": {
+    "source": "run-artifacts/run34-target-hit-review/cases/slime-turn2.json",
+    "sha256": "2b4976dbf1fe79953b3827aee817792fbb56c22d92b58cf6b44a709367220fcb"
+  },
+  "finding": "The prior completed candidate assessment included Dismantle then Bash against enemy 2, but omitted Bash then Dismantle against the same enemy. Missing candidate coverage contributed to that failure; it cannot be attributed solely to model preference.",
+  "change": "Apply one bounded adjacent-order sweep to sampled plans as well as the initial proposal. Validate resources, dependencies and observation boundaries before scoring. Collapse identical ordered use of visibly equivalent copies, keeping target, order, multiplicity, card properties and bound identities distinct. No model instructions, scoring levels or final comparison rules changed.",
+  "baseline": {
+    "result": {
+      "source": "run-artifacts/run34-target-hit-final-review/results/slime-turn2/shared-hits-second-key/1/summary.json",
+      "sha256": "12b26a95f3ad6123d65c525e1b7307746a652c7ddb5f10c184e679c757f0651c"
+    },
+    "decision": {
+      "source": "run-artifacts/run34-target-hit-final-review/results/slime-turn2/shared-hits-second-key/1/decision.json",
+      "sha256": "4fc700cfcab087a31d8320bb8b1d564e241e94fbd3dc6ca6be45c66a940f020d"
+    },
+    "freeze": "86f21debc5f233e29d034ed284e91966a9a849d94b01ee0ff3874bd4efe6f6f0",
+    "input_sha256": "1cfe61d5f8f535ef3a4b2010f2b0c6212a1d55c7179ef4c64e4e721a1971256b",
+    "model": "jev-1.13.0",
+    "calls": 40,
+    "usage": {
+      "input_tokens": 847661,
+      "output_tokens": 2744
+    },
+    "assessed_records": 101,
+    "coverage": {
+      "inspected_prefixes": 3908,
+      "enumerated_plans": 885,
+      "selected_plans": 64,
+      "first_action_variants": 10,
+      "search_truncated": false,
+      "candidate_selection_truncated": true,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "eligible_plans": 101,
+      "assessed_plans": 101,
+      "distinct_allocations": 61,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 4
+    },
+    "matching_orders": [
+      {
+        "request": {
+          "source": "run-artifacts/run34-target-hit-final-review/results/slime-turn2/shared-hits-second-key/1/request-21.json",
+          "sha256": "a0b271c636b494320b0117fe6c2b823f1494a9fc4c46ddfd8ae57a81220bd186"
+        },
+        "response": {
+          "source": "run-artifacts/run34-target-hit-final-review/results/slime-turn2/shared-hits-second-key/1/response-21.json",
+          "sha256": "67f5f6f558e94cb9222a149b0e38948bc6a94f789811c2f0cfe73e021d2e859a"
+        },
+        "question": "assessment_0",
+        "order": [
+          "Dismantle",
+          "Bash"
+        ],
+        "known": {
+          "block": 0,
+          "hp_if_ending": 66,
+          "hp_loss_if_ending": 14,
+          "block_including_end_turn_gains": 0,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": 14,
+          "enemies": [
+            {
+              "combat_id": 2,
+              "hp": 10,
+              "block": 0,
+              "hp_removed": 16,
+              "block_removed": 0,
+              "power_changes": [
+                {
+                  "power_id": "VULNERABLE_POWER",
+                  "before": 0,
+                  "after_declared_actions": {
+                    "min": 2,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            {
+              "combat_id": 3,
+              "hp": 13,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            }
+          ]
+        },
+        "answer": {
+          "type": "score",
+          "score": 1.78,
+          "confidence": 0.3,
+          "legend": {
+            "0": "A losing or seriously wasteful commitment: an avoidable defeat, failed essential dependency, or sacrifice with no credible compensating benefit.",
+            "1": "Weak use of this situation: substantial avoidable loss or a missed feasible opportunity, even after accounting for its possible continuation.",
+            "2": "A workable compromise: preserves a viable turn, but leaves a meaningful weakness or opportunity compared with available resources.",
+            "3": "A strong use of this situation: coherent timing and resource tradeoffs address current threats and further the run, including useful continuation options.",
+            "4": "An excellent use of this situation: captures the major feasible benefits with justified costs and no apparent important missed opportunity."
+          },
+          "probabilities": {
+            "0": 0.03,
+            "1": 0.42,
+            "2": 0.34,
+            "3": 0.16,
+            "4": 0.05
+          }
+        }
+      }
+    ],
+    "initial_selections": [
+      {
+        "stage": "objective",
+        "value": "remove_threat",
+        "confidence": 0.25
+      },
+      {
+        "stage": "payoff",
+        "value": "card_0_target_3",
+        "confidence": 0.19
+      },
+      {
+        "stage": "preparation",
+        "value": null,
+        "confidence": 0.43
+      },
+      {
+        "stage": "payoff",
+        "value": "card_2_target_3",
+        "confidence": 0.24
+      },
+      {
+        "stage": "preparation",
+        "value": null,
+        "confidence": 0.59
+      },
+      {
+        "stage": "payoff",
+        "value": "end_turn",
+        "confidence": 0.32
+      }
+    ],
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Strike",
+        "card_id": "STRIKE_IRONCLAD",
+        "target": 3
+      },
+      {
+        "kind": "play_card",
+        "name": "Defend",
+        "card_id": "DEFEND_IRONCLAD"
+      },
+      {
+        "kind": "play_card",
+        "name": "Dismantle",
+        "card_id": "DISMANTLE",
+        "target": 3
+      },
+      {
+        "kind": "end_turn"
+      }
+    ],
+    "conditional_result": {
+      "block": 5,
+      "hp_if_ending": 74,
+      "hp_loss_if_ending": 6,
+      "block_including_end_turn_gains": 5,
+      "end_turn_block_gains": [],
+      "end_turn_damage_events": [],
+      "incoming_attack": 11,
+      "enemies": [
+        {
+          "combat_id": 2,
+          "hp": 26,
+          "block": 0,
+          "hp_removed": 0,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 3,
+          "hp": 0,
+          "block": 0,
+          "hp_removed": 13,
+          "block_removed": 0,
+          "power_changes": []
+        }
+      ]
+    },
+    "pairs": 6,
+    "order_disagreements": 3,
+    "selected": [
+      "variant_35"
+    ]
+  },
+  "intermediate": {
+    "result": {
+      "source": "run-artifacts/run34-order-review/results/slime-turn2/sampled-orders/1/summary.json",
+      "sha256": "d6671e2322f8f630238113ab7f69b0163ad91181f1800523932c385561c253ed"
+    },
+    "decision": {
+      "source": "run-artifacts/run34-order-review/results/slime-turn2/sampled-orders/1/decision.json",
+      "sha256": "65b2c707e940b948e01f603dee85956bbd8e072f725593f597cadb177285ee36"
+    },
+    "freeze": "5176266390895a2c7ebb5b47c5dd1634a1f4abd72d6eb0861ce8b5901571927e",
+    "input_sha256": "1cfe61d5f8f535ef3a4b2010f2b0c6212a1d55c7179ef4c64e4e721a1971256b",
+    "model": "jev-1.13.0",
+    "calls": 69,
+    "usage": {
+      "input_tokens": 1471150,
+      "output_tokens": 4269
+    },
+    "assessed_records": 190,
+    "coverage": {
+      "inspected_prefixes": 3908,
+      "enumerated_plans": 885,
+      "selected_plans": 64,
+      "first_action_variants": 10,
+      "search_truncated": false,
+      "candidate_selection_truncated": true,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "adjacent_order_review": {
+        "inspected": 106,
+        "added": 94,
+        "truncated": false
+      },
+      "eligible_plans": 190,
+      "assessed_plans": 190,
+      "distinct_allocations": 63,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 4
+    },
+    "matching_orders": [
+      {
+        "request": {
+          "source": "run-artifacts/run34-order-review/results/slime-turn2/sampled-orders/1/request-23.json",
+          "sha256": "a0b271c636b494320b0117fe6c2b823f1494a9fc4c46ddfd8ae57a81220bd186"
+        },
+        "response": {
+          "source": "run-artifacts/run34-order-review/results/slime-turn2/sampled-orders/1/response-23.json",
+          "sha256": "a9ad6efc228146f907f16aec8b2ffe52e25d4e89d1a10d1842c2f0fe95f8b60b"
+        },
+        "question": "assessment_0",
+        "order": [
+          "Dismantle",
+          "Bash"
+        ],
+        "known": {
+          "block": 0,
+          "hp_if_ending": 66,
+          "hp_loss_if_ending": 14,
+          "block_including_end_turn_gains": 0,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": 14,
+          "enemies": [
+            {
+              "combat_id": 2,
+              "hp": 10,
+              "block": 0,
+              "hp_removed": 16,
+              "block_removed": 0,
+              "power_changes": [
+                {
+                  "power_id": "VULNERABLE_POWER",
+                  "before": 0,
+                  "after_declared_actions": {
+                    "min": 2,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            {
+              "combat_id": 3,
+              "hp": 13,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            }
+          ]
+        },
+        "answer": {
+          "type": "score",
+          "score": 1.82,
+          "confidence": 0.27,
+          "legend": {
+            "0": "A losing or seriously wasteful commitment: an avoidable defeat, failed essential dependency, or sacrifice with no credible compensating benefit.",
+            "1": "Weak use of this situation: substantial avoidable loss or a missed feasible opportunity, even after accounting for its possible continuation.",
+            "2": "A workable compromise: preserves a viable turn, but leaves a meaningful weakness or opportunity compared with available resources.",
+            "3": "A strong use of this situation: coherent timing and resource tradeoffs address current threats and further the run, including useful continuation options.",
+            "4": "An excellent use of this situation: captures the major feasible benefits with justified costs and no apparent important missed opportunity."
+          },
+          "probabilities": {
+            "0": 0.03,
+            "1": 0.39,
+            "2": 0.35,
+            "3": 0.18,
+            "4": 0.05
+          }
+        }
+      },
+      {
+        "request": {
+          "source": "run-artifacts/run34-order-review/results/slime-turn2/sampled-orders/1/request-37.json",
+          "sha256": "e516e1cbd354b6702a3eeec4fd9c3b06ec0c583516761a4581055e9b80c7961f"
+        },
+        "response": {
+          "source": "run-artifacts/run34-order-review/results/slime-turn2/sampled-orders/1/response-37.json",
+          "sha256": "4b20e3819f22d15ac8daa15b5ce5599e86760b2866869a7acfc02e94d9d31ca2"
+        },
+        "question": "assessment_0",
+        "order": [
+          "Bash",
+          "Dismantle"
+        ],
+        "known": {
+          "block": 0,
+          "hp_if_ending": 77,
+          "hp_loss_if_ending": 3,
+          "block_including_end_turn_gains": 0,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": 3,
+          "enemies": [
+            {
+              "combat_id": 2,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 26,
+              "block_removed": 0,
+              "power_changes": [
+                {
+                  "power_id": "VULNERABLE_POWER",
+                  "before": 0,
+                  "after_declared_actions": {
+                    "min": 2,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            {
+              "combat_id": 3,
+              "hp": 13,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            }
+          ]
+        },
+        "answer": {
+          "type": "score",
+          "score": 2.36,
+          "confidence": 0.13,
+          "legend": {
+            "0": "A losing or seriously wasteful commitment: an avoidable defeat, failed essential dependency, or sacrifice with no credible compensating benefit.",
+            "1": "Weak use of this situation: substantial avoidable loss or a missed feasible opportunity, even after accounting for its possible continuation.",
+            "2": "A workable compromise: preserves a viable turn, but leaves a meaningful weakness or opportunity compared with available resources.",
+            "3": "A strong use of this situation: coherent timing and resource tradeoffs address current threats and further the run, including useful continuation options.",
+            "4": "An excellent use of this situation: captures the major feasible benefits with justified costs and no apparent important missed opportunity."
+          },
+          "probabilities": {
+            "0": 0.04,
+            "1": 0.23,
+            "2": 0.27,
+            "3": 0.26,
+            "4": 0.2
+          }
+        }
+      }
+    ],
+    "initial_selections": [
+      {
+        "stage": "objective",
+        "value": "remove_threat",
+        "confidence": 0.22
+      },
+      {
+        "stage": "payoff",
+        "value": "card_0_target_3",
+        "confidence": 0.21
+      },
+      {
+        "stage": "preparation",
+        "value": null,
+        "confidence": 0.4
+      },
+      {
+        "stage": "payoff",
+        "value": "card_2_target_3",
+        "confidence": 0.27
+      },
+      {
+        "stage": "preparation",
+        "value": null,
+        "confidence": 0.66
+      },
+      {
+        "stage": "payoff",
+        "value": "card_4_target_2",
+        "confidence": 0.31
+      },
+      {
+        "stage": "preparation",
+        "value": null,
+        "confidence": 0.69
+      },
+      {
+        "stage": "payoff",
+        "value": "end_turn",
+        "confidence": 0.6
+      }
+    ],
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Strike",
+        "card_id": "STRIKE_IRONCLAD",
+        "target": 3
+      },
+      {
+        "kind": "play_card",
+        "name": "Dismantle",
+        "card_id": "DISMANTLE",
+        "target": 3
+      },
+      {
+        "kind": "play_card",
+        "name": "Strike",
+        "card_id": "STRIKE_IRONCLAD",
+        "target": 2
+      },
+      {
+        "kind": "end_turn"
+      }
+    ],
+    "conditional_result": {
+      "block": 0,
+      "hp_if_ending": 69,
+      "hp_loss_if_ending": 11,
+      "block_including_end_turn_gains": 0,
+      "end_turn_block_gains": [],
+      "end_turn_damage_events": [],
+      "incoming_attack": 11,
+      "enemies": [
+        {
+          "combat_id": 2,
+          "hp": 20,
+          "block": 0,
+          "hp_removed": 6,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 3,
+          "hp": 0,
+          "block": 0,
+          "hp_removed": 13,
+          "block_removed": 0,
+          "power_changes": []
+        }
+      ]
+    },
+    "pairs": 6,
+    "order_disagreements": 5,
+    "selected": [
+      "keep"
+    ]
+  },
+  "final": {
+    "result": {
+      "source": "run-artifacts/run34-order-dedup-review/results/slime-turn2/sampled-orders-distinct-copies/1/summary.json",
+      "sha256": "a461bb724a87bd0d635ff2b06862641745d1fe9c1a5bebb52b1df0f5303c4f68"
+    },
+    "decision": {
+      "source": "run-artifacts/run34-order-dedup-review/results/slime-turn2/sampled-orders-distinct-copies/1/decision.json",
+      "sha256": "c71c9e3146752f7a1ee4c8e5a44eabe66defcdfda8d90c9145a41cbad666b9fa"
+    },
+    "freeze": "287dcf29bb8d78c0f951ebe50158322f51623814346f084db0e45888166c3050",
+    "input_sha256": "1cfe61d5f8f535ef3a4b2010f2b0c6212a1d55c7179ef4c64e4e721a1971256b",
+    "model": "jev-1.13.0",
+    "calls": 59,
+    "usage": {
+      "input_tokens": 1271340,
+      "output_tokens": 3765
+    },
+    "assessed_records": 164,
+    "coverage": {
+      "inspected_prefixes": 3908,
+      "enumerated_plans": 885,
+      "selected_plans": 64,
+      "first_action_variants": 10,
+      "search_truncated": false,
+      "candidate_selection_truncated": true,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "adjacent_order_review": {
+        "inspected": 102,
+        "added": 81,
+        "truncated": false
+      },
+      "order_grouping": "same_visible_copies; action_order_targets_and_bound_identities_preserved",
+      "eligible_plans": 164,
+      "assessed_plans": 164,
+      "distinct_allocations": 61,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 4
+    },
+    "matching_orders": [
+      {
+        "request": {
+          "source": "run-artifacts/run34-order-dedup-review/results/slime-turn2/sampled-orders-distinct-copies/1/request-20.json",
+          "sha256": "a0b271c636b494320b0117fe6c2b823f1494a9fc4c46ddfd8ae57a81220bd186"
+        },
+        "response": {
+          "source": "run-artifacts/run34-order-dedup-review/results/slime-turn2/sampled-orders-distinct-copies/1/response-20.json",
+          "sha256": "4133a6525c9b76667f151de0e550cf6f563e06ab4a0118eeaeb0ae5b52daea7b"
+        },
+        "question": "assessment_0",
+        "order": [
+          "Dismantle",
+          "Bash"
+        ],
+        "known": {
+          "block": 0,
+          "hp_if_ending": 66,
+          "hp_loss_if_ending": 14,
+          "block_including_end_turn_gains": 0,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": 14,
+          "enemies": [
+            {
+              "combat_id": 2,
+              "hp": 10,
+              "block": 0,
+              "hp_removed": 16,
+              "block_removed": 0,
+              "power_changes": [
+                {
+                  "power_id": "VULNERABLE_POWER",
+                  "before": 0,
+                  "after_declared_actions": {
+                    "min": 2,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            {
+              "combat_id": 3,
+              "hp": 13,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            }
+          ]
+        },
+        "answer": {
+          "type": "score",
+          "score": 1.74,
+          "confidence": 0.33,
+          "legend": {
+            "0": "A losing or seriously wasteful commitment: an avoidable defeat, failed essential dependency, or sacrifice with no credible compensating benefit.",
+            "1": "Weak use of this situation: substantial avoidable loss or a missed feasible opportunity, even after accounting for its possible continuation.",
+            "2": "A workable compromise: preserves a viable turn, but leaves a meaningful weakness or opportunity compared with available resources.",
+            "3": "A strong use of this situation: coherent timing and resource tradeoffs address current threats and further the run, including useful continuation options.",
+            "4": "An excellent use of this situation: captures the major feasible benefits with justified costs and no apparent important missed opportunity."
+          },
+          "probabilities": {
+            "0": 0.03,
+            "1": 0.43,
+            "2": 0.35,
+            "3": 0.16,
+            "4": 0.03
+          }
+        }
+      },
+      {
+        "request": {
+          "source": "run-artifacts/run34-order-dedup-review/results/slime-turn2/sampled-orders-distinct-copies/1/request-31.json",
+          "sha256": "e516e1cbd354b6702a3eeec4fd9c3b06ec0c583516761a4581055e9b80c7961f"
+        },
+        "response": {
+          "source": "run-artifacts/run34-order-dedup-review/results/slime-turn2/sampled-orders-distinct-copies/1/response-31.json",
+          "sha256": "37b8a99baee0d563119e2693f7b87bc3f39b12b77a0920992abdce57c7b055bb"
+        },
+        "question": "assessment_0",
+        "order": [
+          "Bash",
+          "Dismantle"
+        ],
+        "known": {
+          "block": 0,
+          "hp_if_ending": 77,
+          "hp_loss_if_ending": 3,
+          "block_including_end_turn_gains": 0,
+          "end_turn_block_gains": [],
+          "end_turn_damage_events": [],
+          "incoming_attack": 3,
+          "enemies": [
+            {
+              "combat_id": 2,
+              "hp": 0,
+              "block": 0,
+              "hp_removed": 26,
+              "block_removed": 0,
+              "power_changes": [
+                {
+                  "power_id": "VULNERABLE_POWER",
+                  "before": 0,
+                  "after_declared_actions": {
+                    "min": 2,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            {
+              "combat_id": 3,
+              "hp": 13,
+              "block": 0,
+              "hp_removed": 0,
+              "block_removed": 0,
+              "power_changes": []
+            }
+          ]
+        },
+        "answer": {
+          "type": "score",
+          "score": 2.38,
+          "confidence": 0.18,
+          "legend": {
+            "0": "A losing or seriously wasteful commitment: an avoidable defeat, failed essential dependency, or sacrifice with no credible compensating benefit.",
+            "1": "Weak use of this situation: substantial avoidable loss or a missed feasible opportunity, even after accounting for its possible continuation.",
+            "2": "A workable compromise: preserves a viable turn, but leaves a meaningful weakness or opportunity compared with available resources.",
+            "3": "A strong use of this situation: coherent timing and resource tradeoffs address current threats and further the run, including useful continuation options.",
+            "4": "An excellent use of this situation: captures the major feasible benefits with justified costs and no apparent important missed opportunity."
+          },
+          "probabilities": {
+            "0": 0.04,
+            "1": 0.23,
+            "2": 0.26,
+            "3": 0.26,
+            "4": 0.21
+          }
+        }
+      }
+    ],
+    "initial_selections": [
+      {
+        "stage": "objective",
+        "value": "remove_threat",
+        "confidence": 0.3
+      },
+      {
+        "stage": "payoff",
+        "value": "card_0_target_3",
+        "confidence": 0.23
+      },
+      {
+        "stage": "preparation",
+        "value": null,
+        "confidence": 0.41
+      },
+      {
+        "stage": "payoff",
+        "value": "card_2_target_3",
+        "confidence": 0.23
+      },
+      {
+        "stage": "preparation",
+        "value": null,
+        "confidence": 0.61
+      },
+      {
+        "stage": "payoff",
+        "value": "end_turn",
+        "confidence": 0.31
+      }
+    ],
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Bash",
+        "card_id": "BASH",
+        "target": 2
+      },
+      {
+        "kind": "play_card",
+        "name": "Dismantle",
+        "card_id": "DISMANTLE",
+        "target": 2
+      },
+      {
+        "kind": "end_turn"
+      }
+    ],
+    "conditional_result": {
+      "block": 0,
+      "hp_if_ending": 77,
+      "hp_loss_if_ending": 3,
+      "block_including_end_turn_gains": 0,
+      "end_turn_block_gains": [],
+      "end_turn_damage_events": [],
+      "incoming_attack": 3,
+      "enemies": [
+        {
+          "combat_id": 2,
+          "hp": 0,
+          "block": 0,
+          "hp_removed": 26,
+          "block_removed": 0,
+          "power_changes": [
+            {
+              "power_id": "VULNERABLE_POWER",
+              "before": 0,
+              "after_declared_actions": {
+                "min": 2,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "combat_id": 3,
+          "hp": 13,
+          "block": 0,
+          "hp_removed": 0,
+          "block_removed": 0,
+          "power_changes": []
+        }
+      ]
+    },
+    "pairs": 6,
+    "order_disagreements": 4,
+    "selected": [
+      "variant_86"
+    ]
+  },
+  "validation": {
+    "checks": 38,
+    "failures": 0,
+    "log": "temp/run34-order-dedup-checks.log"
+  },
+  "limitations": [
+    "One inspected development snapshot; not a held-out evaluation or win-rate result.",
+    "The intermediate full replay included the missing order but still chose another plan.",
+    "The final full replay chooses Bash then Dismantle on enemy 2, with conditional 77 HP and that enemy removed. No historical game command was issued, and no future draw was read.",
+    "Initial model proposals differ between full replays; the observed output change does not isolate a deterministic improvement from sampling and model variation.",
+    "Four of six final pair comparisons still disagree by option position. Confidence and preference support are not calibrated correctness probabilities.",
+    "The independent search and additional 96 valid adjacent variants remain bounded; longer permutations or unsampled resource combinations may still be absent."
+  ],
+  "load_checkpoint": {
+    "run_id": "run-1789963561",
+    "root": "run-artifacts/run34-resume-2026-09-21T04-23-29.772Z",
+    "step": 92,
+    "last_confirmed_command": {
+      "cmd": "end_turn"
+    },
+    "pending": null,
+    "fingerprint_matched": true,
+    "floor": 17,
+    "turn": 9,
+    "hp": 35,
+    "energy": 3,
+    "enemy": [
+      {
+        "id": "VANTOM",
+        "hp": 91
+      }
+    ],
+    "source": "temp/run34-before-order-resume.json",
+    "sha256": "27477ad0671d116f72c6c5fef858598cc5753a7979730711d3e87bba2a413368"
+  }
+}

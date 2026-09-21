@@ -6,9 +6,23 @@ import { reserveActionSequence } from './turn_action_constraints.mjs';
 
 export const planSignature = steps => JSON.stringify(steps.map(s => [s.kind, s.card_instance_id, s.potion_id, s.slot, s.target, s.beneficiary_instance_id, s.next_card_instance_id]));
 
-// Only shortlist diversity changes: every exact sequence is still assessed.
-// Equivalent visible copies should not crowd out other resource commitments.
-export function planAllocation(steps, state) {
+// Offer local timing alternatives for every sampled resource commitment,
+// round-robin by position. The caller rechecks affordability, dependencies
+// and observation boundaries; swapping does not make a sequence valid.
+export function* adjacentPlanOrders(plans) {
+  const length = Math.max(0, ...plans.map(steps => steps.length - 1));
+  for (let index = 0; index + 1 < length; index++) for (const steps of plans) {
+    if (index + 1 >= steps.length - 1) continue;
+    const copy = structuredClone(steps);
+    [copy[index], copy[index + 1]] = [copy[index + 1], copy[index]];
+    yield copy;
+  }
+}
+
+// Equivalent visible copies share a resource description, while bindings keep
+// their physical identities. Preserve order for candidate deduplication and
+// ignore it only when assigning distinct-allocation shortlist slots.
+function planResources(steps, state) {
   const allocation = JSON.parse(planSignature(steps));
   // Keep bound identities distinct: upgrading one copy then playing another
   // must not collapse into upgrading and playing the same copy.
@@ -20,8 +34,11 @@ export function planAllocation(steps, state) {
     }));
     for (const item of allocation) if (item[0] === 'play_card' && copies.has(item[1])) item[1] = copies.get(item[1]);
   }
-  return JSON.stringify(allocation.map(item => JSON.stringify(item)).sort());
+  return allocation.map(item => JSON.stringify(item));
 }
+
+export const planOrderSignature = (steps, state) => JSON.stringify(planResources(steps, state));
+export const planAllocation = (steps, state) => JSON.stringify(planResources(steps, state).sort());
 
 export function shortlistPlans(candidates, judgments) {
   if (judgments.length !== candidates.length || judgments.some((j, index) => j.value !== candidates[index].value || !Number.isFinite(j.score))) throw new Error('Invalid turn-plan assessment coverage');

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
-import { independentTurnCandidates, compareFinalists, balancePlanPreference, planAllocation, shortlistPlans } from '../src/turn_candidates.mjs';
+import { independentTurnCandidates, adjacentPlanOrders, compareFinalists, balancePlanPreference, planOrderSignature, planAllocation, shortlistPlans } from '../src/turn_candidates.mjs';
 import { inspectSequence } from '../src/turn_sequence.mjs';
 import { describeContinuation, compareContinuationResources } from '../src/card_flow_projection.mjs';
 import { describePlanAlternative } from '../src/turn_plan_refinement.mjs';
@@ -21,6 +21,21 @@ test('independent search offers distinct first actions and orders, preserves ide
   assert.deepEqual(state, snapshot);
   const bounded = independentTurnCandidates(state, buildModCandidates(state), { maxInspections: 5, maxPlans: 2 });
   assert.ok(bounded.coverage.search_truncated); assert.ok(bounded.coverage.inspected_prefixes <= 5);
+});
+
+test('order review reaches every sampled commitment and keeps targets, copies and the end boundary', () => {
+  const play = (id, target) => ({ kind: 'play_card', card_instance_id: id, target });
+  const end = { kind: 'end_turn' };
+  const plans = [[play('seed', 1), end], [play('a', 2), play('b', 2), end],
+    [play('a', 1), play('copy', 2), play('c', 1), end]];
+  const original = structuredClone(plans);
+  const orders = [...adjacentPlanOrders(plans)];
+  assert.deepEqual(orders.map(p => p.map(s => s.card_instance_id || 'end')), [
+    ['b', 'a', 'end'], ['copy', 'a', 'c', 'end'], ['a', 'c', 'copy', 'end']
+  ]);
+  assert.deepEqual(orders.map(p => p.filter(s => s.kind === 'play_card').map(s => s.target)), [[2, 2], [2, 1, 1], [1, 1, 2]]);
+  assert.deepEqual(plans, original);
+  assert.ok(orders.every(p => p.at(-1).kind === 'end_turn'));
 });
 
 test('finalist review exposes position bias and does not mistake unanimous slot choice for certainty', async () => {
@@ -51,6 +66,9 @@ test('identical copies share shortlist capacity while targets, multiplicity, mod
   delete state.combat.hand[1].details.enchantment;
   const upgrade = { kind: 'play_card', card_instance_id: 'armaments', beneficiary_instance_id: 'a' };
   assert.notEqual(planAllocation([upgrade, hit('a')], state), planAllocation([upgrade, hit('b')], state));
+  assert.equal(planOrderSignature([hit('a'), hit('bash')], state), planOrderSignature([hit('b'), hit('bash')], state));
+  assert.notEqual(planOrderSignature([hit('a'), hit('bash')], state), planOrderSignature([hit('bash'), hit('b')], state));
+  assert.notEqual(planOrderSignature([upgrade, hit('a')], state), planOrderSignature([upgrade, hit('b')], state));
   assert.equal(plans.length, 5, 'Every concrete sequence remains in the assessment pool');
   assert.deepEqual(state, original);
 });

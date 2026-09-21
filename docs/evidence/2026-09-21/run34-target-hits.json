@@ -573,5 +573,9 @@
         }
       }
     }
+  },
+  "follow_up": {
+    "source": "docs/evidence/2026-09-21/run34-order-coverage.json",
+    "finding": "The prior completed candidate assessment included Dismantle then Bash against enemy 2, but omitted Bash then Dismantle against the same enemy. Missing candidate coverage contributed to that failure; it cannot be attributed solely to model preference."
   }
 }
