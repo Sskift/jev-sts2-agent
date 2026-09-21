@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
 import Ajv2020 from 'ajv/dist/2020.js';
-import { ContextError, compactRecords, expandRecordTables, validateDecisionPacket } from './decision_context.mjs';
+import { ContextError, compactRecords, compactNestedRecords, expandRecordTables, validateDecisionPacket } from './decision_context.mjs';
 import { normalizeRuleId as normalize, visitRuleEntities } from './rule_entities.mjs';
 
 export const MODEL_CONTEXT_VERSION = 'sts2.context.v2';
@@ -155,6 +155,9 @@ export function compileModelRequest(payload, metrics = {}) {
     state.analysis.action_estimates = Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(estimates)) ? packed : estimates;
   }
   state.knowledge.entity_rules = entityLinks(state.observation, state.knowledge.catalog);
+  // Current observation readability is selected separately by the caller.
+  // Derived/knowledge records can share repeated structure at any depth.
+  for (const domain of ['analysis', 'knowledge', 'history', 'intent']) state[domain] = compactNestedRecords(state[domain]);
   state.decision = decisionFrame(original, payload.questions, metrics, state.observation);
   const questions = Object.fromEntries(Object.entries(payload.questions).map(([id, question]) => [id,
     { ...question, instructions: prefix + question.instructions }]));

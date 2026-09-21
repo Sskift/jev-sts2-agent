@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { compileModelRequest, restoreCanonicalContext, validateModelRequest, MODEL_CONTEXT_VERSION } from '../src/context_compiler.mjs';
 import { prepareModDecision, makeModDecisionWithJev } from '../src/mod_decision.mjs';
-import { compactDecisionRequest, expandRecordTables } from '../src/decision_context.mjs';
+import { compactDecisionRequest, compactRecords, compactNestedRecords, expandRecordTables } from '../src/decision_context.mjs';
 import { completeCombat, withContext } from './fixtures/context.mjs';
 
 test('one compiler separates observations, rules, history, intentions and calculations without changing the canonical packet', () => {
@@ -65,6 +65,20 @@ test('repeated action estimates retain their distinct IDs, unknown values and un
   assert.ok(JSON.stringify(packed).length < JSON.stringify(decoded).length);
   assert.deepEqual(expandRecordTables(restoreCanonicalContext(compiled.payload.state)), canonical.state);
   assert.deepEqual(canonical, saved);
+});
+
+test('nested route records preserve ordered targets and existing table cells through recursive packing', () => {
+  const targets = Array.from({ length: 8 }, (_, index) => ({ target_id: index, damage: { min: index, max: index + 1 },
+    scope: 'Conditional damage before Block and HP loss caps; not an observed future.' }));
+  const existing = compactRecords(targets);
+  const original = { alternatives: Array.from({ length: 12 }, (_, index) => ({ name: `route_${index}`,
+    sequence: [{ role: 'preparation', targets }, { role: 'payoff', targets: existing }],
+    unresolved: index % 2 ? null : 0, exact_flags: [false, true], empty: [] })) };
+  const saved = structuredClone(original), packed = compactNestedRecords(original);
+  assert.deepEqual(expandRecordTables(packed), expandRecordTables(original));
+  assert.deepEqual(original, saved);
+  assert.ok(JSON.stringify(packed).length < JSON.stringify(original).length);
+  assert.equal(compactNestedRecords(existing), existing, 'Existing table cells remain uninterpreted');
 });
 
 test('between-room choices and advisory ratings use the same full context boundary', async () => {

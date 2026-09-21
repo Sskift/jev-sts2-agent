@@ -703,7 +703,8 @@ export function compactRecords(records, nested = true) {
   const variants = [records, recordTable(records), { encoding: 'record_table_v2', layouts, rows }, { encoding: 'record_table_v2', layouts: sharedLayouts, rows: sharedRows }];
   if (nested) {
     const flatten = (item, path = [], output = {}) => {
-      if (item && typeof item === 'object' && !Array.isArray(item) && Object.keys(item).length) {
+      // Keep nested encoded tables atomic so expansion decodes the full value.
+      if (item && typeof item === 'object' && !Array.isArray(item) && !item.encoding && Object.keys(item).length) {
         for (const [key, value] of Object.entries(item)) flatten(value, [...path, key], output);
       } else output[JSON.stringify(path)] = item;
       return output;
@@ -716,6 +717,15 @@ export function compactRecords(records, nested = true) {
   }
   return variants
     .sort((a, b) => Buffer.byteLength(JSON.stringify(a)) - Buffer.byteLength(JSON.stringify(b)))[0];
+}
+
+export function compactNestedRecords(value) {
+  if (!value || typeof value !== 'object' || value.encoding) return value;
+  if (Array.isArray(value)) {
+    const rows = value.map(compactNestedRecords);
+    return rows.length && rows.every(row => row && typeof row === 'object' && !Array.isArray(row)) ? compactRecords(rows) : rows;
+  }
+  return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, compactNestedRecords(child)]));
 }
 
 // Decode for schema validation and round-trip checks. v3 stores explicit key
@@ -839,9 +849,9 @@ export function compactDecisionRequest(payload) {
 /** Pack newly added planning facts without reinterpreting encoded table cells. */
 export function compactPlanningRequest(payload) {
   const extra = deduplicateText({ planning: payload.state.turn_planning, questions: payload.questions }, { dictionary: payload.state.text_dictionary });
-  const planning = extra.planning;
-  for (const field of ['proposed_steps', 'retained_cards']) if (planning?.[field]?.length) planning[field] = compactRecords(planning[field]);
-  const packed = { ...payload, state: { ...payload.state, turn_planning: planning, text_dictionary: extra.text_dictionary }, questions: extra.questions };
+  // Full routes also repeat nested target previews and dependency records.
+  // Pack those arrays without interpreting cells in an existing encoding.
+  const packed = { ...payload, state: { ...payload.state, turn_planning: compactNestedRecords(extra.planning), text_dictionary: extra.text_dictionary }, questions: compactNestedRecords(extra.questions) };
   return Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(payload)) ? packed : payload;
 }
 

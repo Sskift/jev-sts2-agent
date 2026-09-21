@@ -75,5 +75,78 @@
     "log": "temp/run32-capacity-checks.log"
   },
   "scope": "One complete captured payoff request accepted by Jev, not a whole-turn or full-run success. The offline call sent no game action. Resume requires the same native fingerprint and no pending command.",
-  "runtime_loaded": false
+  "runtime_loaded": false,
+  "full_pipeline": {
+    "recorded_at": "2026-09-21T02:12:06.865Z",
+    "previous_resume": {
+      "file": "temp/run32-resume3-result.json",
+      "sha256": "eed2ebec71a51f12be27c6c6c97b98b2a049e9d6d2170488638229062bfb6704"
+    },
+    "previous_preparation_bytes": 93808,
+    "final_request_bytes": [
+      {
+        "phase": "turn_payoff",
+        "bytes": 81865
+      },
+      {
+        "phase": "turn_preparation",
+        "bytes": 89249
+      }
+    ],
+    "frozen_source": "e07610b1017dddc6e222acf15e29314cce31f4f4d93a7e151add5618d70e206f",
+    "case": {
+      "file": "run-artifacts/run32-capacity-review/cases/retained-hand.json",
+      "sha256": "60b4d16124d55f068636458c8eab26c9e1c5aa352487cebf3d46e73a6e307255"
+    },
+    "result": {
+      "file": "run-artifacts/run32-capacity-review/results/retained-hand/nested-records/1/summary.json",
+      "sha256": "cc1043fc6f0f46fb3979512641e9b0fdccf1b6c7afbb29e9556d4a947b43443c"
+    },
+    "calls": 89,
+    "model": "typesafe/jev-1.13-20260917",
+    "sequence": [
+      {
+        "kind": "play_card",
+        "name": "Rage+",
+        "card_id": "RAGE"
+      },
+      {
+        "kind": "play_card",
+        "name": "Strike",
+        "card_id": "STRIKE_IRONCLAD",
+        "target": 2
+      },
+      {
+        "kind": "play_card",
+        "name": "Pommel Strike+",
+        "card_id": "POMMEL_STRIKE",
+        "target": 1
+      }
+    ],
+    "coverage": {
+      "inspected_prefixes": 4096,
+      "enumerated_plans": 382,
+      "selected_plans": 64,
+      "first_action_variants": 22,
+      "search_truncated": true,
+      "candidate_selection_truncated": true,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Stops at observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "eligible_plans": 135,
+      "assessed_plans": 135,
+      "distinct_allocations": 106,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 5
+    },
+    "usage": {
+      "input_tokens": 2264966,
+      "output_tokens": 4112,
+      "cost_usd": 0.095128572
+    },
+    "validation": {
+      "passed": 57,
+      "log": "temp/run32-nested-capacity-checks.log"
+    },
+    "change": "Recursively share repeated record arrays in planning definitions and derived/knowledge/history/intent domains. Keep existing encoded tables atomic; decode preserves nested targets, action order, nulls and zero values. Current observation presentation remains separately controlled.",
+    "scope": "Complete current-state decision pipeline returned a valid ordered plan without game commands. Bounded search still reports truncation; this proves request execution, not best strategy or combat victory."
+  }
 }
