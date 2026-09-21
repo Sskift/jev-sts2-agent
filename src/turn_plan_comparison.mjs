@@ -86,8 +86,9 @@ export function planComparisonQuestions(pairs, valueInstructions, compareSurviva
         }
       }],
       [`comparison_${index}`, {
-        type: 'choice', instructions: `${location} ${valueInstructions}`,
-        criteria: { plan_a: 'Choose complete plan A.', plan_b: 'Choose complete plan B.' }
+        type: 'choice', instructions: `${location} ${valueInstructions} Choose no_clear_difference when the available evidence does not establish an overall advantage for either plan, including equivalent outcomes or unresolved tradeoffs. Do not invent a preference merely because two plans were offered. Uncertainty alone does not erase a supported advantage in survival, progress, lasting effects or resource costs.`,
+        criteria: { plan_a: 'Complete plan A has the supported overall advantage.', plan_b: 'Complete plan B has the supported overall advantage.',
+          no_clear_difference: 'The available evidence does not establish an overall advantage for either complete plan.' }
       }]
     ];
     return compareSurvival ? questions : questions.slice(1);
@@ -98,12 +99,12 @@ export function resolvePlanComparisons(pairs, answers, compareSurvival = true) {
   return pairs.map((pair, index) => {
     const survival = answers?.[`survival_${index}`], value = answers?.[`comparison_${index}`];
     if (compareSurvival && (survival?.type !== 'choice' || !['plan_a', 'plan_b', 'no_clear_difference'].includes(survival.choice))
-      || value?.type !== 'choice' || !['plan_a', 'plan_b'].includes(value.choice)) {
+      || value?.type !== 'choice' || !['plan_a', 'plan_b', 'no_clear_difference'].includes(value.choice)) {
       throw new Error('Jev returned an invalid turn-plan comparison');
     }
     const selectionBasis = !compareSurvival || survival.choice === 'no_clear_difference' ? 'overall_value' : 'survival_constraint';
     const selected = selectionBasis === 'overall_value' ? value : survival;
-    return { selected: pair[selected.choice === 'plan_a' ? 0 : 1].value,
+    return { selected: selected.choice === 'no_clear_difference' ? null : pair[selected.choice === 'plan_a' ? 0 : 1].value,
       options: { plan_a: pair[0].value, plan_b: pair[1].value },
       selection_basis: selectionBasis,
       survival_assessment: compareSurvival ? survival : null, value_assessment: value,

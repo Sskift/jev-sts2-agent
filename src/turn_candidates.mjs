@@ -139,7 +139,8 @@ export function balancePlanPreference(pair, forward, reverse) {
   const normalize = (result, options) => typeof result === 'string'
     ? { selected: result, value_assessment: { choice: result === options[0].value ? 'plan_a' : 'plan_b' } } : result;
   const a = normalize(forward, pair), b = normalize(reverse, [...pair].reverse());
-  if (![a, b].every(r => pair.some(p => p.value === r?.selected))) throw new Error('Invalid finalist comparison');
+  if (![a, b].every(r => pair.some(p => p.value === r?.selected)
+    || r?.selected === null && r.value_assessment?.choice === 'no_clear_difference')) throw new Error('Invalid finalist comparison');
   const average = field => {
     const first = distribution(a[field]), second = distribution(b[field]);
     return { plan_a: ((first.plan_a || 0) + (second.plan_b || 0)) / 2,
@@ -151,10 +152,12 @@ export function balancePlanPreference(pair, forward, reverse) {
   const survivalAdvantage = survival && Math.abs(survival.plan_a - survival.plan_b) > 1e-9
     && Math.max(survival.plan_a, survival.plan_b) > survival.no_clear_difference;
   const chosen = survivalAdvantage ? survival : value;
+  const hasPreference = Math.abs(chosen.plan_a - chosen.plan_b) > 1e-9
+    && Math.max(chosen.plan_a, chosen.plan_b) > chosen.no_clear_difference;
   const total = chosen.plan_a + chosen.plan_b;
-  return { candidates: pair.map(p => p.value), preference_support: { [pair[0].value]: total ? chosen.plan_a / total : 0.5,
-    [pair[1].value]: total ? chosen.plan_b / total : 0.5 },
-    selection_basis: survivalAdvantage ? 'balanced_survival_constraint' : 'balanced_overall_value',
+  return { candidates: pair.map(p => p.value), preference_support: { [pair[0].value]: hasPreference && total ? chosen.plan_a / total : 0.5,
+    [pair[1].value]: hasPreference && total ? chosen.plan_b / total : 0.5 },
+    selection_basis: !hasPreference ? 'no_supported_difference' : survivalAdvantage ? 'balanced_survival_constraint' : 'balanced_overall_value',
     value_distribution: value, survival_distribution: survival,
     order_disagreement: a.selected !== b.selected, selected_by_order: [a.selected, b.selected] };
 }
@@ -162,6 +165,8 @@ export function balancePlanPreference(pair, forward, reverse) {
 /** Finalists meet in both orders. Average aligned distributions before ranking;
  * a narrow 51/49 reversal must not cancel an opposing 99/1 preference. This is
  * preference support among the finalists, never a calibrated correctness score.
+ * Explicit no-difference judgments remain neutral instead of being renormalized
+ * into a preference from their residual A/B probabilities.
  */
 export async function compareFinalists(finalists, incumbent, compare, instruction, context) {
   const unique = [...new Map([...finalists, incumbent].map(item => [item.value, item])).values()];
@@ -183,5 +188,5 @@ export async function compareFinalists(finalists, incumbent, compare, instructio
   return { selected: ranked[0].value, audit: { comparisons: pairs.length, preference_support: Object.fromEntries(support), balanced_pairs: balanced,
     order_disagreements: balanced.filter(r => r.order_disagreement).map(({ candidates, selected_by_order }) => ({ candidates, selected_by_order })),
     tied_at_top: ranked.filter(item => Math.abs(support.get(item.value) - support.get(ranked[0].value)) < 1e-9).map(item => item.value),
-    interpretation: 'Position-balanced preference support among these finalists only, not correctness or win probability. Independent quality scores and bounded search can still omit a better plan.' } };
+    interpretation: 'Position-balanced preference support among these finalists only, not correctness or win probability. An explicit no-supported-difference result contributes equally to both plans; aggregate ties retain the incumbent. Independent quality scores and bounded search can still omit a better plan.' } };
 }

@@ -276,8 +276,8 @@ test('independent two-plan judgments share full state and a missing result commi
         compared += entries.length;
         const assessment = Boolean(full.turn_planning.assessments);
         assert.equal(assessment ? full.turn_planning.assessments.length : full.turn_planning.comparisons.length * (full.turn_planning.survival_constraints.length ? 2 : 1), entries.length);
-        for (const [id, question] of entries) assert.deepEqual(Object.keys(question.criteria), assessment ? ['0', '1', '2', '3', '4']
-          : id.startsWith('survival_') ? ['plan_a', 'plan_b', 'no_clear_difference'] : ['plan_a', 'plan_b']);
+        for (const [, question] of entries) assert.deepEqual(Object.keys(question.criteria), assessment ? ['0', '1', '2', '3', '4']
+          : ['plan_a', 'plan_b', 'no_clear_difference']);
         answers = Object.fromEntries(entries.slice(omitAnswer ? 1 : 0).map(([id]) => [id, assessment ? { type: 'score', score: 2 }
           : { type: 'choice', choice: 'plan_a', probabilities: { plan_a: 0.6, plan_b: 0.4 } }]));
       }
@@ -305,6 +305,10 @@ test('survival constraint wins over conflicting ordinary value; unknown or equal
   answers.survival_0.choice = 'no_clear_difference';
   assert.equal(resolvePlanComparisons(pairs, answers)[0].selected, 'a');
   assert.equal(resolvePlanComparisons(pairs, answers)[0].selection_basis, 'overall_value');
+  answers.comparison_0.choice = 'no_clear_difference';
+  assert.equal(resolvePlanComparisons(pairs, answers)[0].selected, null);
+  answers.survival_0.choice = 'plan_b';
+  assert.equal(resolvePlanComparisons(pairs, answers)[0].selected, 'b');
   delete answers.comparison_0;
   assert.throws(() => resolvePlanComparisons(pairs, answers), /invalid turn-plan comparison/);
 });

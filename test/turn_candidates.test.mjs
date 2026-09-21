@@ -80,6 +80,23 @@ test('aligned probabilities preserve a strong preference despite a narrow revers
   assert.equal(survival.preference_support.b, 1);
 });
 
+test('explicit no-difference probability is neutral while supported survival still takes precedence', async () => {
+  const pair = [{ value: 'a' }, { value: 'b' }];
+  const first = { selected: null, value_assessment: { choice: 'no_clear_difference', probabilities: { plan_a: 0.03, plan_b: 0.01, no_clear_difference: 0.96 } } };
+  const second = { selected: null, value_assessment: { choice: 'no_clear_difference', probabilities: { plan_a: 0.01, plan_b: 0.05, no_clear_difference: 0.94 } } };
+  const result = balancePlanPreference(pair, first, second);
+  assert.deepEqual(result.preference_support, { a: 0.5, b: 0.5 });
+  assert.equal(result.selection_basis, 'no_supported_difference');
+  assert.deepEqual(balancePlanPreference([...pair].reverse(), second, first).preference_support, result.preference_support);
+  const finalists = await compareFinalists([pair[0]], pair[1], async () => [first, second], '', {});
+  assert.equal(finalists.selected, 'b', 'No residual probability overrides the existing plan');
+  first.survival_assessment = { choice: 'plan_a', probabilities: { plan_a: 0.9, plan_b: 0.01, no_clear_difference: 0.09 } };
+  second.survival_assessment = { choice: 'plan_b', probabilities: { plan_a: 0.01, plan_b: 0.9, no_clear_difference: 0.09 } };
+  const survival = balancePlanPreference(pair, first, second);
+  assert.equal(survival.selection_basis, 'balanced_survival_constraint');
+  assert.ok(survival.preference_support.a > 0.98);
+});
+
 test('draw continuations expose retained choices and pool access without a predicted hand', () => {
   const state = completeCombat();
   state.combat.hand.push(fixtureCard('DRAW', { cost: 0, description: 'Draw 3 cards. You cannot draw additional cards this turn.', details: { instance_id: 'draw' } }));
