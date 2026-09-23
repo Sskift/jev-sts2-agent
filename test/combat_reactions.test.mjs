@@ -54,6 +54,24 @@ test('non-hits do not invent retaliation; unknown X counts remain unknown; Omnis
   assert.equal(combatForecast(c, card, enemy).uncomputed_reactions.length, 1, 'Thorns does not require unblocked damage');
 });
 
+test('unmodeled damage-triggered Block cannot be reported as exact enemy HP or survival', () => {
+  const s = state(), enemy = s.combat.enemies[0], card = s.combat.hand[0];
+  enemy.hp = 30; enemy.intents = [{ type: 'Attack', damage: 12, hits: 1 }];
+  enemy.powers = [{ id: 'CURL_UP_POWER', amount: 5, description: 'When damaged, rolls up and gains Block. (Once per combat)' }];
+  card.attack_preview = { hits: 1 };
+  const forecast = combatForecast(s.combat, card, enemy);
+  assert.equal(forecast.hp_remaining_if_end_turn, null);
+  assert.equal(forecast.uncomputed_reactions[0].damage_per_trigger, null);
+  const projected = describeTurnProjection(s, [{ kind: 'play_card', card_instance_id: card.details.instance_id, target: 42 }]);
+  assert.equal(projected.known_effects_only.enemies[0].hp, null);
+  assert.equal(projected.known_effects_only.incoming_attack, null);
+  const prepared = prepareModDecision(s);
+  prepared.payload.state.turn_planning = { phase_scope: 'reaction fixture', energy_reservation: {
+    observed_energy: 3, remaining_after_printed_costs: 3, scope: 'fixture', is_observed: false, includes_future_energy_gains: false, steps: []
+  }, conditional_projection: projected };
+  assert.doesNotThrow(() => compileModelRequest(prepared.payload));
+});
+
 test('survival exposure accounts for reactions without prioritizing harmless ordinary mitigation', () => {
   const s = state();
   const constraint = visibleSurvivalConstraints(s).find(item => item.kind === 'potential_lethal_health_loss');

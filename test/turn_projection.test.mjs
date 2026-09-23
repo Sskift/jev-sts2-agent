@@ -38,6 +38,61 @@ test('Mangle turns a fatal current attack into a survivable turn when native att
     'Existing attack multipliers must not be treated as an exact ten-point reduction');
 });
 
+test('known Plow threshold cancels the Ceremonial Beast attack in single and ordered previews', () => {
+  const s = state(), enemy = s.combat.enemies[0];
+  s.combat.player.hp = 44; enemy.hp = 175; enemy.max_hp = 252;
+  enemy.intents = [{ type: 'Attack', damage: 24, hits: 1 }];
+  enemy.powers = [
+    { id: 'PLOW_POWER', amount: 150, description: "The first time Ceremonial Beast's HP reaches 150 or below, it becomes Stunned and loses all its Strength." },
+    { id: 'STRENGTH_POWER', amount: 6 }
+  ];
+  s.combat.hand = [
+    fixtureCard('STRIKE_IRONCLAD', { index: 0, details: { instance_id: 'strike-a' }, target_type: 'AnyEnemy', target_previews: [{ target_id: 42, damage: 6 }] }),
+    fixtureCard('STRIKE_IRONCLAD', { index: 1, details: { instance_id: 'strike-b' }, target_type: 'AnyEnemy', target_previews: [{ target_id: 42, damage: 6 }] }),
+    fixtureCard('STOMP', { index: 2, details: { instance_id: 'stomp' }, name: 'Stomp+', type: 'Attack', cost: 2,
+      description: 'Deal 15 damage to ALL enemies. Costs 1 less 1 Energy for each Attack played this turn.',
+      target_type: 'AllEnemies', target_previews: [{ target_id: 42, damage: 15 }] }),
+    fixtureCard('DEFEND_IRONCLAD', { index: 3, details: { instance_id: 'defend' }, name: 'Defend+', type: 'Skill', cost: 1,
+      description: 'Gain 8 Block.', target_type: 'Self', block: 8 })
+  ];
+  const before = structuredClone(s);
+  const hit = id => ({ kind: 'play_card', card_instance_id: id, target: 42 });
+  const stomp = { kind: 'play_card', card_instance_id: 'stomp' };
+  const defend = { kind: 'play_card', card_instance_id: 'defend' };
+  const crosses = describeTurnProjection(s, [hit('strike-a'), hit('strike-b'), stomp]);
+  assert.equal(crosses.known_effects_only.enemies[0].hp, 148);
+  assert.equal(crosses.known_effects_only.incoming_attack, 0);
+  assert.equal(crosses.known_effects_only.hp_if_ending, 44);
+  assert.equal(crosses.known_effects_only.threshold_reactions[0].source_id, 'PLOW_POWER');
+  assert.deepEqual(crosses.known_effects_only.enemies[0].power_changes.map(change => [change.power_id, change.after_declared_actions.min]),
+    [['STRENGTH_POWER', 0], ['PLOW_POWER', 0]]);
+  assert.deepEqual(crosses.omitted_effects, []);
+  const misses = describeTurnProjection(s, [hit('strike-a'), stomp, defend]);
+  assert.equal(misses.known_effects_only.enemies[0].hp, 154);
+  assert.equal(misses.known_effects_only.hp_if_ending, 28);
+  assert.deepEqual(s, before);
+  enemy.hp = 154;
+  const single = combatForecast(s.combat, s.combat.hand[0], enemy);
+  assert.equal(single.hp_remaining_if_end_turn, 44);
+  assert.equal(single.displayed_attacks_after_target_depletion, 0);
+  assert.equal(single.known_threshold_reactions[0].hp_after_known_damage, 148);
+});
+
+test('Shriek threshold stuns without inventing a Strength loss', () => {
+  const s = state(), enemy = s.combat.enemies[0];
+  s.combat.player.hp = 20; enemy.hp = 154;
+  enemy.intents = [{ type: 'Attack', damage: 12, hits: 1 }];
+  enemy.powers = [{ id: 'SHRIEK_POWER', amount: 150,
+    description: "The first time Terror Eel's HP reaches 150 or below, it becomes Stunned." },
+    { id: 'STRENGTH_POWER', amount: 2 }];
+  const card = s.combat.hand[0];
+  const plan = describeTurnProjection(s, [{ kind: 'play_card', card_instance_id: card.details.instance_id, target: 42 }]);
+  assert.equal(plan.known_effects_only.incoming_attack, 0);
+  assert.equal(plan.known_effects_only.hp_if_ending, 20);
+  assert.equal(plan.known_effects_only.threshold_reactions[0].source_id, 'SHRIEK_POWER');
+  assert.deepEqual(plan.known_effects_only.enemies[0].power_changes.map(change => change.power_id), ['SHRIEK_POWER']);
+});
+
 test('unknown attack repetitions never become zero damage or a certain unchanged enemy response', () => {
   const s = state();
   s.combat.hand[0].description = 'Deal 6 damage. Repeat this attack a random number of times.';

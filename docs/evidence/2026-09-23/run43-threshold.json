@@ -1,0 +1,46 @@
+{
+  "run_id": "run-1790173472",
+  "artifact_dir": "run-artifacts/2026-09-23T14-24-29-080Z-e5986048",
+  "formal_result": {
+    "source_step": 250,
+    "screen": "GAME_OVER",
+    "is_victory": false,
+    "act_index": 0,
+    "floor": 17,
+    "score": 221,
+    "ceremonial_beast_hp_before_final_end_turn": 57
+  },
+  "camp_at_step_177": {
+    "hp_before": 30,
+    "max_hp": 91,
+    "rest_healing_available": 27,
+    "original_action": "Smith: Defend to Defend+",
+    "corrected_trigger": "Rest worth at least two thirds of current HP now receives a direct survival review after an initial Smith choice",
+    "offline_replay": "At the same historical snapshot, a new Jev call chose Rest; this replay did not exercise the extra review because its initial choice was already Rest."
+  },
+  "boss_at_step_218": {
+    "player_hp": 44,
+    "ceremonial_beast_hp": 175,
+    "plow_threshold": 150,
+    "incoming_attack": 24,
+    "original_plan": ["Strike", "Stomp+", "Defend+"],
+    "original_conditional_enemy_hp": 154,
+    "original_conditional_player_hp": 28,
+    "omitted_better_plan": ["Strike", "Stomp+", "Strike"],
+    "omitted_plan_known_damage": 27,
+    "old_context_player_hp_for_omitted_plan": 20,
+    "corrected_context_enemy_hp": 148,
+    "corrected_context_incoming_attack": 0,
+    "corrected_context_player_hp": 44,
+    "offline_replay_selected_plan": ["Strike", "Stomp+", "Strike", "End turn"],
+    "offline_replay_input_sha256": "ca29ef305cf2c7b69d22c03132c06e8d8c8b1a5f9aa6f3e5ad62df12ac1ffebe",
+    "offline_replay_model_calls": 24,
+    "scope": "The replay issued no game commands. It demonstrates changed context and decision, not a surviving or winning live run."
+  },
+  "source_of_error": "The native mod exposed PLOW_POWER, threshold 150, live HP and card target previews. The harness summed damage but did not apply the resulting Stun before computing the enemy response.",
+  "recording": {
+    "path": "run-artifacts/boss-1790174174644/act1-boss.mp4",
+    "result_screen": "GAME_OVER",
+    "sent_to_feishu": false
+  }
+}

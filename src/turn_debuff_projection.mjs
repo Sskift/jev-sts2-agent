@@ -13,7 +13,7 @@ function applicationAmount(card, kind) {
 const power = (entity, id) => (entity.powers || []).find(p => p.id === id && (id === 'STRENGTH_POWER'
   ? Number.isFinite(p.amount) && p.amount !== 0 : p.amount > 0));
 const caps = entity => ['INTANGIBLE_POWER', 'SLIPPERY_POWER', 'BUFFER_POWER'].some(id => power(entity, id));
-const modeledPowers = ['SLIPPERY_POWER', 'BUFFER_POWER', 'ARTIFACT_POWER', 'WEAK_POWER', 'VULNERABLE_POWER', 'SLOW_POWER', 'STRENGTH_POWER'];
+const modeledPowers = ['SLIPPERY_POWER', 'BUFFER_POWER', 'ARTIFACT_POWER', 'WEAK_POWER', 'VULNERABLE_POWER', 'SLOW_POWER', 'STRENGTH_POWER', 'PLOW_POWER', 'SHRIEK_POWER'];
 const bounds = values => values.some(v => !Number.isFinite(v)) ? { min: null, max: null }
   : { min: Math.min(...values), max: Math.max(...values) };
 

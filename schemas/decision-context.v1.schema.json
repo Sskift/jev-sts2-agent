@@ -820,7 +820,7 @@
                 "added_if_all_preview_hits_resolve": { "$ref": "#/$defs/conditionalCount" } } } } } },
         "uncomputed_reactions": { "type": "array", "items": { "type": "object", "required": ["source_id", "owner_combat_id", "sequence", "timing", "damage_per_trigger", "preview_hits", "affected_outputs"],
           "properties": { "source_id": { "type": "string" }, "owner_combat_id": { "type": "integer" }, "sequence": { "type": "integer", "minimum": 0 },
-            "timing": { "$ref": "#/$defs/text" }, "damage_per_trigger": { "type": "number", "minimum": 0 }, "preview_hits": { "type": ["integer", "null"], "minimum": 0 },
+            "timing": { "$ref": "#/$defs/text" }, "damage_per_trigger": { "type": ["number", "null"], "minimum": 0 }, "preview_hits": { "type": ["integer", "null"], "minimum": 0 },
             "affected_outputs": { "type": "array", "items": { "$ref": "#/$defs/text" } } } } },
         "omitted_effects": { "type": "array", "items": { "$ref": "#/$defs/text" } },
         "interpretation": { "$ref": "#/$defs/text" }, "scope": { "$ref": "#/$defs/text" }

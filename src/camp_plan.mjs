@@ -35,7 +35,10 @@ export async function decideCamp(state, options, prepared, choose) {
   const survival = payload.state.screen_state.rest_site?.survival_tradeoff;
   const rest = prepared.candidates.get('rest_HEAL');
   const bossNext = survival?.next_room.known_next_is_boss === true;
-  const urgentLowHp = survival?.healing.hp_before <= survival?.healing.effective_hp_gain;
+  // Run 43 reached an ordinary-fight camp at 30 HP and could heal 27, yet
+  // upgraded a basic Defend without reviewing the survival tradeoff. A heal
+  // worth at least two thirds of current HP merits the same direct review.
+  const urgentLowHp = survival?.healing.hp_before <= survival?.healing.effective_hp_gain * 1.5;
   if (initial.request?.id === 'SMITH' && rest && survival?.healing.effective_hp_gain > 0
     && (bossNext || urgentLowHp)) {
     const heal = { action_id: 'rest_HEAL', effect: rest.description, outcome: survival.healing };
@@ -43,7 +46,7 @@ export async function decideCamp(state, options, prepared, choose) {
       upgrade: publicCampTarget(targetDecision.target) };
     const instructions = bossNext
       ? 'The next known room is the revealed boss. Which camp action better serves surviving and winning that fight? Compare the exact immediate HP before/after Rest with the one concrete Smith upgrade, including its chance to be drawn and played in time, current deck, relics, potions and the visible boss rules. A powerful upgrade can beat healing when survival is already secure, while an upgrade cannot help after a lethal turn. Use the complete current state; do not treat the earlier full-menu choice as a fact or assume hidden future rewards.'
-      : 'Rest would add at least as much HP as the player currently has before the next fights. Compare that exact survival buffer with upgrading this ONE actual card. Consider whether the upgrade is likely to be drawn and paid for before the next dangerous attack, bad opening hands, available potions and the visible route. Smith can still be better when its near-term effect reliably prevents more damage than Rest; an upgrade cannot help if the run dies first. Use the complete current state and do not assume hidden encounters or rewards.';
+      : 'Rest would add at least two thirds as much HP as the player currently has before the next fights. Compare that exact survival buffer with upgrading this ONE actual card. Consider whether the upgrade is likely to be drawn and paid for before the next dangerous attack, bad opening hands, available potions and the visible route. Smith can still be better when its near-term effect reliably prevents more damage than Rest; an upgrade cannot help if the run dies first. Use the complete current state and do not assume hidden encounters or rewards.';
     const prefix = bossNext ? 'boss_camp' : 'low_hp_camp';
     const questions = Object.fromEntries([[`${prefix}_forward`, smith, heal], [`${prefix}_reverse`, heal, smith]]
       .map(([id, first, second]) => [id, { type: 'choice', instructions, criteria: { first, second } }]));
@@ -54,7 +57,7 @@ export async function decideCamp(state, options, prepared, choose) {
         return { question: id, action_id: question.criteria[answer.choice].action_id,
           confidence: answer.confidence, probabilities: answer.probabilities };
       });
-      return { action: 'compare_camp_survival', reason: bossNext ? 'revealed_boss_next' : 'rest_at_least_doubles_current_hp', judgments,
+      return { action: 'compare_camp_survival', reason: bossNext ? 'revealed_boss_next' : 'rest_adds_at_least_two_thirds_current_hp', judgments,
         consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
     }));
     comparison = reviewed;

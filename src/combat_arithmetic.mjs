@@ -9,6 +9,17 @@ export { uncomputedDepletionRules } from './combat_depletion.mjs';
 // not a combat simulator: draws, general triggered effects and future choices stay unknown.
 export const intentDamage = enemy => (enemy.intents || []).reduce((sum, intent) => sum + (Number.isFinite(intent.damage) ? intent.damage * (intent.hits || 1) : 0), 0);
 
+// Both native v0.111.0 HP-threshold stun powers expose their threshold in the
+// live counter. The condition needs positive HP loss, not just printed damage.
+export function knownStunThreshold(enemy, hpLoss) {
+  if (!Number.isFinite(hpLoss) || hpLoss <= 0 || enemy.hp - hpLoss <= 0) return null;
+  const power = enemy?.powers?.find(p => ['PLOW_POWER', 'SHRIEK_POWER'].includes(p.id)
+    && Number.isSafeInteger(p.amount) && p.amount > 0
+    && /becomes Stunned(?: and loses all its Strength)?\./i.test(p.description || ''));
+  return power && enemy.hp - hpLoss <= power.amount
+    ? { source_id: power.id, threshold: power.amount, removes_strength: power.id === 'PLOW_POWER' } : null;
+}
+
 // Mangle's live text supplies the temporary amount. An unmodified native
 // attack preview already includes the enemy's current Strength, so removing
 // Strength subtracts that amount from EACH hit (with a zero floor).
@@ -124,16 +135,26 @@ export function combatForecast(combat, card = null, target = null) {
   }) : null;
   const depleted = new Set(areaHits?.filter(preview => preview.hp_depleted).map(preview => preview.target_id));
   if (targetDepleted) depleted.add(target.combat_id);
+  const plowTriggers = reactions.length ? [] : combat.enemies.flatMap(enemy => {
+    const hpLoss = areaHits?.find(hit => hit.target_id === enemy.combat_id)?.hp_loss
+      ?? (enemy.combat_id === target?.combat_id ? hit?.hp_loss : null);
+    const trigger = knownStunThreshold(enemy, hpLoss);
+    return trigger === null ? [] : [{ target_id: enemy.combat_id, source_id: trigger.source_id,
+      threshold: trigger.threshold, hp_after_known_damage: enemy.hp - hpLoss,
+      consequence: trigger.removes_strength ? 'Stunned before the upcoming enemy action; Strength removed'
+        : 'Stunned before the upcoming enemy action', is_observed: false }];
+  });
+  const stunned = new Set(plowTriggers.map(effect => effect.target_id));
   const depletionEffects = combat.enemies.filter(e => depleted.has(e.combat_id)).flatMap(enemy => uncomputedDepletionRules(enemy)
     .map(power => ({ owner_combat_id: enemy.combat_id, source_id: power.id, description: power.description,
       scope: 'HP depletion does not establish removal, canceled intent, or an ended combat. This death/revival hook is not simulated.' })));
   const positioning = projectPositioning(combat, card ? [{ kind: 'play_card', target: target?.combat_id }] : [], depleted);
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
-  let incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
+  let incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id) && !stunned.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
   const strengthLoss = mangleStrengthLoss(card);
-  const reducedIntents = strengthLoss && target && !depleted.has(target.combat_id)
+  const reducedIntents = strengthLoss && target && !depleted.has(target.combat_id) && !stunned.has(target.combat_id)
     ? intentsAfterMangle(combat, target, strengthLoss) : null;
-  const strengthUnresolved = Boolean(strengthLoss && target && !depleted.has(target.combat_id) && !reducedIntents);
+  const strengthUnresolved = Boolean(strengthLoss && target && !depleted.has(target.combat_id) && !stunned.has(target.combat_id) && !reducedIntents);
   if (reducedIntents) incoming += intentDamage({ intents: reducedIntents }) - intentDamage(target);
   const exhausted = card?.id === 'SECOND_WIND' ? (combat.hand || []).filter(other => other.index !== card.index && other.type !== 'Attack') : null;
   const remainingHand = (combat.hand || []).filter(other => other.index !== card?.index && !exhausted?.some(removed => removed.index === other.index));
@@ -196,6 +217,7 @@ export function combatForecast(combat, card = null, target = null) {
     first_hit_hp_loss: target && card ? firstHitHpLoss(card, target)?.hp_loss ?? null : null,
     ...(hit ? { attack_hp_loss: hit.hp_loss, preview_hits: hit.hits } : {}),
     ...(areaHits ? { attack_hp_loss_by_target: areaHits } : {}),
+    ...(plowTriggers.length ? { known_threshold_reactions: plowTriggers } : {}),
     ...(selfHpLoss ? { declared_self_hp_loss: selfHpLoss,
       hp_remaining_after_declared_loss: selfLossPreventable ? null : combat.player.hp - selfHpLoss,
       fatal_from_declared_hp_loss: selfLossPreventable ? null : selfHpLoss >= combat.player.hp } : {}),

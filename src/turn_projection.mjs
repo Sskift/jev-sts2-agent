@@ -1,4 +1,4 @@
-import { attackHpLoss, combatForecast, intentDamage, uncomputedDepletionRules } from './combat_arithmetic.mjs';
+import { attackHpLoss, combatForecast, intentDamage, knownStunThreshold, uncomputedDepletionRules } from './combat_arithmetic.mjs';
 import { projectPositioning } from './combat_positioning.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { describeCardFlow } from './card_flow_projection.mjs';
@@ -73,6 +73,7 @@ export function describeTurnProjection(state, steps) {
     { enemies: resolved, applications: debuffs?.transitions || [], ordered_damage: debuffs?.ordered_damage || [] });
   const lifecycle = describeEffectLifecycle(state, steps);
   const affected = new Set([...(debuffs?.affected_target_ids || []), ...sequence.unknown_targets].filter(id => !resolved.some(e => e.combat_id === id)));
+  for (const reaction of projection.uncomputed_reactions) affected.add(reaction.owner_combat_id);
   const depletionEffects = projection.remaining_enemies.flatMap(enemy => {
     const before = state.combat.enemies.find(e => e.combat_id === enemy.combat_id);
     return enemy.hp <= 0 && before.hp > 0 ? uncomputedDepletionRules(before).map(power => ({ owner_combat_id: enemy.combat_id, source_id: power.id, description: power.description })) : [];
@@ -81,7 +82,7 @@ export function describeTurnProjection(state, steps) {
   // A rounded damage range can leave the enemy certainly alive with the same
   // displayed attack. Its uncertain HP must not erase an independent response.
   // Possible depletion, changed attacks and other unknown modifiers still do.
-  const responseUnresolved = [...affected].some(id => {
+  const responseUnresolved = projection.uncomputed_reactions.length > 0 || [...affected].some(id => {
     const result = debuffs?.enemies.find(e => e.combat_id === id);
     const before = state.combat.enemies.find(e => e.combat_id === id);
     return !result || !(result.hp_remaining.min > 0)
@@ -98,6 +99,7 @@ export function describeTurnProjection(state, steps) {
       block_including_end_turn_gains: depletionEffects.length ? null : projection.block_including_end_turn_gains,
       end_turn_block_gains: projection.end_turn_block_gains,
       end_turn_damage_events: projection.end_turn_damage_events,
+      ...(projection.threshold_reactions.length ? { threshold_reactions: projection.threshold_reactions } : {}),
       incoming_attack: responseUnresolved ? null : projection.incoming_attack_after_prefix,
       enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
         const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
@@ -208,6 +210,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
       || card.id === 'SETUP_STRIKE' && dependency?.applies_after_action
       || ['INFLAME', 'FOOTWORK'].includes(card.id) && dependency?.applies_after_action
       || card.id === 'WHIRLWIND' && Number.isFinite(dependency?.damage_instances)
+      || card.id === 'STOMP' && /^Deal [\d.]+ damage to ALL enemies\. Costs 1 less 1 Energy for each Attack played this turn\.$/i.test(card.description.trim())
       || card.id === 'FRANTIC_ESCAPE' && sandpitOwners.length === 1;
     if (!covered && !/^(?:Deal [\d.]+ damage\.?|Gain [\d.]+ Block\.?)$/i.test(card.description.trim())) unresolved.push(`${card.name}: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed`);
   }
@@ -225,6 +228,21 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
       if (power) power.amount = change.after_declared_actions.min;
       else enemy.powers.push({ id: change.power_id, amount: change.after_declared_actions.min });
     }
+  }
+  const thresholdReactions = [];
+  for (const enemy of combat.enemies) {
+    const before = state.combat.enemies.find(original => original.combat_id === enemy.combat_id);
+    const trigger = knownStunThreshold(before, before.hp - enemy.hp);
+    if (trigger === null || reactions.length || sequence.unknown_targets.includes(enemy.combat_id)
+      || !attackEffects.some(effect => effect.target_id === enemy.combat_id && effect.hp_removed > 0)) continue;
+    // This is a conditional projection from known damage, never a mutation of
+    // the native observation. The actual action must still be confirmed.
+    enemy.powers = enemy.powers.filter(power => power.id !== trigger.source_id
+      && !(trigger.removes_strength && power.id === 'STRENGTH_POWER'));
+    enemy.intents = [];
+    thresholdReactions.push({ target_id: enemy.combat_id, source_id: trigger.source_id, threshold: trigger.threshold,
+      hp_after_known_actions: enemy.hp, consequence: trigger.removes_strength
+        ? 'Stunned before the upcoming enemy action; Strength removed' : 'Stunned before the upcoming enemy action', is_observed: false });
   }
   const end = combatForecast(combat);
   if (sequence.checkpoint) unresolved.push(`Observe after ${sequence.checkpoint.source_id}: ${sequence.checkpoint.reason} No later action or end-turn outcome is promised.`);
@@ -256,7 +274,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     scope: 'Conditional known counter changes, not a survival proof. Sandpit decrements at each enemy turn start and kills at zero, independent of HP or Block. Ordinary unretained hand cards are discarded at turn end; discarded responses need retrieval or a reshuffle before drawing. Card generation and future retrieval are not guaranteed. A checkpoint can still produce a new continuation before ending.'
   }));
   return {
-    scope: 'Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind and Plating/Orichalcum. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint.',
+    scope: 'Conditional arithmetic over the ordered sequence_dependencies, known hit caps, immediate Block/self-loss, Rage, Second Wind, Plating/Orichalcum and exact HP-threshold stun reactions. Not an observed or fully simulated future. Unknown draws, generated/transformed identities, unsupported modifiers, energy gains, death triggers and future enemy choices require observation. End-turn outcomes are not promised across a checkpoint.',
     remaining_enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, name: enemy.name, hp: enemy.hp, block: enemy.block, powers: enemy.powers, visible_attack: enemy.is_alive ? intentDamage(enemy) : 0 })),
     block: reactions.length || sequence.unknown_block ? null : combat.player.block, block_including_end_turn_gains: reactions.length || sequence.unknown_block || sequence.checkpoint ? null : end.block_including_end_turn_gains, end_turn_block_gains: end.end_turn_block_gains,
     hp_after_declared_self_loss: combat.player.hp,
@@ -266,6 +284,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     uncomputed_reactions: reactions,
     uncomputed_death_prevention: end.uncomputed_death_prevention || [],
     attack_effects: attackEffects,
+    threshold_reactions: thresholdReactions,
     uncomputed_turn_end_effects: end.uncomputed_turn_end_effects || [],
     end_turn_damage_events: end.end_turn_damage_events || [],
     loss_deadlines: lossDeadlines,
