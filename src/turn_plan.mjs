@@ -166,6 +166,28 @@ export async function decideTurn(state, options, prepared, choose) {
   const assessPlans = (plans, instructions, extra) => judgePlans(plans, instructions, extra, true);
   async function dispatch(candidate, selectedPlan, cursor) {
     if (!candidate) throw new ContextError('No legal first command in the completed turn plan');
+    if (candidate.request.cmd === 'end_turn'
+      && prepared.candidates.get('end_turn')?.combat_estimate?.fatal_if_end_turn === true) {
+      const potions = [...prepared.candidates].filter(([, action]) => action.request?.cmd === 'use_potion');
+      if (potions.length) {
+        const chosenId = potions.length === 1 ? potions[0][0] : await ask('fatal_potion_rescue',
+          'Ending the turn now is calculated to be fatal. Choose ONE currently legal potion to use first, then observe its actual effect and newly available actions. An uncertain rescue is better than accepting the known lethal enemy response. Compare the potions against the complete current state; do not assume random contents or unobserved effects.',
+          Object.fromEntries(potions.map(([id, action]) => [id, { value: id, label: label(action) }])));
+        const rescue = prepared.candidates.get(chosenId);
+        const rescuePlan = { ...structuredClone(selectedPlan), id: randomUUID(),
+          revision: selectedPlan.revision + 1, steps: [planStep(state, rescue, 'preparation')],
+          cursor: 0, retained_cards: [], status: 'active', review_reasons: [],
+          expected_fingerprint: turnFingerprint(state), end_policy: 'review_after_segment',
+          budget: { initial_energy: state.combat.player.energy,
+            remaining_after_printed_costs: state.combat.player.energy,
+            scope: 'Use a legal potion before an end turn with calculated fatal HP loss; reobserve the actual result before any further action.' } };
+        delete rescuePlan.continuation_intent;
+        trace.push({ stage: 'fatal_potion_rescue', selected: chosenId,
+          end_turn_hp: prepared.candidates.get('end_turn').combat_estimate.hp_remaining_if_end_turn });
+        return { ...rescue, model: 'jev-fatal-potion-rescue', turn_plan: rescuePlan,
+          turn_step: 0, planning_trace: trace, usage, context_metrics: prepared.metrics };
+      }
+    }
     if (candidate.request.cmd === 'end_turn' && prepared.candidates.size > 1) {
       // Phase handoff deserves an actual-state check: a conditional prefix may
       // underestimate a free draw or leave useful resources. This is once at

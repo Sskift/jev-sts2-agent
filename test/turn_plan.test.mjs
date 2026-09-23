@@ -561,3 +561,24 @@ test('end-turn nomination cannot bypass the complete-plan comparison or mutate m
   assert.equal(decision.planning_trace.at(-1).selected, 'end');
   assert.equal(decision.planning_trace.at(-1).audit.order_disagreements.length, 1, 'Pure display-position preference cannot force an extension');
 });
+
+test('a known fatal end turn uses the only legal potion before accepting defeat', async () => {
+  const state = stateWith([], 0);
+  state.combat.player.hp = 6;
+  state.combat.player.potions = [{ slot: 0, id: 'ENTROPIC_BREW', name: 'Entropic Brew',
+    description: 'Fill all your empty potion slots with random potions.', can_use: true,
+    valid_target_ids: [0], usage: 'AnyTime', target_type: 'AnyPlayer' }];
+  sync(state);
+  const memory = new DecisionMemory(); memory.observe(state);
+  memory.data.turn_plan = savedPlan(state, ['end_turn']);
+  const before = structuredClone(memory.data);
+  const decision = await makeModDecisionWithJev(state, { memory, runStrategy: false,
+    apiKey: 'offline', fetchImpl: noModel });
+  assert.equal(prepareModDecision(state).candidates.get('end_turn').combat_estimate.fatal_if_end_turn, true);
+  assert.equal(decision.request.cmd, 'use_potion');
+  assert.equal(decision.request.id, 'ENTROPIC_BREW');
+  assert.equal(decision.turn_plan.steps[0].kind, 'use_potion');
+  assert.equal(decision.turn_plan.end_policy, 'review_after_segment');
+  assert.equal(decision.planning_trace.at(-1).stage, 'fatal_potion_rescue');
+  assert.deepEqual(memory.data, before, 'The potion still needs native dispatch and confirmation');
+});
