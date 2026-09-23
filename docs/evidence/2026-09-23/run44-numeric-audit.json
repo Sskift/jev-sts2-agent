@@ -1,0 +1,32 @@
+{
+  "run_id": "run-1790175430",
+  "artifact_dir": "run-artifacts/2026-09-23T14-57-06-607Z-b797c60b",
+  "formal_result": {
+    "screen": "GAME_OVER",
+    "is_victory": false,
+    "act_index": 0,
+    "floor": 17,
+    "score": 171,
+    "kin_priest_hp_before_final_end_turn": 35
+  },
+  "numeric_reconciliation": {
+    "method": "Replayed the production action-versus-observation audit over saved before-state, selected decision and after-state records; only completed turns and same-turn attack results with finite estimates were comparable.",
+    "comparisons": 83,
+    "mismatches": 0,
+    "completed_end_turn_hp_forecasts": 26,
+    "completed_end_turn_hp_mismatches": 0,
+    "single_target_attack_forecasts_checked_separately": 37,
+    "single_target_attack_forecast_mismatches": 0,
+    "spite_actions_without_numeric_attack_forecast": 3,
+    "scope": "A matching executed action does not establish that unchosen multi-card plans, unknown triggers or future enemy moves were correct."
+  },
+  "strategy_observation": {
+    "shop_purchase": "Howl from Beyond cost 75 gold at floor 8; it appeared in hand repeatedly but was never played before the Act 1 boss loss.",
+    "interpretation": "This run does not supply evidence of a live mod numeric fault or of a new mismatch in the audited harness arithmetic. The unused purchase and insufficient damage/defense deserve separate strategy review."
+  },
+  "recording": {
+    "path": "run-artifacts/boss-1790176038995/act1-boss.mp4",
+    "result_screen": "GAME_OVER",
+    "sent_to_feishu": false
+  }
+}

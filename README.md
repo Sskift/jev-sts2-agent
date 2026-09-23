@@ -108,6 +108,8 @@ Decimillipede 的已核实倒地规则会取消当前攻击，复活则依赖其
 
 条件算术只覆盖已核实的机制。未知触发、随机抽牌、未揭示房间和未来敌人随机动作保持未知；局部数字不能当成完整模拟。命令结果不明确时停止并保留待核对状态，不自动重发。
 
+每次已执行的战斗动作还会把可直接验证的预测与下一份模组状态对照，逐步保存 `estimate-audit.json`，在 `session.json` 汇总检查数与不一致数。不完整的敌方回合、未知伤害和战斗结束动画不会被误判为数值错误。这项审计只覆盖实际执行且可观察的结果；未选择方案的反事实计算仍需用历史局面回放核查。[第 44 局复核](docs/evidence/2026-09-23/run44-numeric-audit.json)中，26 次回合末生命预测和总计 83 个可比较数值均与后续原生观察相符，但首领战仍失败。
+
 ## 历史回放
 
 最新[观察后续接与伤害账目回归](docs/continuation-evaluation.md)使用已接触过的旧局面，记录方案排序、抽牌时的资源与实际开销。这不是新的独立测试集。[知识与规划回归](docs/knowledge-evaluation.md)、[有序依赖结果](docs/sequence-evaluation.md)、[效果时序报告](docs/harness-evaluation.md)继续保留。原始历史存于本机 `run-artifacts/`，不随仓库分发；回放只向 Jev 请求决策，不连接游戏命名管道。冻结同时覆盖代码、schema 与本地 JSON 知识源。
@@ -128,7 +130,7 @@ npm run replay -- replay --split eval/sequence-split.json --output run-artifacts
 
 | 位置 | 职责 |
 |---|---|
-| `src/mod_client.mjs`、`src/mod_loop.mjs` | 模组通信、执行核对与运行记录 |
+| `src/mod_client.mjs`、`src/mod_loop.mjs`、`src/observation_audit.mjs` | 模组通信、执行核对、数值对照与运行记录 |
 | `src/decision_context.mjs`、`src/context_compiler.mjs`、`schemas/` | 状态契约、记忆、统一模型上下文与容量管理 |
 | `src/rule_reference.mjs`、`src/effect_lifecycle.mjs` | 规则关联、效果时序与有效期 |
 | `src/enemy_patterns.mjs`、`src/strategy_knowledge.mjs`、`data/strategy/` | 怪物后继、角色建议、复活与战斗进展 |

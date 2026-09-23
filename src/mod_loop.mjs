@@ -6,6 +6,7 @@ import { makeModDecisionWithJev, prepareModDecision, buildModCandidates } from '
 import { DecisionMemory, ContextError, canonicalObservation } from './decision_context.mjs';
 import { createSession } from './artifacts.mjs';
 import { getJevConfig } from './jev_client.mjs';
+import { auditObservedAction } from './observation_audit.mjs';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const save = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n');
@@ -91,7 +92,8 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
   if (!client) throw new Error('Mod client is required');
   const battle = { sawCombat: false, complete: false, failed: false, playedCards: 0, endedTurns: 0 };
   const { provider, model } = getJevConfig();
-  const summary = { startedAt: new Date().toISOString(), mode: 'mod', decisionProvider: provider, decisionModel: model, artifactDir, steps: 0, battle };
+  const summary = { startedAt: new Date().toISOString(), mode: 'mod', decisionProvider: provider, decisionModel: model, artifactDir, steps: 0, battle,
+    numericAudit: { checked: 0, mismatches: 0 } };
   const memory = new DecisionMemory({ file: memoryFile });
   const previous = memory.data.run_progress;
   const progress = summary.run = previous?.failed || previous?.complete ? {} : previous || {};
@@ -200,6 +202,17 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       await sleep(intervalMs);
       const after = await client.state({ includePileDetails: true });
       save(path.join(directory, 'after-state.json'), after);
+      if (response.ok) {
+        const audit = auditObservedAction(current, decision, after);
+        if (audit) {
+          save(path.join(directory, 'estimate-audit.json'), audit);
+          summary.numericAudit.checked += audit.comparisons.length;
+          if (audit.mismatch) {
+            summary.numericAudit.mismatches += audit.comparisons.filter(item => !item.matches).length;
+            logger(JSON.stringify({ step, numericAudit: audit }));
+          }
+        }
+      }
       await snapshot(directory, 'after');
       if (!response.ok && response.error === 'TIMEOUT' && decision.request.cmd === 'end_turn') {
         const observed = observedEndTurnSelection(memory.data.pending, after);
