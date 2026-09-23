@@ -203,6 +203,23 @@ test('a paid card rated marginal needs a second look against keeping the gold', 
   assert.equal(await compareShopCardWithSaving(state, options, prepared, initial, () => { throw new Error('No comparison needed'); }), initial);
 });
 
+test('a marginal paid card with a split buy-versus-save judgment preserves the removal budget', async () => {
+  const state = shop(), prepared = prepareModDecision(state);
+  const initial = { ...prepared.candidates.get('buy_card_0'), candidate_id: 'buy_card_0',
+    usage: { input_tokens: 100 } };
+  const options = { strategyAssessment: { options: [{ action_id: 'buy_card_0',
+    probabilities: { 0: 0.13, 1: 0.6, 2: 0.25, 3: 0.02 } }] } };
+  const decision = await compareShopCardWithSaving(state, options, prepared, initial, async (_s, _o, p) => ({
+    ...p.parseResult({ answers: {
+      card_forward: { type: 'choice', choice: 'second', probabilities: { first: 0.49, second: 0.51 } },
+      card_reverse: { type: 'choice', choice: 'second', probabilities: { first: 0.45, second: 0.55 } }
+    } }), usage: { input_tokens: 100 }
+  }));
+  assert.equal(decision.request.cmd, 'proceed');
+  assert.equal(decision.shop_card_comparison.consensus_action_id, null);
+  assert.equal(decision.shop_card_evidence.reason, 'marginal_purchase_without_comparison_consensus');
+});
+
 test('an Act 1 shop exit explicitly compares available first Attacks with saving gold', async () => {
   const state = shop();
   state.decision_context.master_deck = [strike('s0'), strike('s1')];

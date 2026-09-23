@@ -62,11 +62,16 @@ export async function compareShopCardWithSaving(state, options, prepared, decisi
       consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
   } });
   options.onPlanningDecision?.(comparison);
-  const changed = comparison.consensus_action_id === 'proceed';
+  // A marginal-rated paid addition needs agreement across both orders to
+  // spend gold. If the comparison splits, retain the gold so the subsequent
+  // removal-versus-exit review can still consider a permanent cut.
+  const changed = comparison.consensus_action_id !== decision.candidate_id;
   return { ...decision, ...(changed ? { ...saving, candidate_id: 'proceed', model: comparison.model,
     confidence: undefined, probabilities: undefined } : {}),
     initial_shop_card_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence,
       probabilities: decision.probabilities }, shop_card_comparison: comparison,
+    ...(changed && comparison.consensus_action_id === null
+      ? { shop_card_evidence: { reason: 'marginal_purchase_without_comparison_consensus' } } : {}),
     usage: { input_tokens: (decision.usage?.input_tokens || 0) + (comparison.usage?.input_tokens || 0),
       output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0) } };
 }
