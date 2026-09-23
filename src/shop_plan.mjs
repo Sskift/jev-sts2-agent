@@ -2,6 +2,7 @@ import { ContextError, groupCards } from './decision_context.mjs';
 import { compileModelRequest } from './context_compiler.mjs';
 import { removableCard, shopEconomy } from './shop_context.mjs';
 import { publicShopRemoval, shopRemovalBasis } from './shop_plan_state.mjs';
+import { lookupRule } from './rule_reference.mjs';
 
 // One conditional Choice, rather than a paid Score for every removable card.
 // The following existing option assessment compares this concrete cut with buys.
@@ -70,22 +71,43 @@ export async function compareShopCardWithSaving(state, options, prepared, decisi
       output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0) } };
 }
 
-// Before leaving an Act 1 shop with no added Attack, put the real damage
-// options beside saving gold. The model may still save or choose removal next.
+// Before leaving or spending away an Act 1 Attack opportunity, compare the
+// concrete first-damage options. The model may still keep its original choice.
 export async function compareShopFirstAttack(state, options, prepared, decision, choose) {
-  if (state.screen !== 'SHOP' || decision.request?.cmd !== 'proceed'
-    || state.decision_context?.act_index !== 0
+  if (state.screen !== 'SHOP' || state.decision_context?.act_index !== 0
     || state.decision_context.master_deck.some(card => card.type === 'Attack' && card.rarity !== 'Basic')) return decision;
   const buys = (state.shop?.cards || []).filter(card => card.is_stocked && card.card_type === 'Attack'
     && card.cost <= state.shop.player_gold && prepared.candidates.has(`buy_card_${card.index}`));
-  if (!buys.length) return decision;
-  const alternatives = [{ action_id: 'proceed', effect: prepared.candidates.get('proceed').description,
-    gold_after: state.shop.player_gold, deck_count_after: state.decision_context.master_deck.length },
+  if (!buys.length || buys.some(card => `buy_card_${card.index}` === decision.candidate_id)) return decision;
+  const leaving = decision.request?.cmd === 'proceed';
+  const transaction = shopEconomy(state, groupCards(state.decision_context.master_deck), prepared.candidates)
+    .transactions.find(item => item.action_id === decision.candidate_id);
+  const spentGoldAfter = transaction?.gold_after ?? (decision.request?.cmd === 'shop_remove_card'
+    ? state.shop.player_gold - state.shop.card_removal.cost : null);
+  if (!leaving && (spentGoldAfter === null || !buys.some(card => card.cost > spentGoldAfter))) return decision;
+  const alternatives = [{ action_id: decision.candidate_id, effect: decision.description,
+    gold_after: leaving ? state.shop.player_gold : spentGoldAfter,
+    resource_horizon: leaving ? 'Current gold carries forward; current stock is lost.'
+      : decision.request.cmd === 'shop_buy_potion' ? 'One consumable potion use.'
+        : decision.request.cmd === 'shop_buy_card' ? 'Permanent card added to future draws.'
+          : decision.request.cmd === 'shop_remove_card' ? 'Permanent removal of one owned card.'
+            : 'Persistent relic effect.',
+    ...(decision.request?.cmd === 'shop_remove_card' && options.shopRemovalPlan
+      ? { target: publicShopRemoval(options.shopRemovalPlan) } : {}) },
+  ...(!leaving && prepared.candidates.has('proceed') ? [{ action_id: 'proceed',
+    effect: prepared.candidates.get('proceed').description,
+    gold_after: state.shop.player_gold,
+    resource_horizon: 'Current gold carries forward; current stock is lost.' }] : []),
   ...buys.map(card => ({ action_id: `buy_card_${card.index}`,
     effect: prepared.candidates.get(`buy_card_${card.index}`).description,
     gold_after: state.shop.player_gold - card.cost,
-    deck_count_after: state.decision_context.master_deck.length + 1 }))];
-  const instructions = 'This Act 1 deck still has no added non-Basic Attack. Compare leaving with the gold against buying ONE of these exact available Attacks. Basic or upgraded attacks, other damage effects, relics and potions may already provide enough damage; an Attack is not mandatory. Assess first-cycle damage, energy, draw dilution, each price, current HP, visible threats and the need to save for removal or later offers. A weak or redundant Attack should lose to saving; an efficient first Attack may prevent repeated enemy turns. Do not assume future card offers. Choose the best complete tradeoff.';
+    deck_count_after: state.decision_context.master_deck.length + 1,
+    ...(Number.isInteger(lookupRule('cards', card.card_id)?.hit_count)
+      ? { wiki_base_hits_per_play: lookupRule('cards', card.card_id).hit_count } : {}),
+    resource_horizon: 'Permanent card added to future draws; use depends on drawing and paying its energy cost.' }))];
+  const boss = state.decision_context.map?.boss;
+  const bossAdvice = prepared.payload.state.strategy_knowledge?.encounter?.find(note => note.enemy_id === boss?.id)?.advice;
+  const instructions = `This Act 1 deck still has no added non-Basic Attack. Compare the proposed shop action, carrying gold forward when offered, and buying ONE of these exact available Attacks. Leaving forfeits this stock; the proposed spend would make at least one Attack unaffordable. Basic or upgraded attacks, other damage effects, relics and potions may already provide enough damage; an Attack is not mandatory. Compare permanent repeated value with one-time value, first-cycle damage, energy, draw dilution, each price, current HP, revealed boss, and the need for removal or later gold. Wiki base hit counts are static; live effects take priority. A weak or redundant Attack should lose; an efficient first Attack may prevent repeated enemy turns. Do not assume future card offers. ${bossAdvice ? `Revealed boss ${boss.name}: ${bossAdvice} ` : ''}Choose the best complete tradeoff.`;
   const questions = Object.fromEntries([['first_attack_forward', alternatives],
     ['first_attack_reverse', [...alternatives].reverse()]].map(([id, ordered]) => [id,
     { type: 'choice', instructions, criteria: Object.fromEntries(ordered.map((item, index) => [`option_${index}`, item])) }]));
@@ -105,10 +127,10 @@ export async function compareShopFirstAttack(state, options, prepared, decision,
   } });
   options.onPlanningDecision?.(comparison);
   const selectedId = comparison.consensus_action_id;
-  const selected = selectedId && selectedId !== 'proceed' ? prepared.candidates.get(selectedId) : null;
+  const selected = selectedId && selectedId !== decision.candidate_id ? prepared.candidates.get(selectedId) : null;
   return { ...decision, ...(selected ? { ...selected, candidate_id: selectedId, model: comparison.model,
     confidence: undefined, probabilities: undefined } : {}),
-    initial_shop_exit_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence,
+    first_attack_initial_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence,
       probabilities: decision.probabilities }, shop_first_attack_comparison: comparison,
     usage: { input_tokens: (decision.usage?.input_tokens || 0) + (comparison.usage?.input_tokens || 0),
       output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0) } };

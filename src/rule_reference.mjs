@@ -36,7 +36,7 @@ function project(category, row) {
   const identity = { id: row.id, name: row.name };
   if (category === 'cards') return { ...identity,
     base_rules: clean(row.description), ...(row.upgrade_description ? { upgraded_rules: clean(row.upgrade_description) } : {}),
-    ...pick(row, ['type', 'target', 'keywords', 'tags', 'spawns_cards']),
+    ...pick(row, ['type', 'target', 'hit_count', 'keywords', 'tags', 'spawns_cards']),
     base_energy_cost: row.is_x_cost ? 'X' : row.cost,
     ...(row.star_cost !== null ? { base_star_cost: row.is_x_star_cost ? 'X' : row.star_cost } : {}),
     ...pick(row, ['vars', 'upgrade']) };

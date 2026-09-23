@@ -228,6 +228,20 @@ test('an Act 1 shop exit explicitly compares available first Attacks with saving
   assert.equal(decision.candidate_id, 'buy_card_1');
   assert.equal(decision.shop_first_attack_comparison.consensus_action_id, 'buy_card_1');
   assert.equal(decision.usage.input_tokens, 200);
+  state.shop.cards.push({ index: 2, card_id: 'TAUNT', card_name: 'Taunt', card_type: 'Skill',
+    description: 'Gain 6 Block. Apply 1 Vulnerable.', energy_cost: 1, cost: 90, is_stocked: true });
+  const withSupport = prepareModDecision(state);
+  const support = { ...withSupport.candidates.get('buy_card_2'), candidate_id: 'buy_card_2',
+    usage: { input_tokens: 100 } };
+  const comparedSpend = await compareShopFirstAttack(state, {}, withSupport, support, async (_s, _o, p) => {
+    assert.deepEqual(Object.values(p.payload.questions.first_attack_forward.criteria).map(value => value.action_id),
+      ['buy_card_2', 'proceed', 'buy_card_0', 'buy_card_1']);
+    return { ...p.parseResult({ answers: {
+      first_attack_forward: { type: 'choice', choice: 'option_2' },
+      first_attack_reverse: { type: 'choice', choice: 'option_1' }
+    } }), usage: { input_tokens: 100 } };
+  });
+  assert.equal(comparedSpend.candidate_id, 'buy_card_0');
   state.decision_context.master_deck.push(fixtureCard('POMMEL_STRIKE', { type: 'Attack', rarity: 'Common' }));
   state.decision_context.player.deck_count = 3;
   assert.equal(await compareShopFirstAttack(state, {}, prepared, leaving, () => { throw new Error('No comparison needed'); }), leaving);

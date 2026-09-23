@@ -102,6 +102,14 @@ test('complete requests include local references and compression preserves every
   assert.equal(buildRuleReference({ screen: 'MENU' }), null);
 });
 
+test('base multi-hit count stays attached to the versioned card rule', () => {
+  const rules = buildRuleReference(stateWith({ shop: { cards: [
+    { card_id: 'TWIN_STRIKE' }, { card_id: 'CONFLAGRATION' }
+  ] } }));
+  assert.equal(rules.entries.cards.find(card => card.id === 'TWIN_STRIKE').hit_count, 2);
+  assert.equal(rules.entries.cards.find(card => card.id === 'CONFLAGRATION').hit_count, 4);
+});
+
 test('typed identities join upcoming encounters and offered entities through the same retrieval registry', () => {
   const state = completeCombat();
   state.decision_context.map.boss = { id: 'VANTOM_BOSS', name: 'Vantom' };
