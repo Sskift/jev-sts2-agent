@@ -1,0 +1,640 @@
+{
+  "date": "2026-09-21",
+  "run_id": "run-1789995870",
+  "source": "run-artifacts/run38-2026-09-21T13-04-24.716Z/step-0158",
+  "original": {
+    "steps": [
+      {
+        "action": "Taunt",
+        "target": 4
+      },
+      {
+        "action": "Strike",
+        "target": 1
+      },
+      {
+        "action": "Strike",
+        "target": 3
+      }
+    ],
+    "known_effects": {
+      "block": 6,
+      "hp_if_ending": 74,
+      "hp_loss_if_ending": 6,
+      "block_including_end_turn_gains": 6,
+      "end_turn_block_gains": [],
+      "end_turn_damage_events": [],
+      "incoming_attack": 12,
+      "enemies": [
+        {
+          "combat_id": 1,
+          "hp": 15,
+          "block": 0,
+          "hp_removed": 6,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 2,
+          "hp": 19,
+          "block": 0,
+          "hp_removed": 0,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 3,
+          "hp": 12,
+          "block": 0,
+          "hp_removed": 6,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 4,
+          "hp": 20,
+          "block": 0,
+          "hp_removed": 0,
+          "block_removed": 0,
+          "power_changes": [
+            {
+              "power_id": "VULNERABLE_POWER",
+              "before": 0,
+              "after_declared_actions": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "omitted": []
+  },
+  "updated": {
+    "steps": [
+      {
+        "action": "Taunt",
+        "target": 3
+      },
+      {
+        "action": "Strike",
+        "target": 3
+      },
+      {
+        "action": "Strike",
+        "target": 3
+      }
+    ],
+    "known_effects": {
+      "block": 6,
+      "hp_if_ending": 80,
+      "hp_loss_if_ending": 0,
+      "block_including_end_turn_gains": 6,
+      "end_turn_block_gains": [],
+      "end_turn_damage_events": [],
+      "incoming_attack": 6,
+      "enemies": [
+        {
+          "combat_id": 1,
+          "hp": 21,
+          "block": 0,
+          "hp_removed": 0,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 2,
+          "hp": 19,
+          "block": 0,
+          "hp_removed": 0,
+          "block_removed": 0,
+          "power_changes": []
+        },
+        {
+          "combat_id": 3,
+          "hp": 0,
+          "block": 0,
+          "hp_removed": 18,
+          "block_removed": 0,
+          "power_changes": [
+            {
+              "power_id": "VULNERABLE_POWER",
+              "before": 0,
+              "after_declared_actions": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "combat_id": 4,
+          "hp": 20,
+          "block": 0,
+          "hp_removed": 0,
+          "block_removed": 0,
+          "power_changes": []
+        }
+      ]
+    },
+    "omitted": []
+  },
+  "candidate_audit": {
+    "source": "run-artifacts/run38-2026-09-21T13-04-24.716Z/step-0158",
+    "old_eligible_count": 135,
+    "old_calculated_defeats": 0,
+    "updated": [
+      {
+        "limit": null,
+        "coverage": {
+          "inspected_prefixes": 2341,
+          "enumerated_plans": 806,
+          "selected_plans": 64,
+          "first_action_variants": 13,
+          "search_truncated": false,
+          "candidate_selection_truncated": true,
+          "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Excludes later targets certainly depleted by a fully calculated prefix, and stops after known combat completion or observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+          "adjacent_order_review": {
+            "inspected": 74,
+            "added": 64,
+            "truncated": false
+          },
+          "order_grouping": "same_visible_copies; action_order_targets_and_bound_identities_preserved",
+          "target_concentration_review": {
+            "inspected": 60,
+            "added": 49,
+            "truncated": false
+          },
+          "eligible_plans": 184,
+          "assessment_limit": null,
+          "assessment_selection_truncated": false
+        },
+        "assessed_count": 184,
+        "calculated_defeats": [
+          {
+            "value": "variant_141",
+            "steps": [
+              {
+                "action": "Taunt",
+                "target": 3
+              },
+              {
+                "action": "Strike",
+                "target": 3
+              },
+              {
+                "action": "Strike",
+                "target": 3
+              }
+            ],
+            "hp": 80,
+            "enemies": [
+              {
+                "combat_id": 1,
+                "hp": 21,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              },
+              {
+                "combat_id": 2,
+                "hp": 19,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              },
+              {
+                "combat_id": 3,
+                "hp": 0,
+                "block": 0,
+                "hp_removed": 18,
+                "block_removed": 0,
+                "power_changes": [
+                  {
+                    "power_id": "VULNERABLE_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 1,
+                      "max": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "combat_id": 4,
+                "hp": 20,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              }
+            ],
+            "omitted_effects": []
+          }
+        ]
+      },
+      {
+        "limit": 24,
+        "coverage": {
+          "inspected_prefixes": 2341,
+          "enumerated_plans": 806,
+          "selected_plans": 64,
+          "first_action_variants": 13,
+          "search_truncated": false,
+          "candidate_selection_truncated": true,
+          "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Excludes later targets certainly depleted by a fully calculated prefix, and stops after known combat completion or observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+          "adjacent_order_review": {
+            "inspected": 74,
+            "added": 64,
+            "truncated": false
+          },
+          "order_grouping": "same_visible_copies; action_order_targets_and_bound_identities_preserved",
+          "target_concentration_review": {
+            "inspected": 60,
+            "added": 49,
+            "truncated": false
+          },
+          "eligible_plans": 184,
+          "assessment_limit": 24,
+          "assessment_selection_truncated": true
+        },
+        "assessed_count": 24,
+        "calculated_defeats": [
+          {
+            "value": "variant_141",
+            "steps": [
+              {
+                "action": "Taunt",
+                "target": 3
+              },
+              {
+                "action": "Strike",
+                "target": 3
+              },
+              {
+                "action": "Strike",
+                "target": 3
+              }
+            ],
+            "hp": 80,
+            "enemies": [
+              {
+                "combat_id": 1,
+                "hp": 21,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              },
+              {
+                "combat_id": 2,
+                "hp": 19,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              },
+              {
+                "combat_id": 3,
+                "hp": 0,
+                "block": 0,
+                "hp_removed": 18,
+                "block_removed": 0,
+                "power_changes": [
+                  {
+                    "power_id": "VULNERABLE_POWER",
+                    "before": 0,
+                    "after_declared_actions": {
+                      "min": 1,
+                      "max": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "combat_id": 4,
+                "hp": 20,
+                "block": 0,
+                "hp_removed": 0,
+                "block_removed": 0,
+                "power_changes": []
+              }
+            ],
+            "omitted_effects": []
+          }
+        ]
+      }
+    ]
+  },
+  "replay": {
+    "input_sha256": "ae722ef7424b1778a420abeea40048917df32983ecb87fcec3344131594830cc",
+    "calls": 26,
+    "responses": 26,
+    "reported_cost_usd": 0.021740123999999996,
+    "candidate_coverage": {
+      "inspected_prefixes": 2341,
+      "enumerated_plans": 806,
+      "selected_plans": 64,
+      "first_action_variants": 13,
+      "search_truncated": false,
+      "candidate_selection_truncated": true,
+      "scope": "Current legal card/potion commands, explicit upgrade targets and known order/energy constraints. Excludes later targets certainly depleted by a fully calculated prefix, and stops after known combat completion or observation checkpoints. Does not assume newly playable commands, generated cards or hidden outcomes. Candidate sampling is structural, not a damage or build heuristic.",
+      "adjacent_order_review": {
+        "inspected": 74,
+        "added": 64,
+        "truncated": false
+      },
+      "order_grouping": "same_visible_copies; action_order_targets_and_bound_identities_preserved",
+      "target_concentration_review": {
+        "inspected": 60,
+        "added": 49,
+        "truncated": false
+      },
+      "eligible_plans": 184,
+      "assessment_limit": 24,
+      "assessment_selection_truncated": true,
+      "assessed_plans": 24,
+      "distinct_allocations": 15,
+      "allocation_grouping": "same_visible_copies; bound_preparation_identities_preserved",
+      "compared_plans": 4
+    },
+    "order_disagreements": [
+      {
+        "candidates": [
+          "variant_104",
+          "keep"
+        ],
+        "selected_by_order": [
+          "variant_104",
+          "keep"
+        ]
+      }
+    ],
+    "scope": "One full production replay with only pre-cutoff state and memory. No game command, holdout or parallel paid gameplay. Local calculations are conditional, not observed alternate outcomes; no win-rate or causal claim."
+  },
+  "checks_passed": 38,
+  "checkpoint": {
+    "floor": 13,
+    "turn": 2,
+    "hp": 58,
+    "energy": 1,
+    "pending": null
+  },
+  "source_files": [
+    {
+      "path": "temp/run38-target-candidate-pool.json",
+      "sha256": "f18b173e341d3dc7ea53c02f2b1e2f241ada2577e6c5eaf0b2ee25d96145aaf9"
+    },
+    {
+      "path": "temp/run38-target-coverage-audit.json",
+      "sha256": "c84dee78fc5e47fe1c7ffe4224278efa65c7cbec4fc2d51d1618859c210fd6d5"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/step-0158/before-state.json",
+      "sha256": "29b0dbf5db21f6d7530491f9694181d83d4bf8892483e37ea6fb792111741350"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/step-0158/decision.json",
+      "sha256": "187328f5b0f534f92fcd937a8ec8239c2bbb9a14385c0b76cff3ded6bdcc99a3"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/continuation-stop-native.json",
+      "sha256": "e6f512778b0c680e089ee08afce9026f6cf488f98d0b65ae22316fea89aebd0f"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/continuation-stop-memory.json",
+      "sha256": "2c96eb3adea63aa2f02bfa621c8b0fa506a8634eb8910dc2cf5a20f846dbb35e"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/cases/run38-four-wrigglers.json",
+      "sha256": "0465740ab40d2a9d283308f2d3c004e0b518c52095fb36b306c325bf19e1ca99"
+    },
+    {
+      "path": "src/turn_candidates.mjs",
+      "sha256": "2b54013e64c99960569616676faa79555892606614741f4b9d1c85534bc0b548"
+    },
+    {
+      "path": "src/turn_plan_refinement.mjs",
+      "sha256": "250b318a89f24033324223cad460cd7cd80239190b93299b8fb079d16cfc808a"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/decision.json",
+      "sha256": "ce5b0d46744d2c5e445467dab7cdf4b6e9e882c6a05af2a6bd2d067d9cc3512d"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-1.json",
+      "sha256": "e5d88b102c7fde02c876d167893d406a24495aa7bc457ee869c27a56e131c5c0"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-10.json",
+      "sha256": "2c640989b0e4cf6bb52fae9f7a47ce45db5c4e65cc6c443e408417064bb0e9b1"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-11.json",
+      "sha256": "abc8fc5d15896d39c0930889ad383173b201a34699c02ea27c05b5dd6ed646ea"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-12.json",
+      "sha256": "9523138d2a1e0d1abb11d04291d4c8efb25819cb9b59dffa66f5f876ed06be61"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-13.json",
+      "sha256": "23b92fbf664683cb37d50a56cd0dcd1a0dd07be89a542f5494bf64deb71fdc2b"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-14.json",
+      "sha256": "691ffd262b80594b8f0c1adde5aba3dcf1c20f81b3861e88f857a64af7715e25"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-15.json",
+      "sha256": "12e642599268028af8ed0161b6e860912b6016603478ff195e94d14acad2e378"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-16.json",
+      "sha256": "1261236a1580d7f7b3bd6f90e3abee2b7e05cd56e54cde0d103ff851eb67fe79"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-17.json",
+      "sha256": "229ee82fb03dd551842e59b35d9759a8b684230323544ad76a141ebe1bc56898"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-18.json",
+      "sha256": "2e0a6b4adf74d3e10123dffe1bb5615910b56f103f20fd5a1c728b88ad4b1a35"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-19.json",
+      "sha256": "66ac0b1f54226af3a6a153f6a1e0b793a207522141fa644d859ce02610f2015b"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-2.json",
+      "sha256": "819aaa4785d7d26f8eb80711c2b3ffa5d77042a5919c2e7e73f8dae6e0b1d5e4"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-20.json",
+      "sha256": "d2b0ea23cf58da56304774e94ae8a2c6f8ba33e7f370f2358e208e8c095052e0"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-21.json",
+      "sha256": "2ea2e574e877e487071f8d684078dff9ba53d405284d472c42d7901115a46cc4"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-22.json",
+      "sha256": "9601d742eaf983095d1ac78e26aae8697215d8fc042d2ee09274b16a36f8ab1a"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-23.json",
+      "sha256": "3886f451fbe42c87627ca4b6b583ee9cdbc528b353287487f2e8e08bdb3a54da"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-24.json",
+      "sha256": "6555b47fc4db162d0da8234cf09b5e9ea968c290e49f09236f16e3f5191b7fc8"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-25.json",
+      "sha256": "c0d2d0700de8e8628a962c1527c05ae2c6b32f82d4024515848353391d70847f"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-26.json",
+      "sha256": "d175034e768e8a5ff90dd0ec9fee9eb4f2b51626af62529f76128079d535d836"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-3.json",
+      "sha256": "323c2b019f237de0006c958199d94b39e68be0a9ccc718de544a9b159aaf9eda"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-4.json",
+      "sha256": "9b85226de323ff81cf41b074617341e6cb533db129f67d30c675c0dc4b5f6122"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-5.json",
+      "sha256": "b0c3029fbb1f5c5c979bcf902135a397c415700645877f550cce8cf90b828ed6"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-6.json",
+      "sha256": "f6365a287dcfcf44dcf534cbd1631fbcdb260a082294fecef09dc379fe6999b5"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-7.json",
+      "sha256": "984ecb5d912932084ffad840e25220235465458e8d4e3820e4f148de5c3d3bcc"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-8.json",
+      "sha256": "71c3c0539cdf4e24f00ec86cfbf597fc1a99ffbe2c7085f0200e103f8ded5cb8"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/request-9.json",
+      "sha256": "f76f9cd8d185c488cb67ea131f74a988f3445f4652f9c394962fc9a9b191fd36"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-1.json",
+      "sha256": "8405d448063804259d14574562e1859d5402ac7e214b4be2989c571b370ae603"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-10.json",
+      "sha256": "76b09ff3458c6d2070cc3f495888c73a7e8f7cb4fcf68ac6925120cb218ddbba"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-11.json",
+      "sha256": "2cde45c5fd3976a41b8bfa4ac09ea9c132a668444f1047fca5fe48e0ef4c16e2"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-12.json",
+      "sha256": "d5e70ccf6ba9301b14b45828240bb90c753a57b34b1d6a3e04d876c7ef22f629"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-13.json",
+      "sha256": "d6b447ad07ace4a5452771609df7747be75217ed18c7b1d7494d52a83da38459"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-14.json",
+      "sha256": "1b569c5a1df51ab39baead4478e4f2276a46ba238fe2dc815e9b958950e353c5"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-15.json",
+      "sha256": "fa215280a2a8428ebdd9ce0699c017696338a14e6e36c7ddb3e0d0dfff4b3db9"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-16.json",
+      "sha256": "318185cf4979bc8c39a134eec3ae31f5a482b0ba818365bf42ca81301a820e03"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-17.json",
+      "sha256": "b86ed5ec9d267097fd6fe71e405b5389fe9d9d6558e06c8d1c5e9a62c83fdb55"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-18.json",
+      "sha256": "845897b6103e4a1154c08cab39400d57e5295a3b8b41f82cd398378dd23ee9c1"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-19.json",
+      "sha256": "ed02cf5b5ccb10904dccd2b029c6a111837ace411b4963abfbd3284301369cab"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-2.json",
+      "sha256": "ab6d117454e7605ef1db762445ae4a6ef817c7d3ba9f55dfe2516aeae73a023d"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-20.json",
+      "sha256": "ad9ce34f6fe1c16dd4be7d07b5f93f62677fe5b67a03d80b15fa71e72f279462"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-21.json",
+      "sha256": "ebde84baa83c7ad9fe3ec2e87878f0a031f87e20678951eb3b97e367cb5e3c50"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-22.json",
+      "sha256": "5b7ccdd1175d1d0f74aac7d3aaa439187f786bc7eb5467145d08da9ac5add5ef"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-23.json",
+      "sha256": "37b95b39dc463cbfd2b87dcbca44f7c661ea2a134626b083b793c16d765d956c"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-24.json",
+      "sha256": "c78898195586b796eac65bcfc53e3067015b4a5e252d3d7ea23a2e6d1ab2ed14"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-25.json",
+      "sha256": "c04fd37383a8a194dd7b75a4d6eb357688f172878909808fdb0825b61ba59181"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-26.json",
+      "sha256": "aac71f72b97e70bc6bba4ad5c22fede83a26b8dc2b93580dc48a275dc77239e0"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-3.json",
+      "sha256": "893534324b718a71894bacce95ae10ec49d3600e6872f68012dc0df087f143ee"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-4.json",
+      "sha256": "bce9456cfcdb24f380dbbdc699a21b49f41f4ad7ef339ddcfd0c7a9eb3beac17"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-5.json",
+      "sha256": "1f062879cbbb82dccf97522261424e7b6d1f25eb2c142664ea6ea3ae459d1985"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-6.json",
+      "sha256": "953422966e14fbbfa3657870709d6802be5a7a64d31b19571d8bb20fdba7c59c"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-7.json",
+      "sha256": "ae2c931df6626c238d45b944e523761117822a5cc564967ec2b937dcdbbe59a4"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-8.json",
+      "sha256": "17b7e02b554510e47bf636f52ff8cd010fb97b46007b16dd7fbf6f82cb642ec3"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/response-9.json",
+      "sha256": "54596432570703de92ea92e8d89878cf112ac6728d3de67ff7153c052b0c5523"
+    },
+    {
+      "path": "run-artifacts/run38-target-review/results/run38-four-wrigglers/target-coverage/1/summary.json",
+      "sha256": "a7e385c052ab647cc19f2156577af34db895d4b1643fb26fad8d16e876b37419"
+    }
+  ]
+}

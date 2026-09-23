@@ -4,7 +4,7 @@ import { potionEffectFacts } from './potion_effects.mjs';
 import { handUpgradeMode, nextCardKind, preservesPlanDependencies } from './turn_effects.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
-import { independentTurnCandidates, adjacentPlanOrders, compareFinalists, planSignature, planOrderSignature, planAllocation, shortlistPlans, limitPlanAssessments } from './turn_candidates.mjs';
+import { independentTurnCandidates, adjacentPlanOrders, concentratedPlanTargets, compareFinalists, planSignature, planOrderSignature, planAllocation, shortlistPlans, limitPlanAssessments } from './turn_candidates.mjs';
 import { describeContinuation } from './card_flow_projection.mjs';
 import { intentDamage } from './combat_arithmetic.mjs';
 import { ContextError } from './decision_context.mjs';
@@ -140,6 +140,13 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
   }
   plan.candidate_coverage.adjacent_order_review = orderCoverage;
   plan.candidate_coverage.order_grouping = 'same_visible_copies; action_order_targets_and_bound_identities_preserved';
+  const targetCoverage = { inspected: 0, added: 0, truncated: false };
+  for (const steps of concentratedPlanTargets([...alternatives.values()], state, prepared.candidates)) {
+    if (targetCoverage.added >= 96) { targetCoverage.truncated = true; break; }
+    targetCoverage.inspected++;
+    if (add(steps)) targetCoverage.added++;
+  }
+  plan.candidate_coverage.target_concentration_review = targetCoverage;
   // An expensive payoff can crowd out useful defense or setup even when its
   // order is correct. Compare substitutions (including target changes), and
   // offer concrete continuations using released energy. Never reuse one
@@ -222,6 +229,7 @@ export async function refineTurnPlan(state, plan, prepared, comparePairs, assess
   const candidates = limitPlanAssessments(eligible, assessmentLimit);
   plan.candidate_coverage.assessment_limit = assessmentLimit;
   plan.candidate_coverage.assessment_selection_truncated = candidates.length < eligible.length;
+  plan.candidate_coverage.assessment_sampling = 'Preserve the seed, ending and a seed order; reserve at most one third of capped slots for distinct calculated defeat sets without omitted effects or checkpoints, then sample other allocations and orders. These are choices for Jev to judge, not forced kills; limited coverage can still miss a better plan.';
   const judgments = await assessPlans(candidates, 'Assess the overall quality of committing this ordered segment toward winning the run. Evaluate the whole remaining turn, including the ability to continue after an observation; use current rules and available resources, not hypothetical favorable draws.', comparisonState);
   const shortlist = shortlistPlans(candidates, judgments);
   plan.candidate_coverage.assessed_plans = judgments.length;

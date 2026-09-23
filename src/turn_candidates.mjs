@@ -20,6 +20,33 @@ export function* adjacentPlanOrders(plans) {
   }
 }
 
+// A bounded sample of distributed targets can omit every concentrated route.
+// Offer the same ordered resources against each common legal target as well;
+// this adds choices, not a target preference or an execution policy.
+export function* concentratedPlanTargets(plans, state, candidates) {
+  const actions = [...candidates.values()].filter(c => ['play_card', 'use_potion'].includes(c.request.cmd)).map(c => planStep(state, c));
+  const targets = state.combat.enemies.filter(e => e.is_alive && e.hp > 0).map(e => e.combat_id);
+  const identity = step => step.kind === 'play_card' ? `card:${step.card_instance_id}` : `potion:${step.potion_id}:${step.slot}`;
+  const seen = new Set();
+  for (const steps of plans) {
+    const aimed = steps.filter(step => targets.includes(step.target));
+    if (aimed.length < 2) continue;
+    const key = planOrderSignature(steps.map(step => targets.includes(step.target) ? { ...step, target: undefined } : step), state);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    for (const target of targets) {
+      const replacements = aimed.map(step => actions.find(action => identity(action) === identity(step) && action.target === target));
+      if (replacements.some(action => !action)) continue;
+      let index = 0;
+      yield steps.map(step => {
+        if (!targets.includes(step.target)) return structuredClone(step);
+        const action = replacements[index++];
+        return { ...structuredClone(step), target, description: action.description };
+      });
+    }
+  }
+}
+
 // Equivalent visible copies share a resource description, while bindings keep
 // their physical identities. Preserve order for candidate deduplication and
 // ignore it only when assigning distinct-allocation shortlist slots.
@@ -60,6 +87,17 @@ export function limitPlanAssessments(candidates, limit = null) {
   const sortedGroups = [...groups].map(([allocation, items]) => ({ allocation, items: items.toSorted((a, b) => order(a).localeCompare(order(b))) }))
     .sort((a, b) => createHash('sha256').update(a.allocation).digest('hex').localeCompare(createHash('sha256').update(b.allocation).digest('hex')));
   add(sortedGroups.find(group => group.allocation === seed?.allocation)?.items.find(item => item.value !== seed?.value));
+  // Reserve a small part of the same budget for distinct calculated defeats.
+  // Otherwise target sampling can hide all available kills. Unknown effects
+  // and observation checkpoints cannot establish this coverage class.
+  const defeats = new Map();
+  for (const item of candidates.toSorted((a, b) => order(a).localeCompare(order(b)))) {
+    const preview = item.label.conditional_preview;
+    if (!preview?.known_effects_only || preview.omitted_effects?.length || preview.sequence_dependencies?.checkpoint) continue;
+    const ids = preview.known_effects_only.enemies.filter(enemy => enemy.hp === 0).map(enemy => enemy.combat_id).sort((a, b) => a - b);
+    if (ids.length && !defeats.has(JSON.stringify(ids))) defeats.set(JSON.stringify(ids), item);
+  }
+  for (const item of [...defeats.values()].slice(0, Math.floor(limit / 3))) add(item);
   for (let offset = 0; selected.size < limit; offset += 2) {
     let added = false;
     for (const group of sortedGroups) for (const item of group.items.slice(offset, offset + 2)) {

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { completeCombat, fixtureCard } from './fixtures/context.mjs';
 import { buildModCandidates } from '../src/mod_decision.mjs';
-import { independentTurnCandidates, adjacentPlanOrders, compareFinalists, balancePlanPreference, planOrderSignature, planAllocation, shortlistPlans, limitPlanAssessments } from '../src/turn_candidates.mjs';
+import { independentTurnCandidates, adjacentPlanOrders, concentratedPlanTargets, compareFinalists, balancePlanPreference, planOrderSignature, planAllocation, shortlistPlans, limitPlanAssessments } from '../src/turn_candidates.mjs';
 import { inspectSequence } from '../src/turn_sequence.mjs';
 import { describeContinuation, compareContinuationResources } from '../src/card_flow_projection.mjs';
 import { describePlanAlternative } from '../src/turn_plan_refinement.mjs';
@@ -55,6 +55,33 @@ test('assessment spending cap retains the seed, ending and changed order without
   assert.deepEqual(candidates, before);
   assert.equal(limitPlanAssessments(candidates), candidates);
   assert.throws(() => limitPlanAssessments(candidates, 1), /limit/);
+});
+
+test('target coverage offers shared legal targets and keeps distinct calculated defeats within the same assessment cap', () => {
+  const state = completeCombat(); state.combat.player.energy = 3;
+  state.combat.enemies[0].hp = 18;
+  state.combat.enemies.push({ ...structuredClone(state.combat.enemies[0]), combat_id: 43 });
+  state.combat.hand = [0, 1].map(index => fixtureCard('STRIKE_IRONCLAD', { index, damage: 6,
+    description: 'Deal 6 damage.', can_play: true, target_type: 'AnyEnemy',
+    target_previews: [42, 43].map(target_id => ({ target_id, damage: 6 })), details: { instance_id: `attack${index}` } }));
+  state.combat.hand.push(fixtureCard('TAUNT', { index: 2, type: 'Skill', block: 6, damage: 0,
+    description: 'Gain 6 Block. Apply 1 Vulnerable.', can_play: true, target_type: 'AnyEnemy',
+    details: { instance_id: 'debuff' } }));
+  const choices = buildModCandidates(state), original = structuredClone(state);
+  const seed = ['card_2_target_42', 'card_0_target_43', 'card_1_target_42', 'end_turn'].map(id => planStep(state, choices.get(id)));
+  const concentrated = [...concentratedPlanTargets([seed], state, choices)];
+  assert.deepEqual(concentrated.map(steps => steps.slice(0, -1).map(s => s.target)), [[42, 42, 42], [43, 43, 43]]);
+  assert.ok(concentrated.every(steps => reserveSequence(state, steps)));
+  const entry = (value, steps) => ({ value, allocation: planAllocation(steps, state), label: describePlanAlternative(state, steps) });
+  const entries = [entry('keep', seed), entry('end', [seed.at(-1)]), ...concentrated.map((steps, i) => entry(`focus${i}`, steps))];
+  for (let i = 0; i < 20; i++) entries.push({ ...entry(`other${i}`, [seed[0], seed.at(-1)]), allocation: `other${i}` });
+  const sampled = limitPlanAssessments(entries, 9);
+  assert.equal(sampled.length, 9);
+  assert.ok(sampled.some(p => p.value === 'focus0')); assert.ok(sampled.some(p => p.value === 'focus1'));
+  assert.deepEqual(limitPlanAssessments([...entries].reverse(), 9), sampled);
+  const restricted = new Map([...choices].filter(([id]) => id !== 'card_2_target_43'));
+  assert.equal([...concentratedPlanTargets([seed], state, restricted)].length, 1, 'All commands must legally accept the shared target');
+  assert.deepEqual(state, original);
 });
 
 test('independent search offers distinct first actions and orders, preserves identities and stops at draws', () => {
