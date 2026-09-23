@@ -59,11 +59,26 @@ export async function compareRewardSkip(state, options, prepared, decision, choo
       consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
   } });
   options.onPlanningDecision?.(comparison);
-  const changed = comparison.consensus_action_id === skipId;
+  const chosenRating = rated.find(item => item?.action_id === decision.candidate_id);
+  const takeSupport = comparison.judgments.map(({ question, probabilities }) => {
+    const alternative = Object.entries(questions[question].criteria)
+      .find(([, criterion]) => criterion.action_id === decision.candidate_id)?.[0];
+    return probabilities?.[alternative];
+  });
+  // Jev can pick the card in both orderings while assigning only a slight
+  // edge over Skip. An addition with no clear usefulness rating needs stronger
+  // evidence than that; otherwise every close reward slowly bloats the deck.
+  const weakAddition = !needsFirstAttack && comparison.consensus_action_id === decision.candidate_id
+    && chosenRating?.useful_or_better_probability < 0.6
+    && takeSupport.every(value => Number.isFinite(value) && value >= 0.5 && value < 0.75);
+  const changed = comparison.consensus_action_id === skipId || weakAddition;
   return { ...decision, ...(changed ? { ...skip, candidate_id: skipId, model: comparison.model,
     confidence: undefined, probabilities: undefined } : {}),
     initial_reward_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence,
       probabilities: decision.probabilities }, reward_skip_comparison: comparison,
+    ...(weakAddition ? { reward_skip_evidence: { reason: 'weak_incremental_value',
+      useful_or_better_probability: chosenRating.useful_or_better_probability,
+      take_support_by_order: takeSupport } } : {}),
     usage: { input_tokens: (decision.usage?.input_tokens || 0) + (comparison.usage?.input_tokens || 0),
       output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0) } };
 }

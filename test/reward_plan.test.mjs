@@ -107,3 +107,24 @@ test('an Act 1 reward without an Attack still skips a unanimously marginal addit
   assert.equal(decision.request.cmd, 'reward_skip_card');
   assert.ok(Math.abs(decision.reward_skip_assessment.card_judgments[0].marginal_or_worse_probability - 0.8) < 1e-9);
 });
+
+test('a low-value reward needs more than a slight pairwise edge over Skip', async () => {
+  for (const [forward, reverse, expected] of [[0.64, 0.73, 'reward_skip_card'],
+    [0.85, 0.88, 'reward_choose_card']]) {
+    const state = reward();
+    state.decision_context.master_deck.push(fixtureCard('POMMEL_STRIKE', { rarity: 'Common', type: 'Attack',
+      details: { instance_id: 'existing-attack', upgrade_level: 0 } }));
+    state.decision_context.player.deck_count = state.decision_context.master_deck.length;
+    const decision = await makeModDecisionWithJev(state, { runStrategy: false, apiKey: 'offline',
+      fetchImpl: async (_url, request) => {
+        const payload = parseJevRequest(request.body);
+        if (payload.questions.option_0) return reply({ option_0: { type: 'score', score: 1.47,
+          probabilities: { 0: 0.07, 1: 0.42, 2: 0.47, 3: 0.04 } } });
+        if (payload.questions.next_action) return reply({ next_action: { type: 'choice', choice: 'reward_0_card_0' } });
+        return reply({ reward_forward: { type: 'choice', choice: 'first', probabilities: { first: forward, second: 1 - forward } },
+          reward_reverse: { type: 'choice', choice: 'second', probabilities: { first: 1 - reverse, second: reverse } } });
+      } });
+    assert.equal(decision.request.cmd, expected);
+    assert.equal(Boolean(decision.reward_skip_evidence), expected === 'reward_skip_card');
+  }
+});

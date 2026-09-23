@@ -54,7 +54,7 @@ npm start                # 会操作游戏，仅在需要开始或继续实战�
 
 商店先由 Jev 条件选择具体要删的一张牌，再比较删牌、购物与留钱。JSON 列出实际价格、已有副本、购物后余额、能否同时删牌及失去删牌机会的购买；升级、附魔和 Eternal 分别处理。独立评分偏向边际却仍被选中的付费牌，会再与留金离店直接比较。第一幕若卡组尚无非基础攻击牌，准备离店或一笔支出将使当前攻击牌买不起时，还会与实际可买的攻击牌双向比较。购买会耗掉删牌预算，或准备在仍能删牌时直接离店，也会追加交换选项顺序的比较；意见冲突保留原选择。确认买下删牌服务后，核对原生选牌界面并续接同一目标。攻略提供条件性建议，不固定删 Strike，也不强制删牌。[历史回放](docs/shop-removal.md)已出现选择变化，但仍有低置信度与顺序分歧，尚无胜率改善证据。
 
-战后牌不再默认拿取。Jev 先评估每张牌相对于不加牌的增益；若同一奖励所有候选更可能属于恶化或边际收益，就按该评估跳过，否则对提议拿取的牌与跳过再作双向直接比较。第一幕只要尚无非基础攻击牌，低独立评分也先进入直接比较，避免把需要补伤害的牌组机械瘦身；JSON 明示当前攻击牌缺口和可选攻击牌，但不把牌型计数当成伤害总量。达到眼前伤害需求后，再对多余攻击牌提高增益要求。[Jorbs 的近期战斗任务框架](https://sts2.untapped.gg/en/articles/slay-the-spire-deckbuilding-strategy-solving-the-spire-with-jobs)与[Baalorlord 的抽牌循环分析](https://sts2.untapped.gg/en/articles/core-deckbuilding-concepts-in-slay-the-spire)是这里的定性依据；第 38 局的[开发回放与后续反例](docs/reward-choices.md)表明跳牌决策确实改变，但尚不是通关率证据。
+战后牌不再默认拿取。Jev 先评估每张牌相对于不加牌的增益；若同一奖励所有候选更可能属于恶化或边际收益，就按该评估跳过，否则对提议拿取的牌与跳过再作双向直接比较。如果所选牌的独立“有用或更好”概率不足 60%，而正反顺序比较中拿牌的支持率都不足 75%，按低证据增益跳过，并记录这项依据。第一幕只要尚无非基础攻击牌，低独立评分仍进入直接比较，且不触发该低证据跳过规则，避免把急需补伤害的牌组机械瘦身；JSON 明示当前攻击牌缺口和可选攻击牌，但不把牌型计数当成伤害总量。这里的阈值是保守决策规则，不是已校准的胜率；获得更多对局证据后应复核。达到眼前伤害需求后，再对多余攻击牌提高增益要求。[Untapped 的构筑指南](https://sts2.untapped.gg/en/guides/how-to-build-a-strong-deck)、[Jorbs 的近期战斗任务框架](https://sts2.untapped.gg/en/articles/slay-the-spire-deckbuilding-strategy-solving-the-spire-with-jobs)与[Baalorlord 的抽牌循环分析](https://sts2.untapped.gg/en/articles/core-deckbuilding-concepts-in-slay-the-spire)是这里的定性依据；第 38 局的[开发回放与后续反例](docs/reward-choices.md)表明跳牌决策确实改变，但尚不是通关率证据。
 
 已揭示的首领会在选牌和商店阶段附带对应的条件性攻略：例如 [Vantom 的 Slippery](https://www.pcgamer.com/games/roguelike/slay-the-spire-2-vantom/) 会让多段攻击的命中次数成为明确的备战因素。攻略只说明机制和选牌目的；实际层数、伤害和出招以模组实时状态为准。
 
