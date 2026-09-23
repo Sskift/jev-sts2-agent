@@ -22,6 +22,7 @@ export function buildStrategyKnowledge(state) {
   const general = notes.general.filter(note => !note.phases || note.phases.some(phase => phases.includes(phase)));
   const revealedBossId = context.map?.boss?.id;
   const revealedBossNote = notes.encounters?.[revealedBossId]
+    || notes.encounters?.[notes.boss_encounter_ids?.[revealedBossId]]
     || notes.encounters?.[revealedBossId?.replace(/_BOSS$/, '')];
   const encounter = state.combat ? state.combat.enemies.flatMap(enemy => notes.encounters?.[enemy.id]
     ? [{ enemy_id: enemy.id, ...notes.encounters[enemy.id] }] : [])

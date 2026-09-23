@@ -7,13 +7,15 @@ import { lookupRule } from '../src/rule_reference.mjs';
 import { buildStrategyKnowledge, encounterProgress, describeCombatProgress, describeEnemyOutlook } from '../src/strategy_knowledge.mjs';
 import { completeCombat, withContext } from './fixtures/context.mjs';
 
-test('a revealed Vantom boss is available during drafting and again in combat', () => {
+test('revealed Vantom and Kin bosses are available during drafting; Vantom remains known in combat', () => {
   const reward = withContext({ screen: 'REWARD', rewards: { can_skip: true, rewards: [] } });
   reward.decision_context.map.boss = { id: 'VANTOM_BOSS', name: 'Vantom' };
   const preparation = buildStrategyKnowledge(reward).encounter;
   assert.equal(preparation[0].enemy_id, 'VANTOM_BOSS');
   assert.equal(preparation[0].role, 'revealed_act_boss');
   assert.match(preparation[0].advice, /Slippery/);
+  reward.decision_context.map.boss = { id: 'THE_KIN_BOSS', name: 'The Kin' };
+  assert.match(buildStrategyKnowledge(reward).encounter[0].advice, /Kin Followers/);
   const combat = completeCombat();
   combat.combat.enemies[0].id = 'VANTOM';
   assert.match(buildStrategyKnowledge(combat).encounter[0].advice, /multi-hit/);
