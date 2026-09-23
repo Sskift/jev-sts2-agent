@@ -1,4 +1,5 @@
 import { displayedAttackTotal } from './combat_observation.mjs';
+import { reviewedEffectScope, supportedNativePreviewRule } from './rule_scope.mjs';
 
 // Closed coverage lists: a new active source is uncomputed until reviewed.
 // Native preview modifiers are already incorporated in the observed numbers.
@@ -10,7 +11,7 @@ const enemyPowers = new Set(['ARTIFACT_POWER', 'SLIPPERY_POWER', 'BUFFER_POWER',
 const coveredRelics = new Set(['ORICHALCUM', 'CLOAK_CLASP', 'BURNING_BLOOD', 'BAG_OF_PREPARATION', 'LOST_COFFER',
   'SWORD_OF_STONE', 'NUTRITIOUS_OYSTER', 'CAPTAINS_WHEEL', 'POCKETWATCH', 'HAPPY_FLOWER']);
 const plainRule = /^(?:Deal [\d.]+ damage(?: to ALL enemies)?(?: (?:\d+ times|twice|thrice))?\.|Gain [\d.]+ Block\.)$/i;
-const supportedSingle = card => plainRule.test(card.description.trim())
+const supportedSingle = card => plainRule.test(card.description.trim()) || supportedNativePreviewRule(card)
   || card.id === 'MANGLE' && /^Deal [\d.]+ damage\. Enemy loses \d+ Strength this turn\.$/i.test(card.description.trim())
   || card.id === 'BREAKTHROUGH' && /^Lose \d+ HP\. Deal [\d.]+ damage to ALL enemies\.$/i.test(card.description.trim())
   || card.id === 'WHIRLWIND' && Number.isSafeInteger(card.attack_preview?.hits)
@@ -20,21 +21,29 @@ const supportedSingle = card => plainRule.test(card.description.trim())
 const outputKinds = ['enemy_hp', 'player_block', 'player_hp', 'enemy_response'];
 export const coverageAffects = (coverage, output) => coverage.uncovered_effects.some(effect => effect.affected_outputs.includes(output));
 
-export function forecastCoverage(combat, card = null, { sequence = false, uncomputedActions = [] } = {}) {
+export function forecastCoverage(combat, card = null, { sequence = false, uncomputedActions = [], playedCards = card ? [card] : [] } = {}) {
   const uncovered = uncomputedActions.map(effect => ({ ...effect, affected_outputs: outputKinds }));
+  const reviewed = [];
   const add = (category, owner, source, reason, affected_outputs = outputKinds) => uncovered.push({ category, owner, source_id: source.id,
     live_rule: source.description || '', reason, affected_outputs });
+  const review = (category, owner, source) => {
+    const scope = reviewedEffectScope(category, source, { owner, playedCards });
+    if (!scope) return false;
+    reviewed.push({ category, owner, source_id: source.id, ...scope });
+    if (scope.affected_outputs.length) add(category, owner, source, scope.interpretation, scope.affected_outputs);
+    return true;
+  };
   for (const power of combat.player.powers || []) if (!previewPowers.has(power.id) && !playerPowers.has(power.id)
     && !((sequence || !card) && power.id === 'TENDER_POWER'))
     add('power', 'player', power, 'Active player effect has no complete numeric adapter.');
   for (const enemy of combat.enemies) {
-    for (const power of enemy.powers || []) if (!previewPowers.has(power.id) && !enemyPowers.has(power.id))
+    for (const power of enemy.powers || []) if (!previewPowers.has(power.id) && !enemyPowers.has(power.id) && !review('powers', enemy.combat_id, power))
       add('power', enemy.combat_id, power, 'Enemy effect or reaction has no complete numeric adapter.');
     for (const intent of enemy.intents || []) if (enemy.is_alive && enemy.hp > 0 && intent.type
       && !['Attack', 'Stun', 'Defend'].includes(intent.type))
       add('intent', enemy.combat_id, { id: intent.type, description: intent.description }, 'Only the displayed intent is observed; this enemy action and its interaction with later actions are not simulated.', ['player_hp', 'enemy_response']);
   }
-  for (const relic of combat.player.relics || []) if (!coveredRelics.has(relic.id))
+  for (const relic of combat.player.relics || []) if (!coveredRelics.has(relic.id) && !review('relics', 'player', relic))
     add('relic', 'player', relic, 'Relic trigger timing or consequences have not been incorporated in this calculation.');
   for (const potion of combat.player.potions || []) if (potion.usage === 'Automatic' && potion.id !== 'FAIRY_IN_A_BOTTLE')
     add('potion', 'player', potion, 'Automatic potion trigger has no numeric adapter.');
@@ -48,8 +57,8 @@ export function forecastCoverage(combat, card = null, { sequence = false, uncomp
       const raw = current.details?.[category] || current[category];
       const source = typeof raw === 'string' ? { id: raw } : raw;
       if (!source?.id || category === 'affliction' && source.id === 'RINGING') continue;
-      const key = `${category}/${source.id}`;
-      if (!seenAttachments.has(key)) add(category, 'player', source, 'Card attachment triggers are not incorporated in this calculation.');
+      const key = JSON.stringify([category, source.id, source.description, source.amount]);
+      if (!seenAttachments.has(key) && !review(`${category}s`, 'player', source)) add(category, 'player', source, 'Card attachment triggers are not incorporated in this calculation.');
       seenAttachments.add(key);
     }
   if (displayedAttackTotal(combat.enemies) === null)
@@ -57,6 +66,7 @@ export function forecastCoverage(combat, card = null, { sequence = false, uncomp
   if (card?.description && !supportedSingle(card))
     add('card', 'player', card, 'Single-card arithmetic does not execute this complete rule; its native previews remain in the current hand.');
   return { status: uncovered.length ? 'incomplete' : 'bounded', uncovered_effects: uncovered,
+    ...(reviewed.length ? { reviewed_dependencies: reviewed } : {}),
     scope: 'Current native rules remain authoritative. Coverage is closed: unrecognized active effects invalidate dependent future totals instead of counting as zero. Bounded arithmetic is still conditional, not a full game simulation.' };
 }
 

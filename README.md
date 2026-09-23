@@ -50,6 +50,8 @@ npm start                # 会操作游戏，仅在需要开始或继续实战�
 
 实时输入包含生命、能量、各牌堆、当前费用和目标预览、药水、遗物、敌人意图、地图及合法动作。本地 [Spire Codex v0.111.0](data/spire-codex/README.md) 补充关联规则；当前原生数值优先于 Wiki 基础数值。
 
+已核实规则按触发时机和受影响字段参与计算：拾取／奖励阶段的遗物不会抹掉无关的当前战斗算术；Permafrost 缺少首次触发标记时，仅使涉及 Power 的方案的格挡与生命结论未知。Entangled 加费与 Slither 本次抽牌随机出的费用直接使用原生值；Territorial 的力量在敌方回合结束后获得。Expect a Fight 保留当前原生格挡，只对前序动作改变的力量追加差值，并处理负力量和 Frail 取整；Wiki 不覆盖当前预览。完整规则不匹配或其他效果尚未计算时仍明确保留未知。[离线规则核对](docs/evidence/2026-09-24/rule-scope.json)使用历史快照、固定版本 Wiki 和同版本原生代码，无游戏命令或模型调用。
+
 [策略知识](data/strategy/README.md) 将攻略建议与原生规则分开：每个组合记录前提和代价，不预设固定流派。怪物图区分固定顺序、条件、随机权重、重复限制和资料缺口；只根据可见意图关联后续可能行动。已提取的生成牌与能力调用补充规则、数量、目的地或作用对象；条件、重复、阶段中断和最终施加结果仍有明确边界。
 
 路线除了各类房间的数量范围，还提供最多五条具体示例，分别体现精英数量、营火、商店和普通战斗机会，并列出同一路径上真实共存的数量与顺序。示例不指定首选路线，也不把问号房当成确定奖励；Jev 仍选择下一节点，后续分支保持开放。
@@ -122,7 +124,7 @@ Decimillipede 的已核实倒地规则会取消当前攻击，复活则依赖其
 node scripts/audit_combat_context.mjs --output run-artifacts/context-audit run-artifacts/<session>
 ```
 
-该命令不连接游戏、不读取密钥、不调用模型。当前核对结果与范围见[事实保留证据](docs/evidence/2026-09-23/harness-fidelity.json)。这项检查不能代替原生提取器核验或模型决策质量评估。
+该命令不连接游戏、不读取密钥、不调用模型。存在已执行命令和动作后状态时，还用当前 Harness 重算该命令，核对可观察的格挡、实际掉血和结束回合生命；动画中间态、未知预测与未选择方案不作为匹配样本。结果与范围见[事实保留证据](docs/evidence/2026-09-23/harness-fidelity.json)和[规则与数值核对](docs/evidence/2026-09-24/rule-scope.json)。这项检查不能代替原生提取器核验或模型决策质量评估。
 
 最新[观察后续接与伤害账目回归](docs/continuation-evaluation.md)使用已接触过的旧局面，记录方案排序、抽牌时的资源与实际开销。这不是新的独立测试集。[知识与规划回归](docs/knowledge-evaluation.md)、[有序依赖结果](docs/sequence-evaluation.md)、[效果时序报告](docs/harness-evaluation.md)继续保留。原始历史存于本机 `run-artifacts/`，不随仓库分发；回放只向 Jev 请求决策，不连接游戏命名管道。冻结同时覆盖代码、schema 与本地 JSON 知识源。
 
@@ -145,7 +147,7 @@ npm run replay -- replay --split eval/sequence-split.json --output run-artifacts
 | `src/mod_client.mjs`、`src/mod_loop.mjs`、`src/observation_audit.mjs` | 模组通信、执行核对、数值对照与运行记录 |
 | `src/decision_context.mjs`、`src/combat_observation.mjs`、`src/context_compiler.mjs`、`schemas/` | 原始战斗事实核对、状态契约、记忆、模型上下文与容量管理 |
 | `src/forecast_coverage.mjs`、`src/combat_arithmetic.mjs` | 条件算术、计算覆盖范围与未知值传播 |
-| `src/rule_reference.mjs`、`src/effect_lifecycle.mjs` | 规则关联、效果时序与有效期 |
+| `src/rule_reference.mjs`、`src/rule_scope.mjs`、`src/effect_lifecycle.mjs` | 规则关联、影响范围、效果时序与有效期 |
 | `src/enemy_patterns.mjs`、`src/strategy_knowledge.mjs`、`data/strategy/` | 怪物后继、角色建议、复活与战斗进展 |
 | `src/turn_plan*.mjs`、`src/turn_sequence.mjs`、`src/turn_projection.mjs` | 有序回合计划、依赖传播、观察断点和有限效果分析 |
 | `src/turn_candidates.mjs` | 独立有序候选、覆盖记录和入围方案复核 |

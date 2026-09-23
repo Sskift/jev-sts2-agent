@@ -35,3 +35,15 @@ test('attack audit skips conditional or unobservable outcomes', () => {
   assert.equal(auditObservedAction(before, { ...decision, combat_estimate: { attack_hp_loss: 9 } },
     { ...after, screen: 'UNKNOWN' }), null);
 });
+
+test('audit compares actual HP removed rather than overkill and waits for stable Block', () => {
+  const decision = { request: { cmd: 'play_card', target: 3 }, combat_estimate: { attack_hp_loss: 50, block_after_card: 5 } };
+  const after = { screen: 'COMBAT', decision_context: { run_id: 'run', combat_id: 'combat' },
+    combat: { is_player_turn: true, turn_number: 1, player: { block: 5 }, enemies: [{ combat_id: 3, hp: 0 }] } };
+  const audit = auditObservedAction(before, decision, after);
+  assert.equal(audit.mismatch, false);
+  assert.equal(audit.comparisons.length, 2);
+  assert.equal(audit.comparisons[1].predicted, 40);
+  after.combat.is_player_actions_disabled = true;
+  assert.equal(auditObservedAction(before, decision, after), null);
+});

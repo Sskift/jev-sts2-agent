@@ -1,10 +1,12 @@
 import { nextCardKind } from './turn_effects.mjs';
 import { lookupRule } from './rule_reference.mjs';
 import { potionEffectFacts } from './potion_effects.mjs';
+import { reviewedEffectScope } from './rule_scope.mjs';
 
 // Public rules: Spire Codex v0.111.0. Precise hook timing was checked against
 // the corresponding native Power classes. Values always come from live state.
 const timing = {
+  TANGLED: { trigger: 'owned_entangled_card_cost_query', expires: 'owner_side_turn_end', consequence: 'energy_cost_increase_already_in_native_cost', detail: 'The native hook adds the current power amount to Entangled cards; do not add it again to observed costs. At the end of the owner side turn the entire power and its Entangled afflictions are removed. Its amount is not a remaining-turn countdown.' },
   THORNS: { trigger: 'before_each_qualifying_damage_instance', expires: 'until_removed', consequence: 'blockable_damage_to_attacker', detail: 'Triggers on powered Attack damage or Omnislice, even when the hit would kill its owner or is fully blocked. Reaction precedes the incoming hit and later actions; end-turn Block is too late.' },
   FLAME_BARRIER: { trigger: 'after_each_incoming_powered_attack_damage_instance', expires: 'opposing_side_turn_end', consequence: 'blockable_damage_to_attacker', detail: 'For the player this persists through the coming enemy attacks. It is not removed at the end of the player action phase.' },
   CONSTRICT: { trigger: 'owner_turn_end_after_early_block', expires: 'applier_death_or_removal', consequence: 'blockable_damage_to_owner', detail: 'Current amount is damage at each owner turn end while its applier survives, in addition to displayed enemy attacks.' },
@@ -57,6 +59,7 @@ export function describeCombatEffects(combat) {
     const pileTrigger = category === 'cards' ? pileTriggers[id] : null;
     const description = entity.description || '';
     const potion = category === 'potions' ? potionEffectFacts(entity) : null;
+    const reviewed = reviewedEffectScope(category, entity, { owner });
     if (!active && !definition && !potion && !temporal.test(description) && !turnEnd.test(description)) continue;
     const expires = potion?.expires_at ?? definition?.expires ?? (pileTrigger ? 'leaves_required_pile' : null);
     effects.push({ source_id: entity.id, category, owner, active,
@@ -66,12 +69,13 @@ export function describeCombatEffects(combat) {
       ...(Number.isFinite(entity.amount) ? { current_amount: entity.amount } : {}),
       live_rule: description, wiki_rule_id: rule ? `${category}/${rule.id}` : null,
       activation: active ? 'already_present' : pileTrigger ? 'enters_required_pile' : category === 'potions' ? 'after_use' : 'after_play',
-      trigger: definition?.trigger ?? (pileTrigger ? 'owner_auto_post_play_phase' : potion ? 'subsequent_matching_card_effects' : turnEnd.test(description) ? 'declared_turn_end' : null), expires,
+      trigger: definition?.trigger ?? reviewed?.trigger ?? (pileTrigger ? 'owner_auto_post_play_phase' : potion ? 'subsequent_matching_card_effects' : turnEnd.test(description) ? 'declared_turn_end' : null), expires,
       ...(definition?.consequence ? { consequence: definition.consequence } : {}),
       ...(definition?.detail ? { timing_detail: definition.detail } : {}),
+      ...(reviewed ? { verified_rule_scope: reviewed } : {}),
       ...(pileTrigger ? { timing_detail: 'This automatic play requires the stated pile condition when the hook resolves. Being in hand or playing the card manually does not establish it. Draw-pile contents do not reveal the top card; automatic-play effects are not simulated.' } : {}),
       ...(potion ? { followup: potion.affected_quantity, amount_after_use: potion.amount, retroactive: false } : {}),
-      timing_coverage: definition || potion || pileTrigger ? 'versioned_rule_adapter' : 'live_rule_only_do_not_assume_no_effect'
+      timing_coverage: definition || potion || pileTrigger || reviewed ? 'versioned_rule_adapter' : 'live_rule_only_do_not_assume_no_effect'
     });
   }
   return { game_version: 'v0.111.0', effects,

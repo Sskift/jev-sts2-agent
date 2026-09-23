@@ -212,7 +212,7 @@ test('complete-plan comparison can replace two separated defenses with one stron
       offered = true;
       assert.equal(target.label.energy_spent, 3);
       assert.equal(state.combat.hand[0].block, 25, 'The current native preview stays intact');
-      assert.equal(target.label.conditional_preview.known_effects_only.block, null, 'An uncomputed scaling rule cannot become a fixed future total');
+      assert.equal(target.label.conditional_preview.known_effects_only.block, 25, 'The native scaling preview remains valid without a preceding Strength change');
     }
     return (target || pair[0]).value;
   }), async plans => plans.map(item => ({ value: item.value, score: isTarget(item) ? 3 : 1 })));

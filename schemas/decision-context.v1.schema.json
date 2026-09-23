@@ -849,6 +849,11 @@
             "trigger": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/text" }] },
             "expires": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/text" }] },
             "consequence": { "$ref": "#/$defs/text" }, "timing_detail": { "$ref": "#/$defs/text" }, "timing_coverage": { "$ref": "#/$defs/text" },
+            "verified_rule_scope": { "type": "object", "additionalProperties": false,
+              "required": ["wiki_rule_id", "trigger", "affected_outputs", "interpretation"],
+              "properties": { "wiki_rule_id": { "type": "string" }, "trigger": { "$ref": "#/$defs/text" },
+                "affected_outputs": { "type": "array", "items": { "enum": ["enemy_hp", "player_block", "player_hp", "enemy_response"] } },
+                "interpretation": { "$ref": "#/$defs/text" } } },
             "followup": { "$ref": "#/$defs/text" }, "amount_after_use": { "type": "number" }, "retroactive": { "const": false }
           }
         } }

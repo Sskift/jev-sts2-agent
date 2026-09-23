@@ -1,6 +1,7 @@
 import { potionEffectFacts } from './potion_effects.mjs';
 import { handUpgradeMode, nextCardKind, slowPercent } from './turn_effects.mjs';
 import { previewHitCount } from './combat_arithmetic.mjs';
+import { strengthBlockCoefficient } from './rule_scope.mjs';
 
 const instance = card => card?.details?.instance_id;
 const amount = (entity, id) => (entity.powers || []).find(p => p.id === id)?.amount || 0;
@@ -152,10 +153,18 @@ export function inspectSequence(state, steps) {
         attacks++;
       }
       if (Number.isFinite(card.block) && card.type !== 'Power') {
-        const range = dexterity === 0 && !unknownDexterity && !repeats ? { min: card.block, max: card.block }
-          : shifted(card.block, dexterity, amount(observed.player, 'FRAIL_POWER') > 0 ? 3 : 1,
-            amount(observed.player, 'FRAIL_POWER') > 0 ? 4 : 1, !unknownDexterity && !repeats);
+        const coefficient = strengthBlockCoefficient(card);
+        const originalStrength = amount(observed.player, 'STRENGTH_POWER');
+        const strengthBlock = coefficient === null ? 0 : coefficient * (Math.max(0, originalStrength + strength) - Math.max(0, originalStrength));
+        const unknownScaling = coefficient !== null && unknownStrength;
+        const delta = dexterity + strengthBlock;
+        const range = delta === 0 && !unknownDexterity && !unknownScaling && !repeats ? { min: card.block, max: card.block }
+          : shifted(card.block, delta, amount(observed.player, 'FRAIL_POWER') > 0 ? 3 : 1,
+            amount(observed.player, 'FRAIL_POWER') > 0 ? 4 : 1, !unknownDexterity && !unknownScaling && !repeats);
         detail.block_per_gain = range;
+        if (coefficient !== null) detail.strength_block_dependency = { coefficient, observed_strength: originalStrength,
+          strength_change_before_action: unknownStrength ? null : strength, block_delta_before_frail: unknownScaling ? null : strengthBlock,
+          source: 'Native ExpectAFight clamps Strength to zero before its multiplier; current Block already contains the observed Strength.' };
         const block = exact(range);
         if (block === null) { unknownBlock = true; card.block = undefined; }
         else card.block = block;

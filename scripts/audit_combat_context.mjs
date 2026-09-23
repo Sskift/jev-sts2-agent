@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { parseArgs } from 'node:util';
+import { parseArgs, isDeepStrictEqual } from 'node:util';
 import { createHash } from 'node:crypto';
-import { prepareModDecision } from '../src/mod_decision.mjs';
+import { prepareModDecision, buildModCandidates } from '../src/mod_decision.mjs';
 import { expandRecordTables } from '../src/decision_context.mjs';
 import { compileModelRequest } from '../src/context_compiler.mjs';
+import { auditObservedAction } from '../src/observation_audit.mjs';
 
 // Offline only: same source-to-packet and final compiler as production;
 // deliberately no client, credentials, memory writes or model/game calls.
@@ -16,6 +17,7 @@ const report = { scope: 'Native combat snapshot → canonical packet → compile
   model_calls: 0, game_commands: 0, sessions: [] };
 for (const directory of positionals) {
   const result = { session: path.basename(directory), snapshots: 0, verified: 0, failures: [],
+    observed_outcomes: { actions: 0, comparisons: 0, fields: {}, mismatches: [] },
     future_estimates: { bounded: 0, incomplete: 0 }, uncovered_sources: {}, max_request_bytes: 0 };
   const hashes = createHash('sha256');
   let sample;
@@ -35,6 +37,22 @@ for (const directory of positionals) {
       if (!receipt) throw new Error('Missing native integrity receipt');
       hashes.update(`${name}:${receipt.native_snapshot_sha256}\n`);
       result.verified++;
+      const decisionFile = path.join(directory, name, 'decision.json'), afterFile = path.join(directory, name, 'after-state.json');
+      if (fs.existsSync(decisionFile) && fs.existsSync(afterFile)) {
+        const saved = JSON.parse(fs.readFileSync(decisionFile, 'utf8'));
+        // Recompute only the action actually dispatched; no model and no replay of commands.
+        const candidate = [...buildModCandidates(native).values()].find(action => isDeepStrictEqual(action.request, saved.request));
+        const audit = candidate && auditObservedAction(native, candidate, JSON.parse(fs.readFileSync(afterFile, 'utf8')));
+        if (audit) {
+          result.observed_outcomes.actions++;
+          for (const comparison of audit.comparisons) {
+            result.observed_outcomes.comparisons++;
+            const field = comparison.field.replace(/enemy_\d+_/, 'enemy_');
+            result.observed_outcomes.fields[field] = (result.observed_outcomes.fields[field] || 0) + 1;
+            if (!comparison.matches) result.observed_outcomes.mismatches.push({ step: name, request: candidate.request, ...comparison });
+          }
+        }
+      }
       result.max_request_bytes = Math.max(result.max_request_bytes, compiled.bytes);
       for (const estimate of Object.values(packet.analysis.action_estimates || {})) {
         result.future_estimates[estimate.calculation_coverage.status]++;
@@ -55,10 +73,11 @@ for (const directory of positionals) {
     result.sample = { source: sample.source, native: `${result.session}.native.json`, request: `${result.session}.request.json` };
   }
   report.sessions.push(result);
-  console.log(JSON.stringify({ session: result.session, snapshots: result.snapshots, verified: result.verified, failures: result.failures.length, max_request_bytes: result.max_request_bytes }));
+  console.log(JSON.stringify({ session: result.session, snapshots: result.snapshots, verified: result.verified, failures: result.failures.length,
+    comparisons: result.observed_outcomes.comparisons, mismatches: result.observed_outcomes.mismatches.length, max_request_bytes: result.max_request_bytes }));
 }
 report.totals = report.sessions.reduce((total, session) => ({ snapshots: total.snapshots + session.snapshots,
   verified: total.verified + session.verified, failures: total.failures + session.failures.length }), { snapshots: 0, verified: 0, failures: 0 });
 fs.writeFileSync(path.join(output, 'audit.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(JSON.stringify({ output, ...report.totals }));
-if (report.totals.failures || !report.totals.snapshots) process.exitCode = 1;
+if (report.totals.failures || !report.totals.snapshots || report.sessions.some(s => s.observed_outcomes.mismatches.length)) process.exitCode = 1;

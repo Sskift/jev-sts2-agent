@@ -7,6 +7,7 @@ import { projectDebuffDependencies, modeledPowerChanges } from './turn_debuff_pr
 import { describeEffectLifecycle } from './effect_lifecycle.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
 import { encounterProgress } from './strategy_knowledge.mjs';
+import { supportedNativePreviewRule } from './rule_scope.mjs';
 
 export function sequenceEnergyBudget(state, steps) {
   const sequence = inspectSequence(state, steps);
@@ -72,7 +73,8 @@ export function describeTurnProjection(state, steps) {
   }).map(result => result.combat_id));
   const projection = projectTurnPrefix(state, steps, { ...sequence, unknown_targets: sequence.unknown_targets.filter(id => !knownResponses.has(id)) },
     { enemies: resolved, applications: debuffs?.transitions || [], ordered_damage: debuffs?.ordered_damage || [] });
-  const coverage = forecastCoverage(state.combat, null, { sequence: true, uncomputedActions: projection.uncomputed_actions });
+  const coverage = forecastCoverage(state.combat, null, { sequence: true, uncomputedActions: projection.uncomputed_actions,
+    playedCards: sequence.entries.map(entry => entry.card).filter(Boolean) });
   const unknownActions = coverageAffects(coverage, 'enemy_hp');
   const unknownResponse = coverageAffects(coverage, 'enemy_response');
   if (coverage.uncovered_effects.length) projection.unresolved_effects.push('Active effects outside numeric coverage invalidate future totals. Read calculation_coverage and the complete current rules.');
@@ -221,7 +223,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     const sandpitOwners = combat.enemies.filter(enemy => enemy.is_alive && enemy.powers?.some(p => p.id === 'SANDPIT_POWER'));
     if (card.id === 'FRANTIC_ESCAPE' && sandpitOwners.length === 1) sandpitOwners[0].powers.find(p => p.id === 'SANDPIT_POWER').amount++;
     const dependency = sequence.analysis.steps.find(s => s.sequence === index);
-    const covered = supportedApplication || card.id === 'RAGE' && Number.isFinite(card.rage_block_per_attack)
+    const covered = supportedApplication || supportedNativePreviewRule(card) || card.id === 'RAGE' && Number.isFinite(card.rage_block_per_attack)
       || card.id === 'ARMAMENTS' && dependency?.upgrades_before_later_actions?.every(id => state.combat.hand.find(c => c.details?.instance_id === id)?.upgrade_preview)
       || card.id === 'SETUP_STRIKE' && dependency?.applies_after_action
       || ['INFLAME', 'FOOTWORK'].includes(card.id) && dependency?.applies_after_action
@@ -229,7 +231,6 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
       || card.id === 'SECOND_WIND' && Number.isFinite(card.block)
       || card.id === 'DISMANTLE' && /^Deal [\d.]+ damage\. If the enemy is Vulnerable, hits twice\.$/i.test(card.description.trim())
       || card.id === 'BREAKTHROUGH' && /^Lose \d+ HP\. Deal [\d.]+ damage to ALL enemies\.$/i.test(card.description.trim())
-      || card.id === 'STOMP' && /^Deal [\d.]+ damage to ALL enemies\. Costs 1 less 1 Energy for each Attack played this turn\.$/i.test(card.description.trim())
       || card.id === 'FRANTIC_ESCAPE' && sandpitOwners.length === 1;
     // An unconditional draw ends the prefix. Its preceding plain damage/Block
     // remains computable; the drawn identities and resulting turn stay unknown.

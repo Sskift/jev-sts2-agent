@@ -1,0 +1,408 @@
+{
+  "recorded_at": "2026-09-23T16:34:28.746Z",
+  "baseline_commit": "2775634",
+  "source_schema_data_sha256": "1dbcd6cb8c3887085893bf8a5804ddf5397d7a90dc88020b66ad6431fbb34123",
+  "model_calls": 0,
+  "game_commands": 0,
+  "method": "Production source-to-packet and final-request verification on actionable historical snapshots. Recompute only the recorded dispatched action, then compare finite forecasts with its saved after-state. HP removal is capped at prior HP. Card outcomes require the same combat/player turn with no ending/disabled flag; end-turn HP requires a later player turn or game over. No game commands or model requests.",
+  "split": {
+    "development": [
+      43,
+      44
+    ],
+    "validation": [
+      19,
+      24,
+      26
+    ],
+    "note": "These validation runs had prior project exposure. This is a rules/transport regression, not a pristine decision-quality holdout. Some snapshots are resumed-session duplicates; they are not independent game outcomes."
+  },
+  "sources": {
+    "wiki": {
+      "url": "https://spire-codex.com/developers",
+      "version": "v0.111.0",
+      "manifest": "data/spire-codex/v0.111.0/manifest.json",
+      "manifest_sha256": "bcb98bf6a5dbc738bb195fe484f3b0ccf981ecd7777a7ff567640e752c383207"
+    },
+    "native": {
+      "version": "v0.111.0",
+      "assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
+      "inspected": [
+        "Pomander.AfterObtained",
+        "NutritiousSoup.AfterObtained",
+        "PrayerWheel.TryModifyRewards",
+        "Permafrost.AfterRoomEntered/AfterCardPlayed",
+        "Slither.AfterCardDrawn",
+        "Entangled",
+        "TangledPower.TryModifyEnergyCostInCombat/AfterSideTurnEnd/AfterRemoved",
+        "TerritorialPower.AfterSideTurnEnd",
+        "ExpectAFight.CanonicalVars/OnUpgrade",
+        "PerfectedStrike.CanonicalVars/OnPlay",
+        "PlayerCombatState.AllCards/AllPiles",
+        "IronWave.OnPlay"
+      ]
+    }
+  },
+  "changes": [
+    "Reviewed trigger scopes invalidate only dependent outputs. A rule must match the pinned reference or explicit native adapter; unknown attachments and altered descriptions remain uncomputed.",
+    "Pomander/Nutritious Soup affect acquisition and Prayer Wheel affects rewards. Resulting card enchantments are still independently checked.",
+    "Permafrost has no effect without a Power in the prefix. With a Power, the unexported private activation flag prevents a fixed Block/HP prediction, while independent enemy damage remains computable.",
+    "Slither current native cost is the resolved draw result. Entangled cost is already included by Tangled; its power amount is a surcharge, and the entire power/afflictions clear at owner-side turn end, not a countdown.",
+    "Enemy Territorial gains Strength after its current attack. The observed attack is not increased a second time.",
+    "Expect a Fight uses native Block and preceding positive-clamped Strength deltas, including upgraded coefficients and Frail rounding bounds. Native missing previews remain unknown.",
+    "Perfected Strike uses native calculated target damage; ordinary movement between all five combat piles does not change its Strike count. Creation/removal/transform rules still require coverage or observation. Iron Wave uses native Block and damage, with uncomputed reactions remaining unknown.",
+    "Actual action audit now checks stable Block and caps removed HP at target HP, rather than mislabeling overkill damage as an error."
+  ],
+  "totals": {
+    "snapshots": 943,
+    "verified": 943,
+    "failures": 0,
+    "outcome_actions": 177,
+    "outcome_comparisons": 267,
+    "mismatches": 0
+  },
+  "checks": {
+    "tests": 302,
+    "passed": 302,
+    "failed": 0
+  },
+  "runs": [
+    {
+      "run_id": "run-1790173472",
+      "split": "dev",
+      "snapshots": 127,
+      "verified": 127,
+      "failures": 0,
+      "estimates": {
+        "bounded": 169,
+        "incomplete": 386
+      },
+      "outcome_actions": 63,
+      "outcome_comparisons": 100,
+      "outcome_fields": {
+        "player_block_after_card": 51,
+        "enemy_hp_removed": 37,
+        "player_hp_after_end_turn": 12
+      },
+      "mismatches": [],
+      "sessions": [
+        {
+          "session": "2026-09-23T14-24-29-080Z-e5986048",
+          "snapshot_index_sha256": "c9ee2765d4d256bd1639c240340d23d1c7c150944b7e0764bcae5edb8ae26004"
+        }
+      ]
+    },
+    {
+      "run_id": "run-1790175430",
+      "split": "dev",
+      "snapshots": 117,
+      "verified": 117,
+      "failures": 0,
+      "estimates": {
+        "bounded": 141,
+        "incomplete": 428
+      },
+      "outcome_actions": 51,
+      "outcome_comparisons": 76,
+      "outcome_fields": {
+        "player_block_after_card": 41,
+        "enemy_hp_removed": 25,
+        "player_hp_after_end_turn": 10
+      },
+      "mismatches": [],
+      "sessions": [
+        {
+          "session": "2026-09-23T14-57-06-607Z-b797c60b",
+          "snapshot_index_sha256": "ae9a972a34ab67052a2f01d74c83b0f77cc61c3d3280b788ce94af0fdc076faf"
+        }
+      ]
+    },
+    {
+      "run_id": "run-1789879418",
+      "split": "validation",
+      "snapshots": 315,
+      "verified": 315,
+      "failures": 0,
+      "estimates": {
+        "bounded": 174,
+        "incomplete": 1190
+      },
+      "outcome_actions": 63,
+      "outcome_comparisons": 91,
+      "outcome_fields": {
+        "player_block_after_card": 51,
+        "enemy_hp_removed": 28,
+        "player_hp_after_end_turn": 12
+      },
+      "mismatches": [],
+      "sessions": [
+        {
+          "session": "2026-09-20T04-43-34-749Z-1126343a",
+          "snapshot_index_sha256": "8245010715046648a575122ea5a362a0e6bdc91a780ce0ed059f9374b5c047f4"
+        },
+        {
+          "session": "2026-09-20T04-45-25-301Z-0f18a1bf",
+          "snapshot_index_sha256": "f6b7264dfd058a0c84af80d09469c7900b0c32fc07b2a24836780ea8465232ee"
+        },
+        {
+          "session": "2026-09-20T05-29-45-548Z-3a018899",
+          "snapshot_index_sha256": "753b1b4353c338860ed840356e00d158ffb4d0587ec484f2ab17e5f55ff521c1"
+        },
+        {
+          "session": "2026-09-20T05-56-20-581Z-e993c2ed",
+          "snapshot_index_sha256": "a960d67c375feed9dfb10608ff73cb136750b71f36666a1a06863012439313e0"
+        },
+        {
+          "session": "2026-09-20T06-56-29-269Z-0ef87b79",
+          "snapshot_index_sha256": "9c990c243a134d99f34f1e1bbac2e69cc52ef43b1009b2bdffca66404bee3f0c"
+        },
+        {
+          "session": "2026-09-20T07-01-46-473Z-3339a4c8",
+          "snapshot_index_sha256": "ad9188eea898896d72fea775aa626079ad4470d9d22f7679c225634d49f40605"
+        },
+        {
+          "session": "2026-09-20T07-06-43-801Z-36b782a2",
+          "snapshot_index_sha256": "c31e422ea814d953ba31449b2677b246d01b77f3a736e5bc4f932aa2891f71f7"
+        }
+      ]
+    },
+    {
+      "run_id": "run-1789900349",
+      "split": "validation",
+      "snapshots": 224,
+      "verified": 224,
+      "failures": 0,
+      "estimates": {
+        "bounded": 0,
+        "incomplete": 1049
+      },
+      "outcome_actions": 0,
+      "outcome_comparisons": 0,
+      "outcome_fields": {},
+      "mismatches": [],
+      "sessions": [
+        {
+          "session": "2026-09-20T10-32-26-082Z-389690fd",
+          "snapshot_index_sha256": "8a6b84bd3df2f26ff6893b7991309dad41eccf61ec32721c8d0d7571931063ee"
+        },
+        {
+          "session": "2026-09-20T10-43-21-626Z-5c0b1377",
+          "snapshot_index_sha256": "2f44c2ef09ca75a07f51896c68deea2fc90780f8e622d1a8e90c05034b2f6bb6"
+        },
+        {
+          "session": "2026-09-20T11-00-04-270Z-80ddb435",
+          "snapshot_index_sha256": "83754f4fae09569d31cac9e8af492c8f8cd16024bbb150f69f030b2e4f365e17"
+        }
+      ]
+    },
+    {
+      "run_id": "run-1789906322",
+      "split": "validation",
+      "snapshots": 160,
+      "verified": 160,
+      "failures": 0,
+      "estimates": {
+        "bounded": 0,
+        "incomplete": 779
+      },
+      "outcome_actions": 0,
+      "outcome_comparisons": 0,
+      "outcome_fields": {},
+      "mismatches": [],
+      "sessions": [
+        {
+          "session": "2026-09-20T12-11-59-152Z-f7a98087",
+          "snapshot_index_sha256": "568cccb5278ead1c52ffc4c65b09dc51ae5016ff7804501195007779fc0a9548"
+        }
+      ]
+    }
+  ],
+  "examples": [
+    {
+      "rule": "SLITHER",
+      "source": "run-artifacts/2026-09-23T14-24-29-080Z-e5986048/step-0085",
+      "before_sha256": "a6ddc96c20e97040f6982ba8fccefd74c68caf21ed1c23eb4ceedd17d31d6017",
+      "after_sha256": "c8f4d3315ea61fbf08ee43eb20234d7bdd0d5854a4aa7f837961570f21668506",
+      "request": {
+        "cmd": "play_card",
+        "id": "DEFEND_IRONCLAD",
+        "nth": 0
+      },
+      "comparisons": [
+        {
+          "field": "player_block_after_card",
+          "predicted": 5,
+          "observed": 5,
+          "matches": true
+        }
+      ],
+      "reviewed_dependencies": [
+        {
+          "category": "enchantments",
+          "owner": "player",
+          "source_id": "SLITHER",
+          "wiki_rule_id": "enchantments/SLITHER",
+          "trigger": "after_owner_card_drawn",
+          "affected_outputs": [],
+          "interpretation": "Current native cost already contains this draw result. A later draw randomizes it again and requires a new observation; no future cost is inferred."
+        }
+      ]
+    },
+    {
+      "rule": "TERRITORIAL_POWER",
+      "source": "run-artifacts/2026-09-23T14-24-29-080Z-e5986048/step-0153",
+      "before_sha256": "74bb3e01f535ccf55fd4dc68fee46ed6531aa699a256215a35007aee18c35fee",
+      "after_sha256": "6ff6158793a6d5497c627c133c3089a590dd6749b617d6d7c3ba1beb9cd23b08",
+      "request": {
+        "cmd": "play_card",
+        "id": "DEFEND_IRONCLAD",
+        "nth": 0
+      },
+      "comparisons": [
+        {
+          "field": "player_block_after_card",
+          "predicted": 5,
+          "observed": 5,
+          "matches": true
+        }
+      ],
+      "reviewed_dependencies": [
+        {
+          "category": "powers",
+          "owner": 1,
+          "source_id": "TERRITORIAL_POWER",
+          "wiki_rule_id": "powers/TERRITORIAL",
+          "trigger": "owner_side_turn_end",
+          "affected_outputs": [],
+          "interpretation": "Strength is gained after this enemy turn, not before its currently displayed attack. This does not predict next-turn damage or retain the current intent for later turns."
+        },
+        {
+          "category": "relics",
+          "owner": "player",
+          "source_id": "PERMAFROST",
+          "wiki_rule_id": "relics/PERMAFROST",
+          "trigger": "after_first_owned_power_play_in_combat",
+          "affected_outputs": [],
+          "interpretation": "No Power is played in this prefix; this relic cannot change its Block or HP. Its one-use activation flag is not inferred."
+        },
+        {
+          "category": "enchantments",
+          "owner": "player",
+          "source_id": "SLITHER",
+          "wiki_rule_id": "enchantments/SLITHER",
+          "trigger": "after_owner_card_drawn",
+          "affected_outputs": [],
+          "interpretation": "Current native cost already contains this draw result. A later draw randomizes it again and requires a new observation; no future cost is inferred."
+        }
+      ]
+    },
+    {
+      "rule": "PERMAFROST",
+      "source": "run-artifacts/2026-09-23T14-24-29-080Z-e5986048/step-0201",
+      "before_sha256": "8ac68c7f556cf1a637bc518d499c0b2760b1dc911edd20498ccd47456101d70e",
+      "after_sha256": "121e86671afb6dd1f8e9230f180fbfc6a9d87c65c4c0092d772786849092e59b",
+      "request": {
+        "cmd": "play_card",
+        "id": "STRIKE_IRONCLAD",
+        "nth": 0,
+        "target": 1
+      },
+      "comparisons": [
+        {
+          "field": "player_block_after_card",
+          "predicted": 0,
+          "observed": 0,
+          "matches": true
+        },
+        {
+          "field": "enemy_1_hp_removed",
+          "predicted": 6,
+          "observed": 6,
+          "matches": true
+        }
+      ],
+      "reviewed_dependencies": [
+        {
+          "category": "relics",
+          "owner": "player",
+          "source_id": "PERMAFROST",
+          "wiki_rule_id": "relics/PERMAFROST",
+          "trigger": "after_first_owned_power_play_in_combat",
+          "affected_outputs": [],
+          "interpretation": "No Power is played in this prefix; this relic cannot change its Block or HP. Its one-use activation flag is not inferred."
+        },
+        {
+          "category": "enchantments",
+          "owner": "player",
+          "source_id": "SLITHER",
+          "wiki_rule_id": "enchantments/SLITHER",
+          "trigger": "after_owner_card_drawn",
+          "affected_outputs": [],
+          "interpretation": "Current native cost already contains this draw result. A later draw randomizes it again and requires a new observation; no future cost is inferred."
+        }
+      ]
+    },
+    {
+      "rule": "PERFECTED_STRIKE",
+      "source": "run-artifacts/2026-09-23T14-57-06-607Z-b797c60b/step-0133",
+      "before_sha256": "06b119adc7133cb4bd35ace628e78288b439df361724cb7a419c094ed6e76681",
+      "after_sha256": "ce657d70d343c05302274088e934b20f23e6ad69bd647af8314ce2383ab03181",
+      "request": {
+        "cmd": "play_card",
+        "id": "PERFECTED_STRIKE",
+        "nth": 0,
+        "target": 1
+      },
+      "comparisons": [
+        {
+          "field": "player_block_after_card",
+          "predicted": 0,
+          "observed": 0,
+          "matches": true
+        },
+        {
+          "field": "enemy_1_hp_removed",
+          "predicted": 30,
+          "observed": 30,
+          "matches": true
+        }
+      ],
+      "reviewed_dependencies": []
+    },
+    {
+      "rule": "ENTANGLED",
+      "source": "run-artifacts/2026-09-23T14-57-06-607Z-b797c60b/step-0136",
+      "before_sha256": "b655899e5f36050d81bfdd78b744ee2219295df15a655df1b828188f01503bdb",
+      "after_sha256": "10d90c079b7c86bc4f2c829aebaa1f86863984765578060c8738be5110cd94e0",
+      "request": {
+        "cmd": "play_card",
+        "id": "DEFEND_IRONCLAD",
+        "nth": 0
+      },
+      "comparisons": [
+        {
+          "field": "player_block_after_card",
+          "predicted": 5,
+          "observed": 5,
+          "matches": true
+        }
+      ],
+      "reviewed_dependencies": [
+        {
+          "category": "afflictions",
+          "owner": "player",
+          "source_id": "ENTANGLED",
+          "wiki_rule_id": "afflictions/ENTANGLED",
+          "trigger": "native_cost_query",
+          "affected_outputs": [],
+          "interpretation": "Tangled owns the cost modifier; this affliction has no independent trigger. Current native cost already includes the surcharge. Do not add it again."
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Finite matches validate only the actual action and directly comparable saved endpoint. Unknown values and skipped/partial endpoints are not successes; unchosen plans have no observed counterfactual outcome.",
+    "Runs 24/26 supply transport validation but no finite comparable outcomes under current coverage. Do not describe their 384 snapshots as validated full combat simulations.",
+    "Native extractor completeness, private relic flags, unimplemented reactions/death hooks and model decision quality are not established by this audit. No win-rate or new-game claim."
+  ]
+}
