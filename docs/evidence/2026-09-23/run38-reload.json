@@ -1,0 +1,124 @@
+{
+  "date": "2026-09-23",
+  "run_id": "run-1789995870",
+  "native_version": "v0.111.0",
+  "mod_version": "0.111.0-context.17",
+  "loaded_commit": "b21ba850c7f15abb0e3cd820d45680279300e1f2",
+  "original_pause": {
+    "floor": 13,
+    "turn": 2,
+    "hp": 58,
+    "energy": 1,
+    "pending": null
+  },
+  "reloaded_native": {
+    "floor": 13,
+    "turn": 1,
+    "hp": 58,
+    "energy": 3,
+    "run_id": "run-1789995870",
+    "combat_id_changed": true
+  },
+  "permanent_state_match": {
+    "hp": true,
+    "max_hp": true,
+    "gold": true,
+    "deck": true,
+    "relics": true,
+    "potions": true
+  },
+  "agent_memory": {
+    "old_actions": 145,
+    "rebuilt_actions": 135,
+    "old_strategy_revision": 28,
+    "rebuilt_strategy_revision": 27,
+    "pending": null,
+    "started_at_floor": 1,
+    "acts": [
+      0
+    ]
+  },
+  "first_confirmed_action": {
+    "request": {
+      "cmd": "play_card",
+      "id": "STRIKE_IRONCLAD",
+      "nth": 1,
+      "target": 1
+    },
+    "new_model_calls": 26,
+    "response": {
+      "ok": true,
+      "data": {
+        "card_index": 4,
+        "card_id": "STRIKE_IRONCLAD",
+        "target": 1,
+        "results": [
+          {
+            "type": "damage",
+            "target_id": 1,
+            "target_name": "SNAPPING_JAXFRUIT",
+            "damage": 6,
+            "blocked": 0,
+            "hp_loss": 6,
+            "killed": false
+          }
+        ]
+      }
+    }
+  },
+  "scope": "Game was closed between sessions. Native save restored the same run to the beginning of the current room, not the exact paused combat state. Memory was rebuilt only through the original room entry; 10 old in-room actions and one later strategic revision were removed before live play. No earlier act or whole run was restarted. The actual new combat and future choices remain native observations.",
+  "source_files": [
+    {
+      "path": "temp/run38-reload.json",
+      "sha256": "6e3b90984ac8516e988e645d2904740b612071617ee04af27174e3f0f2cb0be7"
+    },
+    {
+      "path": "temp/run38-reload-memory-check.json",
+      "sha256": "50caea4c2018a75c961486e161a744605ca29dfa53844d1c9d7e1ba64dfc7753"
+    },
+    {
+      "path": "temp/run38-reload-before-resume.json",
+      "sha256": "54c126cb83abcf4a7a2f67537f327c7dad6d361d30f0986b49adde6ba7a56ff7"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/continuation-stop-native.json",
+      "sha256": "e6f512778b0c680e089ee08afce9026f6cf488f98d0b65ae22316fea89aebd0f"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/pre-rewind-memory.json",
+      "sha256": "2c96eb3adea63aa2f02bfa621c8b0fa506a8634eb8910dc2cf5a20f846dbb35e"
+    },
+    {
+      "path": "run-artifacts/run38-2026-09-21T13-04-24.716Z/post-rewind-memory.json",
+      "sha256": "1e83362b45791d79dc4e2dd610690d2ab3ed5cc3fd72a9f341ed34f55bc22406"
+    },
+    {
+      "path": "run-artifacts/run38-resume-2026-09-23T02-16-59.742Z/runtime.json",
+      "sha256": "0b3c15cd4f6734a49a20b456a49bb630e1815f4a29a4d9ca9672df9433656ef4"
+    },
+    {
+      "path": "run-artifacts/run38-resume-2026-09-23T02-16-59.742Z/prior-memory.json",
+      "sha256": "1e83362b45791d79dc4e2dd610690d2ab3ed5cc3fd72a9f341ed34f55bc22406"
+    },
+    {
+      "path": "run-artifacts/run38-resume-2026-09-23T02-16-59.742Z/resume-native.json",
+      "sha256": "7f2ee28472737d0424930928b96fc26f16c5801ebb8034bddb2e40b04e3cc85a"
+    },
+    {
+      "path": "run-artifacts/run38-resume-2026-09-23T02-16-59.742Z/step-0001/before-state.json",
+      "sha256": "2f6e9e5619f824c1ecd928e36b0875ace27db34188894f19abb4f91902633f76"
+    },
+    {
+      "path": "run-artifacts/run38-resume-2026-09-23T02-16-59.742Z/step-0001/decision.json",
+      "sha256": "cef94a2a695efbd6bcf18d948d33f574af1dc0a9db6dd52cd8b117add3699b43"
+    },
+    {
+      "path": "run-artifacts/run38-resume-2026-09-23T02-16-59.742Z/step-0001/response.json",
+      "sha256": "91bd4ebdc49fff7449d9812fcb10449351e305132a40ae83bf50bee4530b3a96"
+    },
+    {
+      "path": "run-artifacts/run38-resume-2026-09-23T02-16-59.742Z/step-0001/after-state.json",
+      "sha256": "0376e5a05bc44606a6c1a33c586cfaad4fde58885a77a6d3c5b6083ed944f1a7"
+    }
+  ]
+}
