@@ -10,31 +10,9 @@ export async function compareRewardSkip(state, options, prepared, decision, choo
   if (!skip) return decision;
   const chosen = prepared.candidates.get(decision.candidate_id);
   if (!chosen) throw new ContextError('Chosen reward is missing from current candidates');
-  const rated = [...prepared.candidates].filter(([, candidate]) => candidate.request?.cmd === 'reward_choose_card'
-    && candidate.request.nth === decision.request.nth).map(([actionId]) => {
-    const p = options.strategyAssessment?.options.find(option => option.action_id === actionId)?.probabilities;
-    if (!p || ![0, 1, 2, 3].every(level => Number.isFinite(p[level]) && p[level] >= 0 && p[level] <= 1)
-      || Math.abs(Object.values(p).reduce((sum, value) => sum + value, 0) - 1) >= 0.02) return null;
-    return { action_id: actionId, marginal_or_worse_probability: p[0] + p[1],
-      useful_or_better_probability: p[2] + p[3] };
-  });
   const earlyDamage = prepared.payload.state.deck?.statistics?.early_damage_check;
   const needsFirstAttack = earlyDamage?.no_added_attack === true
     && earlyDamage.offered_attack_action_ids.some(id => prepared.candidates.get(id)?.request?.nth === decision.request.nth);
-  // A starter-only early deck still needs reliable damage for upcoming fights.
-  // Resolve a low independent rating against the full-menu choice directly;
-  // it is too weak a signal to auto-skip every attack opportunity here.
-  if (!needsFirstAttack && rated.length && rated.every(item => item
-    && item.marginal_or_worse_probability > item.useful_or_better_probability + 1e-9)) {
-    const judgment = { action: 'assess_reward_skip', reward_nth: decision.request.nth,
-      card_judgments: rated,
-      basis: 'Every offered card is more likely to be Jev class 0-1 (worse or marginal) than class 2-3 (useful enough to justify deck dilution).' };
-    options.onPlanningDecision?.(judgment);
-    return { ...decision, ...skip, candidate_id: skipId, model: 'jev-reward-assessment',
-      confidence: undefined, probabilities: undefined,
-      initial_reward_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence,
-        probabilities: decision.probabilities }, reward_skip_assessment: judgment };
-  }
   const deckCount = state.decision_context?.master_deck?.length;
   const add = { action_id: decision.candidate_id, effect: chosen.description,
     deck_count_after: Number.isInteger(deckCount) ? deckCount + 1 : null };
@@ -59,26 +37,15 @@ export async function compareRewardSkip(state, options, prepared, decision, choo
       consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
   } });
   options.onPlanningDecision?.(comparison);
-  const chosenRating = rated.find(item => item?.action_id === decision.candidate_id);
-  const takeSupport = comparison.judgments.map(({ question, probabilities }) => {
-    const alternative = Object.entries(questions[question].criteria)
-      .find(([, criterion]) => criterion.action_id === decision.candidate_id)?.[0];
-    return probabilities?.[alternative];
-  });
-  // Jev can pick the card in both orderings while assigning only a slight
-  // edge over Skip. An addition with no clear usefulness rating needs stronger
-  // evidence than that; otherwise every close reward slowly bloats the deck.
-  const weakAddition = !needsFirstAttack && comparison.consensus_action_id === decision.candidate_id
-    && chosenRating?.useful_or_better_probability < 0.6
-    && takeSupport.every(value => Number.isFinite(value) && value >= 0.5 && value < 0.75);
-  const changed = comparison.consensus_action_id === skipId || weakAddition;
+  // The independent option rating is advisory. Run 42 showed it could veto
+  // Shrug It Off before Jev compared the actual addition with keeping the deck.
+  // Trust a two-order direct comparison when both answers agree; disagreement
+  // keeps the original full-menu choice instead of inventing a skip threshold.
+  const changed = comparison.consensus_action_id === skipId;
   return { ...decision, ...(changed ? { ...skip, candidate_id: skipId, model: comparison.model,
     confidence: undefined, probabilities: undefined } : {}),
     initial_reward_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence,
       probabilities: decision.probabilities }, reward_skip_comparison: comparison,
-    ...(weakAddition ? { reward_skip_evidence: { reason: 'weak_incremental_value',
-      useful_or_better_probability: chosenRating.useful_or_better_probability,
-      take_support_by_order: takeSupport } } : {}),
     usage: { input_tokens: (decision.usage?.input_tokens || 0) + (comparison.usage?.input_tokens || 0),
       output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0) } };
 }

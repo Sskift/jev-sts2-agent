@@ -2,7 +2,7 @@
 
 《Slay the Spire 2》游戏 Agent：**C# 模组读取实时状态 → Node.js 组织规则与上下文 → Jev 制定回合计划 → 模组执行 → 重新观察。** 游戏自行结算和渲染，正常循环不要求窗口置顶。
 
-目前是研究原型，已记录到第 41 局，尚未通关；第 41 局在第一幕 Kin 首领战失败。此前局数与原生证据见[整局进展](docs/full-run-progress.md)，第 37 局的[复盘](docs/run37-review.md)区分了伤害核算、破盾与构筑取舍。
+目前是研究原型，已记录到第 42 局，尚未通关；第 42 局在第一幕 Kin 首领战失败。此前局数与原生证据见[整局进展](docs/full-run-progress.md)，第 37 局的[复盘](docs/run37-review.md)区分了伤害核算、破盾与构筑取舍。
 
 当前按用户要求使用 OpenRouter `typesafe/jev-1.13`，自动回退关闭。已接入五个角色的策略参考、115 个怪物的行动图、招式关联规则、独立有序候选和方案比较分歧记录。最新修复覆盖目标相关的命中次数，并将相邻换序扩展到采样方案，避免只评到一组牌的较差顺序；等价副本按实际顺序去重。[同局面回放](docs/evidence/2026-09-21/run34-order-coverage.json)已选出可行收尾，仍有比较分歧，尚不能证明胜率提高。
 
@@ -33,7 +33,7 @@ JEV_FALLBACK_PROVIDER=
 
 输入与执行核对共用游戏语义：已核实的 Happy Flower 激活动画显示值会还原为真实回合计数，原始模组快照仍保留。生命、能量、实际计数、状态与合法动作变化仍会使旧答案失效；发送游戏命令前再次核对完整状态。
 
-已确认出牌后的确定变化可以延续原回合计划：Tremble 的易伤进入有序效果计算，Tuning Fork 未触发时的技能计数增长经过完整原生记录核对后不再单独引起重新规划。触发效果、未知计数、新牌或其他未解释变化仍需检查；[本局历史核对](docs/evidence/2026-09-21/run36-continuation.json)没有额外付费调用。
+已确认出牌后的确定变化可以延续原回合计划：Tremble 的易伤进入有序效果计算，Tuning Fork 未触发时的技能计数，以及 Pocketwatch 前三次出牌的正常计数增长，不再单独引起重新规划。触发效果、未知计数、新牌或其他未解释变化仍需检查；[历史核对](docs/evidence/2026-09-21/run36-continuation.json)没有额外付费调用。第 42 局首领战的 Taunt → Pillage 计划曾因 Pocketwatch 计数而改打别的目标，现已用同形态状态验证计划能够续接。
 
 启动已启用模组的游戏后：
 
@@ -56,7 +56,7 @@ npm start                # 会操作游戏，仅在需要开始或继续实战�
 
 商店先由 Jev 条件选择具体要删的一张牌，再比较删牌、购物与留钱。JSON 列出实际价格、已有副本、购物后余额、能否同时删牌及失去删牌机会的购买；升级、附魔和 Eternal 分别处理。独立评分偏向边际却仍被选中的付费牌，会再与留金离店直接比较；如果正反顺序不能一致支持购买，就保留金币并继续评估删牌。第一幕若卡组尚无非基础攻击牌，准备离店或一笔支出将使当前攻击牌买不起时，还会与实际可买的攻击牌双向比较。购买会耗掉删牌预算，或准备在仍能删牌时直接离店，也会追加交换选项顺序的比较；意见冲突保留原选择。确认买下删牌服务后，核对原生选牌界面并续接同一目标。攻略提供条件性建议，不固定删 Strike，也不强制删牌。[历史回放](docs/shop-removal.md)已出现选择变化，但仍有低置信度与顺序分歧，尚无胜率改善证据。
 
-战后牌不再默认拿取。Jev 先评估每张牌相对于不加牌的增益；若同一奖励所有候选更可能属于恶化或边际收益，就按该评估跳过，否则对提议拿取的牌与跳过再作双向直接比较。如果所选牌的独立“有用或更好”概率不足 60%，而正反顺序比较中拿牌的支持率都不足 75%，按低证据增益跳过，并记录这项依据。第一幕只要尚无非基础攻击牌，低独立评分仍进入直接比较，且不触发该低证据跳过规则，避免把急需补伤害的牌组机械瘦身；JSON 明示当前攻击牌缺口和可选攻击牌，但不把牌型计数当成伤害总量。这里的阈值是保守决策规则，不是已校准的胜率；获得更多对局证据后应复核。达到眼前伤害需求后，再对多余攻击牌提高增益要求。[Untapped 的构筑指南](https://sts2.untapped.gg/en/guides/how-to-build-a-strong-deck)、[Jorbs 的近期战斗任务框架](https://sts2.untapped.gg/en/articles/slay-the-spire-deckbuilding-strategy-solving-the-spire-with-jobs)与[Baalorlord 的抽牌循环分析](https://sts2.untapped.gg/en/articles/core-deckbuilding-concepts-in-slay-the-spire)是这里的定性依据；第 38 局的[开发回放与后续反例](docs/reward-choices.md)表明跳牌决策确实改变，但尚不是通关率证据。
+战后牌不再默认拿取。Jev 对所有选项的独立评分只作参考；若先选中一张牌，就把该牌与跳过放在正反两种选项顺序中直接比较。两问一致支持跳过才覆盖拿牌选择；两问一致支持拿牌则拿牌，意见冲突保留原来的全菜单选择。第 42 局先选中 Shrug It Off，却因三张候选独立评分偏低而未经过直接比较就跳过；同局 Flame Barrier 的正反比较都支持拿牌，又被额外的概率阈值否决。现已移除这两道未经胜率校准的自动否决，同时保留跳过边际牌的实际选择空间。JSON 明示起始牌组的攻击缺口和可选攻击牌，但不把牌型计数当成伤害总量。[Untapped 的构筑指南](https://sts2.untapped.gg/en/guides/how-to-build-a-strong-deck)、[Jorbs 的近期战斗任务框架](https://sts2.untapped.gg/en/articles/slay-the-spire-deckbuilding-strategy-solving-the-spire-with-jobs)与[Baalorlord 的抽牌循环分析](https://sts2.untapped.gg/en/articles/core-deckbuilding-concepts-in-slay-the-spire)是定性依据；代码修正仍需后续实战检验。
 
 已揭示的首领会在选牌和商店阶段附带对应的条件性攻略：例如 [Vantom 的 Slippery](https://www.pcgamer.com/games/roguelike/slay-the-spire-2-vantom/) 会让多段攻击的命中次数成为明确的备战因素。攻略只说明机制和选牌目的；实际层数、伤害和出招以模组实时状态为准。
 

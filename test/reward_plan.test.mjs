@@ -45,7 +45,7 @@ test('a direct skip choice does not need a second comparison', async () => {
   assert.equal(decision.reward_skip_comparison, undefined);
 });
 
-test('independent Jev judgment skips a marginal card without another paid comparison', async () => {
+test('independent low rating cannot skip a card without a direct comparison', async () => {
   let calls = 0;
   const state = reward();
   state.decision_context.master_deck.push(fixtureCard('POMMEL_STRIKE', { rarity: 'Common', type: 'Attack',
@@ -56,12 +56,13 @@ test('independent Jev judgment skips a marginal card without another paid compar
     const payload = parseJevRequest(request.body);
     if (payload.questions.option_0) return reply({ option_0: { type: 'score', score: 1.2,
       probabilities: { 0: 0.1, 1: 0.6, 2: 0.25, 3: 0.05 } } });
-    assert.ok(payload.questions.next_action);
-    return reply({ next_action: { type: 'choice', choice: 'reward_0_card_0', confidence: 0.8 } });
+    if (payload.questions.next_action) return reply({ next_action: { type: 'choice', choice: 'reward_0_card_0', confidence: 0.8 } });
+    return reply({ reward_forward: { type: 'choice', choice: 'second' },
+      reward_reverse: { type: 'choice', choice: 'first' } });
   } });
-  assert.equal(calls, 2);
+  assert.equal(calls, 3);
   assert.equal(decision.request.cmd, 'reward_skip_card');
-  assert.equal(decision.reward_skip_assessment.card_judgments[0].marginal_or_worse_probability, 0.7);
+  assert.equal(decision.reward_skip_comparison.consensus_action_id, 'skip_card_0');
   assert.equal(decision.initial_reward_choice.candidate_id, 'reward_0_card_0');
   assert.equal(decision.confidence, undefined);
 });
@@ -92,7 +93,7 @@ test('an Act 1 deck without an added Attack rechecks damage even after floor 6',
   assert.equal(decision.reward_skip_assessment, undefined);
 });
 
-test('an Act 1 reward without an Attack still skips a unanimously marginal addition', async () => {
+test('an Act 1 reward without an Attack may still be skipped after direct comparison', async () => {
   const state = reward();
   state.rewards.rewards[0].card_choices[0] = { index: 0, id: 'EVIL_EYE', name: 'Evil Eye',
     description: 'Gain 8 Block. Gain another 8 Block if you have Exhausted a card this turn.', type: 'Skill', cost: 1 };
@@ -101,16 +102,16 @@ test('an Act 1 reward without an Attack still skips a unanimously marginal addit
       const payload = parseJevRequest(request.body);
       if (payload.questions.option_0) return reply({ option_0: { type: 'score', score: 1.1,
         probabilities: { 0: 0.1, 1: 0.7, 2: 0.2, 3: 0 } } });
-      assert.ok(payload.questions.next_action, 'No direct comparison is needed when no Attack is offered');
-      return reply({ next_action: { type: 'choice', choice: 'reward_0_card_0' } });
+      if (payload.questions.next_action) return reply({ next_action: { type: 'choice', choice: 'reward_0_card_0' } });
+      return reply({ reward_forward: { type: 'choice', choice: 'second' },
+        reward_reverse: { type: 'choice', choice: 'first' } });
     } });
   assert.equal(decision.request.cmd, 'reward_skip_card');
-  assert.ok(Math.abs(decision.reward_skip_assessment.card_judgments[0].marginal_or_worse_probability - 0.8) < 1e-9);
+  assert.equal(decision.reward_skip_comparison.consensus_action_id, 'skip_card_0');
 });
 
-test('a low-value reward needs more than a slight pairwise edge over Skip', async () => {
-  for (const [forward, reverse, expected] of [[0.64, 0.73, 'reward_skip_card'],
-    [0.85, 0.88, 'reward_choose_card']]) {
+test('a card chosen in both comparison orders is not vetoed by a low independent rating', async () => {
+  for (const [forward, reverse] of [[0.54, 0.62], [0.85, 0.88]]) {
     const state = reward();
     state.decision_context.master_deck.push(fixtureCard('POMMEL_STRIKE', { rarity: 'Common', type: 'Attack',
       details: { instance_id: 'existing-attack', upgrade_level: 0 } }));
@@ -124,7 +125,7 @@ test('a low-value reward needs more than a slight pairwise edge over Skip', asyn
         return reply({ reward_forward: { type: 'choice', choice: 'first', probabilities: { first: forward, second: 1 - forward } },
           reward_reverse: { type: 'choice', choice: 'second', probabilities: { first: 1 - reverse, second: reverse } } });
       } });
-    assert.equal(decision.request.cmd, expected);
-    assert.equal(Boolean(decision.reward_skip_evidence), expected === 'reward_skip_card');
+    assert.equal(decision.request.cmd, 'reward_choose_card');
+    assert.equal(decision.reward_skip_comparison.consensus_action_id, 'reward_0_card_0');
   }
 });

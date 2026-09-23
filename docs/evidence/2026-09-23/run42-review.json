@@ -1,0 +1,52 @@
+{
+  "run_id": "run-1790171320",
+  "artifact_dir": "run-artifacts/2026-09-23T13-48-36-553Z-f1e86d26",
+  "result": {
+    "source_step": 276,
+    "screen": "GAME_OVER",
+    "is_victory": false,
+    "act_index": 0,
+    "floor": 17,
+    "score": 221,
+    "player_hp": 0,
+    "kin_priest_hp_before_final_end_turn": 64
+  },
+  "reward_counterexamples": [
+    {
+      "step": 59,
+      "offer": ["Perfected Strike", "True Grit", "Flame Barrier"],
+      "initial_choice": "Flame Barrier",
+      "paired_choice": "Flame Barrier in both option orders",
+      "executed_choice": "skip",
+      "cause": "Additional independent-rating and probability threshold overrode the direct comparison"
+    },
+    {
+      "step": 89,
+      "offer": ["Inflame", "Shrug It Off", "Anger"],
+      "initial_choice": "Shrug It Off",
+      "executed_choice": "skip",
+      "cause": "Independent option ratings automatically skipped the full offer before direct comparison"
+    },
+    {
+      "step": 212,
+      "offer": ["Pillage", "Pommel Strike", "Armaments"],
+      "initial_choice": "Pillage",
+      "executed_choice": "skip",
+      "cause": "Independent option ratings automatically skipped the full offer before direct comparison"
+    }
+  ],
+  "plan_counterexample": {
+    "setup_step": 249,
+    "setup": "Taunt targeted Kin Priest, combat_id 3",
+    "planned_payoff": "Pillage+ targeted Kin Priest, combat_id 3",
+    "observed_relic_change": "Pocketwatch counter 1 to 2, status Active unchanged",
+    "review_reason": "Player relics changed.",
+    "revised_step": 250,
+    "revised_payoff": "Pillage+ targeted Kin Follower, combat_id 2"
+  },
+  "recording": {
+    "path": "run-artifacts/boss-1790172201666/act1-boss.mp4",
+    "result_screen": "GAME_OVER",
+    "sent_to_feishu": false
+  }
+}

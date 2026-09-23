@@ -57,6 +57,30 @@ test('ordinary Tuning Fork progress can continue the same plan; activation or un
     }
   }
 });
+test('Pocketwatch counting preserves an attack planned after a targeted setup', async () => {
+  for (const [beforeCount, afterCount, expected] of [[1, 2, 'active'], [2, 3, 'active'], [3, 4, 'needs_review'], [1, 3, 'needs_review']]) {
+    const s = stateWith([card('TAUNT', 'setup', 0, { type: 'Skill', description: 'Gain 6 Block. Apply 1 Vulnerable.' }),
+      card('PILLAGE', 'payoff', 1)]);
+    s.combat.player.relics = [{ id: 'POCKETWATCH', status: 'Active', counter: beforeCount,
+      description: 'Whenever you play 3 or fewer cards during your turn, draw 3 additional cards at the start of your next turn.' }];
+    sync(s);
+    const plan = savedPlan(s, ['card_0_target_42', 'card_1_target_42']);
+    const memory = new DecisionMemory(); memory.observe(s);
+    memory.begin({ cmd: 'play_card', id: 'TAUNT', nth: 0, target: 42 }, s, { turnPlan: plan, turnStep: 0 });
+    const after = structuredClone(s); after.combat.hand.shift(); after.combat.player.energy--;
+    after.combat.player.relics[0].counter = afterCount;
+    after.combat.player.block += 6;
+    after.combat.enemies[0].powers = [{ id: 'VULNERABLE_POWER', name: 'Vulnerable', amount: 1,
+      description: 'Receive 50% more damage from Attacks for 1 turn.' }];
+    sync(after); memory.finish({ ok: true }, after);
+    assert.equal(memory.data.turn_plan.status, expected, `${beforeCount} -> ${afterCount}`);
+    if (expected === 'active') {
+      memory.observe(after);
+      const decision = await makeModDecisionWithJev(after, { memory, fetchImpl: noModel });
+      assert.deepEqual(decision.request, { cmd: 'play_card', id: 'PILLAGE', nth: 0, target: 42 });
+    }
+  }
+});
 function fakeJev(answers, seen = []) {
   return async (_url, request) => {
     const body = parseJevRequest(request.body); seen.push(body);

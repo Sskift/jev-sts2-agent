@@ -17,15 +17,23 @@ export function turnFingerprint(state) {
   return createHash('sha256').update(JSON.stringify(canonicalObservation(state))).digest('hex');
 }
 
-// Native v0.111.0 TuningFork.AfterCardPlayed increments once per owned Skill.
-// Only a non-triggering increment is explained here. Activation can grant
-// Block and show the threshold during its animation, so it still needs review.
+// Explain only observed, non-triggering relic counters. An activation or an
+// unknown rule still requires review before the next planned command.
 function expectedNonTriggerRelics(combat, step) {
   const card = step?.kind === 'play_card' && combat.hand.find(card => cardInstance(card) === step.card_instance_id);
-  if (card?.type !== 'Skill') return null;
+  if (!card) return null;
   let changed = false;
   const relics = canonicalRelics(combat.player.relics)?.map(relic => {
+    // Pocketwatch counts cards in v0.111.0. Counts 0..3 remain Active;
+    // crossing beyond three forfeits its next-turn draw and needs review.
+    if (relic.id === 'POCKETWATCH' && relic.status === 'Active'
+      && relic.description === 'Whenever you play 3 or fewer cards during your turn, draw 3 additional cards at the start of your next turn.'
+      && Number.isSafeInteger(relic.counter) && relic.counter >= 0 && relic.counter < 3) {
+      changed = true;
+      return { ...relic, counter: relic.counter + 1 };
+    }
     if (relic.id !== 'TUNING_FORK' || relic.status !== 'Normal') return relic;
+    if (card.type !== 'Skill') return relic;
     const match = /^Every time you play (\d+) Skills, gain ([\d.]+) Block\.$/.exec(relic.description || '');
     const threshold = Number(match?.[1]);
     if (!Number.isSafeInteger(threshold) || threshold < 2 || !Number.isSafeInteger(relic.counter)
