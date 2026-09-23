@@ -120,6 +120,34 @@ test('a known boss next receives exact heal arithmetic and a reversed rest-versu
   assert.equal(result.usage.input_tokens, 30);
 });
 
+test('very low HP before ordinary fights needs two-order evidence to Smith instead of Rest', async () => {
+  for (const smithInReverse of [false, true]) {
+    const state = camp(), memory = new DecisionMemory();
+    state.decision_context.player.hp = 18;
+    memory.observe(state);
+    let calls = 0;
+    const result = await makeModDecisionWithJev(state, { memory, runStrategy: false,
+      apiKey: 'fixture-only', fetchImpl: async (_url, request) => {
+        calls++;
+        const payload = JSON.parse(request.body); payload.state = JSON.parse(payload.state);
+        let answers;
+        if (payload.questions.upgrade_target) answers = { upgrade_target: { type: 'choice', choice: 'upgrade_0' } };
+        else if (payload.questions.next_action) answers = { next_action: { type: 'choice', choice: 'rest_SMITH' } };
+        else {
+          assert.equal(payload.state.observation.screen_state.rest_site.survival_tradeoff.healing.hp_after, 42);
+          assert.match(payload.questions.low_hp_camp_forward.instructions, /bad opening hands/);
+          answers = { low_hp_camp_forward: { type: 'choice', choice: 'first' },
+            low_hp_camp_reverse: { type: 'choice', choice: smithInReverse ? 'second' : 'first' } };
+        }
+        return { ok: true, json: async () => ({ model: 'jev-test', answers }) };
+      } });
+    assert.equal(calls, 3);
+    assert.equal(result.request.id, smithInReverse ? 'SMITH' : 'HEAL');
+    assert.equal(result.camp_survival_comparison.reason, 'rest_at_least_doubles_current_hp');
+    assert.equal(result.camp_upgrade_plan !== undefined, smithInReverse);
+  }
+});
+
 test('camp intentions reject stale resources, changed previews and indistinguishable non-equivalent copies', () => {
   const state = camp(), target = campUpgradeTargets(state)[1], after = grid(state);
   const pick = view => plannedCampSelection(target, view, buildModCandidates(view));

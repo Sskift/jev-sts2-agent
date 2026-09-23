@@ -34,27 +34,34 @@ export async function decideCamp(state, options, prepared, choose) {
   let decision = initial, comparison = null;
   const survival = payload.state.screen_state.rest_site?.survival_tradeoff;
   const rest = prepared.candidates.get('rest_HEAL');
-  if (initial.request?.id === 'SMITH' && rest && survival?.next_room.known_next_is_boss
-    && survival.healing.effective_hp_gain > 0) {
+  const bossNext = survival?.next_room.known_next_is_boss === true;
+  const urgentLowHp = survival?.healing.hp_before <= survival?.healing.effective_hp_gain;
+  if (initial.request?.id === 'SMITH' && rest && survival?.healing.effective_hp_gain > 0
+    && (bossNext || urgentLowHp)) {
     const heal = { action_id: 'rest_HEAL', effect: rest.description, outcome: survival.healing };
     const smith = { action_id: 'rest_SMITH', effect: 'Upgrade exactly one owned card',
       upgrade: publicCampTarget(targetDecision.target) };
-    const instructions = 'The next known room is the revealed boss. Which camp action better serves surviving and winning that fight? Compare the exact immediate HP before/after Rest with the one concrete Smith upgrade, including its chance to be drawn and played in time, current deck, relics, potions and the visible boss rules. A powerful upgrade can beat healing when survival is already secure, while an upgrade cannot help after a lethal turn. Use the complete current state; do not treat the earlier full-menu choice as a fact or assume hidden future rewards.';
-    const questions = Object.fromEntries([['boss_camp_forward', smith, heal], ['boss_camp_reverse', heal, smith]]
+    const instructions = bossNext
+      ? 'The next known room is the revealed boss. Which camp action better serves surviving and winning that fight? Compare the exact immediate HP before/after Rest with the one concrete Smith upgrade, including its chance to be drawn and played in time, current deck, relics, potions and the visible boss rules. A powerful upgrade can beat healing when survival is already secure, while an upgrade cannot help after a lethal turn. Use the complete current state; do not treat the earlier full-menu choice as a fact or assume hidden future rewards.'
+      : 'Rest would add at least as much HP as the player currently has before the next fights. Compare that exact survival buffer with upgrading this ONE actual card. Consider whether the upgrade is likely to be drawn and paid for before the next dangerous attack, bad opening hands, available potions and the visible route. Smith can still be better when its near-term effect reliably prevents more damage than Rest; an upgrade cannot help if the run dies first. Use the complete current state and do not assume hidden encounters or rewards.';
+    const prefix = bossNext ? 'boss_camp' : 'low_hp_camp';
+    const questions = Object.fromEntries([[`${prefix}_forward`, smith, heal], [`${prefix}_reverse`, heal, smith]]
       .map(([id, first, second]) => [id, { type: 'choice', instructions, criteria: { first, second } }]));
-    const reviewed = await choose(state, options, phase(prepared, { ...payload, questions }, 'camp_boss_survival_comparison', result => {
+    const reviewed = await choose(state, options, phase(prepared, { ...payload, questions }, 'camp_survival_comparison', result => {
       const judgments = Object.entries(questions).map(([id, question]) => {
         const answer = result.answers?.[id];
         if (answer?.type !== 'choice' || !Object.hasOwn(question.criteria, answer.choice)) throw new Error('Invalid boss camp comparison');
         return { question: id, action_id: question.criteria[answer.choice].action_id,
           confidence: answer.confidence, probabilities: answer.probabilities };
       });
-      return { action: 'compare_boss_camp_survival', judgments,
+      return { action: 'compare_camp_survival', reason: bossNext ? 'revealed_boss_next' : 'rest_at_least_doubles_current_hp', judgments,
         consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
     }));
     comparison = reviewed;
     options.onPlanningDecision?.(reviewed);
-    if (reviewed.consensus_action_id === 'rest_HEAL') decision = { ...rest, candidate_id: 'rest_HEAL', model: reviewed.model };
+    if (reviewed.consensus_action_id === 'rest_HEAL'
+      || (urgentLowHp && reviewed.consensus_action_id !== 'rest_SMITH'))
+      decision = { ...rest, candidate_id: 'rest_HEAL', model: reviewed.model };
   }
   return { ...decision, ...(decision.request?.cmd === 'choose_rest_option' && decision.request.id === 'SMITH'
     ? { camp_upgrade_plan: targetDecision.target } : {}),
