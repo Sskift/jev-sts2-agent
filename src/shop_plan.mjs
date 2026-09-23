@@ -32,6 +32,44 @@ export async function planShopRemoval(state, options, prepared, choose) {
   return result;
 }
 
+// A paid card the model itself rated marginal needs a direct comparison with
+// keeping the gold. A useful card still passes through the full-menu choice.
+export async function compareShopCardWithSaving(state, options, prepared, decision, choose) {
+  if (state.screen !== 'SHOP' || decision.request?.cmd !== 'shop_buy_card') return decision;
+  const saving = prepared.candidates.get('proceed');
+  const rating = options.strategyAssessment?.options.find(option => option.action_id === decision.candidate_id)?.probabilities;
+  if (!saving || !rating || ![0, 1, 2, 3].every(level => Number.isFinite(rating[level]) && rating[level] >= 0 && rating[level] <= 1)
+    || Math.abs(Object.values(rating).reduce((sum, value) => sum + value, 0) - 1) >= 0.02
+    || rating[0] + rating[1] <= rating[2] + rating[3]) return decision;
+  const purchase = prepared.candidates.get(decision.candidate_id);
+  if (!purchase) throw new ContextError('Chosen shop card is missing from current candidates');
+  const buy = { action_id: decision.candidate_id, effect: purchase.description };
+  const leave = { action_id: 'proceed', effect: saving.description, gold_carried_forward: state.shop.player_gold };
+  const instructions = 'The proposed paid card was independently rated more likely marginal or worse than clearly useful. Reconsider that uncertain judgment using the complete current state. Which outcome better serves winning the run: buy this exact card now, or leave this shop carrying the gold? Compare its concrete job, existing copies, energy and draw cost, price, current deck needs, visible boss and route. A needed immediate card can still justify its cost; a redundant or unreliable addition can make the deck worse. Leaving forfeits this shop stock. Do not assume unknown future offers or treat the earlier rating as a fact. Choose the better complete tradeoff.';
+  const questions = Object.fromEntries([['card_forward', buy, leave], ['card_reverse', leave, buy]].map(([id, first, second]) =>
+    [id, { type: 'choice', instructions, criteria: { first, second } }]));
+  const payload = { ...prepared.payload, questions }, metrics = { ...prepared.metrics, purpose: 'shop_card_vs_saving', question_count: 2 };
+  metrics.request_bytes = compileModelRequest(payload, metrics).bytes;
+  if (metrics.request_bytes > metrics.max_request_bytes) throw new ContextError('Complete shop card comparison exceeds request budget');
+  const comparison = await choose(state, options, { ...prepared, payload, metrics, parseResult: result => {
+    const judgments = Object.entries(questions).map(([id, question]) => {
+      const answer = result.answers?.[id];
+      if (answer?.type !== 'choice' || !Object.hasOwn(question.criteria, answer.choice)) throw new Error('Invalid shop card comparison');
+      return { question: id, action_id: question.criteria[answer.choice].action_id, confidence: answer.confidence, probabilities: answer.probabilities };
+    });
+    return { action: 'compare_shop_card_with_saving', judgments,
+      consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
+  } });
+  options.onPlanningDecision?.(comparison);
+  const changed = comparison.consensus_action_id === 'proceed';
+  return { ...decision, ...(changed ? { ...saving, candidate_id: 'proceed', model: comparison.model,
+    confidence: undefined, probabilities: undefined } : {}),
+    initial_shop_card_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence,
+      probabilities: decision.probabilities }, shop_card_comparison: comparison,
+    usage: { input_tokens: (decision.usage?.input_tokens || 0) + (comparison.usage?.input_tokens || 0),
+      output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0) } };
+}
+
 // Compare removal with a purchase that consumes its budget, or with leaving
 // while removal is still affordable. Disagreement preserves the full-menu
 // choice; there is no hard-coded preference for removal.

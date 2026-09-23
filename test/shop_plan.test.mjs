@@ -8,7 +8,7 @@ import { compileModelRequest } from '../src/context_compiler.mjs';
 import { shopEconomy } from '../src/shop_context.mjs';
 import { shopRemovalBasis, plannedShopRemoval } from '../src/shop_plan_state.mjs';
 import { buildStrategyKnowledge } from '../src/strategy_knowledge.mjs';
-import { compareShopRemoval } from '../src/shop_plan.mjs';
+import { compareShopRemoval, compareShopCardWithSaving } from '../src/shop_plan.mjs';
 
 const strike = (instance, extra = {}) => fixtureCard('STRIKE_IRONCLAD', { details: { instance_id: instance, upgrade_level: 0 }, ...extra });
 function shop() {
@@ -179,6 +179,28 @@ test('leaving an affordable removal behind gets a direct save-gold comparison', 
   assert.equal(decision.shop_budget_comparison.consensus_action_id, 'remove_card');
   assert.equal(decision.confidence, undefined);
   assert.equal(decision.usage.input_tokens, 200);
+});
+
+test('a paid card rated marginal needs a second look against keeping the gold', async () => {
+  const state = shop(), prepared = prepareModDecision(state);
+  const initial = { ...prepared.candidates.get('buy_card_0'), candidate_id: 'buy_card_0', confidence: 0.7,
+    probabilities: { buy_card_0: 0.7 }, usage: { input_tokens: 100 } };
+  const options = { strategyAssessment: { options: [{ action_id: 'buy_card_0',
+    probabilities: { 0: 0.1, 1: 0.6, 2: 0.25, 3: 0.05 } }] } };
+  const decision = await compareShopCardWithSaving(state, options, prepared, initial, async (_s, _o, p) => {
+    assert.equal(p.payload.questions.card_forward.criteria.first.action_id, 'buy_card_0');
+    assert.equal(p.payload.questions.card_reverse.criteria.first.gold_carried_forward, 107);
+    return { ...p.parseResult({ answers: {
+      card_forward: { type: 'choice', choice: 'second' },
+      card_reverse: { type: 'choice', choice: 'first' }
+    } }), usage: { input_tokens: 100 } };
+  });
+  assert.equal(decision.request.cmd, 'proceed');
+  assert.equal(decision.shop_card_comparison.consensus_action_id, 'proceed');
+  assert.equal(decision.confidence, undefined);
+  assert.equal(decision.usage.input_tokens, 200);
+  options.strategyAssessment.options[0].probabilities = { 0: 0.1, 1: 0.2, 2: 0.6, 3: 0.1 };
+  assert.equal(await compareShopCardWithSaving(state, options, prepared, initial, () => { throw new Error('No comparison needed'); }), initial);
 });
 
 test('removal guidance is scoped to shops and permanent removal, not combat discard choices', () => {
