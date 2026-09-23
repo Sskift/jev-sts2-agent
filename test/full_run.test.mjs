@@ -17,6 +17,26 @@ test('ordinary rewards keep offering cards, gold and proceeding', () => {
   assert.ok(candidates.has('proceed'));
 });
 
+test('free gold and a potion with an uncontested open slot are claimed before leaving rewards', async () => {
+  const state = withContext({ screen: 'REWARD', rewards: { can_skip: true, rewards: [
+    { index: 0, type: 'Gold', description: '17 Gold' },
+    { index: 1, type: 'Potion', description: 'Speed Potion', potion_id: 'SPEED_POTION' },
+    { index: 2, type: 'Card', card_choices: [{ index: 0, id: 'A', name: 'A', description: 'Example card', cost: 1 }] }
+  ] } });
+  let calls = 0;
+  const offline = { runStrategy: false, apiKey: 'offline', fetchImpl() { calls++; throw new Error('Offline'); } };
+  const gold = await makeModDecisionWithJev(state, offline);
+  assert.deepEqual(gold.request, { cmd: 'reward_claim', reward_type: 'gold', nth: 0 });
+  state.rewards.rewards.shift();
+  const potion = await makeModDecisionWithJev(state, offline);
+  assert.deepEqual(potion.request, { cmd: 'reward_claim', reward_type: 'potion', nth: 0 });
+  assert.equal(calls, 0);
+  state.rewards.rewards.unshift({ index: 3, type: 'Potion', description: 'Another potion', potion_id: 'ANOTHER_POTION' });
+  state.decision_context.potion_capacity = 1;
+  await assert.rejects(makeModDecisionWithJev(state, offline), /network or timeout/);
+  assert.equal(calls, 1);
+});
+
 test('shop candidates exclude unaffordable and sold items but count sold copies for nth', () => {
   const state = withContext({ screen: 'SHOP', shop: { player_gold: 80, can_proceed: true,
     cards: [

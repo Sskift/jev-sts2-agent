@@ -125,6 +125,23 @@ export function shortlistPlans(candidates, judgments) {
   for (const handoff of new Set(ranked.map(item => item.label.continuation.handoff))) {
     add(ranked.find(item => item.label.continuation.handoff === handoff), 'best_assessed_handoff');
   }
+  // Independent scores can undervalue a concrete damage window (for example
+  // stripping the last Slippery charge before a heavy hit). Keep one calculated
+  // progress alternative for direct comparison when its projected HP is no
+  // worse than the top-rated plan. This nominates an option; it never forces it.
+  const topHp = ranked[0]?.label.conditional_preview?.known_effects_only?.hp_if_ending;
+  if (Number.isFinite(topHp)) {
+    const progress = ranked.map(item => {
+      const preview = item.label.conditional_preview;
+      const known = preview?.known_effects_only;
+      const enemies = known?.enemies;
+      if (preview?.sequence_dependencies?.checkpoint || !Number.isFinite(known?.hp_if_ending)
+        || known.hp_if_ending < topHp || !Array.isArray(enemies) || !enemies.length
+        || enemies.some(enemy => !Number.isFinite(enemy.hp_removed))) return null;
+      return { item, damage: enemies.reduce((sum, enemy) => sum + enemy.hp_removed, 0) };
+    }).filter(Boolean).toSorted((a, b) => b.damage - a.damage || scores.get(b.item.value).score - scores.get(a.item.value).score);
+    if (progress[0]?.damage > 0) add(progress[0].item, 'largest_calculated_damage_at_no_worse_projected_hp');
+  }
   const observations = ranked.filter(item => item.label.continuation.further_player_choices);
   if (observations.length) {
     const energy = Math.max(...observations.map(item => item.label.energy_left));

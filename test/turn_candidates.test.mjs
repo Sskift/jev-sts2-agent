@@ -256,3 +256,17 @@ test('shortlisting compares different commitments instead of filling its slots w
   assert.equal(result.assessments.at(-1).reason, 'preserve_resources_for_observation');
   assert.throws(() => shortlistPlans(plans, judgments.slice(1)), /coverage/);
 });
+
+test('a high-damage sequence survives low independent ratings when projected HP is no worse', () => {
+  const entry = (value, score, damage, hp = 25) => ({ value, score, allocation: value,
+    label: { energy_left: 0, continuation: { handoff: 'end', further_player_choices: false },
+      conditional_preview: { known_effects_only: { hp_if_ending: hp, enemies: [{ hp_removed: damage }] },
+        sequence_dependencies: { checkpoint: null } } } });
+  const plans = [entry('defend', 1.9, 1), entry('taunt', 1.8, 1), entry('block', 1.7, 0),
+    entry('strike_then_heavy', 1.3, 21), entry('unsafe_burst', 1.2, 40, 5)];
+  const result = shortlistPlans(plans, plans.map(({ value, score }) => ({ value, score })));
+  assert.ok(result.candidates.some(item => item.value === 'strike_then_heavy'));
+  assert.ok(!result.candidates.some(item => item.value === 'unsafe_burst'));
+  assert.equal(result.assessments.find(item => item.value === 'strike_then_heavy').reason,
+    'largest_calculated_damage_at_no_worse_projected_hp');
+});

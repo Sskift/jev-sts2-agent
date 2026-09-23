@@ -381,6 +381,19 @@ export async function makeModDecisionWithJev(gameState, options = {}) {
 }
 
 async function decidePrepared(gameState, options, prepared) {
+  if (gameState.screen === 'REWARD') {
+    const rewards = gameState.rewards?.rewards || [];
+    const freeGold = rewards.find(reward => reward.type === 'Gold' && prepared.candidates.has(`claim_${reward.index}`));
+    const potions = rewards.filter(reward => reward.type === 'Potion' && prepared.candidates.has(`claim_${reward.index}`));
+    const openSlots = gameState.decision_context?.potion_capacity - gameState.decision_context?.player.potions.length;
+    // Independent free rewards have no deck cost. When potions compete for
+    // fewer slots than offers, keep the choice with Jev.
+    const free = freeGold || (Number.isInteger(openSlots) && openSlots >= potions.length ? potions[0] : null);
+    if (free) {
+      const candidate_id = `claim_${free.index}`;
+      return { ...prepared.candidates.get(candidate_id), candidate_id, model: 'claim-free-reward', context_metrics: prepared.metrics };
+    }
+  }
   const shopSelection = plannedShopRemoval(options.memory?.data.shop_removal_plan, gameState, prepared.candidates);
   if (shopSelection) return { ...shopSelection, model: 'jev-shop-plan-selection', context_metrics: prepared.metrics };
   const campSelection = plannedCampSelection(options.memory?.data.camp_upgrade_plan, gameState, prepared.candidates);
