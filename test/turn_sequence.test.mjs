@@ -173,7 +173,7 @@ test('automatic extra plays do not reuse a single manual hit count for retaliati
 
 test('complete plans distinguish expiring excess Block from a preserved consumable', () => {
   const s = combat();
-  s.combat.enemies[0].intents = [{ type: 'Buff', description: 'Buffing' }];
+  s.combat.enemies[0].intents = [{ type: 'Stun', description: 'Stunned' }];
   s.combat.player.potions = [{ id: 'SPEED_POTION', slot: 0, description: 'Gain 5 Dexterity. At the end of your turn, lose 5 Dexterity.' }];
   const used = describePlanAlternative(s, [potion('SPEED_POTION'), play('DEFEND_IRONCLAD'), end]);
   const kept = describePlanAlternative(s, [play('DEFEND_IRONCLAD'), end]);

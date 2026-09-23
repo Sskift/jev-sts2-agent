@@ -6,8 +6,8 @@ import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
 import { independentTurnCandidates, adjacentPlanOrders, concentratedPlanTargets, compareFinalists, planSignature, planOrderSignature, planAllocation, shortlistPlans, limitPlanAssessments } from './turn_candidates.mjs';
 import { describeContinuation } from './card_flow_projection.mjs';
-import { intentDamage } from './combat_arithmetic.mjs';
 import { ContextError } from './decision_context.mjs';
+import { displayedAttackTotal } from './combat_observation.mjs';
 
 const signature = planSignature;
 const bindFollowthrough = (step, following) => {
@@ -48,7 +48,7 @@ export function describePlanAlternative(state, steps) {
     Object.assign(continuation, { handoff: 'combat_completion', further_player_choices: false });
   }
   if (completion) continuation.completion_if_calculated_defeats_resolve = completion;
-  const currentAttack = state.combat.enemies.filter(e => e.is_alive && e.hp > 0).reduce((sum, e) => sum + intentDamage(e), 0);
+  const currentAttack = displayedAttackTotal(state.combat.enemies);
   const blockable = known.incoming_attack === null ? null : known.incoming_attack + known.end_turn_damage_events.reduce((sum, event) => sum + event.amount, 0);
   let energyAfterReservedCosts = state.combat.player.energy;
   return {

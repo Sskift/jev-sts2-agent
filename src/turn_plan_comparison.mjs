@@ -1,5 +1,6 @@
-import { combatForecast, intentDamage, previewHitCount } from './combat_arithmetic.mjs';
+import { combatForecast, previewHitCount } from './combat_arithmetic.mjs';
 import { uncomputedAttackReactions } from './combat_reactions.mjs';
+import { displayedAttackTotal } from './combat_observation.mjs';
 
 export const planValueLevels = [
   'A losing or seriously wasteful commitment: an avoidable defeat, failed essential dependency, or sacrifice with no credible compensating benefit.',
@@ -27,8 +28,7 @@ export function resolvePlanAssessments(plans, answers) {
 // not permission to override the value judgment. This is not a safety proof.
 export function visibleSurvivalConstraints(state) {
   const combat = state.combat, constraints = [];
-  const incoming = combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0)
-    .reduce((sum, enemy) => sum + intentDamage(enemy), 0);
+  const incoming = displayedAttackTotal(combat.enemies);
   const selfLoss = combat.hand.reduce((sum, card) => sum + Math.max(0, card.hp_loss || 0), 0);
   const reactionRules = new Set();
   const reactionExposure = combat.hand.reduce((sum, card) => {
@@ -38,7 +38,7 @@ export function visibleSurvivalConstraints(state) {
     return sum + Math.max(0, ...alternatives.map(reactions => reactions.reduce((total, reaction) => total + (reaction.damage_if_all_preview_hits_resolve ?? 0), 0)));
   }, 0);
   const forecast = combatForecast(combat);
-  if (incoming + selfLoss + reactionExposure >= combat.player.hp || forecast.fatal_if_end_turn === true && !forecast.instant_death_if_end_turn) {
+  if (incoming !== null && incoming + selfLoss + reactionExposure >= combat.player.hp || forecast.fatal_if_end_turn === true && !forecast.instant_death_if_end_turn) {
     constraints.push({ kind: 'potential_lethal_health_loss', current_hp: combat.player.hp,
       displayed_attacks_before_block: incoming, hand_declared_self_loss_upper_bound: selfLoss,
       ...(reactionExposure ? { hand_preview_reaction_exposure: reactionExposure, reaction_rule_ids: [...reactionRules] } : {}),

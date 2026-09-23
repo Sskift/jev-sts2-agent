@@ -15,7 +15,7 @@ function compatible(node, enemy, repertoire) {
   if (!actual.length || JSON.stringify(actual) !== JSON.stringify(expected)) return false;
   const move = repertoire?.find(move => move.id === node.move_id);
   const attack = enemy.intents.find(i => intentKind(i.type) === 'Attack');
-  if (attack && move?.damage) return (attack.hits || 1) === (move.damage.hit_count || 1);
+  if (attack && move?.damage) return Number.isSafeInteger(attack.hits) && attack.hits === (move.damage.hit_count ?? 1);
   return true;
 }
 

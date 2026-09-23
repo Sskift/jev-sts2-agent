@@ -5,7 +5,7 @@ import { refreshRunStrategy } from './run_strategy.mjs';
 import { validateModRequest } from './mod_client.mjs';
 import { buildDecisionContext, ContextError, compactDecisionRequest, validateDecisionPacket, cardRewardKey, presentCurrentRecords } from './decision_context.mjs';
 import { potionEffectFacts, potionForRequest } from './potion_effects.mjs';
-import { combatForecast, firstHitHpLoss, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
+import { combatForecast, attackHpLoss, previewDamageSum } from './combat_arithmetic.mjs';
 import { selectionStage, assembleSelection } from './mod_selection.mjs';
 import { needsStrategyAssessment, prepareStrategyAssessment, parseStrategyAssessment } from './strategy_assessment.mjs';
 import { decideTurn } from './turn_plan.mjs';
@@ -15,6 +15,7 @@ import { plannedCampSelection } from './camp_plan_state.mjs';
 import { removableCard } from './shop_context.mjs';
 import { planShopRemoval, compareShopRemoval, compareShopCardWithSaving, compareShopFirstAttack } from './shop_plan.mjs';
 import { compareRewardSkip } from './reward_plan.mjs';
+import { displayedAttackTotal } from './combat_observation.mjs';
 import { plannedShopRemoval, shopRemovalApplicable } from './shop_plan_state.mjs';
 
 const integer = value => Number.isInteger(value) && value >= 0;
@@ -100,11 +101,7 @@ export function buildModCandidates(state) {
           for (const enemy of enemies) if (!Array.isArray(card.valid_target_ids) || card.valid_target_ids.includes(enemy.combat_id)) {
             const preview = card.target_previews?.find(p => p.target_id === enemy.combat_id);
             const effect = `${description}${Number.isFinite(preview?.damage) ? ` Deal ${preview.damage} damage per hit.` : ''}`;
-            const hit = firstHitHpLoss(card, enemy);
-            const lethal = hit && hit.hp_loss >= enemy.hp ? ' Current first-hit preview is enough to deplete target HP if the hit resolves.' : '';
-            const revival = enemy.powers?.some(power => power.id === 'ILLUSION_POWER' && power.amount > 0);
-            const deathRule = revival ? ' Illusion: revives next turn at full HP; a knockdown only provides temporary relief.' : enemy.is_minion ? ' Minion: abandons combat when its leader dies.' : enemies.some(other => other.is_minion) && enemies.filter(other => !other.is_minion).length === 1 ? ' Last non-minion: defeating this leader makes its minions abandon combat.' : '';
-            add(`card_${card.index}_target_${enemy.combat_id}`, { ...request, target: enemy.combat_id }, `${effect} Target ${enemy.name} #${enemy.combat_id}.${lethal}${deathRule}`, { card_hand_index: card.index, target_combat_id: enemy.combat_id });
+            add(`card_${card.index}_target_${enemy.combat_id}`, { ...request, target: enemy.combat_id }, `${effect} Target ${enemy.name} #${enemy.combat_id}.`, { card_hand_index: card.index, target_combat_id: enemy.combat_id });
           }
         } else if (['AnyAlly', 'AnyPlayer'].includes(card.target_type) && Array.isArray(card.valid_target_ids)) {
           for (const target of card.valid_target_ids) if (integer(target)) {
@@ -131,8 +128,8 @@ export function buildModCandidates(state) {
           add(`potion_${potion.slot}`, request, description);
         }
       }
-      const incoming = enemies.flatMap(e => e.intents || []).reduce((n, i) => n + (Number.isFinite(i.damage) ? i.damage * (i.hits || 1) : 0), 0);
-      add('end_turn', { cmd: 'end_turn' }, `End turn: ${combat.player.energy} unused energy, ${combat.player.block} Block, ${incoming} incoming attack damage. Spend resources on useful actions first.`);
+      const incoming = displayedAttackTotal(enemies);
+      add('end_turn', { cmd: 'end_turn' }, `End turn: ${combat.player.energy} unused energy, ${combat.player.block} Block, ${incoming ?? 'unknown'} damage in currently displayed Attack intents. This is not final HP loss. Spend resources on useful actions first.`);
       break;
     }
     case 'HAND_SELECT': {
@@ -243,13 +240,14 @@ export function buildModCandidates(state) {
       const observedDescription = action.description;
       const unknownBlock = estimate.block_preview?.amount === null;
       action.description += ` End-now HP ${estimate.hp_remaining_if_end_turn ?? 'unknown'}${estimate.fatal_if_end_turn && !unknownBlock ? ' (FATAL)' : ''}; energy after printed cost ${estimate.energy_after_printed_cost} (gains excluded).`;
+      if (estimate.calculation_coverage.uncovered_effects.length) action.description += ' Future totals are unknown because listed current effects are outside numeric coverage; evaluate the complete native rules.';
       if (estimate.incoming_attack_preview_valid === false) action.description += ` Facing changes to ${estimate.positioning.facing_after_sequence}; current enemy intent damage is stale for this outcome. Do not reuse it as the final incoming damage.`;
       if (estimate.uncomputed_reactions?.length) action.description += ` ${estimate.reaction_coverage} Evaluate the listed uncomputed_reactions before treating an attack or target depletion as safe.`;
       if (unknownBlock) action.description += ' Block contribution is UNKNOWN, not zero: this HP number omits that effect and cannot establish fatality. Evaluate the complete live rule.';
-      else if (estimate.block_preview) action.description += ` Immediate Block ${estimate.block_preview.amount} from the resolved live first sentence; its native numeric preview is absent.`;
+      else if (estimate.block_preview) action.description += ` Immediate Block ${estimate.block_preview.amount} from the complete unconditional live rule; its native numeric preview is absent.`;
       if (estimate.active_rage_block_gain) action.description += ` Active Rage adds ${estimate.active_rage_block_gain} Block for playing this Attack (once per card, already included in the estimate).`;
-      if (estimate.end_turn_block_gains.length) action.description += ` Automatic turn-end Block: ${estimate.end_turn_block_gains.map(gain => `${gain.source_id} +${gain.amount}`).join(', ')}; included once in end-now HP, not immediate Block.`;
-      if (card?.cost < 0 && !card.attack_preview) action.description += ' X-cost: per-hit damage does not guarantee a hit. Without a known hit count this estimate assumes no attack repetitions; use current energy, card rules and modifiers.';
+      if (estimate.end_turn_block_gains.length) action.description += ` Conditional turn-end Block components: ${estimate.end_turn_block_gains.map(gain => `${gain.source_id} +${gain.amount}`).join(', ')}; these do not establish the final total when other effects are unresolved.`;
+      if (card?.cost < 0 && !card.attack_preview) action.description += ' X-cost: per-hit damage does not guarantee a hit. Missing hit count means unknown repetitions, not zero; use current energy, card rules and modifiers.';
       if (estimate.declared_self_hp_loss) action.description += ` Printed self HP loss ${estimate.declared_self_hp_loss}; HP after that loss ${estimate.hp_remaining_after_declared_loss ?? 'unknown'}${estimate.fatal_from_declared_hp_loss ? ' (LETHAL SELF-LOSS before waiting for enemies)' : ''}. Check any loss-prevention effects.`;
       if (estimate.uncomputed_death_prevention?.length) action.description += ' An automatic death-prevention potion can be consumed during this sequence; final HP and survival require its trigger order and subsequent damage, which are not simulated.';
       if (estimate.end_turn_hand_damage) action.description += ` Remaining Toxic cards deal ${estimate.end_turn_hand_damage} extra blockable damage at end of turn.`;
@@ -261,9 +259,7 @@ export function buildModCandidates(state) {
       if (estimate.instant_death_if_end_turn) action.description += ' Sandpit causes instant death on the next enemy turn, regardless of HP/Block.';
       else if (card?.id === 'FRANTIC_ESCAPE' && estimate.death_timers?.length) action.description += ` Sandpit deadline extended to ${estimate.death_timers[0].enemy_turns_remaining_after_card} enemy turns.`;
       const hit = card && target ? attackHpLoss(card, target) : null;
-      if (hit?.limits.length) action.description += ` ${hit.limits.join(', ')}: preview HP damage ${hit.hp_loss} across ${hit.hits} counted hits.`;
-      const followup = estimate.followup_attacks;
-      if (followup?.enough_to_deplete_target && followup.hand_indices.length) action.description += ` Then hand ${followup.hand_indices.join(', ')} has ${followup.hp_damage} damage: enough to finish this target.`;
+      if (hit?.limits.length && Number.isFinite(estimate.attack_hp_loss)) action.description += ` ${hit.limits.join(', ')}: conditional HP damage ${hit.hp_loss} across ${hit.hits} counted hits.`;
       estimate.explanation = action.description.slice(observedDescription.length).trim();
       action.description = observedDescription;
     }
@@ -343,7 +339,6 @@ export function prepareModDecision(gameState, options = {}) {
             ...(estimate.uncomputed_death_prevention ? { uncomputed_death_prevention: estimate.uncomputed_death_prevention } : {}),
             ...(estimate.positioning ? { positioning: estimate.positioning } : {}),
             ...(estimate.active_rage_block_gain ? { rage_block_included: estimate.active_rage_block_gain } : {}),
-            ...(estimate.followup_attacks?.hand_indices.length ? { conditional_followups: estimate.followup_attacks } : {}),
             ...(estimate.attack_trigger_potential ? { conditional_attack_block: { hand_indices: estimate.attack_trigger_potential.hand_indices, additional_block_if_all_played: estimate.attack_trigger_potential.additional_block_if_all_played } } : {})
           } } : {}) }];
       }))

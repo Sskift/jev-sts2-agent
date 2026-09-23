@@ -213,12 +213,13 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
       if (hp.max === null || invalidIncoming.has(original.combat_id)) return null;
       if ((bound === 'min' ? hp.min : hp.max) === 0) return 0;
       if (!newlyWeak) return intentDamage(variants[bound === 'min' ? 0 : 1]);
+      if (intentDamage(original) === null) return null;
       return original.intents.reduce((sum, intent) => sum + (Number.isFinite(intent.damage)
-        ? scaledPreview(intent.damage, 3, 4, bound) * (intent.hits || 1) : 0), 0);
+        ? scaledPreview(intent.damage, 3, 4, bound) * intent.hits : 0), 0);
     });
     const exactStrengthIntents = changedStrength && variants.every(e => JSON.stringify(e.intents) === JSON.stringify(variants[0].intents))
       && !invalidIncoming.has(original.combat_id)
-      ? variants[0].intents.map((intent, index) => ({ index, type: intent.type, damage: intent.damage ?? null, hits: intent.hits ?? 1 })) : null;
+      ? variants[0].intents.map((intent, index) => ({ index, type: intent.type, damage: intent.damage ?? null, hits: intent.hits ?? null })) : null;
     return { combat_id: original.combat_id, hp_remaining: hp,
       block_remaining: invalid.has(original.combat_id) ? { min: null, max: null } : bounds(variants.map(e => e.block)),
       power_changes: modeledPowerChanges(original, variants, invalid.has(original.combat_id)),

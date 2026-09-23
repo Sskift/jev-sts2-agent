@@ -755,6 +755,7 @@
       "required": ["calculation_status", "fully_simulated", "known_effects_only", "omitted_effects", "interpretation", "scope"],
       "properties": {
         "calculation_status": { "enum": ["incomplete", "preview_arithmetic"] },
+        "calculation_coverage": { "type": "object" },
         "fully_simulated": { "const": false },
         "known_effects_only": {
           "type": "object", "additionalProperties": false,

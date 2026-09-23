@@ -225,7 +225,9 @@ test('uncomputed potion benefits stay distinct from equal numeric baselines', ()
   const s = state();
   const plain = describeTurnProjection(s, [strike]);
   const withPotion = describeTurnProjection(s, [{ kind: 'use_potion', name: 'Strength Potion' }, strike]);
-  assert.deepEqual(withPotion.known_effects_only, plain.known_effects_only);
+  assert.equal(withPotion.known_effects_only.hp_if_ending, null);
+  assert.equal(withPotion.known_effects_only.enemies[0].hp, null);
+  assert.equal(plain.known_effects_only.hp_if_ending, 28);
   assert.equal(withPotion.calculation_status, 'incomplete');
   assert.equal(plain.calculation_status, 'preview_arithmetic');
   assert.equal(withPotion.fully_simulated, false);

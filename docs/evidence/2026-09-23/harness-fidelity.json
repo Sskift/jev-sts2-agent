@@ -1,0 +1,270 @@
+{
+  "recorded_at": "2026-09-23T16:04:41.914Z",
+  "baseline_commit": "73b09dd",
+  "scope": "Native combat snapshot → canonical packet → compiled model request. Every supplied combat/player/pile/deck/rule record is verified before encoding; the compiler verifies reversible encoding. No claim that the native extractor exposes every game mechanic or that forecasts fully simulate combat.",
+  "development_runs": [
+    43,
+    44
+  ],
+  "validation_runs": [
+    19,
+    24,
+    26
+  ],
+  "validation_note": "The three older runs were inspected only after the harness changes passed focused regressions. They have earlier project exposure; this is a transport regression, not a fresh decision-quality holdout. Resumed-session snapshots are counted as separate records, not independent game outcomes.",
+  "model_calls": 0,
+  "game_commands": 0,
+  "snapshots": 943,
+  "verified": 943,
+  "failures": 0,
+  "checks": {
+    "full_suite": {
+      "tests": 294,
+      "passed": 294,
+      "failures": 0
+    },
+    "final_saved_request_validation": 13
+  },
+  "functional_changes": [
+    "Every supplied current combat field, player record, target preview, pile, deck and native rule is checked against the original native input.",
+    "Identity aliases are round-trip checked. A required fact digest survives packing, text interning, presentation and final compiler validation; missing or modified facts stop the request.",
+    "Unknown damage/counts propagate as null. Zero stays zero. A displayed attack sum is not a final HP/fatality prediction.",
+    "Missing Block previews no longer parse only the first sentence of a conditional rule.",
+    "Unrecognized powers, relics, card attachments, automatic actors and uncomputed actions invalidate dependent counterfactual totals while retaining native values/rules.",
+    "Unordered follow-up kill budgets were removed; all active power/relic rules remain in the effect ledger, including zero-stack effects."
+  ],
+  "runs": [
+    {
+      "run": 19,
+      "run_id": "run-1789879418",
+      "snapshots": 315,
+      "verified": 315,
+      "failures": 0,
+      "estimates": {
+        "bounded": 0,
+        "incomplete": 1364
+      }
+    },
+    {
+      "run": 24,
+      "run_id": "run-1789900349",
+      "snapshots": 224,
+      "verified": 224,
+      "failures": 0,
+      "estimates": {
+        "bounded": 0,
+        "incomplete": 1049
+      }
+    },
+    {
+      "run": 26,
+      "run_id": "run-1789906322",
+      "snapshots": 160,
+      "verified": 160,
+      "failures": 0,
+      "estimates": {
+        "bounded": 0,
+        "incomplete": 779
+      }
+    },
+    {
+      "run": 43,
+      "run_id": "run-1790173472",
+      "snapshots": 127,
+      "verified": 127,
+      "failures": 0,
+      "estimates": {
+        "bounded": 70,
+        "incomplete": 485
+      }
+    },
+    {
+      "run": 44,
+      "run_id": "run-1790175430",
+      "snapshots": 117,
+      "verified": 117,
+      "failures": 0,
+      "estimates": {
+        "bounded": 120,
+        "incomplete": 449
+      }
+    }
+  ],
+  "sessions": [
+    {
+      "session": "2026-09-23T14-24-29-080Z-e5986048",
+      "snapshots": 127,
+      "verified": 127,
+      "failures": [],
+      "max_request_bytes": 63039,
+      "verified_snapshot_index_sha256": "c9ee2765d4d256bd1639c240340d23d1c7c150944b7e0764bcae5edb8ae26004",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-23T14-24-29-080Z-e5986048/step-0109/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-23T14-24-29-080Z-e5986048.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-23T14-24-29-080Z-e5986048.request.json"
+      }
+    },
+    {
+      "session": "2026-09-23T14-57-06-607Z-b797c60b",
+      "snapshots": 117,
+      "verified": 117,
+      "failures": [],
+      "max_request_bytes": 68707,
+      "verified_snapshot_index_sha256": "ae9a972a34ab67052a2f01d74c83b0f77cc61c3d3280b788ce94af0fdc076faf",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-23T14-57-06-607Z-b797c60b/step-0186/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-23T14-57-06-607Z-b797c60b.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-23T14-57-06-607Z-b797c60b.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T04-43-34-749Z-1126343a",
+      "snapshots": 14,
+      "verified": 14,
+      "failures": [],
+      "max_request_bytes": 42423,
+      "verified_snapshot_index_sha256": "8245010715046648a575122ea5a362a0e6bdc91a780ce0ed059f9374b5c047f4",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T04-43-34-749Z-1126343a/step-0019/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T04-43-34-749Z-1126343a.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T04-43-34-749Z-1126343a.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T04-45-25-301Z-0f18a1bf",
+      "snapshots": 151,
+      "verified": 151,
+      "failures": [],
+      "max_request_bytes": 69316,
+      "verified_snapshot_index_sha256": "f6b7264dfd058a0c84af80d09469c7900b0c32fc07b2a24836780ea8465232ee",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T04-45-25-301Z-0f18a1bf/step-0258/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T04-45-25-301Z-0f18a1bf.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T04-45-25-301Z-0f18a1bf.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T05-29-45-548Z-3a018899",
+      "snapshots": 44,
+      "verified": 44,
+      "failures": [],
+      "max_request_bytes": 82500,
+      "verified_snapshot_index_sha256": "753b1b4353c338860ed840356e00d158ffb4d0587ec484f2ab17e5f55ff521c1",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T05-29-45-548Z-3a018899/step-0022/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T05-29-45-548Z-3a018899.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T05-29-45-548Z-3a018899.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T05-56-20-581Z-e993c2ed",
+      "snapshots": 90,
+      "verified": 90,
+      "failures": [],
+      "max_request_bytes": 82950,
+      "verified_snapshot_index_sha256": "a960d67c375feed9dfb10608ff73cb136750b71f36666a1a06863012439313e0",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T05-56-20-581Z-e993c2ed/step-0030/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T05-56-20-581Z-e993c2ed.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T05-56-20-581Z-e993c2ed.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T06-56-29-269Z-0ef87b79",
+      "snapshots": 9,
+      "verified": 9,
+      "failures": [],
+      "max_request_bytes": 77036,
+      "verified_snapshot_index_sha256": "9c990c243a134d99f34f1e1bbac2e69cc52ef43b1009b2bdffca66404bee3f0c",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T06-56-29-269Z-0ef87b79/step-0009/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T06-56-29-269Z-0ef87b79.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T06-56-29-269Z-0ef87b79.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T07-01-46-473Z-3339a4c8",
+      "snapshots": 3,
+      "verified": 3,
+      "failures": [],
+      "max_request_bytes": 77036,
+      "verified_snapshot_index_sha256": "ad9188eea898896d72fea775aa626079ad4470d9d22f7679c225634d49f40605",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T07-01-46-473Z-3339a4c8/step-0001/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T07-01-46-473Z-3339a4c8.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T07-01-46-473Z-3339a4c8.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T07-06-43-801Z-36b782a2",
+      "snapshots": 4,
+      "verified": 4,
+      "failures": [],
+      "max_request_bytes": 76251,
+      "verified_snapshot_index_sha256": "c31e422ea814d953ba31449b2677b246d01b77f3a736e5bc4f932aa2891f71f7",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T07-06-43-801Z-36b782a2/step-0001/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T07-06-43-801Z-36b782a2.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T07-06-43-801Z-36b782a2.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T10-32-26-082Z-389690fd",
+      "snapshots": 62,
+      "verified": 62,
+      "failures": [],
+      "max_request_bytes": 57915,
+      "verified_snapshot_index_sha256": "8a6b84bd3df2f26ff6893b7991309dad41eccf61ec32721c8d0d7571931063ee",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T10-32-26-082Z-389690fd/step-0116/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T10-32-26-082Z-389690fd.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T10-32-26-082Z-389690fd.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T10-43-21-626Z-5c0b1377",
+      "snapshots": 127,
+      "verified": 127,
+      "failures": [],
+      "max_request_bytes": 86419,
+      "verified_snapshot_index_sha256": "2f44c2ef09ca75a07f51896c68deea2fc90780f8e622d1a8e90c05034b2f6bb6",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T10-43-21-626Z-5c0b1377/step-0175/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T10-43-21-626Z-5c0b1377.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T10-43-21-626Z-5c0b1377.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T11-00-04-270Z-80ddb435",
+      "snapshots": 35,
+      "verified": 35,
+      "failures": [],
+      "max_request_bytes": 78167,
+      "verified_snapshot_index_sha256": "83754f4fae09569d31cac9e8af492c8f8cd16024bbb150f69f030b2e4f365e17",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T11-00-04-270Z-80ddb435/step-0071/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T11-00-04-270Z-80ddb435.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T11-00-04-270Z-80ddb435.request.json"
+      }
+    },
+    {
+      "session": "2026-09-20T12-11-59-152Z-f7a98087",
+      "snapshots": 160,
+      "verified": 160,
+      "failures": [],
+      "max_request_bytes": 71173,
+      "verified_snapshot_index_sha256": "568cccb5278ead1c52ffc4c65b09dc51ae5016ff7804501195007779fc0a9548",
+      "sample": {
+        "native_source": "run-artifacts/2026-09-20T12-11-59-152Z-f7a98087/step-0151/before-state.json",
+        "native_copy": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T12-11-59-152Z-f7a98087.native.json",
+        "compiled_request": "run-artifacts/harness-fidelity-2026-09-23/2026-09-20T12-11-59-152Z-f7a98087.request.json"
+      }
+    }
+  ],
+  "limits": [
+    "Preservation proves supplied native facts survive; it cannot prove the mod exposes every relevant fact or validate every native numeric preview against the game engine.",
+    "Counterfactual arithmetic remains partial. Conservative null totals are intentional, not a claim that the effect has no benefit.",
+    "No Jev responses, winning-rate evidence, or new live game results were produced by this audit."
+  ],
+  "detailed_local_report": "run-artifacts/harness-fidelity-2026-09-23/audit.json"
+}

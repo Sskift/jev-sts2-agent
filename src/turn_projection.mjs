@@ -1,4 +1,5 @@
-import { attackHpLoss, combatForecast, intentDamage, knownStunThreshold, uncomputedDepletionRules } from './combat_arithmetic.mjs';
+import { attackHpLoss, combatForecast, combatForecastBaseline, intentDamage, knownStunThreshold, uncomputedDepletionRules } from './combat_arithmetic.mjs';
+import { forecastCoverage, coverageAffects } from './forecast_coverage.mjs';
 import { projectPositioning } from './combat_positioning.mjs';
 import { reserveActionSequence } from './turn_action_constraints.mjs';
 import { describeCardFlow } from './card_flow_projection.mjs';
@@ -38,9 +39,9 @@ export function unavailableTargetsAfterPrefix(state, steps) {
     && state.combat.enemies.some(current => current.combat_id === enemy.combat_id && current.is_alive && current.hp > 0)).map(enemy => enemy.combat_id);
 }
 
-function checkpointAttackBalance(projection, responseUnresolved, energy) {
-  const hp = projection.uncomputed_reactions.length ? null : projection.hp_after_declared_self_loss;
-  const block = projection.block;
+function checkpointAttackBalance(projection, responseUnresolved, energy, coverage) {
+  const hp = projection.uncomputed_reactions.length || coverageAffects(coverage, 'player_hp') ? null : projection.hp_after_declared_self_loss;
+  const block = coverageAffects(coverage, 'player_block') ? null : projection.block;
   const attack = responseUnresolved ? null : projection.current_attack_after_known_prefix;
   const uncovered = attack === null || block === null ? null : Math.max(0, attack - block);
   const margin = hp === null || uncovered === null ? null : hp - uncovered;
@@ -71,8 +72,13 @@ export function describeTurnProjection(state, steps) {
   }).map(result => result.combat_id));
   const projection = projectTurnPrefix(state, steps, { ...sequence, unknown_targets: sequence.unknown_targets.filter(id => !knownResponses.has(id)) },
     { enemies: resolved, applications: debuffs?.transitions || [], ordered_damage: debuffs?.ordered_damage || [] });
+  const coverage = forecastCoverage(state.combat, null, { sequence: true, uncomputedActions: projection.uncomputed_actions });
+  const unknownActions = coverageAffects(coverage, 'enemy_hp');
+  const unknownResponse = coverageAffects(coverage, 'enemy_response');
+  if (coverage.uncovered_effects.length) projection.unresolved_effects.push('Active effects outside numeric coverage invalidate future totals. Read calculation_coverage and the complete current rules.');
   const lifecycle = describeEffectLifecycle(state, steps);
   const affected = new Set([...(debuffs?.affected_target_ids || []), ...sequence.unknown_targets].filter(id => !resolved.some(e => e.combat_id === id)));
+  if (unknownActions) for (const enemy of state.combat.enemies) affected.add(enemy.combat_id);
   for (const reaction of projection.uncomputed_reactions) affected.add(reaction.owner_combat_id);
   const depletionEffects = projection.remaining_enemies.flatMap(enemy => {
     const before = state.combat.enemies.find(e => e.combat_id === enemy.combat_id);
@@ -82,34 +88,35 @@ export function describeTurnProjection(state, steps) {
   // A rounded damage range can leave the enemy certainly alive with the same
   // displayed attack. Its uncertain HP must not erase an independent response.
   // Possible depletion, changed attacks and other unknown modifiers still do.
-  const responseUnresolved = projection.uncomputed_reactions.length > 0 || [...affected].some(id => {
+  const responseUnresolved = unknownResponse || projection.uncomputed_reactions.length > 0 || [...affected].some(id => {
     const result = debuffs?.enemies.find(e => e.combat_id === id);
     const before = state.combat.enemies.find(e => e.combat_id === id);
     return !result || !(result.hp_remaining.min > 0)
       || result.current_attack_after_debuffs.min !== intentDamage(before)
       || result.current_attack_after_debuffs.max !== intentDamage(before);
   });
-  const hp = responseUnresolved ? null : projection.hp_if_ending_after_prefix;
+  const hp = responseUnresolved || projection.unresolved_effects.length ? null : projection.hp_if_ending_after_prefix;
   return {
     calculation_status: projection.unresolved_effects.length || debuffs || depletionEffects.length ? 'incomplete' : 'preview_arithmetic',
+    calculation_coverage: coverage,
     fully_simulated: false,
     known_effects_only: {
-      block: projection.block, hp_if_ending: hp,
+      block: coverageAffects(coverage, 'player_block') ? null : projection.block, hp_if_ending: hp,
       hp_loss_if_ending: hp === null ? null : state.combat.player.hp - hp,
-      block_including_end_turn_gains: depletionEffects.length ? null : projection.block_including_end_turn_gains,
+      block_including_end_turn_gains: coverageAffects(coverage, 'player_block') || depletionEffects.length ? null : projection.block_including_end_turn_gains,
       end_turn_block_gains: projection.end_turn_block_gains,
       end_turn_damage_events: projection.end_turn_damage_events,
-      ...(projection.threshold_reactions.length ? { threshold_reactions: projection.threshold_reactions } : {}),
+      ...(projection.threshold_reactions.length && !unknownActions ? { threshold_reactions: projection.threshold_reactions } : {}),
       incoming_attack: responseUnresolved ? null : projection.incoming_attack_after_prefix,
       enemies: projection.remaining_enemies.map(({ combat_id, hp, block }) => {
         const before = state.combat.enemies.find(enemy => enemy.combat_id === combat_id);
         const after = projection.remaining_enemies.find(enemy => enemy.combat_id === combat_id);
         const dependency = debuffs?.enemies.find(e => e.combat_id === combat_id);
-        const powerChanges = dependency?.power_changes
+        const powerChanges = !unknownActions && dependency?.power_changes
           || modeledPowerChanges(before, [after], affected.has(combat_id));
         if (affected.has(combat_id)) {
           const range = dependency?.hp_remaining;
-          const bounded = Number.isFinite(range?.min) && Number.isFinite(range?.max)
+          const bounded = !unknownActions && Number.isFinite(range?.min) && Number.isFinite(range?.max)
             && !depletionEffects.some(e => e.owner_combat_id === combat_id);
           return { combat_id, hp: null, block: null, hp_removed: null, block_removed: null, power_changes: powerChanges,
             ...(bounded ? { conditional_bounds: { hp: range, hp_removed: { min: before.hp - range.max, max: before.hp - range.min }, block: dependency.block_remaining } } : {}) };
@@ -117,12 +124,12 @@ export function describeTurnProjection(state, steps) {
         return { combat_id, hp, block, hp_removed: before.hp - hp, block_removed: before.block - block, power_changes: powerChanges };
       })
     },
-    ...(sequence.checkpoint ? { checkpoint_attack_balance: checkpointAttackBalance(projection, responseUnresolved, sequence.energy_left) } : {}),
+    ...(sequence.checkpoint ? { checkpoint_attack_balance: checkpointAttackBalance(projection, responseUnresolved, sequence.energy_left, coverage) } : {}),
     ...(projection.positioning ? { positioning: projection.positioning } : {}),
     ...(projection.uncomputed_reactions.length ? { uncomputed_reactions: projection.uncomputed_reactions } : {}),
     ...(projection.uncomputed_death_prevention.length ? { uncomputed_death_prevention: projection.uncomputed_death_prevention } : {}),
     ...(projection.card_flow ? { card_flow: projection.card_flow } : {}),
-    ...(debuffs ? { debuff_dependencies: debuffs } : {}),
+    ...(debuffs && !unknownActions ? { debuff_dependencies: debuffs } : {}),
     ...(lifecycle ? { effect_lifecycle: lifecycle } : {}),
     sequence_dependencies: { ...sequence.analysis, steps: sequence.analysis.steps.map(step => {
       const ordered = debuffs?.ordered_damage.filter(effect => effect.sequence === step.sequence) || [];
@@ -159,7 +166,12 @@ export function describeTurnProjection(state, steps) {
 // This is a conditional sum of visible previews, not a game simulator. Keeping
 // it separate from combat prevents planned outcomes from becoming observations.
 export function projectTurnPrefix(state, steps, sequence = inspectSequence(state, steps), dependencies = { enemies: [], applications: [] }) {
-  const combat = structuredClone(state.combat), unresolved = [], reactions = [], cardFlowEffects = [], attackEffects = [];
+  const combat = structuredClone(state.combat), unresolved = [], reactions = [], cardFlowEffects = [], attackEffects = [], uncomputedActions = [];
+  const uncomputedAction = (entry, source, reason) => {
+    unresolved.push(reason);
+    uncomputedActions.push({ category: entry.step.kind, owner: 'player', sequence: entry.sequence,
+      source_id: source?.id || entry.step.potion_id || entry.step.card_instance_id, live_rule: source?.description || '', reason });
+  };
   for (const entry of sequence.entries) {
     const { sequence: index, step } = entry;
     let card = entry.card;
@@ -172,12 +184,16 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     // A passive after-play reaction does not cover the card's own effects.
     const applications = dependencies.applications.filter(effect => effect.sequence === index && effect.timing !== 'after_card_play');
     const supportedApplication = applications.length > 0 && applications.every(effect => effect.outcome !== 'unresolved');
-    if (step.kind !== 'play_card') { if (!supportedApplication && !sequence.analysis.steps.find(s => s.sequence === index)?.applies_after_action) unresolved.push(`${step.name}: potion effects are not simulated`); continue; }
-    if (!card) { unresolved.push(`${step.name}: card availability is unconfirmed`); continue; }
+    if (step.kind !== 'play_card') {
+      if (!supportedApplication && !sequence.analysis.steps.find(s => s.sequence === index)?.applies_after_action)
+        uncomputedAction(entry, combat.player.potions?.find(p => p.slot === step.slot), `${step.name}: potion effects are not simulated`);
+      continue;
+    }
+    if (!card) { uncomputedAction(entry, null, `${step.name}: card availability is unconfirmed`); continue; }
     if (card.cost < 0 && !card.attack_preview) unresolved.push(`${card.name}: X-cost hit count after earlier spending is unknown`);
     const target = combat.enemies.find(enemy => enemy.combat_id === step.target);
     // Keep immediate Block separate from effects due only at turn end.
-    const estimate = combatForecast(combat, card, target);
+    const estimate = combatForecastBaseline(combat, card, target);
     for (const reaction of estimate.uncomputed_reactions || []) reactions.push({ sequence: index, ...reaction });
     for (const effect of estimate.card_flow?.effects || []) cardFlowEffects.push({ sequence: index, ...effect });
     if (estimate.block_preview?.amount === null) unresolved.push(`${card.name}: Block contribution is unknown, not zero; HP arithmetic omits it`);
@@ -209,10 +225,17 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
       || card.id === 'ARMAMENTS' && dependency?.upgrades_before_later_actions?.every(id => state.combat.hand.find(c => c.details?.instance_id === id)?.upgrade_preview)
       || card.id === 'SETUP_STRIKE' && dependency?.applies_after_action
       || ['INFLAME', 'FOOTWORK'].includes(card.id) && dependency?.applies_after_action
-      || card.id === 'WHIRLWIND' && Number.isFinite(dependency?.damage_instances)
+      || card.id === 'WHIRLWIND' && /^Deal [\d.]+ damage(?: to ALL enemies)? X times\.$/i.test(card.description.trim())
+      || card.id === 'SECOND_WIND' && Number.isFinite(card.block)
+      || card.id === 'DISMANTLE' && /^Deal [\d.]+ damage\. If the enemy is Vulnerable, hits twice\.$/i.test(card.description.trim())
+      || card.id === 'BREAKTHROUGH' && /^Lose \d+ HP\. Deal [\d.]+ damage to ALL enemies\.$/i.test(card.description.trim())
       || card.id === 'STOMP' && /^Deal [\d.]+ damage to ALL enemies\. Costs 1 less 1 Energy for each Attack played this turn\.$/i.test(card.description.trim())
       || card.id === 'FRANTIC_ESCAPE' && sandpitOwners.length === 1;
-    if (!covered && !/^(?:Deal [\d.]+ damage\.?|Gain [\d.]+ Block\.?)$/i.test(card.description.trim())) unresolved.push(`${card.name}: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed`);
+    // An unconditional draw ends the prefix. Its preceding plain damage/Block
+    // remains computable; the drawn identities and resulting turn stay unknown.
+    const drawCheckpoint = sequence.checkpoint && /^(?:(?:Deal [\d.]+ damage|Gain [\d.]+ Block)\. )?Draw \d+ cards?\.$/i.test(card.description.trim());
+    if (!covered && !drawCheckpoint && !/^(?:Deal [\d.]+ damage(?: to ALL enemies)?(?: (?:\d+ times|twice|thrice))?\.?|Gain [\d.]+ Block\.?)$/i.test(card.description.trim()))
+      uncomputedAction(entry, card, `${card.name}: only existing damage/Block previews and printed cost/self-loss are counted; other effects are unconfirmed`);
   }
   // Reconcile exact dependency bounds BEFORE calculating incoming damage and
   // turn-end hooks. A supported debuff must not erase a known HP/counter result
@@ -282,6 +305,7 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
     hp_if_ending_after_prefix: facingUnresolved || timedLossUnresolved || reactions.length || sequence.unknown_block || sequence.unknown_targets.length || sequence.checkpoint ? null : end.hp_remaining_if_end_turn,
     incoming_attack_after_prefix: facingUnresolved || reactions.length || sequence.unknown_targets.length || sequence.checkpoint ? null : end.displayed_attacks_after_target_depletion,
     uncomputed_reactions: reactions,
+    uncomputed_actions: uncomputedActions,
     uncomputed_death_prevention: end.uncomputed_death_prevention || [],
     attack_effects: attackEffects,
     threshold_reactions: thresholdReactions,

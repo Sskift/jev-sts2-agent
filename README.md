@@ -2,7 +2,7 @@
 
 《Slay the Spire 2》游戏 Agent：**C# 模组读取实时状态 → Node.js 组织规则与上下文 → Jev 制定回合计划 → 模组执行 → 重新观察。** 游戏自行结算和渲染，正常循环不要求窗口置顶。
 
-目前是研究原型，已记录到第 43 局，尚未通关；第 43 局在第一幕 Ceremonial Beast 首领战失败。此前局数与原生证据见[整局进展](docs/full-run-progress.md)，第 37 局的[复盘](docs/run37-review.md)区分了伤害核算、破盾与构筑取舍。
+目前是研究原型，已记录到第 44 局，尚未通关；第 44 局在第一幕 Kin 首领战失败。此前局数与原生证据见[整局进展](docs/full-run-progress.md)。当前优先修复 Harness 的事实保留和计算边界，暂停新对局。
 
 当前按用户要求使用 OpenRouter `typesafe/jev-1.13`，自动回退关闭。已接入五个角色的策略参考、115 个怪物的行动图、招式关联规则、独立有序候选和方案比较分歧记录。最新修复覆盖目标相关的命中次数，并将相邻换序扩展到采样方案，避免只评到一组牌的较差顺序；等价副本按实际顺序去重。[同局面回放](docs/evidence/2026-09-21/run34-order-coverage.json)已选出可行收尾，仍有比较分歧，尚不能证明胜率提高。
 
@@ -72,6 +72,10 @@ npm start                # 会操作游戏，仅在需要开始或继续实战�
 
 统一上下文区分观察、规则、相关历史、意图、条件分析和未知信息。每次模型请求自包含，不依赖 Jev 跨调用记忆。历史默认保留当前回合、上一轮敌方响应，以及仍影响当前决策的计数、延迟或牌序信息。另用每个敌人的累计生命伤害与已观察到的倒地次数概括战斗进展；复活、治疗和当前生命仍需一起判断，不把临时击倒算成永久移除。
 
+战斗快照逐项核对完整玩家记录、模组提供的每个战斗字段、逐目标预览、牌堆、永久卡组与原生规则。短 ID 替换可逆；当前事实摘要在压缩、可读展开和模型编译后再次验证，字段被改写或丢失即停止发送。`uncertainty.observation_integrity` 保留原始快照哈希、检查范围和已知归一化说明。它验证的是模组已提供事实的忠实传输，不能证明模组提取了游戏内部的全部机制。
+
+当前数值仍在 `observation` 中；未来结果单独放在 `analysis`。攻击次数缺失不补成 1，伤害缺失不补成 0；显示攻击合计不等同于最终失血。缺少原生格挡预览时只接受完整无条件规则，不截取条件牌的第一句。单动作和有序方案均列出 `calculation_coverage`：未知能力、附魔、遗物、自动单位或未实现的动作效果会使相关未来合计保持 `null`，同时保留完整实时规则。已移除不考虑顺序与触发的“剩余手牌足以击杀”计算。条件算术仍不是完整模拟器，未知不代表没有收益，也不能作为自动否决一个方案的理由。
+
 Jev 在代码提供的目标与候选空间中选择构筑方向、回合目标、准备动作、顺序和完整方案。回合目标是可修订的意图，服从整局价值。普通连续出牌沿用计划，原生结果匹配已核实的降费或精确敌方能力变化时也保留原顺序；后者还要求目标生命、格挡与账目一致。抽牌、变形、回收／选牌及未计算或不吻合的变化，在原生结果可见后继续规划。框架与候选生成由代码定义，模型负责其中的判断；当前没有完整的跨回合战斗求解器。
 
 完整方案包含从不同合法起手独立展开的有序段，也保留模型原提案及局部替换。搜索按起手和长度分配候选，记录搜索与采样上限，不按伤害评分预先筛掉策略。Jev 先独立评分，再比较不同卡牌／目标分配、结束边界和保留资源的候选；同一资源安排的排列和相同副本共用入围名额，保留评分最高的具体方案。原生属性不同的副本、用牌数量、目标及绑定升级／后续消费者仍分开处理。入围方案与原提案交换 A/B 位置比较，按对齐后的概率汇总偏好，记录原始分歧和并列。结束回合前的追加动作也经过双向比较。
@@ -112,6 +116,14 @@ Decimillipede 的已核实倒地规则会取消当前攻击，复活则依赖其
 
 ## 历史回放
 
+无需模型额度即可检查旧战斗状态到最终请求的事实保留，并保存原生输入和编译请求样本：
+
+```powershell
+node scripts/audit_combat_context.mjs --output run-artifacts/context-audit run-artifacts/<session>
+```
+
+该命令不连接游戏、不读取密钥、不调用模型。当前核对结果与范围见[事实保留证据](docs/evidence/2026-09-23/harness-fidelity.json)。这项检查不能代替原生提取器核验或模型决策质量评估。
+
 最新[观察后续接与伤害账目回归](docs/continuation-evaluation.md)使用已接触过的旧局面，记录方案排序、抽牌时的资源与实际开销。这不是新的独立测试集。[知识与规划回归](docs/knowledge-evaluation.md)、[有序依赖结果](docs/sequence-evaluation.md)、[效果时序报告](docs/harness-evaluation.md)继续保留。原始历史存于本机 `run-artifacts/`，不随仓库分发；回放只向 Jev 请求决策，不连接游戏命名管道。冻结同时覆盖代码、schema 与本地 JSON 知识源。
 
 ```powershell
@@ -131,7 +143,8 @@ npm run replay -- replay --split eval/sequence-split.json --output run-artifacts
 | 位置 | 职责 |
 |---|---|
 | `src/mod_client.mjs`、`src/mod_loop.mjs`、`src/observation_audit.mjs` | 模组通信、执行核对、数值对照与运行记录 |
-| `src/decision_context.mjs`、`src/context_compiler.mjs`、`schemas/` | 状态契约、记忆、统一模型上下文与容量管理 |
+| `src/decision_context.mjs`、`src/combat_observation.mjs`、`src/context_compiler.mjs`、`schemas/` | 原始战斗事实核对、状态契约、记忆、模型上下文与容量管理 |
+| `src/forecast_coverage.mjs`、`src/combat_arithmetic.mjs` | 条件算术、计算覆盖范围与未知值传播 |
 | `src/rule_reference.mjs`、`src/effect_lifecycle.mjs` | 规则关联、效果时序与有效期 |
 | `src/enemy_patterns.mjs`、`src/strategy_knowledge.mjs`、`data/strategy/` | 怪物后继、角色建议、复活与战斗进展 |
 | `src/turn_plan*.mjs`、`src/turn_sequence.mjs`、`src/turn_projection.mjs` | 有序回合计划、依赖传播、观察断点和有限效果分析 |

@@ -5,7 +5,6 @@ import { isDeepStrictEqual } from 'node:util';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { canonicalObservation } from './observation_state.mjs';
 export { canonicalObservation } from './observation_state.mjs';
-import { previewDamageSum } from './combat_arithmetic.mjs';
 import { buildRuleReference } from './rule_reference.mjs';
 import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
 import { campSurvivalFacts } from './camp_context.mjs';
@@ -19,6 +18,7 @@ import { publicRunStrategy } from './run_strategy_state.mjs';
 import { scopeDecisionHistory } from './history_scope.mjs';
 import { describeCombatEffects } from './effect_lifecycle.mjs';
 import { buildStrategyKnowledge, describeEnemyOutlook, describeCombatProgress } from './strategy_knowledge.mjs';
+import { currentCombatArithmetic, verifyNativeCombatObservation, combatFactDigest } from './combat_observation.mjs';
 
 export const CONTEXT_VERSION = 'sts2.decision.v1';
 export class ContextError extends Error {
@@ -102,6 +102,11 @@ export function validateDecisionPacket(rawPacket) {
     Object.values(item).forEach(visit);
   };
   visit(packet);
+  if (packet.in_combat && !/^[a-f0-9]{64}$/.test(packet.information?.observation_integrity?.encoded_fact_sha256 || ''))
+    throw new ContextError('Missing verified native combat facts; rebuild the context from its native snapshot');
+  if (packet.information?.observation_integrity?.encoded_fact_sha256
+    && packet.information.observation_integrity.encoded_fact_sha256 !== combatFactDigest(packet))
+    throw new ContextError('Native combat facts changed after snapshot verification; no model or action request may be sent');
   return rawPacket;
 }
 
@@ -144,6 +149,8 @@ export function validateContext(state) {
   };
   for (const field of ['relics', 'potions', 'powers']) checkEffects(player[field], `player.${field}`);
   if (state.combat) {
+    for (const field of ['hp', 'max_hp', 'block', 'energy']) if (!Number.isFinite(state.combat.player?.[field]))
+      throw new ContextError(`Missing combat.player.${field}; unknown values cannot be replaced with zero`);
     const issue = positioningError(state.combat);
     if (issue) throw new ContextError(issue);
     if (!context.combat_id) throw new ContextError('Missing combat identity');
@@ -156,7 +163,12 @@ export function validateContext(state) {
       checkCards(cards, pile);
     }
     array(state.combat.enemies, 'combat.enemies');
+    const enemyIds = new Set();
     for (const enemy of state.combat.enemies) {
+      if (!Number.isInteger(enemy.combat_id) || enemyIds.has(enemy.combat_id)) throw new ContextError('Missing or duplicate enemy combat identity');
+      enemyIds.add(enemy.combat_id);
+      for (const field of ['hp', 'block']) if (!Number.isFinite(enemy[field])) throw new ContextError(`Missing enemy.${field}`, { combat_id: enemy.combat_id });
+      if (typeof enemy.is_alive !== 'boolean') throw new ContextError('Missing enemy.is_alive', { combat_id: enemy.combat_id });
       checkEffects(array(enemy.powers, 'enemy.powers'), 'enemy.powers');
       array(enemy.intents, 'enemy.intents');
       for (const intent of enemy.intents) if (!intent.description?.trim() && !intent.type) throw new ContextError('Enemy intent description and visible type are missing');
@@ -533,27 +545,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     for (const enemy of combat.enemies) for (const intent of enemy.intents) {
       if (!intent.description?.trim()) intent.description = `Visible ${intent.type} intent. Exact effect is not specified by the displayed label.`;
     }
-    const incoming = combat.enemies.filter(e => e.is_alive).flatMap(e => e.intents).reduce((sum, i) => sum + (Number.isFinite(i.damage) ? i.damage * (i.hits || 1) : 0), 0);
-    combat.visible_arithmetic = {
-      incoming_attack_damage: incoming,
-      ...(combat.positioning ? { incoming_attack_facing: combat.positioning.facing, includes_current_back_attack_multiplier: true } : {}),
-      current_block: context.player.block,
-      attack_damage_after_current_block: Math.max(0, incoming - context.player.block),
-      energy_remaining: context.player.energy,
-      fatal_if_end_turn_from_visible_attacks: Math.max(0, incoming - context.player.block) >= context.player.hp,
-      extra_block_needed_to_survive_visible_attacks: Math.max(0, incoming - context.player.block - context.player.hp + 1),
-      note: 'Arithmetic from current visible intents only. Action estimates use known attack_preview.hits (otherwise one hit, or unknown for X), printed Block, active Rage once per Attack, explicit hp_loss and Toxic hand damage. They exclude other self-damage, changing hit modifiers, draws, buffs, other triggers, death prevention/revival and later actions. Printed hp_loss is before prevention hooks. Unspent ordinary energy disappears at end of turn unless a rule says otherwise.'
-    };
-    combat.visible_arithmetic.attack_budgets = combat.enemies.filter(enemy => enemy.is_alive).map(enemy => {
-      const energy = Math.max(0, Math.min(30, context.player.energy || 0));
-      const dp = Array.from({ length: energy + 1 }, () => ({ damage: 0, hand_indices: [] }));
-      for (const card of combat.hand) {
-        const damage = previewDamageSum(card, enemy);
-        if (!card.can_play || !Number.isFinite(damage) || damage <= 0 || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy || (card.hp_loss || 0) >= context.player.hp) continue;
-        for (let budget = energy; budget >= card.cost; budget--) if (dp[budget - card.cost].damage + damage > dp[budget].damage) dp[budget] = { damage: dp[budget - card.cost].damage + damage, hand_indices: [...dp[budget - card.cost].hand_indices, card.index] };
-      }
-      return { target_id: enemy.combat_id, hp_plus_block: enemy.hp + enemy.block, energy_budget: energy, attack_preview_damage_sum: dp[energy].damage, hand_indices: dp[energy].hand_indices, note: 'Sum of current per-target previews under current fixed costs, one use per listed card. Uses known attack_preview.hits; other cards contribute only one hit. Excludes X-cost sequences and does not simulate changing costs, new buffs, draws, extra resources or death-prevention powers.' };
-    });
+    combat.visible_arithmetic = currentCombatArithmetic(source.combat);
     combat.play_pile = context.play_pile;
     combat.history = clone(context.combat_history);
     for (const entry of combat.history) {
@@ -592,7 +584,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
   const memoryContext = memory.context(state);
   mergeObservedCardPlays(combat, memoryContext);
   const legalActions = [...candidates].map(([action_id, candidate]) => ({ action_id, request: candidate.request, description: candidate.description, ...(candidate.planning_choice ? { planning_choice: candidate.planning_choice } : {}), ...(candidate.card_hand_index !== undefined ? { card_hand_index: candidate.card_hand_index } : {}), ...(candidate.target_combat_id !== undefined ? { target_combat_id: candidate.target_combat_id } : {}), ...(candidate.combat_estimate ? { combat_estimate: candidate.combat_estimate } : {}) }));
-  return validateDecisionPacket(aliasInstanceIds(scopeDecisionHistory({
+  const packet = {
     schema_version: CONTEXT_VERSION,
     objective: { strategy: 'Win this entire run through all three acts and the final boss. Balance immediate survival, efficient combat, coherent deck/relic synergies, resources, and visible future routes.', execution_checkpoint: 'Continue through ordinary rewards and act transitions until the formal final victory screen.' },
     screen: state.screen, in_combat: Boolean(combat),
@@ -630,7 +622,12 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     strategy_knowledge: buildStrategyKnowledge(source),
     information: { source: 'single mod main-thread snapshot plus decision-relevant local memory', unknown: ['unobserved draw order; retained card effects may establish partial knowledge', 'unrevealed question-mark contents and rewards', 'future enemy random choices', 'later acts', 'history outside the stated decision window or before available observations', ...(context?.extraction_errors || []).filter(e => /^history\.\d+\.description: NullReferenceException$/.test(e)).map(e => `Unavailable history display text (${e}); retained typed events and commands are available.`)], card_grouping: 'Each cards entry with count represents that many exactly equivalent card states; instance_ids distinguish copies. Never infer draw order from array order or IDs.', extraction_errors: (context?.extraction_errors || []).filter(e => !/^history\.\d+\.description: NullReferenceException$/.test(e)) },
     legal_actions: legalActions
-  }, source, memory)));
+  };
+  const scoped = scopeDecisionHistory(packet, source, memory);
+  if (combat) scoped.information.observation_integrity = verifyNativeCombatObservation(state, scoped);
+  const aliased = aliasInstanceIds(scoped);
+  if (combat) aliased.information.observation_integrity.encoded_fact_sha256 = combatFactDigest(aliased);
+  return validateDecisionPacket(aliased);
 }
 
 // Instance IDs are arbitrary identity labels, not gameplay facts. Use compact
@@ -638,16 +635,20 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
 // Original identities remain in local state logs and persistent memory.
 function aliasInstanceIds(context) {
   const aliases = new Map();
-  const visit = (item, key = '') => {
+  const visit = (item, key = '', reverse = null) => {
+    if (typeof item === 'string' && /(^|_)ids?$/.test(key) && reverse) return reverse.get(item) ?? item;
     if (typeof item === 'string' && /(^|_)ids?$/.test(key) && /^[a-f0-9]{32}$/.test(item)) {
       if (!aliases.has(item)) aliases.set(item, `i${aliases.size + 1}`);
       return aliases.get(item);
     }
-    if (Array.isArray(item)) return item.map(value => visit(value, key));
-    if (item && typeof item === 'object') return Object.fromEntries(Object.entries(item).map(([name, value]) => [name, visit(value, name)]));
+    if (Array.isArray(item)) return item.map(value => visit(value, key, reverse));
+    if (item && typeof item === 'object') return Object.fromEntries(Object.entries(item).map(([name, value]) => [name, visit(value, name, reverse)]));
     return item;
   };
-  return visit(context);
+  const aliased = visit(context);
+  if (!isDeepStrictEqual(context, visit(aliased, '', new Map([...aliases].map(([raw, alias]) => [alias, raw])))))
+    throw new ContextError('Card identity aliasing changed source facts');
+  return aliased;
 }
 
 // Losslessly intern repeated long rule text only when necessary. The dictionary

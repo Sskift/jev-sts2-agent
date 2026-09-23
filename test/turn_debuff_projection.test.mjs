@@ -92,6 +92,8 @@ test('Slow does not turn unknown effects, capped previews or random targets into
   const s = slowFixture();
   s.combat.hand[0].description = 'Gain 5 Block. Some unmodeled effect.';
   assert.ok(describeTurnProjection(s, [defend, strike]).omitted_effects.some(text => text.includes('other effects are unconfirmed')));
+  assert.equal(describeTurnProjection(s, [defend, strike]).known_effects_only.enemies[0].hp, null);
+  s.combat.hand[0].description = 'Gain 5 Block.';
   s.combat.enemies[0].powers.push({ id: 'INTANGIBLE_POWER', amount: 1 });
   s.combat.hand[1].target_previews[0].damage = 1;
   assert.deepEqual(describeTurnProjection(s, [defend, strike]).debuff_dependencies.ordered_damage[0].per_hit, { min: null, max: null });

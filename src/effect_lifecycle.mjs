@@ -57,7 +57,7 @@ export function describeCombatEffects(combat) {
     const pileTrigger = category === 'cards' ? pileTriggers[id] : null;
     const description = entity.description || '';
     const potion = category === 'potions' ? potionEffectFacts(entity) : null;
-    if (!definition && !potion && !temporal.test(description) && !turnEnd.test(description)) continue;
+    if (!active && !definition && !potion && !temporal.test(description) && !turnEnd.test(description)) continue;
     const expires = potion?.expires_at ?? definition?.expires ?? (pileTrigger ? 'leaves_required_pile' : null);
     effects.push({ source_id: entity.id, category, owner, active,
       ...(entity.details?.instance_id ? { card_instance_id: entity.details.instance_id } : {}),

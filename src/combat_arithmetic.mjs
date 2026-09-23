@@ -3,11 +3,13 @@ import { uncomputedAttackReactions } from './combat_reactions.mjs';
 import { attackCardFlowEffects, describeCardFlow } from './card_flow_projection.mjs';
 import { knownTurnEndDamage, uncomputedTurnEndHealthEffects } from './effect_lifecycle.mjs';
 import { uncomputedDepletionRules } from './combat_depletion.mjs';
+import { intentDamage, displayedAttackTotal } from './combat_observation.mjs';
+import { scopeSingleActionForecast } from './forecast_coverage.mjs';
 export { uncomputedDepletionRules } from './combat_depletion.mjs';
+export { intentDamage } from './combat_observation.mjs';
 
 // Arithmetic over player-visible facts only. These are single-action estimates,
 // not a combat simulator: draws, general triggered effects and future choices stay unknown.
-export const intentDamage = enemy => (enemy.intents || []).reduce((sum, intent) => sum + (Number.isFinite(intent.damage) ? intent.damage * (intent.hits || 1) : 0), 0);
 
 // Both native v0.111.0 HP-threshold stun powers expose their threshold in the
 // live counter. The condition needs positive HP loss, not just printed damage.
@@ -115,14 +117,20 @@ export function attackHpLoss(card, enemy) {
 export function immediateBlockPreview(card) {
   if (!card || card.id === 'RAGE' || card.type === 'Power') return { amount: 0, source: 'no_immediate_block' };
   if (Number.isFinite(card.block)) return { amount: Math.max(0, card.block), source: 'native_preview' };
-  // Only a complete, unconditional FIRST sentence in the resolved live text.
+  // Only a complete, unconditional rule in the resolved live text.
   // Do not parse future triggers, per-card multipliers, or static Wiki values.
-  const literal = card.description?.trim().match(/^Gain (\d+(?:\.\d+)?) Block\.(?:\s|$)/);
-  if (literal) return { amount: Number(literal[1]), source: 'resolved_live_first_sentence' };
+  const literal = card.description?.trim().match(/^Gain (\d+(?:\.\d+)?) Block\.$/);
+  if (literal) return { amount: Number(literal[1]), source: 'resolved_live_complete_rule' };
   return { amount: /\bBlock\b/.test(card.description || '') ? null : 0, source: 'no_native_preview' };
 }
 
 export function combatForecast(combat, card = null, target = null) {
+  return scopeSingleActionForecast(combat, card, combatForecastBaseline(combat, card, target));
+}
+
+// Internal arithmetic only. Do not expose this baseline as a model forecast;
+// combatForecast and describeTurnProjection apply the closed coverage gate.
+export function combatForecastBaseline(combat, card = null, target = null) {
   const reactions = uncomputedAttackReactions(combat, card, target, card ? previewHitCount(card, target) : 0);
   const reactionUnresolved = reactions.length > 0;
   const hitPreview = card ? attackHitPreview(card, target) : { hits: 0, source: 'no_card' };
@@ -131,7 +139,7 @@ export function combatForecast(combat, card = null, target = null) {
   const targetDepleted = hit && hit.hp_loss >= target.hp;
   const areaHits = card?.target_type === 'AllEnemies' ? combat.enemies.filter(e => e.is_alive && e.hp > 0).map(enemy => {
     const preview = attackHpLoss(card, enemy);
-    return { target_id: enemy.combat_id, hp_loss: preview?.hp_loss ?? null, hp_depleted: Boolean(preview && preview.hp_loss >= enemy.hp) };
+    return { target_id: enemy.combat_id, hp_loss: preview?.hp_loss ?? null, hp_depleted: preview ? preview.hp_loss >= enemy.hp : null };
   }) : null;
   const depleted = new Set(areaHits?.filter(preview => preview.hp_depleted).map(preview => preview.target_id));
   if (targetDepleted) depleted.add(target.combat_id);
@@ -150,12 +158,12 @@ export function combatForecast(combat, card = null, target = null) {
       scope: 'HP depletion does not establish removal, canceled intent, or an ended combat. This death/revival hook is not simulated.' })));
   const positioning = projectPositioning(combat, card ? [{ kind: 'play_card', target: target?.combat_id }] : [], depleted);
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
-  let incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id) && !stunned.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
+  let incoming = displayedAttackTotal(combat.enemies.filter(e => !depleted.has(e.combat_id) && !stunned.has(e.combat_id)));
   const strengthLoss = mangleStrengthLoss(card);
   const reducedIntents = strengthLoss && target && !depleted.has(target.combat_id) && !stunned.has(target.combat_id)
     ? intentsAfterMangle(combat, target, strengthLoss) : null;
   const strengthUnresolved = Boolean(strengthLoss && target && !depleted.has(target.combat_id) && !stunned.has(target.combat_id) && !reducedIntents);
-  if (reducedIntents) incoming += intentDamage({ intents: reducedIntents }) - intentDamage(target);
+  if (reducedIntents && incoming !== null) incoming += intentDamage({ intents: reducedIntents }) - intentDamage(target);
   const exhausted = card?.id === 'SECOND_WIND' ? (combat.hand || []).filter(other => other.index !== card.index && other.type !== 'Attack') : null;
   const remainingHand = (combat.hand || []).filter(other => other.index !== card?.index && !exhausted?.some(removed => removed.index === other.index));
   const living = combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0);
@@ -165,8 +173,9 @@ export function combatForecast(combat, card = null, target = null) {
   const endTurnDamage = allTargetsDepleted ? [] : knownTurnEndDamage(combat, remainingHand, depleted);
   const timedEffects = allTargetsDepleted ? [] : uncomputedTurnEndHealthEffects(combat, remainingHand, endTurnDamage);
   const outgoingEndUnresolved = timedEffects.some(effect => effect.enemy_response_dependency);
-  const attackUnresolved = card?.type === 'Attack' && (hitPreview.hits === null || target && !hit || areaHits?.some(hit => hit.hp_loss === null));
-  const healthUnresolved = reactionUnresolved || attackUnresolved || strengthUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;
+  const attackUnresolved = card?.type === 'Attack' && (hitPreview.hits === null || target && !hit
+    || areaHits?.some(hit => hit.hp_loss === null) || card.target_type === 'RandomEnemy');
+  const healthUnresolved = incoming === null || reactionUnresolved || attackUnresolved || strengthUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;
   const endTurnHandDamage = endTurnDamage.filter(e => e.hand_index !== undefined).reduce((sum, e) => sum + e.amount, 0);
   const selfHpLoss = Math.max(0, card?.hp_loss || 0);
   const blockPreview = immediateBlockPreview(card);
@@ -194,7 +203,6 @@ export function combatForecast(combat, card = null, target = null) {
   }
   const blockIncludingEndTurnGains = block + endTurnBlockGains.reduce((sum, gain) => sum + gain.amount, 0);
   const loss = selfHpLoss + Math.max(0, incoming + endTurnDamage.reduce((sum, e) => sum + e.amount, 0) - blockIncludingEndTurnGains);
-  const followup = card && target && hit ? followupAttackBudget(combat, card, target, hit) : null;
   // Sandpit is a visible, deterministic instant-death countdown. Ordinary
   // Block/HP cannot prevent it; Frantic Escape visibly adds one turn.
   const deathTimers = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id))
@@ -226,7 +234,7 @@ export function combatForecast(combat, card = null, target = null) {
     block_after_card: reactionUnresolved ? null : block,
     block_including_end_turn_gains: healthUnresolved ? null : blockIncludingEndTurnGains,
     end_turn_block_gains: endTurnBlockGains,
-    ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
+    ...(blockPreview.source === 'resolved_live_complete_rule' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
     displayed_attacks_after_target_depletion: reactionUnresolved || attackUnresolved || strengthUnresolved || depletionEffects.length || outgoingEndUnresolved ? null : incoming,
     ...(strengthLoss ? { temporary_enemy_strength_loss: { target_id: target?.combat_id, amount: strengthLoss,
@@ -246,7 +254,6 @@ export function combatForecast(combat, card = null, target = null) {
     fatal_if_end_turn: hpUnresolved ? null : instantDeath || selfHpLoss >= combat.player.hp ? true : blockPreview.amount === null || facingUnresolved ? null : loss >= combat.player.hp,
     ...(exhausted ? { exhausted_hand_cards: exhausted.map(c => ({ index: c.index, id: c.id, type: c.type })), immediate_block_gain: immediateBlock } : {}),
     ...(deathTimers.length ? { death_timers: deathTimers, instant_death_if_end_turn: instantDeath } : {}),
-    ...(followup?.hand_indices.length ? { followup_attacks: followup } : {}),
     ...(card?.id === 'RAGE' ? { attack_trigger_potential: rageFollowups(combat, card) } : {})
   };
 }
@@ -267,24 +274,4 @@ function rageFollowups(combat, rage) {
   const blockPerAttack = Math.max(0, rage.rage_block_per_attack);
   return { additional_block_per_attack: blockPerAttack, hand_indices: dp[energy], additional_block_if_all_played: blockPerAttack * dp[energy].length,
     note: 'Conditional future Block, not immediate Block. Play Rage before these currently playable attacks, using current fixed costs and remaining energy. Excludes X-cost and declared self-HP-loss attacks, draws, energy gains, cost changes and other triggers. Not a forced plan.' };
-}
-
-function followupAttackBudget(combat, played, target, hit) {
-  if (hit.hp_loss >= target.hp) return { hp_damage: 0, hand_indices: [], enough_to_deplete_target: true };
-  const postPowers = hit.powers_after;
-  if (postPowers.filter(p => p.amount > 0 && ['SLIPPERY_POWER', 'BUFFER_POWER'].includes(p.id)).length > 1) return null;
-  if (postPowers.some(p => p.amount > 0 && ['SLIPPERY_POWER', 'BUFFER_POWER', 'INTANGIBLE_POWER'].includes(p.id))) return null;
-  const energy = played.cost < 0 ? 0 : Math.max(0, Math.min(30, combat.player.energy - played.cost));
-  const dp = Array.from({ length: energy + 1 }, () => ({ damage: 0, hand_indices: [] }));
-  for (const card of combat.hand || []) {
-    if (card.index === played.index || !card.can_play || !Number.isInteger(card.cost) || card.cost < 0 || card.cost > energy || (card.hp_loss || 0) >= combat.player.hp - (played.hp_loss || 0)) continue;
-    const damage = previewDamageSum(card, target);
-    if (!Number.isFinite(damage) || damage <= 0) continue;
-    for (let budget = energy; budget >= card.cost; budget--) {
-      const prior = dp[budget - card.cost];
-      if (prior.damage + damage > dp[budget].damage) dp[budget] = { damage: prior.damage + damage, hand_indices: [...prior.hand_indices, card.index] };
-    }
-  }
-  const hpDamage = Math.max(0, dp[energy].damage - hit.block_after);
-  return { hp_damage: hpDamage, hand_indices: dp[energy].hand_indices, enough_to_deplete_target: hpDamage + hit.hp_loss >= target.hp };
 }

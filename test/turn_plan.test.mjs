@@ -208,7 +208,12 @@ test('complete-plan comparison can replace two separated defenses with one stron
   };
   await refineTurnPlan(state, plan, prepared, async pairs => pairs.map(pair => {
     const target = pair.find(isTarget);
-    if (target) { offered = true; assert.equal(target.label.energy_spent, 3); assert.equal(target.label.conditional_preview.known_effects_only.block, 25); }
+    if (target) {
+      offered = true;
+      assert.equal(target.label.energy_spent, 3);
+      assert.equal(state.combat.hand[0].block, 25, 'The current native preview stays intact');
+      assert.equal(target.label.conditional_preview.known_effects_only.block, null, 'An uncomputed scaling rule cannot become a fixed future total');
+    }
     return (target || pair[0]).value;
   }), async plans => plans.map(item => ({ value: item.value, score: isTarget(item) ? 3 : 1 })));
   assert.ok(offered, 'The model must see the consolidated alternative even though a one-card replacement is unaffordable');
