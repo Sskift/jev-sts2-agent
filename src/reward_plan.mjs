@@ -18,7 +18,14 @@ export async function compareRewardSkip(state, options, prepared, decision, choo
     return { action_id: actionId, marginal_or_worse_probability: p[0] + p[1],
       useful_or_better_probability: p[2] + p[3] };
   });
-  if (rated.length && rated.every(item => item && item.marginal_or_worse_probability > item.useful_or_better_probability + 1e-9)) {
+  const deck = state.decision_context?.master_deck || [];
+  const needsFirstAttack = state.decision_context?.act_index === 0 && state.decision_context?.act_floor <= 6
+    && !deck.some(card => card.type === 'Attack' && card.rarity !== 'Basic');
+  // A starter-only early deck still needs reliable damage for upcoming fights.
+  // Resolve a low independent rating against the full-menu choice directly;
+  // it is too weak a signal to auto-skip every attack opportunity here.
+  if (!needsFirstAttack && rated.length && rated.every(item => item
+    && item.marginal_or_worse_probability > item.useful_or_better_probability + 1e-9)) {
     const judgment = { action: 'assess_reward_skip', reward_nth: decision.request.nth,
       card_judgments: rated,
       basis: 'Every offered card is more likely to be Jev class 0-1 (worse or marginal) than class 2-3 (useful enough to justify deck dilution).' };
@@ -48,6 +55,7 @@ export async function compareRewardSkip(state, options, prepared, decision, choo
         confidence: answer.confidence, probabilities: answer.probabilities };
     });
     return { action: 'compare_reward_skip', judgments,
+      ...(needsFirstAttack ? { first_non_basic_attack_missing: true } : {}),
       consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
   } });
   options.onPlanningDecision?.(comparison);
