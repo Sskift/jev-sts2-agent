@@ -161,6 +161,26 @@ test('exclusive-budget comparison requires agreement across reversed positions a
   assert.equal(await compareShopRemoval(state, { shopRemovalPlan: plan }, prepared, cheap, () => { throw new Error('No comparison needed'); }), cheap);
 });
 
+test('leaving an affordable removal behind gets a direct save-gold comparison', async () => {
+  const state = shop(), plan = planFor(state);
+  const prepared = prepareModDecision(state, { shopRemovalPlan: plan });
+  const leaving = { ...prepared.candidates.get('proceed'), candidate_id: 'proceed', confidence: 0.6,
+    usage: { input_tokens: 100 } };
+  const decision = await compareShopRemoval(state, { shopRemovalPlan: plan }, prepared, leaving, async (_s, _o, p) => {
+    assert.equal(p.payload.questions.budget_forward.criteria.first.gold_carried_forward, 107);
+    assert.equal(p.payload.questions.budget_forward.criteria.second.target.card.id, 'STRIKE_IRONCLAD');
+    assert.match(p.payload.questions.budget_forward.instructions, /future shop/);
+    return { ...p.parseResult({ answers: {
+      budget_forward: { type: 'choice', choice: 'second' },
+      budget_reverse: { type: 'choice', choice: 'first' }
+    } }), usage: { input_tokens: 100 } };
+  });
+  assert.equal(decision.request.cmd, 'shop_remove_card');
+  assert.equal(decision.shop_budget_comparison.consensus_action_id, 'remove_card');
+  assert.equal(decision.confidence, undefined);
+  assert.equal(decision.usage.input_tokens, 200);
+});
+
 test('removal guidance is scoped to shops and permanent removal, not combat discard choices', () => {
   const state = shop();
   assert.ok(buildStrategyKnowledge(state).general.some(n => n.id === 'remove_obsolete_jobs'));

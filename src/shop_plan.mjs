@@ -32,21 +32,25 @@ export async function planShopRemoval(state, options, prepared, choose) {
   return result;
 }
 
-// Only when the selected purchase spends the removal budget: compare the two
-// concrete, mutually exclusive uses in both orders. Disagreement preserves the
-// original full-menu choice; there is no hard-coded preference for removal.
+// Compare removal with a purchase that consumes its budget, or with leaving
+// while removal is still affordable. Disagreement preserves the full-menu
+// choice; there is no hard-coded preference for removal.
 export async function compareShopRemoval(state, options, prepared, decision, choose) {
   if (!options.shopRemovalPlan || state.screen !== 'SHOP') return decision;
-  const transaction = shopEconomy(state, groupCards(state.decision_context.master_deck), prepared.candidates)
-    .transactions.find(t => t.action_id === decision.candidate_id);
-  if (!transaction?.forecloses_affordable_removal) return decision;
   const removal = prepared.candidates.get('remove_card');
   if (!removal) return decision;
-  const buy = { action_id: decision.candidate_id, effect: decision.description, budget: transaction };
+  const leaving = decision.candidate_id === 'proceed' && decision.request?.cmd === 'proceed';
+  const transaction = shopEconomy(state, groupCards(state.decision_context.master_deck), prepared.candidates)
+    .transactions.find(t => t.action_id === decision.candidate_id);
+  if (!leaving && !transaction?.forecloses_affordable_removal) return decision;
+  const alternative = { action_id: decision.candidate_id, effect: decision.description,
+    ...(leaving ? { gold_carried_forward: state.shop.player_gold } : { budget: transaction }) };
   const cut = { action_id: 'remove_card', effect: removal.description, target: publicShopRemoval(options.shopRemovalPlan),
     gold_after: state.shop.player_gold - options.shopRemovalPlan.cost };
-  const instructions = 'Compare these two concrete uses of the same current shop budget. Which leaves the run better prepared for its visible route and boss? This purchase makes the specified removal unaffordable, so they cannot both be taken at displayed prices. Weigh the purchased effect and any affordable remaining offers against the exact removed card, better access to retained cards, lost synergies and remaining gold. Necessary damage/defense or a powerful relic/potion can outweigh removal; redundant output can lose to consistency. Use actual rules and current resources, not a universal buy/remove policy. Choose the better complete tradeoff, not the more impressive isolated effect. Prior option ratings are fallible model judgments.';
-  const questions = Object.fromEntries([['budget_forward', buy, cut], ['budget_reverse', cut, buy]].map(([id, first, second]) =>
+  const instructions = leaving
+    ? 'Before leaving this shop, compare preserving all current gold for visible future opportunities against paying now to remove the specified owned card. Leaving forfeits this shop service; a future shop is only available if the known route reaches one, and its stock and prices are unknown. Removal improves repeated access to retained cards but loses this card and costs the displayed gold. Judge current deck jobs, actual replacement cards, upcoming fights and future route; neither removal nor saving is mandatory. Choose the better complete tradeoff. Prior option ratings are fallible model judgments.'
+    : 'Compare these two concrete uses of the same current shop budget. Which leaves the run better prepared for its visible route and boss? This purchase makes the specified removal unaffordable, so they cannot both be taken at displayed prices. Weigh the purchased effect and any affordable remaining offers against the exact removed card, better access to retained cards, lost synergies and remaining gold. Necessary damage/defense or a powerful relic/potion can outweigh removal; redundant output can lose to consistency. Use actual rules and current resources, not a universal buy/remove policy. Choose the better complete tradeoff, not the more impressive isolated effect. Prior option ratings are fallible model judgments.';
+  const questions = Object.fromEntries([['budget_forward', alternative, cut], ['budget_reverse', cut, alternative]].map(([id, first, second]) =>
     [id, { type: 'choice', instructions, criteria: { first, second } }]));
   const payload = { ...prepared.payload, questions }, metrics = { ...prepared.metrics, purpose: 'shop_budget_comparison', question_count: 2 };
   metrics.request_bytes = compileModelRequest(payload, metrics).bytes;
