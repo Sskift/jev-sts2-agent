@@ -1,0 +1,34 @@
+{
+  "run_number": 45,
+  "run_id": "run-1790182932",
+  "recorded_at": "2026-09-23T17:03:56.951Z",
+  "harness_commit": "9e0d9e99da20f28e69f4b9f045f70ba68fdf9444",
+  "provider": "openrouter",
+  "model": "typesafe/jev-1.13",
+  "plan_assessment_limit": 24,
+  "game_version": "v0.111.0",
+  "mod_version": "0.111.0-context.17",
+  "character": "IRONCLAD",
+  "ascension": 0,
+  "game_mode": "Standard",
+  "modifiers": [],
+  "started_at_floor": 1,
+  "initial_menu": {
+    "has_run_save": false
+  },
+  "recording_enabled": false,
+  "video_sending_enabled": false,
+  "account_balance_at_start_usd": 19.916353602,
+  "first_combat_action": {
+    "request": {
+      "cmd": "play_card",
+      "id": "DRAMATIC_ENTRANCE",
+      "nth": 0
+    },
+    "ok": true,
+    "evidence": "C:\\Users\\skift\\jevmake\\run-artifacts\\run45-2026-09-23T17-02-08.465Z/step-0012/response.json"
+  },
+  "artifact_dir": "C:\\Users\\skift\\jevmake\\run-artifacts\\run45-2026-09-23T17-02-08.465Z",
+  "start_snapshot_sha256": "1125ee693659d8287691e2a73c5f39bc63ad0ebe71f13c307319b0e3b6867cd5",
+  "scope": "Observed fresh standard run and first executed combat action. No victory claim. Live runner stops after a confirmed action if its comparable numeric audit reports a mismatch."
+}
