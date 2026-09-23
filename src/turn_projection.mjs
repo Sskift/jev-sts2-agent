@@ -61,7 +61,8 @@ export function describeTurnProjection(state, steps) {
     const before = state.combat.enemies.find(e => e.combat_id === result.combat_id);
     return [result.hp_remaining, result.block_remaining, result.current_attack_after_debuffs, ...result.power_changes.map(p => p.after_declared_actions)]
         .every(range => Number.isFinite(range.min) && range.min === range.max)
-      && (result.hp_remaining.max === 0 || result.current_attack_after_debuffs.min === intentDamage(before));
+      && (result.hp_remaining.max === 0 || result.current_attack_after_debuffs.min === intentDamage(before)
+        || Boolean(result.attack_intents_after_debuffs));
   });
   const knownResponses = new Set((debuffs?.enemies || []).filter(result => {
     const before = state.combat.enemies.find(e => e.combat_id === result.combat_id);
@@ -216,6 +217,9 @@ export function projectTurnPrefix(state, steps, sequence = inspectSequence(state
   for (const result of dependencies.enemies) {
     const enemy = combat.enemies.find(e => e.combat_id === result.combat_id);
     enemy.hp = result.hp_remaining.min; enemy.block = result.block_remaining.min; enemy.is_alive = enemy.hp > 0;
+    if (result.attack_intents_after_debuffs) for (const intent of result.attack_intents_after_debuffs) {
+      if (enemy.intents[intent.index]?.type === 'Attack') enemy.intents[intent.index].damage = intent.damage;
+    }
     for (const change of result.power_changes) {
       const power = enemy.powers.find(p => p.id === change.power_id);
       if (power) power.amount = change.after_declared_actions.min;

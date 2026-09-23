@@ -1,0 +1,18 @@
+{
+  "run_id": "run-1790135669",
+  "source_step": "run41-resume3-2026-09-23T04-14-06.120Z/step-0060",
+  "source_input_sha256": "c852285dddc66aefe752e1b0e800a70245e2571abb594677258cb1c300cb2c19",
+  "observed_player_hp": 6,
+  "observed_enemy": { "id": "KIN_PRIEST", "hp": 66, "attack_per_hit": 12, "hits": 1, "strength": 4 },
+  "mangle_live_rule": "Deal 20 damage. Enemy loses 10 Strength this turn.",
+  "old_decision": ["WHIRLWIND", "end_turn"],
+  "corrected_conditional_projection": {
+    "mangle_attack_after_strength_loss": 2,
+    "player_hp_after_enemy_attack": 4,
+    "conditions": "Mangle resolves on the surviving target and no other attack modifier changes its native current intent."
+  },
+  "new_offline_jev_decision": ["MANGLE", "end_turn"],
+  "replay_model": "typesafe/jev-1.13-20260917",
+  "replay_calls": 14,
+  "limitation": "One offline Jev replay of an identical historical observation and confirmed pre-cutoff memory. The card was not played in the original run; no subsequent game state or win is inferred."
+}

@@ -9,6 +9,25 @@ export { uncomputedDepletionRules } from './combat_depletion.mjs';
 // not a combat simulator: draws, general triggered effects and future choices stay unknown.
 export const intentDamage = enemy => (enemy.intents || []).reduce((sum, intent) => sum + (Number.isFinite(intent.damage) ? intent.damage * (intent.hits || 1) : 0), 0);
 
+// Mangle's live text supplies the temporary amount. An unmodified native
+// attack preview already includes the enemy's current Strength, so removing
+// Strength subtracts that amount from EACH hit (with a zero floor).
+export function mangleStrengthLoss(card) {
+  const match = card?.id === 'MANGLE' && card.description?.trim()
+    .match(/^Deal \d+(?:\.\d+)? damage\. Enemy loses (\d+) Strength this turn\.$/i);
+  return match ? Number(match[1]) : null;
+}
+export function intentsAfterMangle(combat, enemy, loss) {
+  if (!Number.isSafeInteger(loss) || loss <= 0 || !enemy) return null;
+  // Existing attack multipliers and prevention can hide the pre-modifier
+  // damage. Do not turn their displayed integer into an invented exact result.
+  if (enemy.powers?.some(p => p.amount > 0 && ['ARTIFACT_POWER', 'WEAK_POWER'].includes(p.id))
+    || combat.player.powers?.some(p => p.amount > 0 && ['VULNERABLE_POWER', 'INTANGIBLE_POWER', 'SLIPPERY_POWER', 'BUFFER_POWER'].includes(p.id))) return null;
+  if (enemy.intents?.some(intent => intent.type === 'Attack' && (!Number.isSafeInteger(intent.damage) || intent.damage < 0))) return null;
+  return (enemy.intents || []).map(intent => intent.type === 'Attack'
+    ? { ...intent, damage: Math.max(0, intent.damage - loss) } : { ...intent });
+}
+
 export function firstHitHpLoss(card, enemy) {
   // A per-hit preview without a verified count does not establish that X will hit.
   // Zero-energy Whirlwind is playable but can deal no damage; payment modifiers
@@ -110,7 +129,12 @@ export function combatForecast(combat, card = null, target = null) {
       scope: 'HP depletion does not establish removal, canceled intent, or an ended combat. This death/revival hook is not simulated.' })));
   const positioning = projectPositioning(combat, card ? [{ kind: 'play_card', target: target?.combat_id }] : [], depleted);
   const facingUnresolved = positioning && !positioning.current_intents_still_applicable;
-  const incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
+  let incoming = combat.enemies.filter(e => e.is_alive && e.hp > 0 && !depleted.has(e.combat_id)).reduce((n, e) => n + intentDamage(e), 0);
+  const strengthLoss = mangleStrengthLoss(card);
+  const reducedIntents = strengthLoss && target && !depleted.has(target.combat_id)
+    ? intentsAfterMangle(combat, target, strengthLoss) : null;
+  const strengthUnresolved = Boolean(strengthLoss && target && !depleted.has(target.combat_id) && !reducedIntents);
+  if (reducedIntents) incoming += intentDamage({ intents: reducedIntents }) - intentDamage(target);
   const exhausted = card?.id === 'SECOND_WIND' ? (combat.hand || []).filter(other => other.index !== card.index && other.type !== 'Attack') : null;
   const remainingHand = (combat.hand || []).filter(other => other.index !== card?.index && !exhausted?.some(removed => removed.index === other.index));
   const living = combat.enemies.filter(enemy => enemy.is_alive && enemy.hp > 0);
@@ -121,7 +145,7 @@ export function combatForecast(combat, card = null, target = null) {
   const timedEffects = allTargetsDepleted ? [] : uncomputedTurnEndHealthEffects(combat, remainingHand, endTurnDamage);
   const outgoingEndUnresolved = timedEffects.some(effect => effect.enemy_response_dependency);
   const attackUnresolved = card?.type === 'Attack' && (hitPreview.hits === null || target && !hit || areaHits?.some(hit => hit.hp_loss === null));
-  const healthUnresolved = reactionUnresolved || attackUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;
+  const healthUnresolved = reactionUnresolved || attackUnresolved || strengthUnresolved || timedEffects.length > 0 || depletionEffects.length > 0;
   const endTurnHandDamage = endTurnDamage.filter(e => e.hand_index !== undefined).reduce((sum, e) => sum + e.amount, 0);
   const selfHpLoss = Math.max(0, card?.hp_loss || 0);
   const blockPreview = immediateBlockPreview(card);
@@ -182,7 +206,10 @@ export function combatForecast(combat, card = null, target = null) {
     end_turn_block_gains: endTurnBlockGains,
     ...(blockPreview.source === 'resolved_live_first_sentence' || blockPreview.amount === null ? { block_preview: blockPreview } : {}),
     ...(rageBlock ? { active_rage_block_gain: rageBlock } : {}),
-    displayed_attacks_after_target_depletion: reactionUnresolved || attackUnresolved || depletionEffects.length || outgoingEndUnresolved ? null : incoming,
+    displayed_attacks_after_target_depletion: reactionUnresolved || attackUnresolved || strengthUnresolved || depletionEffects.length || outgoingEndUnresolved ? null : incoming,
+    ...(strengthLoss ? { temporary_enemy_strength_loss: { target_id: target?.combat_id, amount: strengthLoss,
+      current_attack_after_application: strengthUnresolved ? null : reducedIntents ? intentDamage({ intents: reducedIntents }) : 0,
+      expires: 'after_upcoming_enemy_turn', is_observed: false } } : {}),
     ...(outgoingEndUnresolved ? { current_displayed_attacks_before_uncomputed_end_effects: incoming,
       enemy_response_after_end_effects_known: false } : {}),
     ...(depletionEffects.length ? { uncomputed_depletion_effects: depletionEffects } : {}),

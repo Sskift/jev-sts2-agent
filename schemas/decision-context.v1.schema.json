@@ -776,7 +776,7 @@
                 "conditional_bounds": { "type": "object", "additionalProperties": false, "required": ["hp", "hp_removed", "block"],
                   "properties": { "hp": { "$ref": "#/$defs/conditionalCount" }, "hp_removed": { "$ref": "#/$defs/conditionalCount" }, "block": { "$ref": "#/$defs/conditionalCount" } } },
                 "power_changes": { "type": "array", "items": { "type": "object", "required": ["power_id", "before", "after_declared_actions"],
-                  "properties": { "power_id": { "type": "string" }, "before": { "type": "number" }, "after_declared_actions": { "$ref": "#/$defs/conditionalCount" } } } }
+                  "properties": { "power_id": { "type": "string" }, "before": { "type": "number" }, "after_declared_actions": { "$ref": "#/$defs/conditionalSignedCount" } } } }
               }
             } }
           }
@@ -828,6 +828,8 @@
     },
     "conditionalCount": { "type": "object", "additionalProperties": false, "required": ["min", "max"],
       "properties": { "min": { "type": ["integer", "null"], "minimum": 0 }, "max": { "type": ["integer", "null"], "minimum": 0 } } },
+    "conditionalSignedCount": { "type": "object", "additionalProperties": false, "required": ["min", "max"],
+      "properties": { "min": { "type": ["integer", "null"] }, "max": { "type": ["integer", "null"] } } },
     "combatEffects": {
       "type": "object", "additionalProperties": false, "required": ["game_version", "effects", "scope", "phase_order"],
       "properties": {

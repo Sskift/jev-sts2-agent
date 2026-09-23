@@ -1,4 +1,4 @@
-import { attackHpLoss, previewHitCount, intentDamage } from './combat_arithmetic.mjs';
+import { attackHpLoss, previewHitCount, intentDamage, mangleStrengthLoss, intentsAfterMangle } from './combat_arithmetic.mjs';
 import { slowPercent } from './turn_effects.mjs';
 
 // These adapters follow verified native v0.111.0 OnPlay ordering. Amounts
@@ -10,9 +10,10 @@ function applicationAmount(card, kind) {
       : new RegExp(`(?:^|\\.\\s*)Apply (\\d+) ${kind}\\.`);
   return Number(card.description.match(rule)?.[1]);
 }
-const power = (entity, id) => (entity.powers || []).find(p => p.id === id && p.amount > 0);
+const power = (entity, id) => (entity.powers || []).find(p => p.id === id && (id === 'STRENGTH_POWER'
+  ? Number.isFinite(p.amount) && p.amount !== 0 : p.amount > 0));
 const caps = entity => ['INTANGIBLE_POWER', 'SLIPPERY_POWER', 'BUFFER_POWER'].some(id => power(entity, id));
-const modeledPowers = ['SLIPPERY_POWER', 'BUFFER_POWER', 'ARTIFACT_POWER', 'WEAK_POWER', 'VULNERABLE_POWER', 'SLOW_POWER'];
+const modeledPowers = ['SLIPPERY_POWER', 'BUFFER_POWER', 'ARTIFACT_POWER', 'WEAK_POWER', 'VULNERABLE_POWER', 'SLOW_POWER', 'STRENGTH_POWER'];
 const bounds = values => values.some(v => !Number.isFinite(v)) ? { min: null, max: null }
   : { min: Math.min(...values), max: Math.max(...values) };
 
@@ -53,7 +54,7 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
     return Number.isFinite(range.min) && Number.isFinite(range.max) && range.min !== range.max;
   }));
   const hasSlow = observed.enemies.some(enemy => enemy.powers?.some(power => power.id === 'SLOW_POWER'));
-  if (!hasOrderedRanges && !hasSlow && !steps.some(step => applications[source(step)?.id])) return null;
+  if (!hasOrderedRanges && !hasSlow && !steps.some(step => applications[source(step)?.id] || source(step)?.id === 'MANGLE')) return null;
   const affected = new Set(), transitions = [], damage = [];
   const invalid = new Set(), invalidIncoming = new Set();
   const branches = ['min', 'max'].map(bound => ({ bound, enemies: structuredClone(observed.enemies) }));
@@ -152,6 +153,26 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
             timing: card.type === 'Attack' ? 'after_card_damage' : step.kind === 'use_potion' ? 'during_potion_effect' : 'during_card_effect', outcome,
             condition: 'Minimum-damage branch; a target killed by greater possible preceding damage receives no later application.' });
         }
+        if (card.id === 'MANGLE') {
+          const amount = mangleStrengthLoss(card);
+          let outcome = 'applied';
+          if (!enemy.is_alive) outcome = 'target_depleted';
+          else {
+            const intents = intentsAfterMangle(observed, enemy, amount);
+            if (!intents) { outcome = 'unresolved'; affected.add(id); invalidIncoming.add(id); }
+            else {
+              enemy.intents = intents;
+              const strength = enemy.powers.find(p => p.id === 'STRENGTH_POWER');
+              if (strength) strength.amount -= amount;
+              else enemy.powers.push({ id: 'STRENGTH_POWER', amount: -amount });
+              affected.add(id);
+            }
+          }
+          if (bound === 'min') transitions.push({ sequence, source_id: card.id, card_id: card.id,
+            target_id: id, power_id: 'STRENGTH_POWER', amount: Number.isFinite(amount) ? -amount : null,
+            timing: 'after_card_damage', expires: 'after_upcoming_enemy_turn', outcome,
+            condition: 'Conditional current attack reduction per hit after this card resolves; other attack multipliers or prevention leave the amount unknown.' });
+        }
       }
       if (card.type === 'Attack') damage.push({ sequence, card_id: card.id, target_id: id,
         per_hit: { min: perHit.min ?? null, max: perHit.max ?? null },
@@ -183,22 +204,28 @@ export function projectDebuffDependencies(state, steps, orderedEntries = null, o
   const enemies = observed.enemies.map(original => {
     const variants = branches.map(b => b.enemies.find(e => e.combat_id === original.combat_id));
     const newlyWeak = !power(original, 'WEAK_POWER') && variants.some(e => power(e, 'WEAK_POWER'));
+    const changedStrength = variants.some(e => (power(e, 'STRENGTH_POWER')?.amount || 0) !== (power(original, 'STRENGTH_POWER')?.amount || 0));
+    if (changedStrength && newlyWeak) invalidIncoming.add(original.combat_id);
     if (newlyWeak && (caps(observed.player) || customMultiplier(observed, original, 'Weak'))) invalidIncoming.add(original.combat_id);
     const hp = invalid.has(original.combat_id) ? { min: null, max: null }
       : { min: Math.min(...variants.map(e => e.hp)), max: Math.max(...variants.map(e => e.hp)) };
     const attacks = ['min', 'max'].map(bound => {
       if (hp.max === null || invalidIncoming.has(original.combat_id)) return null;
       if ((bound === 'min' ? hp.min : hp.max) === 0) return 0;
-      if (!newlyWeak) return intentDamage(original);
+      if (!newlyWeak) return intentDamage(variants[bound === 'min' ? 0 : 1]);
       return original.intents.reduce((sum, intent) => sum + (Number.isFinite(intent.damage)
         ? scaledPreview(intent.damage, 3, 4, bound) * (intent.hits || 1) : 0), 0);
     });
+    const exactStrengthIntents = changedStrength && variants.every(e => JSON.stringify(e.intents) === JSON.stringify(variants[0].intents))
+      && !invalidIncoming.has(original.combat_id)
+      ? variants[0].intents.map((intent, index) => ({ index, type: intent.type, damage: intent.damage ?? null, hits: intent.hits ?? 1 })) : null;
     return { combat_id: original.combat_id, hp_remaining: hp,
       block_remaining: invalid.has(original.combat_id) ? { min: null, max: null } : bounds(variants.map(e => e.block)),
       power_changes: modeledPowerChanges(original, variants, invalid.has(original.combat_id)),
       depleted_if_all_declared_hits_resolve: hp.max === null ? null : hp.max === 0,
+      ...(exactStrengthIntents ? { attack_intents_after_debuffs: exactStrengthIntents } : {}),
       current_attack_after_debuffs: attacks.includes(null) ? { min: null, max: null } : { min: Math.min(...attacks), max: Math.max(...attacks) } };
   });
   return { is_observed_effect: false, adapters: [...new Set([...transitions.map(t => t.source_id), ...(hasOrderedRanges ? ['ORDERED_DAMAGE_RANGES'] : [])])], affected_target_ids: [...affected], transitions, ordered_damage: damage, enemies,
-    scope: 'Conditional ordered damage and current-intent bounds for verified native v0.111.0 applications and ordered target previews. Attack-source debuffs apply after damage; Taunt grants Block then Vulnerable; Artifact consumes applications in order. Slow adds 10 displayed percentage points after each card, benefiting later powered Attacks; its current displayed percentage is already included in starting previews. Slippery/Buffer HP-loss counters advance after unblocked hits, including across cards. Area recipients come from native previews. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so changed multipliers yield ranges. Intangible-capped previews, overlapping prevention hooks, custom multipliers and unreadable applications stay unknown. Assumes other hooks remain unchanged and every declared hit resolves; uncomputed potions, automatic plays, reactions, random targets and future moves are not simulated. Counter changes describe the end of the declared segment before enemy-turn resets or duration ticks, not an observation.' };
+    scope: 'Conditional ordered damage and current-intent bounds for verified native v0.111.0 applications and ordered target previews. Attack-source debuffs apply after damage; Taunt grants Block then Vulnerable; Artifact consumes applications in order. Mangle reduces each current unmodified enemy attack hit by its live temporary Strength loss, floored at zero; modified or protected attacks remain unknown. Slow adds 10 displayed percentage points after each card, benefiting later powered Attacks; its current displayed percentage is already included in starting previews. Slippery/Buffer HP-loss counters advance after unblocked hits, including across cards. Area recipients come from native previews. Existing Weak/Vulnerable are not multiplied twice. Integer previews hide fractions, so changed multipliers yield ranges. Intangible-capped previews, overlapping prevention hooks, custom multipliers and unreadable applications stay unknown. Assumes other hooks remain unchanged and every declared hit resolves; uncomputed potions, automatic plays, reactions, random targets and future moves are not simulated. Counter changes describe the end of the declared segment before enemy-turn resets or duration ticks, not an observation.' };
 }

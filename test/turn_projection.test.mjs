@@ -14,6 +14,30 @@ function state() {
 const strike = { kind: 'play_card', name: 'Strike', card_instance_id: 'STRIKE_IRONCLAD', target: 42 };
 const defend = { kind: 'play_card', name: 'Defend', card_instance_id: 'DEFEND_IRONCLAD' };
 
+test('Mangle turns a fatal current attack into a survivable turn when native attack math is unmodified', () => {
+  const s = state(); s.combat.player.hp = 6;
+  const enemy = s.combat.enemies[0]; enemy.hp = 66;
+  enemy.intents = [{ type: 'Attack', damage: 12, hits: 1 }];
+  enemy.powers = [{ id: 'STRENGTH_POWER', amount: 4 }];
+  s.combat.hand = [fixtureCard('MANGLE', { index: 0, name: 'Mangle', type: 'Attack', cost: 3,
+    description: 'Deal 20 damage. Enemy loses 10 Strength this turn.', can_play: true,
+    target_type: 'AnyEnemy', target_previews: [{ target_id: 42, damage: 20 }] })];
+  const before = structuredClone(s), card = s.combat.hand[0];
+  const step = { kind: 'play_card', card_instance_id: card.details.instance_id, target: 42 };
+  const single = combatForecast(s.combat, card, enemy);
+  const plan = describeTurnProjection(s, [step]);
+  assert.equal(single.fatal_if_end_turn, false);
+  assert.equal(single.hp_remaining_if_end_turn, 4);
+  assert.equal(plan.known_effects_only.hp_if_ending, 4);
+  assert.equal(plan.known_effects_only.incoming_attack, 2);
+  assert.deepEqual(plan.known_effects_only.enemies[0].power_changes[0].after_declared_actions, { min: -6, max: -6 });
+  assert.deepEqual(plan.omitted_effects, []);
+  assert.deepEqual(s, before);
+  enemy.powers.push({ id: 'WEAK_POWER', amount: 1 });
+  assert.equal(describeTurnProjection(s, [step]).known_effects_only.hp_if_ending, null,
+    'Existing attack multipliers must not be treated as an exact ten-point reduction');
+});
+
 test('unknown attack repetitions never become zero damage or a certain unchanged enemy response', () => {
   const s = state();
   s.combat.hand[0].description = 'Deal 6 damage. Repeat this attack a random number of times.';
