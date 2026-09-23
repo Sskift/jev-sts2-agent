@@ -19,7 +19,7 @@ test('card skip intent survives other claims without hiding gold or reconsiderin
   let prepared = prepareModDecision(state, { memory });
   assert.equal(prepared.candidates.has('skip_card_0'), false);
   assert.ok(prepared.candidates.has('claim_0'));
-  assert.ok(prepared.candidates.has('reward_1_card_0'));
+  assert.equal(prepared.candidates.has('reward_1_card_0'), false);
   assert.deepEqual(prepared.payload.state.screen_state.skipped_card_rewards.reward_nths, [0]);
   const after = structuredClone(state);
   after.rewards.rewards.shift(); after.rewards.rewards[0].index = 0;
@@ -27,6 +27,7 @@ test('card skip intent survives other claims without hiding gold or reconsiderin
   memory.finish({ ok: true }, after); memory.observe(after);
   prepared = prepareModDecision(after, { memory });
   assert.equal(prepared.candidates.has('skip_card_0'), false);
+  assert.equal(prepared.candidates.has('reward_0_card_0'), false);
   const decision = await makeModDecisionWithJev(after, { memory, fetchImpl: () => { throw new Error('Already selected skip needs no new judgment'); } });
   assert.equal(decision.request.cmd, 'proceed');
   assert.equal(decision.model, 'complete-selected-skip');

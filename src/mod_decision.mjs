@@ -288,7 +288,7 @@ export function prepareModDecision(gameState, options = {}) {
       if (key && options.memory.data.run_id === gameState.decision_context?.run_id && options.memory.data.actions.some(action => action.ok && action.request.cmd === 'reward_skip_card' && action.floor === gameState.decision_context.total_floor && action.card_reward_key === key && (action.request.nth ?? 0) === nth)) {
         skippedCardRewards.push(nth);
         candidates.delete(`skip_card_${nth}`);
-        for (const candidate of candidates.values()) if (candidate.request.cmd === 'reward_choose_card' && candidate.request.nth === nth) candidate.description += ' This reward was already skipped; selecting it now reconsiders that choice.';
+        for (const [id, candidate] of candidates) if (candidate.request.cmd === 'reward_choose_card' && candidate.request.nth === nth) candidates.delete(id);
       }
     }
   }
@@ -298,7 +298,7 @@ export function prepareModDecision(gameState, options = {}) {
   if (!candidates.size) return { action: 'wait', reason: `No complete supported action in ${gameState?.screen || 'unknown'}` };
   if (options.shopRemovalPlan && !shopRemovalApplicable(options.shopRemovalPlan, gameState)) throw new ContextError('Stale shop removal target');
   const context = buildDecisionContext(gameState, { candidates, memory: options.memory, selectionPlanning: stage?.state, shopRemovalPlan: options.shopRemovalPlan });
-  if (skippedCardRewards.length) context.screen_state.skipped_card_rewards = { reward_nths: skippedCardRewards, note: 'Skip closes the card picker but the game keeps this reward available. The earlier skip choice is remembered: duplicate skip commands are omitted, while taking a card to reconsider and claiming other rewards remain available.' };
+  if (skippedCardRewards.length) context.screen_state.skipped_card_rewards = { reward_nths: skippedCardRewards, note: 'Native Skip closes the card picker but keeps the offer visible. The confirmed decision is remembered for this unchanged reward: repeated Skip and card-add actions are omitted while claiming other rewards and proceeding remain available.' };
   if (options.strategyAssessment) context.strategy_assessment = { source: 'Independent Jev judgments of incremental value, advisory rather than verified facts', scale: options.strategyAssessment.scale, options: options.strategyAssessment.options };
   if (gameState.screen === 'MAP') for (const route of context.map?.routes || []) {
     const id = `map_${route.next_node.col}_${route.next_node.row}`, candidate = candidates.get(id);
