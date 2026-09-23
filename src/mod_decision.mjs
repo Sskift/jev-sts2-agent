@@ -14,6 +14,7 @@ import { decideCamp } from './camp_plan.mjs';
 import { plannedCampSelection } from './camp_plan_state.mjs';
 import { removableCard } from './shop_context.mjs';
 import { planShopRemoval, compareShopRemoval } from './shop_plan.mjs';
+import { compareRewardSkip } from './reward_plan.mjs';
 import { plannedShopRemoval, shopRemovalApplicable } from './shop_plan_state.mjs';
 
 const integer = value => Number.isInteger(value) && value >= 0;
@@ -406,7 +407,8 @@ async function decidePrepared(gameState, options, prepared) {
   }
   if (prepared.selectionPlan) return assembleSelection(gameState, options, prepared, choosePrepared, prepareModDecision);
   const initial = await choosePrepared(gameState, options, prepared);
-  const decision = await compareShopRemoval(gameState, options, prepared, initial, choosePrepared);
+  const decision = await compareRewardSkip(gameState, options, prepared,
+    await compareShopRemoval(gameState, options, prepared, initial, choosePrepared), choosePrepared);
   if (!assessment && !removal) return decision;
   return { ...decision, ...(assessment ? { strategy_assessment: assessment } : {}),
     ...(removal ? { shop_target_decision: removal,

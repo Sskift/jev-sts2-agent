@@ -111,9 +111,11 @@ test('between-room choices and advisory ratings use the same full context bounda
     return { ok: true, json: async () => ({ model: 'jev-test', answers: Object.fromEntries(Object.entries(body.questions).map(([key, question]) => [key,
       question.type === 'score' ? { type: 'score', score: 2 } : { type: 'choice', choice: Object.keys(question.criteria)[0] }])) }) };
   } });
-  assert.equal(seen.length, 2);
+  assert.equal(seen.length, 3);
   assert.equal(seen[0].state.decision.output_role, 'advisory_assessment');
   assert.equal(seen[1].state.decision.output_role, 'legal_action_selection');
   assert.equal(seen[1].state.analysis.model_assessment.options.length, 1);
   assert.deepEqual(seen[0].state.observation.deck, seen[1].state.observation.deck);
+  assert.deepEqual(seen[1].state.observation.deck, seen[2].state.observation.deck);
+  assert.ok(seen[2].questions.reward_forward && seen[2].questions.reward_reverse);
 });
