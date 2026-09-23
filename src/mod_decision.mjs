@@ -13,7 +13,7 @@ import { plannedUpgradeSelection } from './turn_plan_state.mjs';
 import { decideCamp } from './camp_plan.mjs';
 import { plannedCampSelection } from './camp_plan_state.mjs';
 import { removableCard } from './shop_context.mjs';
-import { planShopRemoval, compareShopRemoval, compareShopCardWithSaving } from './shop_plan.mjs';
+import { planShopRemoval, compareShopRemoval, compareShopCardWithSaving, compareShopFirstAttack } from './shop_plan.mjs';
 import { compareRewardSkip } from './reward_plan.mjs';
 import { plannedShopRemoval, shopRemovalApplicable } from './shop_plan_state.mjs';
 
@@ -421,8 +421,9 @@ async function decidePrepared(gameState, options, prepared) {
   if (prepared.selectionPlan) return assembleSelection(gameState, options, prepared, choosePrepared, prepareModDecision);
   const initial = await choosePrepared(gameState, options, prepared);
   const shopCardReviewed = await compareShopCardWithSaving(gameState, options, prepared, initial, choosePrepared);
+  const attackReviewed = await compareShopFirstAttack(gameState, options, prepared, shopCardReviewed, choosePrepared);
   const decision = await compareRewardSkip(gameState, options, prepared,
-    await compareShopRemoval(gameState, options, prepared, shopCardReviewed, choosePrepared), choosePrepared);
+    await compareShopRemoval(gameState, options, prepared, attackReviewed, choosePrepared), choosePrepared);
   if (!assessment && !removal) return decision;
   return { ...decision, ...(assessment ? { strategy_assessment: assessment } : {}),
     ...(removal ? { shop_target_decision: removal,

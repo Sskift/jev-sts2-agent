@@ -609,7 +609,18 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
         by_type: Object.fromEntries([...new Set(context.master_deck.map(c => c.type))].map(type => [type, context.master_deck.filter(c => c.type === type).length])),
         basic_cards: context.master_deck.filter(c => c.rarity === 'Basic').length,
         non_basic_attacks: context.master_deck.filter(c => c.type === 'Attack' && c.rarity !== 'Basic').length,
-        upgraded_attacks: context.master_deck.filter(c => c.type === 'Attack' && c.is_upgraded).length
+        upgraded_attacks: context.master_deck.filter(c => c.type === 'Attack' && c.is_upgraded).length,
+        ...(['REWARD', 'SHOP'].includes(state.screen) && context.act_index === 0 ? {
+          early_damage_check: {
+            no_added_attack: !context.master_deck.some(c => c.type === 'Attack' && c.rarity !== 'Basic'),
+            offered_attack_action_ids: legalActions.filter(action => action.request?.cmd === 'reward_choose_card'
+              ? state.rewards?.rewards?.some(reward => reward.type === 'Card' && reward.card_choices?.some(card =>
+                card.id === action.request.card_id && card.type === 'Attack'))
+              : action.request?.cmd === 'shop_buy_card' && state.shop?.cards?.some(card =>
+                `buy_card_${card.index}` === action.action_id && card.card_type === 'Attack')).map(action => action.action_id),
+            scope: 'This counts permanent non-Basic Attack cards, not total damage. Basic or upgraded attacks, damaging non-Attacks, relics and potions may also solve early fights. Compare the actual first-cycle output and upcoming threats before adding or skipping a card.'
+          }
+        } : {})
       }
     } : null,
     map, combat, screen_state: screenState,

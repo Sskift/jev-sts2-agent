@@ -8,7 +8,7 @@ import { compileModelRequest } from '../src/context_compiler.mjs';
 import { shopEconomy } from '../src/shop_context.mjs';
 import { shopRemovalBasis, plannedShopRemoval } from '../src/shop_plan_state.mjs';
 import { buildStrategyKnowledge } from '../src/strategy_knowledge.mjs';
-import { compareShopRemoval, compareShopCardWithSaving } from '../src/shop_plan.mjs';
+import { compareShopRemoval, compareShopCardWithSaving, compareShopFirstAttack } from '../src/shop_plan.mjs';
 
 const strike = (instance, extra = {}) => fixtureCard('STRIKE_IRONCLAD', { details: { instance_id: instance, upgrade_level: 0 }, ...extra });
 function shop() {
@@ -201,6 +201,36 @@ test('a paid card rated marginal needs a second look against keeping the gold', 
   assert.equal(decision.usage.input_tokens, 200);
   options.strategyAssessment.options[0].probabilities = { 0: 0.1, 1: 0.2, 2: 0.6, 3: 0.1 };
   assert.equal(await compareShopCardWithSaving(state, options, prepared, initial, () => { throw new Error('No comparison needed'); }), initial);
+});
+
+test('an Act 1 shop exit explicitly compares available first Attacks with saving gold', async () => {
+  const state = shop();
+  state.decision_context.master_deck = [strike('s0'), strike('s1')];
+  state.decision_context.player.deck_count = 2;
+  state.shop.cards.forEach(card => card.card_type = 'Attack');
+  const prepared = prepareModDecision(state);
+  const leaving = { ...prepared.candidates.get('proceed'), candidate_id: 'proceed',
+    confidence: 0.5, usage: { input_tokens: 100 } };
+  const decision = await compareShopFirstAttack(state, {}, prepared, leaving, async (_s, _o, p) => {
+    const questions = p.payload.questions;
+    assert.deepEqual(Object.values(questions.first_attack_forward.criteria).map(value => value.action_id),
+      ['proceed', 'buy_card_0', 'buy_card_1']);
+    assert.deepEqual(Object.values(questions.first_attack_reverse.criteria).map(value => value.action_id),
+      ['buy_card_1', 'buy_card_0', 'proceed']);
+    assert.deepEqual(p.payload.state.deck.statistics.early_damage_check.offered_attack_action_ids,
+      ['buy_card_0', 'buy_card_1']);
+    return { ...p.parseResult({ answers: {
+      first_attack_forward: { type: 'choice', choice: 'option_2' },
+      first_attack_reverse: { type: 'choice', choice: 'option_0' }
+    } }), usage: { input_tokens: 100 } };
+  });
+  assert.equal(decision.request.cmd, 'shop_buy_card');
+  assert.equal(decision.candidate_id, 'buy_card_1');
+  assert.equal(decision.shop_first_attack_comparison.consensus_action_id, 'buy_card_1');
+  assert.equal(decision.usage.input_tokens, 200);
+  state.decision_context.master_deck.push(fixtureCard('POMMEL_STRIKE', { type: 'Attack', rarity: 'Common' }));
+  state.decision_context.player.deck_count = 3;
+  assert.equal(await compareShopFirstAttack(state, {}, prepared, leaving, () => { throw new Error('No comparison needed'); }), leaving);
 });
 
 test('removal guidance is scoped to shops and permanent removal, not combat discard choices', () => {

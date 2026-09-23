@@ -18,9 +18,9 @@ export async function compareRewardSkip(state, options, prepared, decision, choo
     return { action_id: actionId, marginal_or_worse_probability: p[0] + p[1],
       useful_or_better_probability: p[2] + p[3] };
   });
-  const deck = state.decision_context?.master_deck || [];
-  const needsFirstAttack = state.decision_context?.act_index === 0 && state.decision_context?.act_floor <= 6
-    && !deck.some(card => card.type === 'Attack' && card.rarity !== 'Basic');
+  const earlyDamage = prepared.payload.state.deck?.statistics?.early_damage_check;
+  const needsFirstAttack = earlyDamage?.no_added_attack === true
+    && earlyDamage.offered_attack_action_ids.some(id => prepared.candidates.get(id)?.request?.nth === decision.request.nth);
   // A starter-only early deck still needs reliable damage for upcoming fights.
   // Resolve a low independent rating against the full-menu choice directly;
   // it is too weak a signal to auto-skip every attack opportunity here.

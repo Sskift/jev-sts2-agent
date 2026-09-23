@@ -70,6 +70,50 @@ export async function compareShopCardWithSaving(state, options, prepared, decisi
       output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0) } };
 }
 
+// Before leaving an Act 1 shop with no added Attack, put the real damage
+// options beside saving gold. The model may still save or choose removal next.
+export async function compareShopFirstAttack(state, options, prepared, decision, choose) {
+  if (state.screen !== 'SHOP' || decision.request?.cmd !== 'proceed'
+    || state.decision_context?.act_index !== 0
+    || state.decision_context.master_deck.some(card => card.type === 'Attack' && card.rarity !== 'Basic')) return decision;
+  const buys = (state.shop?.cards || []).filter(card => card.is_stocked && card.card_type === 'Attack'
+    && card.cost <= state.shop.player_gold && prepared.candidates.has(`buy_card_${card.index}`));
+  if (!buys.length) return decision;
+  const alternatives = [{ action_id: 'proceed', effect: prepared.candidates.get('proceed').description,
+    gold_after: state.shop.player_gold, deck_count_after: state.decision_context.master_deck.length },
+  ...buys.map(card => ({ action_id: `buy_card_${card.index}`,
+    effect: prepared.candidates.get(`buy_card_${card.index}`).description,
+    gold_after: state.shop.player_gold - card.cost,
+    deck_count_after: state.decision_context.master_deck.length + 1 }))];
+  const instructions = 'This Act 1 deck still has no added non-Basic Attack. Compare leaving with the gold against buying ONE of these exact available Attacks. Basic or upgraded attacks, other damage effects, relics and potions may already provide enough damage; an Attack is not mandatory. Assess first-cycle damage, energy, draw dilution, each price, current HP, visible threats and the need to save for removal or later offers. A weak or redundant Attack should lose to saving; an efficient first Attack may prevent repeated enemy turns. Do not assume future card offers. Choose the best complete tradeoff.';
+  const questions = Object.fromEntries([['first_attack_forward', alternatives],
+    ['first_attack_reverse', [...alternatives].reverse()]].map(([id, ordered]) => [id,
+    { type: 'choice', instructions, criteria: Object.fromEntries(ordered.map((item, index) => [`option_${index}`, item])) }]));
+  const payload = { ...prepared.payload, questions }, metrics = { ...prepared.metrics,
+    purpose: 'shop_first_attack_vs_saving', question_count: 2 };
+  metrics.request_bytes = compileModelRequest(payload, metrics).bytes;
+  if (metrics.request_bytes > metrics.max_request_bytes) throw new ContextError('Complete first Attack comparison exceeds request budget');
+  const comparison = await choose(state, options, { ...prepared, payload, metrics, parseResult: result => {
+    const judgments = Object.entries(questions).map(([id, question]) => {
+      const answer = result.answers?.[id];
+      if (answer?.type !== 'choice' || !Object.hasOwn(question.criteria, answer.choice)) throw new Error('Invalid first Attack comparison');
+      return { question: id, action_id: question.criteria[answer.choice].action_id,
+        confidence: answer.confidence, probabilities: answer.probabilities };
+    });
+    return { action: 'compare_shop_first_attack', judgments,
+      consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
+  } });
+  options.onPlanningDecision?.(comparison);
+  const selectedId = comparison.consensus_action_id;
+  const selected = selectedId && selectedId !== 'proceed' ? prepared.candidates.get(selectedId) : null;
+  return { ...decision, ...(selected ? { ...selected, candidate_id: selectedId, model: comparison.model,
+    confidence: undefined, probabilities: undefined } : {}),
+    initial_shop_exit_choice: { candidate_id: decision.candidate_id, confidence: decision.confidence,
+      probabilities: decision.probabilities }, shop_first_attack_comparison: comparison,
+    usage: { input_tokens: (decision.usage?.input_tokens || 0) + (comparison.usage?.input_tokens || 0),
+      output_tokens: (decision.usage?.output_tokens || 0) + (comparison.usage?.output_tokens || 0) } };
+}
+
 // Compare removal with a purchase that consumes its budget, or with leaving
 // while removal is still affordable. Disagreement preserves the full-menu
 // choice; there is no hard-coded preference for removal.
