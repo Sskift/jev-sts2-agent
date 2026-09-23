@@ -20,9 +20,12 @@ export function buildStrategyKnowledge(state) {
   const phases = [state.screen, ...(!state.combat ? ['between_rooms'] : []),
     ...(!state.combat && state.screen === 'GRID_CARD_SELECT' && state.grid_card_select?.selection_type === 'remove' ? ['permanent_removal'] : [])];
   const general = notes.general.filter(note => !note.phases || note.phases.some(phase => phases.includes(phase)));
-  const sources = new Set([...general.map(n => n.source), ...(character ? [character.source] : []), ...packages.map(n => n.source).filter(Boolean)]);
+  const encounter = state.combat ? state.combat.enemies.flatMap(enemy => notes.encounters?.[enemy.id]
+    ? [{ enemy_id: enemy.id, ...notes.encounters[enemy.id] }] : []) : [];
+  const sources = new Set([...general.map(n => n.source), ...encounter.map(n => n.source),
+    ...(character ? [character.source] : []), ...packages.map(n => n.source).filter(Boolean)]);
   return { rules_version: notes.rules_version, reviewed_at: notes.reviewed_at, authority: notes.authority,
-    general, character: character ? { id: context.player.character_id, overview: character.overview, packages } : null,
+    general, encounter, character: character ? { id: context.player.character_id, overview: character.overview, packages } : null,
     sources: Object.fromEntries([...sources].map(id => [id, notes.sources[id]])) };
 }
 

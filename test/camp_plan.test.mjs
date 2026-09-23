@@ -3,16 +3,20 @@ import assert from 'node:assert/strict';
 import { DecisionMemory } from '../src/decision_context.mjs';
 import { makeModDecisionWithJev, buildModCandidates } from '../src/mod_decision.mjs';
 import { campUpgradeTargets, distinctCampUpgradeTargets, plannedCampSelection } from '../src/camp_plan_state.mjs';
+import { campSurvivalFacts } from '../src/camp_context.mjs';
 import { withContext, fixtureCard } from './fixtures/context.mjs';
 
 function camp() {
   const deck = ['first', 'second'].map(instance_id => fixtureCard('STRIKE_IRONCLAD', { details: { instance_id, upgrade_level: 0, target_type: 'AnyEnemy' } }));
-  return withContext({ screen: 'REST_SITE', rest_site: { options: [
+  const state = withContext({ screen: 'REST_SITE', rest_site: { options: [
     { option_id: 'HEAL', name: 'Rest', description: 'Heal 24 HP.', is_enabled: true },
     { option_id: 'SMITH', name: 'Smith', description: 'Upgrade a card.', is_enabled: true }
   ], can_proceed: false } }, { master_deck: deck, deck_upgrade_previews: deck.map((card, deck_index) => ({
     deck_index, instance_id: card.details.instance_id, card_id: card.id, name: 'Strike+', description: 'Deal 9 damage.', cost: 1
   })) });
+  state.decision_context.map.nodes[0].type = 'REST_SITE';
+  state.decision_context.map.nodes[1].type = 'MONSTER';
+  return state;
 }
 function grid(state) {
   const after = structuredClone(state); after.screen = 'GRID_CARD_SELECT'; delete after.rest_site;
@@ -82,6 +86,38 @@ test('resting discards the hypothetical upgrade, and a failed Smith never author
   memory.finish({ ok: false, error: 'TIMEOUT' }, grid(state));
   assert.equal(memory.data.camp_upgrade_plan, undefined);
   assert.equal(memory.data.pending.outcome_unknown, true);
+});
+
+test('a known boss next receives exact heal arithmetic and a reversed rest-versus-upgrade review', async () => {
+  const state = camp(), memory = new DecisionMemory();
+  state.decision_context.player.hp = 32;
+  state.rest_site.options[0].description = 'Heal for 30% of your Max HP (24).';
+  state.decision_context.map.nodes[1].type = 'BOSS';
+  const facts = campSurvivalFacts(state);
+  assert.equal(facts.healing.hp_after, 56);
+  assert.equal(facts.next_room.known_next_is_boss, true);
+  memory.observe(state);
+  const requests = [];
+  const result = await makeModDecisionWithJev(state, { memory, runStrategy: false, apiKey: 'fixture-only', fetchImpl: async (_url, request) => {
+    const payload = JSON.parse(request.body); payload.state = JSON.parse(payload.state); requests.push(payload);
+    let answers;
+    if (payload.questions.upgrade_target) answers = { upgrade_target: { type: 'choice', choice: 'upgrade_0' } };
+    else if (payload.questions.next_action) {
+      assert.equal(payload.state.observation.screen_state.rest_site.survival_tradeoff.healing.hp_after, 56);
+      answers = { next_action: { type: 'choice', choice: 'rest_SMITH', confidence: 0.17 } };
+    } else {
+      assert.equal(payload.questions.boss_camp_forward.criteria.second.outcome.effective_hp_gain, 24);
+      answers = { boss_camp_forward: { type: 'choice', choice: 'second' },
+        boss_camp_reverse: { type: 'choice', choice: 'first' } };
+    }
+    return { ok: true, json: async () => ({ model: 'jev-test', usage: { input_tokens: 10, output_tokens: 1 }, answers }) };
+  } });
+  assert.equal(requests.length, 3);
+  assert.equal(result.request.id, 'HEAL');
+  assert.equal(result.camp_survival_comparison.consensus_action_id, 'rest_HEAL');
+  assert.equal(result.camp_upgrade_plan, undefined);
+  assert.equal(result.confidence, undefined);
+  assert.equal(result.usage.input_tokens, 30);
 });
 
 test('camp intentions reject stale resources, changed previews and indistinguishable non-equivalent copies', () => {

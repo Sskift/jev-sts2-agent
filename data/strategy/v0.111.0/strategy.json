@@ -17,7 +17,8 @@
     "regent": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/regent", "version": "Unspecified; card references checked against local v0.111.0." },
     "necrobinder": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/necrobinder", "version": "Unspecified; the page's max-HP Doom claim is excluded as inconsistent with native rules." },
     "defect": { "author": "Untapped.gg", "url": "https://sts2.untapped.gg/en/characters/defect", "version": "Unspecified; numeric and orb-order claims are excluded." },
-    "orb_spam": { "author": "Baalorlord via Untapped.gg", "url": "https://sts2.untapped.gg/en/guides/defect-build-orb-spam", "version": "Earlier Early Access; qualitative prerequisites only." }
+    "orb_spam": { "author": "Baalorlord via Untapped.gg", "url": "https://sts2.untapped.gg/en/guides/defect-build-orb-spam", "version": "Earlier Early Access; qualitative prerequisites only." },
+    "kin_boss": { "author": "GameSpot", "url": "https://www.gamespot.com/gallery/slay-the-spire-2-bosses/2900-7563/", "retrieved": "2026-09-23", "version": "Qualitative target-priority tradeoff; live HP, intents and Minion power take precedence." }
   },
   "general": [
     { "id": "answer_upcoming_jobs", "source": "jobs", "advice": "Evaluate immediate damage, control of multiple enemies, defense, long-fight scaling and access to the right cards. A rare payoff can lose to an ordinary card that solves the next encounter. An established package does not excuse an unanswered threat; compatible packages can coexist." },
@@ -31,6 +32,9 @@
     { "id": "removal_exceptions", "source": "removal_discussion", "phases": ["SHOP", "permanent_removal"], "advice": "Strike versus Defend is a current-deck comparison, not a character-wide fixed order. Upgrades, enchantments, existing replacements and supported Strike or curse payoffs can change the answer. Compare removal with the actual shop offers and prices; neither removing at every shop nor achieving a fixed small deck size is mandatory." },
     { "id": "route_resources", "source": "pathing", "phases": ["between_rooms"], "advice": "Use the revealed boss and reachable paths to evaluate preparation needs. Elite rewards compete with HP, potions and access to rest or upgrades. Preserve route flexibility where useful. A question-mark node does not guarantee a safe room, and a suggested elite count is not a rule." }
   ],
+  "encounters": {
+    "KIN_PRIEST": { "source": "kin_boss", "advice": "Kin Followers deal damage and strengthen over time, but abandon combat when the Kin Priest dies. Compare a focused follower kill that reduces future incoming attacks against a credible fast Priest kill that ends the encounter. Account for current HP, each target's live HP and intent, available damage and AoE. Splitting single-target damage across all three without a near-term kill can leave every attacker active. Neither follower-first nor Priest-first is a fixed rule." }
+  },
   "characters": {
     "IRONCLAD": {
       "source": "ironclad",

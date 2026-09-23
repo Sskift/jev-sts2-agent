@@ -30,11 +30,39 @@ export async function decideCamp(state, options, prepared, choose) {
   payload.questions.next_action.instructions += ' Compare the real rest-site options. Smith means exactly the conditional upgrade in intent.camp_planning, not an unspecified powerful upgrade. Compare its incremental benefit with actual capped healing and other rest effects, present HP, potions, remaining route and current build. You may choose any offered action; selecting the hypothetical upgrade above does not commit you to Smith.';
   payload.questions.next_action.criteria.rest_SMITH = { action_id: 'rest_SMITH', command: 'choose_rest_option',
     effect: 'Smith: perform the concrete upgrade in intent.camp_planning, then return to this rest site.' };
-  const decision = await choose(state, options, phase(prepared, payload, 'camp_concrete_choice'));
+  const initial = await choose(state, options, phase(prepared, payload, 'camp_concrete_choice'));
+  let decision = initial, comparison = null;
+  const survival = payload.state.screen_state.rest_site?.survival_tradeoff;
+  const rest = prepared.candidates.get('rest_HEAL');
+  if (initial.request?.id === 'SMITH' && rest && survival?.next_room.known_next_is_boss
+    && survival.healing.effective_hp_gain > 0) {
+    const heal = { action_id: 'rest_HEAL', effect: rest.description, outcome: survival.healing };
+    const smith = { action_id: 'rest_SMITH', effect: 'Upgrade exactly one owned card',
+      upgrade: publicCampTarget(targetDecision.target) };
+    const instructions = 'The next known room is the revealed boss. Which camp action better serves surviving and winning that fight? Compare the exact immediate HP before/after Rest with the one concrete Smith upgrade, including its chance to be drawn and played in time, current deck, relics, potions and the visible boss rules. A powerful upgrade can beat healing when survival is already secure, while an upgrade cannot help after a lethal turn. Use the complete current state; do not treat the earlier full-menu choice as a fact or assume hidden future rewards.';
+    const questions = Object.fromEntries([['boss_camp_forward', smith, heal], ['boss_camp_reverse', heal, smith]]
+      .map(([id, first, second]) => [id, { type: 'choice', instructions, criteria: { first, second } }]));
+    const reviewed = await choose(state, options, phase(prepared, { ...payload, questions }, 'camp_boss_survival_comparison', result => {
+      const judgments = Object.entries(questions).map(([id, question]) => {
+        const answer = result.answers?.[id];
+        if (answer?.type !== 'choice' || !Object.hasOwn(question.criteria, answer.choice)) throw new Error('Invalid boss camp comparison');
+        return { question: id, action_id: question.criteria[answer.choice].action_id,
+          confidence: answer.confidence, probabilities: answer.probabilities };
+      });
+      return { action: 'compare_boss_camp_survival', judgments,
+        consensus_action_id: judgments[0].action_id === judgments[1].action_id ? judgments[0].action_id : null };
+    }));
+    comparison = reviewed;
+    options.onPlanningDecision?.(reviewed);
+    if (reviewed.consensus_action_id === 'rest_HEAL') decision = { ...rest, candidate_id: 'rest_HEAL', model: reviewed.model };
+  }
   return { ...decision, ...(decision.request?.cmd === 'choose_rest_option' && decision.request.id === 'SMITH'
     ? { camp_upgrade_plan: targetDecision.target } : {}),
+    ...(comparison ? { initial_camp_choice: { candidate_id: initial.candidate_id, confidence: initial.confidence,
+      probabilities: initial.probabilities }, camp_survival_comparison: comparison,
+    ...(decision === initial ? {} : { confidence: undefined, probabilities: undefined }) } : {}),
     camp_target_decision: targetDecision, usage: {
-      input_tokens: (targetDecision.usage?.input_tokens || 0) + (decision.usage?.input_tokens || 0),
-      output_tokens: (targetDecision.usage?.output_tokens || 0) + (decision.usage?.output_tokens || 0)
+      input_tokens: (targetDecision.usage?.input_tokens || 0) + (initial.usage?.input_tokens || 0) + (comparison?.usage?.input_tokens || 0),
+      output_tokens: (targetDecision.usage?.output_tokens || 0) + (initial.usage?.output_tokens || 0) + (comparison?.usage?.output_tokens || 0)
     } };
 }

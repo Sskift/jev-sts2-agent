@@ -8,6 +8,7 @@ export { canonicalObservation } from './observation_state.mjs';
 import { previewDamageSum } from './combat_arithmetic.mjs';
 import { buildRuleReference } from './rule_reference.mjs';
 import { combatFrame, observedCombatChange, buildDecisionBrief } from './decision_brief.mjs';
+import { campSurvivalFacts } from './camp_context.mjs';
 import { sameTurn, publicTurnPlan, turnGuard, advanceTurnPlan } from './turn_plan_state.mjs';
 import { campPlanApplicable, publicCampTarget } from './camp_plan_state.mjs';
 import { shopRemovalApplicable, publicShopRemoval } from './shop_plan_state.mjs';
@@ -492,6 +493,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
   const source = canonicalObservation(state), context = source.decision_context;
   const screenState = { ...source };
   for (const key of ['screen', 'combat', 'map', 'decision_context']) delete screenState[key];
+  if (state.screen === 'REST_SITE' && screenState.rest_site) screenState.rest_site.survival_tradeoff = campSurvivalFacts(source);
   if (state.screen === 'GRID_CARD_SELECT' && campPlanApplicable(memory.data.camp_upgrade_plan, state)) {
     screenState.camp_planning = publicCampTarget(memory.data.camp_upgrade_plan);
   }
