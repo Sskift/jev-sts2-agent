@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { validateDecisionPacket, ContextError, compactPlanningRequest } from './decision_context.mjs';
+import { validateDecisionPacket, ContextError, compactPlanningRequest, expandRecordTables } from './decision_context.mjs';
 import { sameTurn, planStep, resolvePlanStep, inspectTurnPlan, turnFingerprint, cardInstance } from './turn_plan_state.mjs';
 import { describeTurnProjection, sequenceEnergyBudget, reserveSequence } from './turn_projection.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
@@ -116,9 +116,17 @@ export async function decideTurn(state, options, prepared, choose) {
     // packing is only a fallback when one complete judgment cannot fit.
     const preferredPresentation = 'named';
     const purpose = assessment ? 'turn_assess_plans' : 'turn_refine_pairs';
-    const comparisonState = { ...prepared.payload.state, turn_planning: planningState({ ...extra, survival_constraints: constraints }) };
+    // A complete ordered plan has its own conditional projection. Isolated
+    // one-action forecasts describe a different horizon and duplicate much of
+    // that analysis. Keep every legal command and all native facts/rules;
+    // scope out only those derived estimates before compiling this phase.
+    const legalActions = expandRecordTables(prepared.payload.state.legal_actions)
+      .map(({ combat_estimate, ...action }) => action);
+    const comparisonState = { ...prepared.payload.state, legal_actions: legalActions,
+      turn_planning: planningState({ ...extra, survival_constraints: constraints }) };
+    comparisonState.turn_planning.phase_scope += ' Conditional calculations in this phase belong to each complete ordered plan. Isolated single-action estimates are not included; all current legal actions, native previews and rules remain available.';
     validateDecisionPacket(comparisonState);
-    const judgments = [];
+    const judgments = [], batches = [];
     let batch = [];
     const payloadFor = items => ({ model: prepared.payload.model,
       state: { ...comparisonState, turn_planning: { ...comparisonState.turn_planning,
@@ -132,14 +140,13 @@ export async function decideTurn(state, options, prepared, choose) {
       return { payload, metrics: { ...metrics, request_bytes: compileModelRequest(payload, metrics).bytes,
         question_count: items.length * questionsPerPair } };
     };
-    async function flush(presentation = preferredPresentation) {
-      if (!batch.length) return;
-      const { payload, metrics } = batchRequest(batch, presentation), body = JSON.stringify(payload);
+    async function flush(items, presentation) {
+      const { payload, metrics } = batchRequest(items, presentation), body = JSON.stringify(payload);
       const decision = await choose(state, options, { candidates: prepared.candidates, payload, body,
         metrics,
         parseResult(result) {
           return { action: assessment ? 'assess_turn_plans' : 'compare_turn_plans',
-            judgments: (assessment ? resolvePlanAssessments : resolvePlanComparisons)(batch, result.answers, compareSurvival) };
+            judgments: (assessment ? resolvePlanAssessments : resolvePlanComparisons)(items, result.answers, compareSurvival) };
         } });
       usage.input_tokens += decision.usage?.input_tokens || 0;
       usage.output_tokens += decision.usage?.output_tokens || 0;
@@ -147,19 +154,24 @@ export async function decideTurn(state, options, prepared, choose) {
       const record = { stage: assessment ? 'assess_plans' : 'refine_pairs',
         [assessment ? 'assessments' : 'comparisons']: decision.judgments, model: decision.model, usage: decision.usage };
       trace.push(record); options.onPlanningDecision?.(record);
-      batch = [];
     }
+    const queue = (presentation = preferredPresentation) => { batches.push({ items: batch, presentation }); batch = []; };
+    // Preflight every batch before paying for this phase, so a later oversized
+    // judgment cannot invalidate assessments already sent in the same phase.
     for (const item of items) {
-      if (batch.length && (batch.length * questionsPerPair >= 32 || batchRequest([...batch, item]).metrics.request_bytes > prepared.metrics.max_request_bytes)) await flush();
+      if (batch.length && (batch.length * questionsPerPair >= 32 || batchRequest([...batch, item]).metrics.request_bytes > prepared.metrics.max_request_bytes)) queue();
       if (!batch.length && batchRequest([item]).metrics.request_bytes > prepared.metrics.max_request_bytes) {
-        if (batchRequest([item], 'packed').metrics.request_bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete plan judgment context exceeds the request budget; no game action sent');
+        const packedBytes = batchRequest([item], 'packed').metrics.request_bytes;
+        if (packedBytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete plan judgment context exceeds the request budget; no game action sent',
+          { purpose, request_bytes: packedBytes, max_request_bytes: prepared.metrics.max_request_bytes });
         batch.push(item);
-        await flush('packed');
+        queue('packed');
         continue;
       }
       batch.push(item);
     }
-    await flush();
+    if (batch.length) queue();
+    for (const { items, presentation } of batches) await flush(items, presentation);
     return judgments;
   }
   const comparePairs = (pairs, instructions, extra) => judgePlans(pairs, instructions, extra);

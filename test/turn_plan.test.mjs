@@ -236,6 +236,8 @@ test('constructs an objective, ordered preparation and payoff before dispatch, w
   assert.equal(memory.data.turn_plan, undefined, 'Planning is not a persisted game commitment until the freshness check and begin');
   assert.equal(memory.data.pending, null);
   let sawPreparationBudget = false;
+  let sawCompletePlan = false;
+  const originalPacket = expandRecordTables(prepareModDecision(state, { memory }).payload.state);
   for (const body of seen) {
     const full = expandRecordTables(body.state);
     assert.equal(full.combat.hand.length, 2);
@@ -243,6 +245,18 @@ test('constructs an objective, ordered preparation and payoff before dispatch, w
     assert.equal(full.combat.exhaust_pile.length, 1);
     assert.ok(full.map.nodes.length && full.deck.cards.length && full.rule_reference);
     assert.ok(full.legal_actions.some(action => action.request.cmd === 'end_turn'));
+    if (full.turn_planning.assessments || full.turn_planning.comparisons) {
+      sawCompletePlan = true;
+      assert.ok(full.legal_actions.every(action => !Object.hasOwn(action, 'combat_estimate')));
+      assert.deepEqual(full.legal_actions.map(action => [action.action_id, action.request]),
+        originalPacket.legal_actions.map(action => [action.action_id, action.request]));
+      assert.equal(full.information.observation_integrity.encoded_fact_sha256,
+        originalPacket.information.observation_integrity.encoded_fact_sha256);
+      validateDecisionPacket(full);
+      for (const item of full.turn_planning.assessments || full.turn_planning.comparisons) {
+        for (const plan of item.plan_a ? [item.plan_a, item.plan_b] : [item]) assert.ok(plan.conditional_preview);
+      }
+    }
     assert.match(full.turn_planning.phase_scope, /NOT happened/);
     const reservation = full.turn_planning.energy_reservation;
     assert.equal(reservation.is_observed, false);
@@ -259,6 +273,7 @@ test('constructs an objective, ordered preparation and payoff before dispatch, w
     }
   }
   assert.ok(sawPreparationBudget, 'Budget transitions must be sent before final plan comparison');
+  assert.ok(sawCompletePlan, 'Phase scoping must be exercised for complete plan judgments');
   assert.equal(result.usage.input_tokens, seen.length * 100);
 });
 

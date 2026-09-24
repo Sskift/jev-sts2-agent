@@ -1,0 +1,209 @@
+{
+  "date": "2026-09-24T10:22:26.527Z",
+  "native_snapshot": "run-artifacts/run45-resume4-2026-09-24T10-05-06.111Z/step-0066/before-state.json",
+  "mode": "offline_no_network_no_game_commands",
+  "seed_answers": "First four archived Jev answers; neutral synthetic ratings thereafter only to exercise request construction, not to claim decision quality.",
+  "unchanged_budget_bytes": 90000,
+  "unchanged_plan_assessment_limit": 24,
+  "requests": [
+    {
+      "phase": "turn_objective",
+      "bytes": 84495,
+      "questions": 1
+    },
+    {
+      "phase": "turn_payoff",
+      "bytes": 89098,
+      "questions": 1
+    },
+    {
+      "phase": "turn_preparation",
+      "bytes": 87378,
+      "questions": 1
+    },
+    {
+      "phase": "turn_payoff",
+      "bytes": 89052,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 89989,
+      "questions": 2
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 89783,
+      "questions": 2
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 80692,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 78173,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 78173,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 81340,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 81340,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 75510,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 81749,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 81749,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 79625,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 79625,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 76439,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 82130,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 82130,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 82130,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 82130,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 78173,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 78173,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 81121,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 81121,
+      "questions": 1
+    },
+    {
+      "phase": "turn_assess_plans",
+      "bytes": 82130,
+      "questions": 1
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 87392,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 87392,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 84981,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 84981,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 84630,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 84630,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 89882,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 89882,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 89836,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 89836,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 87383,
+      "questions": 2
+    },
+    {
+      "phase": "turn_refine_pairs",
+      "bytes": 87383,
+      "questions": 2
+    }
+  ],
+  "max_request_bytes": 89989,
+  "assessments": 24,
+  "native_fact_sha256": "9c305382d15d47e34b1d13eb9d83f3ff498241351b7a1e90800b3a0d7dba3844",
+  "source_preservation": "Every emitted packet validates and retains the original verified native fact digest. Only isolated single-action derived estimates are scoped out of complete-plan judgments; native previews, rules, legal commands and ordered plan projections remain.",
+  "planned_first_command": {
+    "cmd": "play_card",
+    "id": "HOWL_FROM_BEYOND",
+    "nth": 0
+  }
+}
