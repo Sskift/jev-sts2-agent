@@ -1,0 +1,53 @@
+{
+  "recorded_at": "2026-09-24T09:46:15.229Z",
+  "run_number": 45,
+  "run_id": "run-1790182932",
+  "reload": {
+    "run_id": "run-1790182932",
+    "restored_floor": 8,
+    "restored_turn": 1,
+    "restored_hp": 75,
+    "paused_turn": 4,
+    "paused_hp": 50,
+    "permanent_room_entry_match": true,
+    "removed_in_room_actions": 14,
+    "old_actions": 63,
+    "restored_actions": 49,
+    "note": "Game was closed between sessions. Native save restored the current room start; no save was edited. Old in-room actions were excluded from restored memory."
+  },
+  "rule_change": {
+    "id": "LEAD_PAPERWEIGHT",
+    "wiki_version": "v0.111.0",
+    "native_assembly_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
+    "native_method": "LeadPaperweight.AfterObtained",
+    "effect": "Choose a Colorless card on acquisition; no combat hooks. The chosen card remains independently covered.",
+    "source_hash": "2e4880eb3a530113a485b573158e8306c658134e5d11a5f14c0f8689325c2785"
+  },
+  "offline_audit": {
+    "snapshots": 34,
+    "verified": 34,
+    "failures": 0,
+    "observed_outcomes": {
+      "actions": 12,
+      "comparisons": 19,
+      "fields": {
+        "player_block_after_card": 10,
+        "enemy_hp_removed": 7,
+        "player_hp_after_end_turn": 2
+      },
+      "mismatches": []
+    },
+    "model_calls": 0,
+    "game_commands": 0
+  },
+  "checks": {
+    "targeted_tests": 7,
+    "passed": 7
+  },
+  "sources": {
+    "original_session": "C:\\Users\\skift\\jevmake\\run-artifacts\\run45-2026-09-23T17-02-08.465Z",
+    "restored_session": "C:\\Users\\skift\\jevmake\\run-artifacts\\run45-resume-2026-09-24T09-43-38.080Z",
+    "audit": "run-artifacts/run45-paperweight-audit/audit.json"
+  },
+  "limitations": "Finite comparisons only; uncomputed other effects remain unknown. Reloaded room is not an uninterrupted combat and is not an independent run."
+}
