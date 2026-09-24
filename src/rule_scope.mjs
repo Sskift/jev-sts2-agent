@@ -17,6 +17,12 @@ export function reviewedEffectScope(category, entity, { owner = 'player', played
   const rule = lookupRule(category, entity.id);
   if (!rule) return null;
   const key = `${category}/${rule.id}`;
+  if (key === 'enchantments/SHARP') {
+    const match = normalized(entity.description).match(/^Increases damage on this card by (\d+(?:\.\d+)?)\.$/);
+    if (!match || Number(match[1]) !== entity.amount) return null;
+    return { wiki_rule_id: key, trigger: 'native_powered_attack_preview', affected_outputs: [],
+      interpretation: 'Sharp adds its amount through the native powered-Attack damage hook. Current target previews already include it; it has no separate play/draw/end-turn trigger. Do not add its amount again.' };
+  }
   if (key === 'powers/TERRITORIAL' && owner !== 'player') {
     const match = normalized(entity.description).match(/^At the end of .+ turn, it gains (\d+) Strength\.$/);
     if (!match || Number(match[1]) !== entity.amount) return null;

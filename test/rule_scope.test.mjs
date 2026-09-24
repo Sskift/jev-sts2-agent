@@ -50,6 +50,18 @@ test('Entangled uses the native current cost and Tangled amount is not a duratio
   assert.match(timing.timing_detail, /not a remaining-turn countdown/);
 });
 
+test('Sharp is already in native target damage and is not added again before Strength deltas', () => {
+  const s = state(), card = s.combat.hand[0];
+  card.description = 'Deal 8 damage.'; card.damage = 8; card.target_previews[0].damage = 8;
+  card.details.enchantment = { id: 'SHARP', amount: 2, description: 'Increases damage on this card by 2.' };
+  s.combat.player.potions = [{ id: 'STRENGTH_POTION', slot: 0, description: 'Gain 2 Strength.' }];
+  assert.equal(describeTurnProjection(s, [hit]).known_effects_only.enemies[0].hp_removed, 8);
+  assert.equal(describeTurnProjection(s, [potion, hit]).known_effects_only.enemies[0].hp_removed, 10);
+  assert.equal(s.combat.hand[0].target_previews[0].damage, 8);
+  card.details.enchantment.amount = 3;
+  assert.equal(describeTurnProjection(s, [hit]).known_effects_only.enemies[0].hp_removed, null);
+});
+
 test('Permafrost only invalidates Block-dependent predictions for a prefix that can trigger it', () => {
   const s = state(); s.combat.player.relics = [{ ...rule('relics', 'PERMAFROST'), status: 'Normal' }];
   s.combat.hand.push(fixtureCard('INFLAME', { index: 1, type: 'Power', target_type: 'Self', description: 'Gain 2 Strength.' }));

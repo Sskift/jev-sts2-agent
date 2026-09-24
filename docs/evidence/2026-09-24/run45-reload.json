@@ -49,5 +49,24 @@
     "restored_session": "C:\\Users\\skift\\jevmake\\run-artifacts\\run45-resume-2026-09-24T09-43-38.080Z",
     "audit": "run-artifacts/run45-paperweight-audit/audit.json"
   },
-  "limitations": "Finite comparisons only; uncomputed other effects remain unknown. Reloaded room is not an uninterrupted combat and is not an independent run."
+  "limitations": "Finite comparisons only; uncomputed other effects remain unknown. Reloaded room is not an uninterrupted combat and is not an independent run.",
+  "additional_rule_change": {
+    "recorded_at": "2026-09-24T09:50:40.686Z",
+    "id": "SHARP",
+    "native_method": "Sharp.EnchantDamageAdditive",
+    "effect": "The powered Attack preview already contains the additive enchantment amount. No separate play/draw/end-turn trigger; no second addition in Harness.",
+    "source_hash": "050433914a33ae5e91603c64fcc125c665388636a6f9d8f2f94857c325288112",
+    "checks": {
+      "targeted_tests": 8,
+      "passed": 8
+    },
+    "offline_audit": {
+      "snapshots": 49,
+      "verified": 49,
+      "failures": 0,
+      "comparisons": 41,
+      "mismatches": 0
+    },
+    "scope": "Includes room observations before and after native save restoration. Matching comparisons are not independent combat wins."
+  }
 }
