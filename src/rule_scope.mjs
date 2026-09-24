@@ -9,6 +9,9 @@ const scopes = {
   'relics/NUTRITIOUS_SOUP': ['on_pickup', 'The acquisition enchants Strikes. Inspect their actual enchantments separately; the relic does not repeat its pickup effect in combat.'],
   'relics/PRAYER_WHEEL': ['reward_generation', 'Changes post-combat card rewards, not current damage or Block.'],
   'relics/LEAD_PAPERWEIGHT': ['on_pickup', 'The chosen Colorless card is already in the observed deck. The relic has no combat hooks; inspect the chosen card independently.'],
+  'relics/WAR_PAINT': ['on_pickup', 'The selected Skill upgrades already exist in native card records. Possession does not upgrade cards again during combat.'],
+  'relics/AMETHYST_AUBERGINE': ['reward_generation', 'Adds Gold to qualifying post-combat rewards; no damage or Block hook.'],
+  'relics/BAG_OF_MARBLES': ['before_owner_first_turn', 'This hook precedes the first player action phase. Current enemy powers and target damage already reflect its resolved application or prevention. Do not apply Vulnerable again or assume it persists.'],
   'enchantments/SLITHER': ['after_owner_card_drawn', 'Current native cost already contains this draw result. A later draw randomizes it again and requires a new observation; no future cost is inferred.'],
   'afflictions/ENTANGLED': ['native_cost_query', 'Tangled owns the cost modifier; this affliction has no independent trigger. Current native cost already includes the surcharge. Do not add it again.']
 };

@@ -21,13 +21,13 @@ function state() {
 
 test('verified pickup/reward effects and resolved draw-cost enchantments do not erase current arithmetic', () => {
   const s = state();
-  s.combat.player.relics = ['POMANDER', 'NUTRITIOUS_SOUP', 'PRAYER_WHEEL', 'LEAD_PAPERWEIGHT'].map(id => rule('relics', id));
+  s.combat.player.relics = ['POMANDER', 'NUTRITIOUS_SOUP', 'PRAYER_WHEEL', 'LEAD_PAPERWEIGHT', 'WAR_PAINT', 'AMETHYST_AUBERGINE', 'BAG_OF_MARBLES'].map(id => rule('relics', id));
   const card = s.combat.hand[0]; card.cost = 2; card.details.enchantment = rule('enchantments', 'SLITHER');
   const original = structuredClone(s), result = describeTurnProjection(s, [hit]);
   assert.equal(result.known_effects_only.enemies[0].hp_removed, 6);
   assert.equal(result.known_effects_only.hp_if_ending, 28);
   assert.equal(inspectSequence(s, [hit]).energy_left, 2);
-  assert.equal(result.calculation_coverage.reviewed_dependencies.length, 5);
+  assert.equal(result.calculation_coverage.reviewed_dependencies.length, 8);
   assert.deepEqual(s, original);
   assert.ok(compileModelRequest(prepareModDecision(withContext(s)).payload).bytes > 0);
   s.combat.hand.push(fixtureCard('SHRUG_IT_OFF', { index: 1, type: 'Skill', target_type: 'Self', block: 8,

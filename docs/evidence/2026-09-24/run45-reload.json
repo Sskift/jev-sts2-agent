@@ -68,5 +68,22 @@
       "mismatches": 0
     },
     "scope": "Includes room observations before and after native save restoration. Matching comparisons are not independent combat wins."
+  },
+  "phase_scope_completion": {
+    "recorded_at": "2026-09-24T10:04:52.511Z",
+    "native_hooks": {
+      "WAR_PAINT": "AfterObtained: upgrades two Skills; no combat hook",
+      "AMETHYST_AUBERGINE": "TryModifyRewards: adds Gold after qualifying combat; no damage or Block hook",
+      "BAG_OF_MARBLES": "BeforeSideTurnStart: applies Vulnerable to enemies before owner turn 1; current action-phase powers/previews already include the result"
+    },
+    "checks": {
+      "targeted_tests": 8,
+      "passed": 8
+    },
+    "snapshots": 117,
+    "verified": 117,
+    "comparisons": 92,
+    "mismatches": [],
+    "scope": "Recomputation on frozen original and resumed run45 records, including recorded boss actions. No model calls or game commands in these checks; observed matches are not a claim about unchosen plans."
   }
 }
