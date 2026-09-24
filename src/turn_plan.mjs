@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { validateDecisionPacket, ContextError, compactPlanningRequest, expandRecordTables } from './decision_context.mjs';
+import { validateDecisionPacket, ContextError, compactPlanningRequest, withoutActionEstimates } from './decision_context.mjs';
 import { sameTurn, planStep, resolvePlanStep, inspectTurnPlan, turnFingerprint, cardInstance } from './turn_plan_state.mjs';
 import { describeTurnProjection, sequenceEnergyBudget, reserveSequence } from './turn_projection.mjs';
 import { inspectSequence } from './turn_sequence.mjs';
@@ -59,6 +59,7 @@ export async function decideTurn(state, options, prepared, choose) {
     inspection.reasons = [...(inspection.reasons || []), 'The unexecuted sequence violates a current action-order constraint.'];
   }
   const trace = [];
+  const planningSnapshot = withoutActionEstimates(prepared.payload.state);
   const usage = { input_tokens: 0, output_tokens: 0 };
   let plan, energy = state.combat.player.energy;
   const used = new Set();
@@ -94,7 +95,7 @@ export async function decideTurn(state, options, prepared, choose) {
   async function ask(stage, instructions, choices, extra = {}) {
     const candidates = new Map(Object.entries(choices).map(([id, value]) => [id, { action: 'plan_turn', request: null, planning_value: value.value, description: typeof value.label === 'string' ? value.label : JSON.stringify(value.label) }]));
     if (!candidates.size || candidates.size > 255) throw new ContextError('Invalid turn-planning candidate count');
-    const payload = compactPlanningRequest({ model: prepared.payload.model, state: { ...prepared.payload.state, turn_planning: planningState(extra) },
+    const payload = compactPlanningRequest({ model: prepared.payload.model, state: { ...planningSnapshot, turn_planning: planningState(extra) },
       questions: { next_action: { type: 'choice', instructions: `${instructions} ${['objective', 'payoff', 'review'].includes(stage) ? turnStrategyInstructions(state) : ''} ${wholeTurnValue} ${references}`, criteria: Object.fromEntries(Object.entries(choices).map(([id, value]) => [id, value.label])) } } });
     validateDecisionPacket(payload.state);
     const body = JSON.stringify(payload), bytes = compileModelRequest(payload, { purpose: `turn_${stage}` }).bytes;
@@ -120,9 +121,7 @@ export async function decideTurn(state, options, prepared, choose) {
     // one-action forecasts describe a different horizon and duplicate much of
     // that analysis. Keep every legal command and all native facts/rules;
     // scope out only those derived estimates before compiling this phase.
-    const legalActions = expandRecordTables(prepared.payload.state.legal_actions)
-      .map(({ combat_estimate, ...action }) => action);
-    const comparisonState = { ...prepared.payload.state, legal_actions: legalActions,
+    const comparisonState = { ...planningSnapshot,
       turn_planning: planningState({ ...extra, survival_constraints: constraints }) };
     comparisonState.turn_planning.phase_scope += ' Conditional calculations in this phase belong to each complete ordered plan. Isolated single-action estimates are not included; all current legal actions, native previews and rules remain available.';
     validateDecisionPacket(comparisonState);
@@ -206,14 +205,17 @@ export async function decideTurn(state, options, prepared, choose) {
       // the proposed end, not a new independent choice after every card.
       const payload = compactPlanningRequest({ ...prepared.payload, state: { ...prepared.payload.state,
         turn_planning: planningState({ phase_scope: 'The planned prefix has been executed and confirmed. Review the ACTUAL current state before ending the player turn.', objective: selectedPlan.objective,
-          proposed_steps: [], conditional_projection: describeTurnProjection(state, []),
+          // No proposed prefix remains. The retained action estimates already
+          // include ending now; do not duplicate that forecast as a plan.
+          proposed_steps: [], conditional_projection: [],
           energy_reservation: { observed_energy: state.combat.player.energy, remaining_after_printed_costs: state.combat.player.energy,
             is_observed: true, includes_future_energy_gains: false, steps: [], scope: 'Actual remaining resources before the end-turn handoff.' } }) },
         questions: { next_action: { ...prepared.payload.questions.next_action,
           instructions: `The prior planned prefix is complete. Before ending this player turn, check the actual remaining hand, energy, potions and threats. Preserve turn_planning.objective. If a useful continuation exists, select its next action and retain the objective; otherwise choose end_turn. A free draw can reveal playable cards even after planned attacks. ${wholeTurnValue} ${prepared.payload.questions.next_action.instructions}` } } });
       validateDecisionPacket(payload.state);
       const body = JSON.stringify(payload), bytes = compileModelRequest(payload, { purpose: 'turn_end_check' }).bytes;
-      if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete end-turn checkpoint exceeds the request budget; no action sent');
+      if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete end-turn checkpoint exceeds the request budget; no action sent',
+        { request_bytes: bytes, max_request_bytes: prepared.metrics.max_request_bytes });
       const checked = await choose(state, options, { ...prepared, payload, body, metrics: { ...prepared.metrics, request_bytes: bytes, purpose: 'turn_end_check' } });
       usage.input_tokens += checked.usage?.input_tokens || 0; usage.output_tokens += checked.usage?.output_tokens || 0;
       const record = { stage: 'end_check', selected: checked.candidate_id, probabilities: checked.probabilities, confidence: checked.confidence, model: checked.model, usage: checked.usage };

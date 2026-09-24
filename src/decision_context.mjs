@@ -874,6 +874,14 @@ export function compactPlanningRequest(payload) {
   return Buffer.byteLength(JSON.stringify(packed)) < Buffer.byteLength(JSON.stringify(payload)) ? packed : payload;
 }
 
+// Strategic reviews and ordered-plan judgments keep the complete observation
+// and rule sources. Isolated one-action forecasts belong to action selection,
+// not to these other horizons; their own scoped projections remain separate.
+export function withoutActionEstimates(packet) {
+  return { ...packet, legal_actions: expandRecordTables(packet.legal_actions)
+    .map(({ combat_estimate, ...action }) => action) };
+}
+
 // Prefer ordinary named records for the current decision when space permits.
 // Historical tables remain intact. Each expansion is lossless and atomic, and
 // cannot displace any facts, questions, or choices to make room.

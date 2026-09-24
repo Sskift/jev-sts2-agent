@@ -576,6 +576,9 @@ test('end-turn handoff checks actual remaining options and extends the same obje
   } });
   assert.equal(seen.length, 2);
   assert.match(seen[0].state.turn_planning.phase_scope, /ACTUAL/);
+  assert.deepEqual(seen[0].state.turn_planning.conditional_projection, [], 'No unexecuted prefix remains at handoff');
+  assert.ok(expandRecordTables(seen[0].state.legal_actions).find(action => action.action_id === 'end_turn').combat_estimate,
+    'The actual-state End Turn forecast remains available without a duplicate plan projection');
   assert.match(seen[1].state.turn_planning.phase_scope, /ACTUAL/);
   assert.deepEqual(seen[1].state.turn_planning.proposed_steps, []);
   assert.equal(decision.request.id, 'FINESSE');

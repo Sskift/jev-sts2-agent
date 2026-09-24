@@ -1,4 +1,4 @@
-import { ContextError } from './decision_context.mjs';
+import { ContextError, withoutActionEstimates } from './decision_context.mjs';
 import { compileModelRequest } from './context_compiler.mjs';
 import { strategicCapabilities, developmentPriorities, strategyRefreshReason, rememberRunStrategy } from './run_strategy_state.mjs';
 
@@ -14,7 +14,7 @@ export function prepareRunStrategy(state, prepared, reason) {
     for (const item of entities) anchors.set(`${kind}_${item.id}`, { kind, id: item.id, name: item.name });
   }
   if (anchors.size > 255) throw new ContextError('Strategic anchor choices exceed the model limit; no choices were discarded');
-  const instructions = 'Review the current owned build for the remaining run and visible upcoming challenges. Use the entire permanent deck, actual upgrades, relics, resources, current encounter and visible map, linked rules, and confirmed history. Prior strategic judgments are advisory and may be revised. Account for actual frequency, deck dilution, supported combinations and setup cost; do not assume missing support will be acquired. This is a strategic assessment, not a game action or a next-card selection.';
+  const instructions = 'Review the current owned build for the remaining run and visible upcoming challenges. Use the entire permanent deck, actual upgrades, relics, resources, current encounter and visible map, linked rules, and confirmed history. Prior strategic judgments are advisory and may be revised. Account for actual frequency, deck dilution, supported combinations and setup cost; do not assume missing support will be acquired. This is a strategic assessment, not a game action or a next-card selection. Isolated one-action forecasts are excluded from this horizon; current native facts and rules remain complete.';
   const questions = Object.fromEntries(Object.entries(strategicCapabilities).map(([id, meaning]) => [`capability_${id}`, {
     type: 'score', instructions: `${instructions} Assess this capability: ${meaning}`,
     criteria: ['Absent or unsupported by the owned build.', 'Weak or unreliable against the visible stage of the run.',
@@ -24,8 +24,10 @@ export function prepareRunStrategy(state, prepared, reason) {
     criteria: developmentPriorities };
   questions.build_anchor = { type: 'choice', instructions: `${instructions} Which existing card or relic most usefully anchors a coherent plan already supported by the build? Choose none if committing to one item would be speculative. A selected item is a reference to inspect, not a promise to play or preserve it at all costs.`,
     criteria: Object.fromEntries([...anchors].map(([id, anchor]) => [id, anchor])) };
-  const payload = { ...prepared.payload, questions }, bytes = compileModelRequest(payload, { purpose: 'run_strategy_assessment' }).bytes;
-  if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete strategic context exceeds the request budget');
+  const payload = { ...prepared.payload, state: withoutActionEstimates(prepared.payload.state), questions },
+    bytes = compileModelRequest(payload, { purpose: 'run_strategy_assessment' }).bytes;
+  if (bytes > prepared.metrics.max_request_bytes) throw new ContextError('Complete strategic context exceeds the request budget',
+    { request_bytes: bytes, max_request_bytes: prepared.metrics.max_request_bytes });
   return { ...prepared, payload, body: JSON.stringify(payload),
     metrics: { ...prepared.metrics, request_bytes: bytes, question_count: Object.keys(questions).length, purpose: 'run_strategy_assessment' },
     parseResult(result) {

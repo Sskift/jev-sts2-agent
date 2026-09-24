@@ -77,6 +77,10 @@ test('the main decision path reassesses once then carries the same strategy into
   assert.equal(seen.length, 3);
   assert.equal(seen[0].decision.horizon, 'remaining_run');
   assert.equal(seen[0].decision.output_role, 'advisory_assessment');
+  assert.equal(seen[0].analysis.action_estimates, undefined, 'Build review does not carry isolated action forecasts');
+  assert.ok(seen[1].analysis.action_estimates, 'Actual action selection retains its action forecasts');
+  assert.equal(seen[0].uncertainty.observation_integrity.encoded_fact_sha256,
+    seen[1].uncertainty.observation_integrity.encoded_fact_sha256, 'Phase scoping preserves all verified native facts');
   assert.equal(seen[1].intent.run_strategy.development_priority.id, 'draw_consistency');
   assert.equal(seen[2].intent.run_strategy.revision, 1);
 });
