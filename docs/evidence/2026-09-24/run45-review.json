@@ -1,0 +1,1112 @@
+{
+  "run_number": 45,
+  "run_id": "run-1790182932",
+  "character": "IRONCLAD",
+  "ascension": 0,
+  "result": {
+    "is_victory": false,
+    "floor": 21,
+    "score": 453,
+    "epochs_discovered": 0,
+    "can_return_to_menu": false,
+    "can_continue": false
+  },
+  "final_native_snapshot": "C:\\Users\\skift\\jevmake\\run-artifacts\\run45-resume6-2026-09-24T10-29-55.885Z/step-0028/after-state.json",
+  "final_snapshot_sha256": "fe604936f5ac684ed5a5837f0ac4c8387e474ca5042993c689b80c7c246fbbdd",
+  "execution_segments": [
+    {
+      "directory": "run-artifacts\\run45-2026-09-23T17-02-08.465Z",
+      "started_at": "2026-09-23T17:02:08.575Z",
+      "finished_at": "2026-09-23T17:07:50.922Z",
+      "steps": 86,
+      "stop": "error; no automatic action replay",
+      "error": "Jev API error 520 via openrouter",
+      "numeric_audit": {
+        "checked": 0,
+        "mismatches": 0
+      }
+    },
+    {
+      "directory": "run-artifacts\\run45-resume-2026-09-24T09-43-38.080Z",
+      "started_at": "2026-09-24T09:43:38.746Z",
+      "finished_at": "2026-09-24T09:45:43.903Z",
+      "steps": 15,
+      "stop": "interrupted",
+      "numeric_audit": {
+        "checked": 0,
+        "mismatches": 0
+      }
+    },
+    {
+      "directory": "run-artifacts\\run45-resume2-2026-09-24T09-47-44.258Z",
+      "started_at": "2026-09-24T09:47:44.380Z",
+      "finished_at": "2026-09-24T09:50:17.302Z",
+      "steps": 35,
+      "stop": "interrupted",
+      "numeric_audit": {
+        "checked": 0,
+        "mismatches": 0
+      }
+    },
+    {
+      "directory": "run-artifacts\\run45-resume3-2026-09-24T09-50-54.648Z",
+      "started_at": "2026-09-24T09:50:54.763Z",
+      "finished_at": "2026-09-24T10:03:54.604Z",
+      "steps": 106,
+      "stop": "interrupted",
+      "numeric_audit": {
+        "checked": 0,
+        "mismatches": 0
+      }
+    },
+    {
+      "directory": "run-artifacts\\run45-resume4-2026-09-24T10-05-06.111Z",
+      "started_at": "2026-09-24T10:05:06.257Z",
+      "finished_at": "2026-09-24T10:14:38.374Z",
+      "steps": 66,
+      "stop": "error; no automatic action replay",
+      "error": "Complete plan judgment context exceeds the request budget; no game action sent",
+      "numeric_audit": {
+        "checked": 7,
+        "mismatches": 0
+      }
+    },
+    {
+      "directory": "run-artifacts\\run45-resume5-2026-09-24T10-23-07.594Z",
+      "started_at": "2026-09-24T10:23:07.728Z",
+      "finished_at": "2026-09-24T10:25:15.196Z",
+      "steps": 22,
+      "stop": "error; no automatic action replay",
+      "error": "Complete strategic context exceeds the request budget",
+      "numeric_audit": {
+        "checked": 0,
+        "mismatches": 0
+      }
+    },
+    {
+      "directory": "run-artifacts\\run45-resume6-2026-09-24T10-29-55.885Z",
+      "started_at": "2026-09-24T10:29:56.047Z",
+      "finished_at": "2026-09-24T10:37:28.176Z",
+      "steps": 28,
+      "stop": "run_failed",
+      "numeric_audit": {
+        "checked": 0,
+        "mismatches": 0
+      }
+    }
+  ],
+  "reload": "Original OpenRouter 520 stop followed by native room-start restoration at floor 8. Excluded 14 old in-room actions from resumed memory; all original logs retained. Other continuations verified unchanged native action fingerprints.",
+  "first_act_boss": {
+    "id": "VANTOM",
+    "defeated": true,
+    "kill_turn": 13,
+    "hp_at_kill": 2,
+    "hp_after_reward": 8,
+    "turns": [
+      {
+        "turn": 1,
+        "hp_start": 80,
+        "boss_hp_start": 173,
+        "slippery_start": 8,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DRAMATIC_ENTRANCE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "BASH",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 75,
+        "hp_after_last_action": 80,
+        "boss_hp_after_last_action": 171,
+        "slippery_after_last_action": 6,
+        "ended": true
+      },
+      {
+        "turn": 2,
+        "hp_start": 80,
+        "boss_hp_start": 171,
+        "slippery_start": 6,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "FINESSE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 81,
+        "hp_after_last_action": 80,
+        "boss_hp_after_last_action": 170,
+        "slippery_after_last_action": 5,
+        "ended": true
+      },
+      {
+        "turn": 3,
+        "hp_start": 80,
+        "boss_hp_start": 170,
+        "slippery_start": 5,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "IRON_WAVE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "ASHEN_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 57,
+        "hp_after_last_action": 64,
+        "boss_hp_after_last_action": 168,
+        "slippery_after_last_action": 3,
+        "ended": true
+      },
+      {
+        "turn": 4,
+        "hp_start": 64,
+        "boss_hp_start": 168,
+        "slippery_start": 3,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "SECOND_WIND",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 33,
+        "hp_after_last_action": 64,
+        "boss_hp_after_last_action": 167,
+        "slippery_after_last_action": 2,
+        "ended": true
+      },
+      {
+        "turn": 5,
+        "hp_start": 64,
+        "boss_hp_start": 167,
+        "slippery_start": 2,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "IRON_WAVE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "FINESSE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 102,
+        "hp_after_last_action": 64,
+        "boss_hp_after_last_action": 166,
+        "slippery_after_last_action": 1,
+        "ended": true
+      },
+      {
+        "turn": 6,
+        "hp_start": 64,
+        "boss_hp_start": 166,
+        "slippery_start": 1,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "BASH",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 39,
+        "hp_after_last_action": 56,
+        "boss_hp_after_last_action": 165,
+        "slippery_after_last_action": null,
+        "ended": true
+      },
+      {
+        "turn": 7,
+        "hp_start": 56,
+        "boss_hp_start": 165,
+        "slippery_start": 0,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "ASHEN_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "POMMEL_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 62,
+        "hp_after_last_action": 36,
+        "boss_hp_after_last_action": 125,
+        "slippery_after_last_action": null,
+        "ended": true
+      },
+      {
+        "turn": 8,
+        "hp_start": 36,
+        "boss_hp_start": 125,
+        "slippery_start": 0,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 46,
+        "hp_after_last_action": 36,
+        "boss_hp_after_last_action": 116,
+        "slippery_after_last_action": null,
+        "ended": true
+      },
+      {
+        "turn": 9,
+        "hp_start": 36,
+        "boss_hp_start": 116,
+        "slippery_start": 0,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "BASH",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "FINESSE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "IRON_WAVE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 61,
+        "hp_after_last_action": 36,
+        "boss_hp_after_last_action": 97,
+        "slippery_after_last_action": null,
+        "ended": true
+      },
+      {
+        "turn": 10,
+        "hp_start": 36,
+        "boss_hp_start": 97,
+        "slippery_start": 0,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "ASHEN_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 55,
+        "hp_after_last_action": 24,
+        "boss_hp_after_last_action": 61,
+        "slippery_after_last_action": null,
+        "ended": true
+      },
+      {
+        "turn": 11,
+        "hp_start": 24,
+        "boss_hp_start": 61,
+        "slippery_start": 0,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "POMMEL_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 46,
+        "hp_after_last_action": 2,
+        "boss_hp_after_last_action": 39,
+        "slippery_after_last_action": null,
+        "ended": true
+      },
+      {
+        "turn": 12,
+        "hp_start": 2,
+        "boss_hp_start": 39,
+        "slippery_start": 0,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "ASHEN_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "BASH",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "model_calls": 41,
+        "hp_after_last_action": 2,
+        "boss_hp_after_last_action": 9,
+        "slippery_after_last_action": null,
+        "ended": true
+      },
+      {
+        "turn": 13,
+        "hp_start": 2,
+        "boss_hp_start": 9,
+        "slippery_start": 0,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "SECOND_WIND",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          }
+        ],
+        "model_calls": 27,
+        "hp_after_last_action": 8,
+        "boss_hp_after_last_action": null,
+        "slippery_after_last_action": null,
+        "ended": false
+      }
+    ]
+  },
+  "final_fight": {
+    "id": "SLUMBERING_BEETLE_NORMAL",
+    "floor": 21,
+    "turns": [
+      {
+        "turn": 1,
+        "hp_before": 71,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 3
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "DRAMATIC_ENTRANCE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 3
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "hp_after": 71,
+        "enemies_after": [
+          {
+            "id": "BOWLBUG_ROCK",
+            "hp": 30
+          },
+          {
+            "id": "BOWLBUG_SILK",
+            "hp": 25
+          },
+          {
+            "id": "SLUMBERING_BEETLE",
+            "hp": 67
+          }
+        ]
+      },
+      {
+        "turn": 2,
+        "hp_before": 71,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "SECOND_WIND",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "IRON_WAVE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "ASHEN_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "hp_after": 52,
+        "enemies_after": [
+          {
+            "id": "BOWLBUG_ROCK",
+            "hp": 21
+          },
+          {
+            "id": "BOWLBUG_SILK",
+            "hp": 25
+          },
+          {
+            "id": "SLUMBERING_BEETLE",
+            "hp": 67
+          }
+        ]
+      },
+      {
+        "turn": 3,
+        "hp_before": 52,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "FINESSE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "POMMEL_STRIKE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "play_card",
+            "id": "BULLY",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "hp_after": 36,
+        "enemies_after": [
+          {
+            "id": "BOWLBUG_ROCK",
+            "hp": 2
+          },
+          {
+            "id": "BOWLBUG_SILK",
+            "hp": 25
+          },
+          {
+            "id": "SLUMBERING_BEETLE",
+            "hp": 67
+          }
+        ]
+      },
+      {
+        "turn": 4,
+        "hp_before": 36,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "IRON_WAVE",
+            "nth": 0,
+            "target": 3
+          },
+          {
+            "cmd": "play_card",
+            "id": "PILLAGE",
+            "nth": 0,
+            "target": 1
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "hp_after": 21,
+        "enemies_after": [
+          {
+            "id": "BOWLBUG_SILK",
+            "hp": 25
+          },
+          {
+            "id": "SLUMBERING_BEETLE",
+            "hp": 64
+          }
+        ]
+      },
+      {
+        "turn": 5,
+        "hp_before": 21,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "THUNDERCLAP",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "STRIKE_IRONCLAD",
+            "nth": 0,
+            "target": 3
+          },
+          {
+            "cmd": "play_card",
+            "id": "FINESSE",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "SHRUG_IT_OFF",
+            "nth": 0
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "hp_after": 21,
+        "enemies_after": [
+          {
+            "id": "BOWLBUG_SILK",
+            "hp": 21
+          },
+          {
+            "id": "SLUMBERING_BEETLE",
+            "hp": 51
+          }
+        ]
+      },
+      {
+        "turn": 6,
+        "hp_before": 21,
+        "actions": [
+          {
+            "cmd": "play_card",
+            "id": "DEFEND_IRONCLAD",
+            "nth": 0
+          },
+          {
+            "cmd": "play_card",
+            "id": "BASH",
+            "nth": 0,
+            "target": 3
+          },
+          {
+            "cmd": "play_card",
+            "id": "BULLY",
+            "nth": 0,
+            "target": 3
+          },
+          {
+            "cmd": "end_turn"
+          }
+        ],
+        "hp_after": 0,
+        "enemies_after": [
+          {
+            "id": "BOWLBUG_SILK",
+            "hp": 21
+          },
+          {
+            "id": "SLUMBERING_BEETLE",
+            "hp": 31
+          }
+        ]
+      }
+    ],
+    "final_current": {
+      "hp": 21,
+      "block": 8,
+      "energy": 0,
+      "enemy_attack_total": 32,
+      "potions": [
+        "ATTACK_POTION",
+        "LIQUID_MEMORIES"
+      ]
+    },
+    "end_check": {
+      "selected": "potion_1_target_0",
+      "confidence": 0.08,
+      "probabilities": {
+        "end_turn": 0.34,
+        "potion_0_target_0": 0.27,
+        "potion_1_target_0": 0.39
+      }
+    },
+    "final_comparison": {
+      "selected": "end",
+      "balanced_pairs": [
+        {
+          "candidates": [
+            "continue",
+            "end"
+          ],
+          "preference_support": {
+            "continue": 0.32666666666666666,
+            "end": 0.6733333333333333
+          },
+          "selection_basis": "balanced_overall_value",
+          "value_distribution": {
+            "plan_a": 0.245,
+            "plan_b": 0.505,
+            "no_clear_difference": 0.25
+          },
+          "survival_distribution": {
+            "plan_a": 0.30000000000000004,
+            "plan_b": 0.115,
+            "no_clear_difference": 0.585
+          },
+          "order_disagreement": false,
+          "selected_by_order": [
+            "end",
+            "end"
+          ]
+        }
+      ]
+    },
+    "before_fix": {
+      "hp_prediction": null,
+      "fatal": null
+    },
+    "after_fix": {
+      "hp_prediction": -3,
+      "fatal": true,
+      "covered": [
+        {
+          "category": "intent",
+          "owner": 3,
+          "source_id": "Buff",
+          "wiki_rule_id": "monsters/SLUMBERING_BEETLE",
+          "trigger": "after_current_attack",
+          "affected_outputs": [],
+          "interpretation": "This visible Attack + Buff is Roll Out: use the current native attack damage, then the beetle gains 2 Strength for later attacks. Do not add that future Strength to this attack or treat this self-buff as healing/prevention."
+        },
+        {
+          "category": "relics",
+          "owner": "player",
+          "source_id": "LEAD_PAPERWEIGHT",
+          "wiki_rule_id": "relics/LEAD_PAPERWEIGHT",
+          "trigger": "on_pickup",
+          "affected_outputs": [],
+          "interpretation": "The chosen Colorless card is already in the observed deck. The relic has no combat hooks; inspect the chosen card independently."
+        },
+        {
+          "category": "relics",
+          "owner": "player",
+          "source_id": "WAR_PAINT",
+          "wiki_rule_id": "relics/WAR_PAINT",
+          "trigger": "on_pickup",
+          "affected_outputs": [],
+          "interpretation": "The selected Skill upgrades already exist in native card records. Possession does not upgrade cards again during combat."
+        },
+        {
+          "category": "relics",
+          "owner": "player",
+          "source_id": "AMETHYST_AUBERGINE",
+          "wiki_rule_id": "relics/AMETHYST_AUBERGINE",
+          "trigger": "reward_generation",
+          "affected_outputs": [],
+          "interpretation": "Adds Gold to qualifying post-combat rewards; no damage or Block hook."
+        },
+        {
+          "category": "relics",
+          "owner": "player",
+          "source_id": "BAG_OF_MARBLES",
+          "wiki_rule_id": "relics/BAG_OF_MARBLES",
+          "trigger": "before_owner_first_turn",
+          "affected_outputs": [],
+          "interpretation": "This hook precedes the first player action phase. Current enemy powers and target damage already reflect its resolved application or prevention. Do not apply Vulnerable again or assume it persists."
+        },
+        {
+          "category": "relics",
+          "owner": "player",
+          "source_id": "PAELS_LEGION",
+          "wiki_rule_id": "relics/PAELS_LEGION",
+          "trigger": "owner_turn_start_cooldown",
+          "affected_outputs": [],
+          "interpretation": "The observed positive cooldown disables the Block multiplier throughout this remaining player turn and enemy response. It decrements at the next owner turn start; no future activation or doubled Block is assumed."
+        },
+        {
+          "category": "pets",
+          "owner": "player",
+          "source_id": "PAELS_LEGION",
+          "wiki_rule_id": "monsters/PAELS_LEGION",
+          "trigger": "idle_pet",
+          "affected_outputs": [],
+          "interpretation": "The pet has no action or independent combat hook. Its Block multiplier belongs to the separate relic; that relic is checked independently. No pet powers are present."
+        },
+        {
+          "category": "enchantments",
+          "owner": "player",
+          "source_id": "SHARP",
+          "wiki_rule_id": "enchantments/SHARP",
+          "trigger": "native_powered_attack_preview",
+          "affected_outputs": [],
+          "interpretation": "Sharp adds its amount through the native powered-Attack damage hook. Current target previews already include it; it has no separate play/draw/end-turn trigger. Do not add its amount again."
+        }
+      ]
+    },
+    "offline_rescue_check": {
+      "model_calls": 0,
+      "game_commands": 0,
+      "synthetic_choice_calls": 1,
+      "planned_request": {
+        "cmd": "use_potion",
+        "id": "LIQUID_MEMORIES",
+        "nth": 0,
+        "target": 0
+      },
+      "scope": "Reuses the saved end-turn plan and supplies a synthetic choice between the two legal potions only. Confirms the existing known-lethal guard blocks End Turn; does not predict the real Jev choice, selected discard card, or survival."
+    }
+  },
+  "resources": {
+    "gold_at_defeat": 384,
+    "deck_cards": 21,
+    "card_rewards_taken": 10,
+    "card_rewards_skipped": 0,
+    "shop_removals": 1,
+    "shop_removal_card": "STRIKE_IRONCLAD",
+    "potions_used": [
+      {
+        "floor": 11,
+        "id": "FIRE_POTION"
+      },
+      {
+        "floor": 14,
+        "id": "EXPLOSIVE_AMPOULE"
+      },
+      {
+        "floor": 19,
+        "id": "FLEX_POTION"
+      }
+    ]
+  },
+  "costs": {
+    "reported_model_usd": 2.5809104999999963,
+    "scope": "All executed and interrupted run45 segments, including room-8 actions later restored by the native save; no paid model replay for the new scope/capacity checks.",
+    "balance_at": "2026-09-24T10:37:38.227Z",
+    "account_remaining_usd": 17.350741896000002,
+    "balance_receipt": "temp/openrouter-budget-1790246258490.json"
+  },
+  "validation": {
+    "checks": 47,
+    "audit": {
+      "scope": "Native combat snapshot → canonical packet → compiled model request. Every supplied combat/player/pile/deck/rule record is verified before encoding; the compiler verifies reversible encoding. No claim that the native extractor exposes every game mechanic or that forecasts fully simulate combat.",
+      "model_calls": 0,
+      "game_commands": 0,
+      "sessions": [
+        {
+          "session": "run45-resume4-2026-09-24T10-05-06.111Z",
+          "snapshots": 34,
+          "verified": 34,
+          "failures": [],
+          "observed_outcomes": {
+            "actions": 9,
+            "comparisons": 12,
+            "fields": {
+              "player_hp_after_end_turn": 3,
+              "player_block_after_card": 6,
+              "enemy_hp_removed": 3
+            },
+            "mismatches": []
+          },
+          "future_estimates": {
+            "bounded": 16,
+            "incomplete": 128
+          },
+          "uncovered_sources": {
+            "intent/StatusCard": 10,
+            "card/POMMEL_STRIKE": 7,
+            "intent/Buff": 81,
+            "card/ASHEN_STRIKE": 2,
+            "card/THUNDERCLAP": 4,
+            "relic/PAELS_LEGION": 45,
+            "card/DRAMATIC_ENTRANCE": 3,
+            "card/HOWL_FROM_BEYOND": 3,
+            "card/FINESSE": 5,
+            "card/SHRUG_IT_OFF": 2,
+            "power/FLEX_POTION_POWER": 14,
+            "power/BURROWED_POWER": 21,
+            "card/NOT_YET": 3,
+            "power/HARD_TO_KILL_POWER": 135,
+            "card/BULLY": 3
+          },
+          "max_request_bytes": 76168,
+          "verified_snapshot_index_sha256": "a2786f65d67729948ee918c7f89809e906599a93df44741a488983cad9e90787",
+          "sample": {
+            "source": "run-artifacts\\run45-resume4-2026-09-24T10-05-06.111Z\\step-0066\\before-state.json",
+            "native": "run45-resume4-2026-09-24T10-05-06.111Z.native.json",
+            "request": "run45-resume4-2026-09-24T10-05-06.111Z.request.json"
+          }
+        },
+        {
+          "session": "run45-resume5-2026-09-24T10-23-07.594Z",
+          "snapshots": 7,
+          "verified": 7,
+          "failures": [],
+          "observed_outcomes": {
+            "actions": 0,
+            "comparisons": 0,
+            "fields": {},
+            "mismatches": []
+          },
+          "future_estimates": {
+            "bounded": 0,
+            "incomplete": 39
+          },
+          "uncovered_sources": {
+            "power/HARD_TO_KILL_POWER": 61,
+            "intent/Buff": 29,
+            "card/HOWL_FROM_BEYOND": 1,
+            "card/BULLY": 5,
+            "relic/PAELS_LEGION": 23,
+            "card/FINESSE": 2,
+            "card/ASHEN_STRIKE": 4,
+            "card/NOT_YET": 2,
+            "power/IMBALANCED_POWER": 10,
+            "intent/Debuff": 10,
+            "power/PLATING_POWER": 10,
+            "power/SLUMBER_POWER": 10,
+            "intent/Sleep": 10,
+            "card/DRAMATIC_ENTRANCE": 1,
+            "card/SHRUG_IT_OFF": 1
+          },
+          "max_request_bytes": 83950,
+          "verified_snapshot_index_sha256": "d111300c3c2e01f99bc1de56e6e1a94f5fe60710d5cd994ecdab1cb5793cb28e",
+          "sample": {
+            "source": "run-artifacts\\run45-resume5-2026-09-24T10-23-07.594Z\\step-0022\\before-state.json",
+            "native": "run45-resume5-2026-09-24T10-23-07.594Z.native.json",
+            "request": "run45-resume5-2026-09-24T10-23-07.594Z.request.json"
+          }
+        },
+        {
+          "session": "run45-resume6-2026-09-24T10-29-55.885Z",
+          "snapshots": 28,
+          "verified": 28,
+          "failures": [],
+          "observed_outcomes": {
+            "actions": 4,
+            "comparisons": 5,
+            "fields": {
+              "player_hp_after_end_turn": 2,
+              "player_block_after_card": 2,
+              "enemy_hp_removed": 1
+            },
+            "mismatches": []
+          },
+          "future_estimates": {
+            "bounded": 14,
+            "incomplete": 161
+          },
+          "uncovered_sources": {
+            "power/IMBALANCED_POWER": 125,
+            "intent/Debuff": 93,
+            "power/PLATING_POWER": 31,
+            "power/SLUMBER_POWER": 31,
+            "intent/Sleep": 31,
+            "relic/PAELS_LEGION": 47,
+            "card/DRAMATIC_ENTRANCE": 3,
+            "card/SHRUG_IT_OFF": 3,
+            "card/ASHEN_STRIKE": 13,
+            "card/THUNDERCLAP": 4,
+            "card/PILLAGE": 21,
+            "card/FINESSE": 6,
+            "card/NOT_YET": 2,
+            "card/POMMEL_STRIKE": 11,
+            "card/BULLY": 9,
+            "card/HOWL_FROM_BEYOND": 1
+          },
+          "max_request_bytes": 83950,
+          "verified_snapshot_index_sha256": "2467aaadc5311d53bba4770b67199db81bf513e58559d9e57b475f8ced1842e6",
+          "sample": {
+            "source": "run-artifacts\\run45-resume6-2026-09-24T10-29-55.885Z\\step-0001\\before-state.json",
+            "native": "run45-resume6-2026-09-24T10-29-55.885Z.native.json",
+            "request": "run45-resume6-2026-09-24T10-29-55.885Z.request.json"
+          }
+        }
+      ],
+      "totals": {
+        "snapshots": 69,
+        "verified": 69,
+        "failures": 0
+      }
+    },
+    "native_dll_sha256": "0861bfa1df347538d932f22d580e75420f08082792eb914e53b4882764acdbe9",
+    "sources": [
+      {
+        "file": "temp/offline-rule-sources/PaelsLegion.cs",
+        "sha256": "fa43c4146cc31ff93dbd6e1ef0a01a2c89732dd110d3d3f303cb9f6eddb8edab"
+      },
+      {
+        "file": "temp/offline-rule-sources/PaelsLegionPet.cs",
+        "sha256": "2af489c9e02053fe377dbd1f0e27d7ad0e388800c4b99544116cab380e30f349"
+      },
+      {
+        "file": "temp/offline-rule-sources/SlumberingBeetle.cs",
+        "sha256": "570ad9840adea5466f54dc5cc96b6809b7e9b87a7bbf4c5ded97514bd22fd495"
+      }
+    ]
+  },
+  "recording": false,
+  "video_sent": false,
+  "new_run_started_after_defeat": false
+}

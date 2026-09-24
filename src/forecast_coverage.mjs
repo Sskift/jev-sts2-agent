@@ -1,5 +1,5 @@
 import { displayedAttackTotal } from './combat_observation.mjs';
-import { reviewedEffectScope, supportedNativePreviewRule } from './rule_scope.mjs';
+import { reviewedEffectScope, reviewedIntentScope, supportedNativePreviewRule } from './rule_scope.mjs';
 
 // Closed coverage lists: a new active source is uncomputed until reviewed.
 // Native preview modifiers are already incorporated in the observed numbers.
@@ -40,15 +40,18 @@ export function forecastCoverage(combat, card = null, { sequence = false, uncomp
     for (const power of enemy.powers || []) if (!previewPowers.has(power.id) && !enemyPowers.has(power.id) && !review('powers', enemy.combat_id, power))
       add('power', enemy.combat_id, power, 'Enemy effect or reaction has no complete numeric adapter.');
     for (const intent of enemy.intents || []) if (enemy.is_alive && enemy.hp > 0 && intent.type
-      && !['Attack', 'Stun', 'Defend'].includes(intent.type))
-      add('intent', enemy.combat_id, { id: intent.type, description: intent.description }, 'Only the displayed intent is observed; this enemy action and its interaction with later actions are not simulated.', ['player_hp', 'enemy_response']);
+      && !['Attack', 'Stun', 'Defend'].includes(intent.type)) {
+      const scope = reviewedIntentScope(enemy, intent);
+      if (scope) reviewed.push({ category: 'intent', owner: enemy.combat_id, source_id: intent.type, ...scope });
+      else add('intent', enemy.combat_id, { id: intent.type, description: intent.description }, 'Only the displayed intent is observed; this enemy action and its interaction with later actions are not simulated.', ['player_hp', 'enemy_response']);
+    }
   }
   for (const relic of combat.player.relics || []) if (!coveredRelics.has(relic.id) && !review('relics', 'player', relic))
     add('relic', 'player', relic, 'Relic trigger timing or consequences have not been incorporated in this calculation.');
   for (const potion of combat.player.potions || []) if (potion.usage === 'Automatic' && potion.id !== 'FAIRY_IN_A_BOTTLE')
     add('potion', 'player', potion, 'Automatic potion trigger has no numeric adapter.');
   for (const category of ['orbs', 'pets']) for (const source of combat.player[category] || [])
-    add(category, 'player', source, 'This automatic actor is present in the native state but its actions are not simulated.');
+    if (!review(category, 'player', source)) add(category, 'player', source, 'This automatic actor is present in the native state but its actions are not simulated.');
   // Attachments can add triggers without changing the card's ordinary rule.
   // Check all piles because an effect can trigger on draw/discard/exhaust.
   const seenAttachments = new Set();

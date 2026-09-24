@@ -17,9 +17,13 @@ const scopes = {
 };
 
 export function reviewedEffectScope(category, entity, { owner = 'player', playedCards } = {}) {
-  const rule = lookupRule(category, entity.id);
+  const rule = lookupRule(category === 'pets' ? 'monsters' : category, entity.id);
   if (!rule) return null;
   const key = `${category}/${rule.id}`;
+  if (key === 'pets/PAELS_LEGION' && Array.isArray(entity.powers) && !entity.powers.length) {
+    return { wiki_rule_id: 'monsters/PAELS_LEGION', trigger: 'idle_pet', affected_outputs: [],
+      interpretation: 'The pet has no action or independent combat hook. Its Block multiplier belongs to the separate relic; that relic is checked independently. No pet powers are present.' };
+  }
   if (key === 'enchantments/SHARP') {
     const match = normalized(entity.description).match(/^Increases damage on this card by (\d+(?:\.\d+)?)\.$/);
     if (!match || Number(match[1]) !== entity.amount) return null;
@@ -33,6 +37,11 @@ export function reviewedEffectScope(category, entity, { owner = 'player', played
       interpretation: 'Strength is gained after this enemy turn, not before its currently displayed attack. This does not predict next-turn damage or retain the current intent for later turns.' };
   }
   if (!entity.description || normalized(entity.description) !== normalized(rule.description)) return null;
+  if (key === 'relics/PAELS_LEGION' && entity.status === 'Normal'
+    && Number.isSafeInteger(entity.counter) && entity.counter > 0 && entity.counter <= 2) {
+    return { wiki_rule_id: key, trigger: 'owner_turn_start_cooldown', affected_outputs: [],
+      interpretation: 'The observed positive cooldown disables the Block multiplier throughout this remaining player turn and enemy response. It decrements at the next owner turn start; no future activation or doubled Block is assumed.' };
+  }
   if (key === 'relics/PERMAFROST') {
     const canTrigger = !playedCards || playedCards.some(card => card.type === 'Power');
     return { wiki_rule_id: key, trigger: 'after_first_owned_power_play_in_combat',
@@ -42,6 +51,17 @@ export function reviewedEffectScope(category, entity, { owner = 'player', played
   }
   const scope = scopes[key];
   return scope ? { wiki_rule_id: key, trigger: scope[0], affected_outputs: [], interpretation: scope[1] } : null;
+}
+
+// Match the visible intent combination, never the private current move ID.
+// The same-version RolloutMove attacks first, then gives only itself Strength.
+export function reviewedIntentScope(enemy, intent) {
+  const rule = lookupRule('monsters', enemy.id);
+  if (rule?.id !== 'SLUMBERING_BEETLE' || intent.type !== 'Buff'
+    || enemy.intents.length !== 2 || enemy.intents[0].type !== 'Attack' || enemy.intents[1] !== intent
+    || enemy.intents[0].hits !== 1 || !Number.isFinite(enemy.intents[0].damage) || enemy.intents[0].damage < 0) return null;
+  return { wiki_rule_id: 'monsters/SLUMBERING_BEETLE', trigger: 'after_current_attack', affected_outputs: [],
+    interpretation: 'This visible Attack + Buff is Roll Out: use the current native attack damage, then the beetle gains 2 Strength for later attacks. Do not add that future Strength to this attack or treat this self-buff as healing/prevention.' };
 }
 
 // Current engine previews already resolve these calculations. Coefficients

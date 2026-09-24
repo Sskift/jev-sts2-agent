@@ -88,6 +88,32 @@ test('enemy Territorial is applied after its displayed attack, not on top of the
   assert.equal(describeTurnProjection(s, [hit]).known_effects_only.hp_if_ending, null);
 });
 
+test('sleeping Pael and a post-attack self-buff cannot hide current lethal damage; unverified variants stay unknown', () => {
+  const s = state(), c = s.combat;
+  c.player.hp = 21; c.player.block = 8;
+  c.player.relics = [{ ...rule('relics', 'PAELS_LEGION'), status: 'Normal', counter: 1 }];
+  c.player.pets = [{ id: 'PAELS_LEGION', powers: [] }];
+  c.enemies[0].id = 'SLUMBERING_BEETLE';
+  c.enemies[0].intents = [{ type: 'Attack', damage: 24, hits: 1 }, { type: 'Buff' }];
+  c.enemies.push({ ...structuredClone(c.enemies[0]), combat_id: 43, id: 'BOWLBUG_SILK', intents: [{ type: 'Attack', damage: 4, hits: 2 }] });
+  const saved = structuredClone(c), forecast = combatForecast(c);
+  assert.equal(forecast.hp_remaining_if_end_turn, -3);
+  assert.equal(forecast.fatal_if_end_turn, true);
+  assert.equal(describeTurnProjection(s, []).known_effects_only.hp_if_ending, -3);
+  assert.deepEqual(c, saved);
+  for (const mutate of [
+    x => { x.player.relics[0].counter = 0; x.player.relics[0].status = 'Active'; },
+    x => { delete x.player.relics[0].counter; },
+    x => { x.player.pets[0].powers.push({ id: 'UNKNOWN_POWER' }); },
+    x => { x.enemies[0].id = 'OTHER_ENEMY'; },
+    x => { x.enemies[0].intents.push({ type: 'Heal' }); },
+    x => { x.enemies[0].intents.reverse(); }
+  ]) {
+    const changed = structuredClone(saved); mutate(changed);
+    assert.equal(combatForecast(changed).hp_remaining_if_end_turn, null);
+  }
+});
+
 test('Expect a Fight updates only preceding Strength deltas from its actual native Block preview', () => {
   const s = state(); s.combat.player.powers = [{ id: 'STRENGTH_POWER', amount: 2 }];
   s.combat.player.potions = [{ id: 'STRENGTH_POTION', slot: 0, description: 'Gain 2 Strength.' }];
