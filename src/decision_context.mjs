@@ -533,6 +533,7 @@ export function buildDecisionContext(state, { candidates, memory = new DecisionM
     }
   }
   if (selectionPlanning) screenState.selection_planning = clone(selectionPlanning);
+  if (!source.combat && context?.multiplayer) screenState.multiplayer = clone(context.multiplayer);
   const combat = source.combat ? { ...source.combat } : null;
   if (combat) {
     combat.effect_timing = describeCombatEffects(source.combat);

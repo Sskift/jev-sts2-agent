@@ -1,0 +1,226 @@
+diff --git a/STS2.Cli.Mod/Actions/EndTurnHandler.cs b/STS2.Cli.Mod/Actions/EndTurnHandler.cs
+index a240f8f..4984def 100644
+--- a/STS2.Cli.Mod/Actions/EndTurnHandler.cs
++++ b/STS2.Cli.Mod/Actions/EndTurnHandler.cs
+@@ -1,3 +1,6 @@
++using MegaCrit.Sts2.Core.Entities.Players;
++using MegaCrit.Sts2.Core.GameActions;
++using MegaCrit.Sts2.Core.Runs;
+ using Godot;
+ using MegaCrit.Sts2.Core.Combat;
+ using MegaCrit.Sts2.Core.Commands;
+@@ -57,6 +60,7 @@ public static class EndTurnHandler
+             // --- Snapshot history and end turn ---
+ 
+             var historyBefore = CombatManager.Instance.History.Entries.Count();
++            var multiplayer = CombatManager.Instance.DebugOnlyGetState()!.Players.Count > 1;
+ 
+             // Bridge turn/combat completion and visible selection prompts to the same wait.
+             var tcs = new TaskCompletionSource<string>();
+@@ -78,6 +82,11 @@ public static class EndTurnHandler
+                     tcs.TrySetResult("turn_started");
+             }
+ 
++            void OnPlayerEndedTurn(Player ended, bool canBackOut)
++            {
++                if (multiplayer && ended == player) tcs.TrySetResult("local_turn_submitted");
++            }
++
+             void OnCombatEnded(CombatRoom _)
+             {
+                 tcs.TrySetResult("combat_ended");
+@@ -100,6 +109,7 @@ public static class EndTurnHandler
+             }
+ 
+             var frameCallback = Callable.From(OnProcessFrame);
++            CombatManager.Instance.PlayerEndedTurn += OnPlayerEndedTurn;
+             CombatManager.Instance.TurnStarted += OnTurnStarted;
+             CombatManager.Instance.CombatEnded += OnCombatEnded;
+             playerCombatState.PlayerTurnPhaseChanged += OnPlayerTurnPhaseChanged;
+@@ -111,10 +121,12 @@ public static class EndTurnHandler
+                 if (tree.Connect(SceneTree.SignalName.ProcessFrame, frameCallback) != Error.Ok)
+                     throw new InvalidOperationException("Could not watch for end-turn card selection");
+ 
+-                // Use PlayerCmd.EndTurn (same as game UI)
+-                // canBackOut: false means the AI cannot undo the end-turn decision
+-                PlayerCmd.EndTurn(player, false);
+-                Logger.Info("EndTurn action executed via PlayerCmd, waiting for enemy turn...");
++                // Multiplayer must replicate readiness through the native action queue.
++                // Single-player retains its non-reversible turn submission.
++                if (multiplayer)
++                    RunManager.Instance.ActionQueueSynchronizer.RequestEnqueue(new EndPlayerTurnAction(player, playerCombatState.TurnNumber));
++                else PlayerCmd.EndTurn(player, false);
++                Logger.Info("EndTurn submitted; waiting for local acknowledgement or turn progression...");
+ 
+                 // A selection pauses the native turn until a separate selection command resolves it.
+                 var completedTask = await Task.WhenAny(tcs.Task,
+@@ -140,7 +152,8 @@ public static class EndTurnHandler
+                     {
+                         action = "END_TURN",
+                         reason,
+-                        turn_completed = reason != "selection_required",
++                        turn_completed = reason is "turn_started" or "combat_ended",
++                        waiting_for_players = reason == "local_turn_submitted",
+                         screen = selectionScreen,
+                         results
+                     }
+@@ -158,6 +171,7 @@ public static class EndTurnHandler
+                 {
+                     // Always unsubscribe on completion, selection, timeout, or failure.
+                     timeoutCancellation.Cancel();
++                    CombatManager.Instance.PlayerEndedTurn -= OnPlayerEndedTurn;
+                     CombatManager.Instance.TurnStarted -= OnTurnStarted;
+                     CombatManager.Instance.CombatEnded -= OnCombatEnded;
+                     playerCombatState.PlayerTurnPhaseChanged -= OnPlayerTurnPhaseChanged;
+diff --git a/STS2.Cli.Mod/Actions/PlayCardHandler.cs b/STS2.Cli.Mod/Actions/PlayCardHandler.cs
+index fc738a5..e4e8fb1 100644
+--- a/STS2.Cli.Mod/Actions/PlayCardHandler.cs
++++ b/STS2.Cli.Mod/Actions/PlayCardHandler.cs
+@@ -79,6 +79,9 @@ public static class PlayCardHandler
+             if (targetError != null)
+                 return targetError;
+ 
++            if (target != null && !card.CanPlayTargeting(target))
++                return new { ok = false, error = "INVALID_TARGET", message = "Native card rules reject this target" };
++
+             // --- Enqueue action and wait for completion ---
+ 
+             // Snapshot history count before the action executes
+diff --git a/STS2.Cli.Mod/Actions/Utils/ActionUtils.cs b/STS2.Cli.Mod/Actions/Utils/ActionUtils.cs
+index f5d0122..7f47673 100644
+--- a/STS2.Cli.Mod/Actions/Utils/ActionUtils.cs
++++ b/STS2.Cli.Mod/Actions/Utils/ActionUtils.cs
+@@ -1,3 +1,4 @@
++using MegaCrit.Sts2.Core.Context;
+ using MegaCrit.Sts2.Core.Combat;
+ using MegaCrit.Sts2.Core.Entities.Actions;
+ using MegaCrit.Sts2.Core.Entities.Cards;
+@@ -43,7 +44,7 @@ public static class ActionUtils
+ 
+     /// <summary>
+     ///     Gets the local player from the current combat state.
+-    ///     In single player mode, returns the first player.
++    ///     Uses the native local network identity; never assumes the host is local.
+     ///     Requires an active combat (caller must validate <see cref="CombatManager.IsInProgress" /> first).
+     /// </summary>
+     public static Player? GetLocalPlayer()
+@@ -52,7 +53,7 @@ public static class ActionUtils
+         {
+             var combatState = CombatManager.Instance.DebugOnlyGetState();
+             var players = combatState?.Players;
+-            return players?.Count > 0 ? players[0] : null;
++            return players == null ? null : LocalContext.GetMe(players);
+         }
+         catch (Exception ex)
+         {
+@@ -63,7 +64,7 @@ public static class ActionUtils
+ 
+     /// <summary>
+     ///     Gets the local player from the current run state (works outside combat).
+-    ///     In single player mode, returns the first player.
++    ///     Uses the native local network identity; never assumes the host is local.
+     ///     Requires an active run (caller must validate <see cref="RunManager.IsInProgress" /> first).
+     ///     Use this instead of <see cref="GetLocalPlayer" /> when outside combat.
+     /// </summary>
+@@ -73,7 +74,7 @@ public static class ActionUtils
+         {
+             var runState = RunManager.Instance.DebugOnlyGetState();
+             var players = runState?.Players;
+-            return players?.Count > 0 ? players[0] : null;
++            return players == null ? null : LocalContext.GetMe(players);
+         }
+         catch (Exception ex)
+         {
+@@ -96,7 +97,9 @@ public static class ActionUtils
+         if (CombatManager.Instance.IsOverOrEnding)
+             return new { ok = false, error = "COMBAT_ENDING", message = "Combat is over or ending" };
+ 
+-        if (GetLocalPlayer()?.PlayerCombatState?.Phase != PlayerTurnPhase.Play)
++        var local = GetLocalPlayer();
++        if (local == null || !local.Creature.IsAlive || CombatManager.Instance.IsPlayerReadyToEndTurn(local)
++            || local.PlayerCombatState?.Phase != PlayerTurnPhase.Play)
+             return new { ok = false, error = "NOT_PLAYER_TURN", message = "Not in play phase" };
+ 
+         if (CombatManager.Instance.PlayerActionsDisabled)
+@@ -175,10 +178,12 @@ public static class ActionUtils
+                 return null;
+             }
+ 
++            // Other living players are legal ally candidates; card/potion rules validate the exact target.
++            if (creature.Side == player.Creature.Side && creature.Player != null && creature.IsHittable)
++                return creature;
++
+             // Verify it's a pet of the player
+-            var playerCombatState = player.PlayerCombatState;
+-            if (playerCombatState != null)
+-                foreach (var pet in playerCombatState.Pets)
++            foreach (var pet in combatState.Players.SelectMany(p => p.PlayerCombatState?.Pets ?? []))
+                     if (pet.CombatId == combatId)
+                         return pet;
+ 
+@@ -248,7 +253,7 @@ public static class ActionUtils
+                     return (player.Creature, null); // Default to player
+ 
+                 var ally = ResolveAllyTarget(player, (uint)targetCombatId.Value);
+-                if (ally == null)
++                if (ally == null || (targetType == TargetType.AnyPlayer && ally.Player == null))
+                     return (null, new
+                     {
+                         ok = false, error = "TARGET_NOT_FOUND",
+diff --git a/STS2.Cli.Mod/Actions/ViewDeckHandler.cs b/STS2.Cli.Mod/Actions/ViewDeckHandler.cs
+index 5f9d770..37c61ad 100644
+--- a/STS2.Cli.Mod/Actions/ViewDeckHandler.cs
++++ b/STS2.Cli.Mod/Actions/ViewDeckHandler.cs
+@@ -1,3 +1,4 @@
++using MegaCrit.Sts2.Core.Context;
+ using MegaCrit.Sts2.Core.Entities.Cards;
+ using MegaCrit.Sts2.Core.Models;
+ using MegaCrit.Sts2.Core.Runs;
+@@ -38,7 +39,8 @@ public static class ViewDeckHandler
+             if (runState.Players.Count == 0)
+                 return new { ok = false, error = "INTERNAL_ERROR", message = "No players found" };
+ 
+-            var player = runState.Players[0];
++            var player = LocalContext.GetMe(runState.Players);
++            if (player == null) return new { ok = false, error = "NO_LOCAL_PLAYER", message = "Local player not found" };
+             var cards = player.Deck.Cards;
+ 
+             var deckCards = new List<PileCardDto>();
+diff --git a/STS2.Cli.Mod/Models/State/CombatStateDto.cs b/STS2.Cli.Mod/Models/State/CombatStateDto.cs
+index a48ba26..b15cb5b 100644
+--- a/STS2.Cli.Mod/Models/State/CombatStateDto.cs
++++ b/STS2.Cli.Mod/Models/State/CombatStateDto.cs
+@@ -9,6 +9,8 @@ namespace STS2.Cli.Mod.Models.State;
+ [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+ public class CombatStateDto
+ {
++    public object? Multiplayer { get; set; }
++
+     /// <summary>
+     ///     Visible Surrounded facing and enemy sides, or null outside that mechanic.
+     ///     Built with the rest of this main-thread observation.
+diff --git a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs b/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
+index 01e4c8a..0fdb134 100644
+--- a/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
++++ b/STS2.Cli.Mod/State/Builders/CombatStateBuilder.cs
+@@ -1,3 +1,4 @@
++using MegaCrit.Sts2.Core.Context;
+ using MegaCrit.Sts2.Core.Combat;
+ using MegaCrit.Sts2.Core.Entities.Cards;
+ using MegaCrit.Sts2.Core.Entities.Players;
+@@ -36,12 +37,13 @@ public static class CombatStateBuilder
+             return null;
+         }
+ 
+-        var player = combatState.Players.Count > 0 ? combatState.Players[0] : null;
++        var player = LocalContext.GetMe(combatState.Players);
+         var result = new CombatStateDto
+         {
+             Encounter = combatState.Encounter?.Id.Entry,
+             TurnNumber = combatState.RoundNumber,
+-            IsPlayerTurn = player?.PlayerCombatState?.Phase == PlayerTurnPhase.Play,
++            IsPlayerTurn = player != null && player.Creature.IsAlive && !combatManager.IsPlayerReadyToEndTurn(player)
++                && player.PlayerCombatState?.Phase == PlayerTurnPhase.Play,
+             IsPlayerActionsDisabled = combatManager.PlayerActionsDisabled,
+             IsCombatEnding = combatManager.IsOverOrEnding
+         };

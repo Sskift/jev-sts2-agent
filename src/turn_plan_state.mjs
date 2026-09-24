@@ -54,6 +54,7 @@ export function turnGuard(state, step = null) {
     energy: combat.player.energy, hp: combat.player.hp, powers: combat.player.powers,
     relics: canonicalRelics(combat.player.relics), orbs: combat.player.orbs,
     positioning: combat.positioning,
+    teammates: combat.multiplayer?.players?.filter(p => !p.is_local),
     hand: combat.hand.map(card => ({ id: card.id, instance_id: cardInstance(card), cost: card.cost, description: card.description, can_play: card.can_play })),
     enemies: combat.enemies.map(enemy => ({ combat_id: enemy.combat_id, hp: enemy.hp, block: enemy.block, is_alive: enemy.is_alive, intents: enemy.intents, powers: enemy.powers })),
     ...(expectedEnemies ? { expected_enemy_changes: expectedEnemies } : {}),
@@ -169,7 +170,7 @@ function changesRequiringReview(before, after, step, remaining) {
   const reasons = [];
   const cost = step?.kind === 'play_card' ? step.cost_at_dispatch < 0 ? before.energy : step.cost_at_dispatch : 0;
   if (after.energy !== before.energy - cost) reasons.push('Energy differs from the reserved printed cost; new actions may be possible.');
-  for (const field of ['hp', 'powers', 'relics', 'orbs', 'positioning']) {
+  for (const field of ['hp', 'powers', 'relics', 'orbs', 'positioning', 'teammates']) {
     const normalize = field === 'relics' ? canonicalRelics : value => value;
     const expected = field === 'relics' ? before.expected_relic_changes ?? before[field] : before[field];
     if (!same(normalize(expected), normalize(after[field]))) reasons.push(`Player ${field} changed.`);

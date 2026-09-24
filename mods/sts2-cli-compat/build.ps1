@@ -7,7 +7,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $upstreamCommit = 'e6ce5bb1f0e5af1213e59582b645c18027ded476'
-$compatVersion = '0.111.0-context.17'
+$compatVersion = '0.111.0-context.18'
 $gameDirPath = (Resolve-Path -LiteralPath $GameDir).Path
 $sourceDirPath = (Resolve-Path -LiteralPath $SourceDir).Path
 $outputDirPath = [System.IO.Path]::GetFullPath($OutputDir)
@@ -15,6 +15,7 @@ $gameAssemblyDir = Join-Path $gameDirPath 'data_sts2_windows_x86_64'
 $gameDll = Join-Path $gameAssemblyDir 'sts2.dll'
 $patch = Join-Path $PSScriptRoot 'v0.111-compat.patch'
 $contextPatch = Join-Path $PSScriptRoot 'decision-context.patch'
+$multiplayerPatch = Join-Path $PSScriptRoot 'multiplayer.patch'
 if (!(Test-Path -LiteralPath $gameDll -PathType Leaf)) { throw "Game assembly not found: $gameDll" }
 if ($outputDirPath.StartsWith($gameDirPath.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase) -or $outputDirPath -eq $gameDirPath) {
     throw 'OutputDir must be outside the game directory; this script never deploys mods.'
@@ -56,6 +57,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Could not apply compatibility patch.' }
 if ($LASTEXITCODE -ne 0) { throw 'Decision context patch does not apply cleanly.' }
 & git -C $patchedSource apply -- $contextPatch
 if ($LASTEXITCODE -ne 0) { throw 'Could not apply decision context patch.' }
+& git -C $patchedSource apply --check -- $multiplayerPatch
+if ($LASTEXITCODE -ne 0) { throw 'Multiplayer patch does not apply cleanly.' }
+& git -C $patchedSource apply -- $multiplayerPatch
+if ($LASTEXITCODE -ne 0) { throw 'Could not apply multiplayer patch.' }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'context\DecisionContextBuilder.cs') -Destination (Join-Path $patchedSource 'STS2.Cli.Mod\State\Builders\DecisionContextBuilder.cs')
 
 $modSource = Join-Path $patchedSource 'STS2.Cli.Mod'
@@ -74,9 +79,9 @@ global using global::System.Threading;
 global using global::System.Threading.Tasks;
 '@, $utf8)
 [System.IO.File]::WriteAllText($generatedAssemblyInfo, @'
-[assembly: System.Reflection.AssemblyVersion("0.111.0.18")]
-[assembly: System.Reflection.AssemblyFileVersion("0.111.0.18")]
-[assembly: System.Reflection.AssemblyInformationalVersion("0.111.0-context.17")]
+[assembly: System.Reflection.AssemblyVersion("0.111.0.19")]
+[assembly: System.Reflection.AssemblyFileVersion("0.111.0.19")]
+[assembly: System.Reflection.AssemblyInformationalVersion("0.111.0-context.18")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v9.0")]
 '@, $utf8)
 
@@ -103,6 +108,7 @@ $evidence = [ordered]@{
     compatVersion = $compatVersion
     patchSha256 = (Get-FileHash -LiteralPath $patch -Algorithm SHA256).Hash
     contextPatchSha256 = (Get-FileHash -LiteralPath $contextPatch -Algorithm SHA256).Hash
+    multiplayerPatchSha256 = (Get-FileHash -LiteralPath $multiplayerPatch -Algorithm SHA256).Hash
     contextSourceSha256 = (Get-FileHash -LiteralPath (Join-Path $PSScriptRoot 'context\DecisionContextBuilder.cs') -Algorithm SHA256).Hash
     gameAssemblySha256 = (Get-FileHash -LiteralPath $gameDll -Algorithm SHA256).Hash
     compiler = $compiler

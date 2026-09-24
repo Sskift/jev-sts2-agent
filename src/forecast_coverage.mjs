@@ -26,6 +26,8 @@ export function forecastCoverage(combat, card = null, { sequence = false, uncomp
   const reviewed = [];
   const add = (category, owner, source, reason, affected_outputs = outputKinds) => uncovered.push({ category, owner, source_id: source.id,
     live_rule: source.description || '', reason, affected_outputs });
+  if (combat.multiplayer) add('multiplayer', 'party', { id: 'CONCURRENT_PARTY_ACTIONS' },
+    'Single-player forecasts do not simulate teammate actions, shared triggers or enemy target assignment. Use the full public party state and native per-player previews; no personal end-turn HP is established.');
   const review = (category, owner, source) => {
     const scope = reviewedEffectScope(category, source, { owner, playedCards });
     if (!scope) return false;

@@ -27,7 +27,7 @@ export function observeModBattle(tracker, state, evidence) {
     tracker.encounter ||= state.combat.encounter;
     tracker.initialHp ??= state.combat.player?.hp;
   }
-  if (state.screen === 'GAME_OVER' || state.combat?.player?.hp === 0) {
+  if (state.screen === 'GAME_OVER' || (!state.combat?.multiplayer && state.combat?.player?.hp === 0)) {
     tracker.failed = true;
     tracker.failureEvidence = evidence;
   }
@@ -162,6 +162,13 @@ export async function runModLoop({ client, driver = null, decide = makeModDecisi
       if (signal?.aborted) break;
       if (decision.action === 'wait') {
         logger(JSON.stringify({ step, screen: state.screen, wait: decision.reason }));
+        if (state.combat?.multiplayer && !state.combat.is_player_turn) {
+          // A submitted turn or a downed local player can wait for human
+          // teammates longer than the single-player animation timeout.
+          emptyCycles = 0;
+          await sleep(intervalMs);
+          continue;
+        }
         if (++emptyCycles >= (state.screen === 'GAME_OVER' ? 60 : 20)) { summary.stoppedReason = `No supported action after ${emptyCycles} observations`; break; }
         await sleep(intervalMs);
         continue;

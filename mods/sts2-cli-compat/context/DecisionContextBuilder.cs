@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Combat.History.Entries;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -69,7 +70,8 @@ public static class DecisionContextBuilder
         if (potion.Usage != PotionUsage.AnyTime && potion.Usage != PotionUsage.CombatOnly) return false;
         if (!RunManager.Instance.IsInProgress) return false;
         if (!CombatManager.Instance.IsInProgress) return potion.Usage == PotionUsage.AnyTime;
-        return owner.PlayerCombatState?.Phase == PlayerTurnPhase.Play && !CombatManager.Instance.PlayerActionsDisabled && !CombatManager.Instance.IsOverOrEnding;
+        return owner.PlayerCombatState?.Phase == PlayerTurnPhase.Play && !CombatManager.Instance.IsPlayerReadyToEndTurn(owner)
+            && !CombatManager.Instance.PlayerActionsDisabled && !CombatManager.Instance.IsOverOrEnding;
     }
 
     public static List<int> PotionTargets(PotionModel potion)
@@ -77,7 +79,7 @@ public static class DecisionContextBuilder
         var combat = CombatManager.Instance.IsInProgress ? CombatManager.Instance.DebugOnlyGetState() : null;
         if (combat == null) return [];
         return combat.Enemies.Concat(combat.Players.Select(p => p.Creature))
-            .Concat(potion.Owner.PlayerCombatState?.Pets ?? [])
+            .Concat(combat.Players.SelectMany(p => p.PlayerCombatState?.Pets ?? []))
             .Where(c => c.IsAlive && c.CombatId.HasValue && potion.IsValidTarget(c))
             .Select(c => (int)c.CombatId!.Value).Distinct().ToList();
     }
@@ -309,12 +311,12 @@ public static class DecisionContextBuilder
     {
         if (!RunManager.Instance.IsInProgress) return null;
         var run = RunManager.Instance.DebugOnlyGetState();
-        if (run == null || run.Players.Count != 1)
+        var player = run == null ? null : LocalContext.GetMe(run.Players);
+        if (run == null || player == null)
         {
-            Report("A complete local single-player run is required");
+            Report("An active run with a resolved local player is required");
             return new { schema_version = 1, extraction_errors = Issues.ToArray() };
         }
-        var player = run.Players[0];
         var pcs = player.PlayerCombatState;
         var combat = CombatManager.Instance.IsInProgress ? CombatManager.Instance.DebugOnlyGetState() : null;
         if (combat != null && screen.Combat != null)
@@ -351,6 +353,28 @@ public static class DecisionContextBuilder
                 }
             }
         }
+        var multiplayer = run.Players.Count > 1 ? new
+            {
+                local_player_id = player.NetId.ToString(),
+                players = run.Players.Select(p => new
+                {
+                    player_id = p.NetId.ToString(), combat_id = p.Creature.CombatId, is_local = p == player,
+                    phase = p.PlayerCombatState?.Phase.ToString(),
+                    ready_to_end_turn = combat != null && CombatManager.Instance.IsPlayerReadyToEndTurn(p),
+                    state = PlayerStateBuilder.Build(p)
+                }).ToArray(),
+                enemy_intents_by_player = combat?.Enemies.Select(e => new
+                {
+                    enemy_id = e.CombatId,
+                    previews = combat.Players.Select(p => new
+                    {
+                        player_id = p.NetId.ToString(), combat_id = p.Creature.CombatId,
+                        intents = IntentStateBuilder.Build(e.Monster!.NextMove, e, new[] { p.Creature })
+                    }).ToArray()
+                }).ToArray(),
+                scope = "Public party state only; teammate hands and draw order are not exported. Per-player intent previews are recipient-dependent damage previews, not proof of target assignment. Teammates can change the state concurrently. End Turn submits only the local player's readiness."
+            } : null;
+        if (screen.Combat != null) screen.Combat.Multiplayer = multiplayer;
         var modifiers = run.Modifiers.Select(m => new { id = m.Id.Entry, name = GetLocText(m.Title), description = GetLocText(m.Description) }).ToArray();
         return new
         {
@@ -358,6 +382,7 @@ public static class DecisionContextBuilder
             act_index = run.CurrentActIndex, act_floor = run.ActFloor, total_floor = run.TotalFloor,
             ascension = run.AscensionLevel, game_mode = run.GameMode.ToString(), modifiers,
             player = playerDto, potion_capacity = player.PotionSlots.Count, master_deck = deck,
+            multiplayer,
             deck_upgrade_previews = deckUpgradePreviews,
             map, combat_history = history, play_pile = playPile, glossary,
             history_coverage = combat != null ? "Game combat history since this combat was loaded; earlier loaded-save events may be unavailable." : "No active combat.",

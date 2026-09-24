@@ -28,7 +28,7 @@ export function resolvePlanAssessments(plans, answers) {
 // not permission to override the value judgment. This is not a safety proof.
 export function visibleSurvivalConstraints(state) {
   const combat = state.combat, constraints = [];
-  const incoming = displayedAttackTotal(combat.enemies);
+  const incoming = combat.multiplayer ? null : displayedAttackTotal(combat.enemies);
   const selfLoss = combat.hand.reduce((sum, card) => sum + Math.max(0, card.hp_loss || 0), 0);
   const reactionRules = new Set();
   const reactionExposure = combat.hand.reduce((sum, card) => {

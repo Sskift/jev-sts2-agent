@@ -105,8 +105,10 @@ export function buildModCandidates(state) {
           }
         } else if (['AnyAlly', 'AnyPlayer'].includes(card.target_type) && Array.isArray(card.valid_target_ids)) {
           for (const target of card.valid_target_ids) if (integer(target)) {
-            const pet = combat.player?.pets?.find(p => p.combat_id === target);
-            add(`card_${card.index}_ally_${target}`, { ...request, target }, `${description} Target ${pet?.name || 'the local player'}, combat_id ${target}.`, { card_hand_index: card.index, target_combat_id: target });
+            const member = combat.multiplayer?.players?.find(p => p.combat_id === target);
+            const pet = [combat.player, ...(combat.multiplayer?.players || []).map(p => p.state)].flatMap(p => p?.pets || []).find(p => p.combat_id === target);
+            const targetName = pet?.name || (member ? `${member.is_local ? 'local player' : 'teammate'} ${member.state?.character_name || member.player_id}` : combat.multiplayer ? `ally #${target}` : 'the local player');
+            add(`card_${card.index}_ally_${target}`, { ...request, target }, `${description} Target ${targetName}, combat_id ${target}.`, { card_hand_index: card.index, target_combat_id: target });
           }
         } else {
           // ActionUtils.ResolveTarget defaults AnyAlly/AnyPlayer to the player;

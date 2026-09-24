@@ -21,6 +21,9 @@ export function displayedAttackTotal(enemies) {
 }
 
 export function currentCombatArithmetic(combat) {
+  if (combat.multiplayer) return { incoming_attack_damage: null, current_block: combat.player.block,
+    attack_damage_after_current_block: null, energy_remaining: combat.player.energy,
+    note: 'Multiplayer: enemy intent previews may depend on recipients. See combat.multiplayer.enemy_intents_by_player and party state; preview recipients do not prove target assignment. Teammate actions and shared effects are not simulated as personal HP loss.' };
   const incoming = displayedAttackTotal(combat.enemies);
   return { incoming_attack_damage: incoming, current_block: combat.player.block,
     attack_damage_after_current_block: incoming === null ? null : Math.max(0, incoming - combat.player.block),
